@@ -212,7 +212,37 @@ local function differs_from(text, key, want, tolerance, mode)
     return false
 end
 
-function main(out, tolerance_text)
+local CASES = {
+    {"glm", "--set", "x", "2", "-1.5", "0"},
+    {"glm_classifier", "--set", "x", "2", "0.5", "-0.5"},
+    {"nn_classifier", "--set", "x", "3", "0.5", "-0.25", "1.0"},
+    {"nn_layers", "--setr", "x", "1x1x4", "4", "0.5", "-1.5", "2.0", "0.25"},
+    {"nn_layers_shape", "--setr", "x", "1x1x2", "2", "0.5", "-0.25"},
+    {"pipeline", "--set", "x", "1", "2"},
+    {"tree_classifier", "--set", "a", "1", "0.25", "--set", "b", "1", "1.0"}
+}
+
+function prepare(out, compiled)
+    local root = path.directory(path.directory(os.scriptdir()))
+    local core = path.join(root, "packages", "a", "apple-backports", "CoreML")
+    os.mkdir(out)
+    if not os.isfile(path.join(out, "models", "manifest.json")) then
+        os.execv(os.programfile(), {"l", path.join(os.scriptdir(), "make-models.lua"), "--out", path.join(out, "models")})
+    end
+    local sources = {}
+    for _, source in ipairs(compiled.sources) do
+        table.insert(sources, path.join(source[1] == "core" and core or os.scriptdir(), source[2]))
+    end
+    if compiled.glob then
+        table.join2(sources, os.files(path.join(core, compiled.glob)))
+    end
+    local binary = path.join(out, compiled.name)
+    os.execv(os.getenv("CC") or "clang", table.join({"-std=c99", "-Wall", "-Wextra", "-Wno-unused-parameter", "-O1", "-fsanitize=address",
+                                                     "-I", core, "-o", binary}, sources))
+    return binary
+end
+
+function check(out, tolerance_text)
     local tolerance = tonumber(tolerance_text)
     local models = path.join(out, "models")
     local harness = path.join(out, "ml-predict")
@@ -296,4 +326,24 @@ function main(out, tolerance_text)
     end
     print(string.format("interpreter check: OK (%d failures, %d models compared, %d with a recorded divergence)",
                         failures, compared, known))
+end
+
+function main(out)
+    if not out or out == "" then
+        local workspace = import("workspace", {rootdir = path.join(os.scriptdir(), "..", "..", "modules"), anonymous = true})
+        out = workspace.run("coreml-predict")
+    end
+    out = path.absolute(out)
+    print("interpreter check -> " .. out)
+    local harness = prepare(out, {name = "ml-predict", sources = {{"tools", "predict-main.c"}}, glob = "CharonML*.c"})
+    for _, case in ipairs(CASES) do
+        local name = case[1]
+        local actual = path.join(out, name .. ".actual")
+        local answer = path.join(out, name .. ".answer")
+        os.execv(harness, table.join({path.join(out, "models", name .. ".mlmodel")}, table.slice(case, 2)),
+                 {try = true, stdout = answer, stderr = answer})
+        io.writefile(actual, name .. "\n" .. (io.readfile(answer, {encoding = "binary"}) or ""), {encoding = "binary"})
+        os.rm(answer)
+    end
+    check(out, os.getenv("TOLERANCE") or "1e-5")
 end

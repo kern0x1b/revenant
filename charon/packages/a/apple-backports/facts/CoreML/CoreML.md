@@ -17,11 +17,11 @@ still reads.
 
 Two checks, both run on this host and both recorded under `.agent-work/runs/`:
 
-- `tools/coreml/check-reader.sh` — nine containers written by coremltools' own writer are read
+- `tools/coreml/check-reader.lua` (then `.sh`) — nine containers written by coremltools' own writer are read
   and the tree printed is compared with the one protobuf's own reflection prints from the same
   file: **five of five identical, and four malformed containers refused** rather than half-read.
   This is a fidelity check on the reader only.
-- `tools/coreml/check-predict.sh` — the same containers are run over fixed inputs and the
+- `tools/coreml/check-predict.lua` (then `.sh`) — the same containers are run over fixed inputs and the
   answers compared with the host's own Core ML (predict-host, the same probe that writes the manifest): **eight models agree to 1e-5 on
   every answer**, and one has a difference written down and checked (below).
 
@@ -405,7 +405,7 @@ archive carries, so the value comes back of the image type and undefined, and th
 | `tools/coreml/gen-schema.lua` | the generator for the table |
 | `tools/coreml/make-models.lua` | the containers, and the host's own answers for them |
 | `tools/coreml/ml-dump.c`, `tools/coreml/predict-main.c` | the two harnesses the checks drive |
-| `tools/coreml/check-reader.sh`, `tools/coreml/check-predict.sh` | the two checks |
+| `tools/coreml/check-reader.lua`, `tools/coreml/check-predict.lua` (once `.sh`) | the two checks |
 
 ## The Objective-C surface this group carries
 

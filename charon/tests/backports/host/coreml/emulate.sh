@@ -16,7 +16,7 @@ here=$(cd "$(dirname "$0")" && pwd)
 . "$here/../../common/runs.sh" "$here"
 root=${COREML_ROOT:-$(cd "$here/../../../.." && pwd)}
 export COREML_ROOT=$root
-models=${COREML_MODELS:-$root/.agent-work/runs/coreml-predict/models}
+models=${COREML_MODELS:-$(xmake l "$root/modules/workspace.lua" run coreml-predict)/models}
 build=${COREML_BUILD:-$(runs_folder charon-coreml-device)}
 device=${COREML_DEVICE:-iPad2,1}
 release=${COREML_MINIMUM:-6.1.3}
