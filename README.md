@@ -89,10 +89,10 @@ eidolon/build.sh        # module, demo app, tests and probe -> eidolon/out/Eidol
 xmake f -P eidolon -p iphoneos -a armv7 -y   # the same, as a Charon port: the app and the tests as packages
 ```
 
-The build begins with `eidolon/coverage.py --check --before-build`, which refuses to continue if the ledger and the code
+The build begins with `xmake l eidolon/coverage.lua --check --before-build`, which refuses to continue if the ledger and the code
 disagree. The count of invented names is not part of that: it is read from `bridge/api/invented.txt`, which
 `bridge/api-surface.sh` makes from the module the build produces, so a fresh tree runs the build, then api-surface.sh,
-then a plain `python3 coverage.py --check`, which compares that count with the README.
+then a plain `xmake l coverage.lua --check`, which compares that count with the README.
 Everything is compiled with availability checking **on**, against the same Swift runtime the app carries.
 
 ## Usage
@@ -102,7 +102,7 @@ Everything is compiled with availability checking **on**, against the same Swift
 ../snapshots.sh [--accept]                              # rendered scenarios against tree references
 ../perf.sh                                              # in-app timings of deeply nested layouts
 xmake emulate -P eidolon -d iPhone4,1 -r 6.1.3 launch space.kern0x1b.eidolon.demo
-python3 coverage.py --check                             # the ledger, checked against the code
+xmake l coverage.lua --check                            # the ledger, checked against the code
 ../bridge/prepare-fw.sh && ../bridge/api-surface.sh     # the typed API diff against Apple's interface
 ```
 

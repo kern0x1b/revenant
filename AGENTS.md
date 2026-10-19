@@ -18,7 +18,7 @@ named `SwiftUI` because every symbol an app takes from SwiftUI is mangled with t
   window, dumps its tree, drives gestures, dialogs and animations for tests. `_Probe`, `_DialogDescription` and
   `_Unsupported` are `@_spi(Probe)`, not public API: a client of them says `@_spi(Probe) import SwiftUI`.
 - `eidolon/Demo/` — the demo app and its snapshot scenarios; `eidolon/Snapshots/reference/` — the tree references.
-- `eidolon/README.md` + `eidolon/coverage.py` — the ledger and its checker.
+- `eidolon/README.md` + `eidolon/coverage.lua` — the ledger and its checker.
 - `eidolon/xmake.lua`, `eidolon/control`, `eidolon/Info.plist` — the Charon port: the same demo sources built as two
   applications (`EidolonDemo`, and `EidolonSnapshots`, whose Info.plist carries `EidolonSnapshots` so it renders the
   scenarios) and the engine tests as `EidolonTests`, each a Debian package `xmake emulate` installs into the image.
@@ -46,7 +46,7 @@ addon has to be one with `xmake emulate launch` (Charon v0.8.14 or later; `until
 names a Charon checkout to take the packages from. The scenarios need a key window, so they run in the application,
 through SpringBoard; the engine tests are a console binary and go through `run`.
 
-A change is done when the engine tests, every snapshot and the ledger check (`coverage.py --check`, after
+A change is done when the engine tests, every snapshot and the ledger check (`coverage.lua --check`, after
 `bridge/api-surface.sh`) pass. Anything that
 touches layout, gestures, animation, dialogs or navigation also gets a run on hardware (an iPad 2 or an iPhone 4S on
 iOS 6.1.3): the repository skill `device-ssh-access` says how to reach one from here.
@@ -57,7 +57,7 @@ Workspace-wide procedures are skills in `$HOME/Git/projects/ios/.agents/skills/`
 
 - **No silent no-ops.** An API the engine does not honour either works, or is declared with `ignored(...)` (nothing to
   correspond to on iOS 6) or `_Unsupported.note(...)` (works with a named difference), and appears in
-  `eidolon/README.md`. `coverage.py --check` fails the build otherwise. A protocol requirement that is only an
+  `eidolon/README.md`. `coverage.lua --check` fails the build otherwise. A protocol requirement that is only an
   *extension* member is not dispatched dynamically: put user-overridable members in the protocol.
 - **Do not measure completeness by names.** Use `bridge/api-surface.sh`; it compares declarations. When you add an
   overload, the gap count should fall.

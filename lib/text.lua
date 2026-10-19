@@ -42,10 +42,6 @@ function startswith(s, prefix, at)
     return string.sub(s, at, at + #prefix - 1) == prefix
 end
 
-function endswith(s, suffix)
-    return suffix == "" or string.sub(s, -#suffix) == suffix
-end
-
 function truthy(v)
     if v == nil or v == false or v == "" or v == 0 then
         return false
