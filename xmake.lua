@@ -5,5 +5,6 @@ add_rules("mode.release", "mode.debug")
 set_defaultmode("release")
 
 add_repositories("hades-third-party third_party")
+add_repositories("charon charon")
 
 includes("*/xmake.lua")

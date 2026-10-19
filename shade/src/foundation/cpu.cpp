@@ -480,12 +480,12 @@ namespace {
     // shape.
     constexpr std::uint32_t jit_artifact_format_version = 8U;
 
-#ifndef SHADE_DYNARMIC_BUILD_FINGERPRINT
-#define SHADE_DYNARMIC_BUILD_FINGERPRINT 0x0ULL
+#ifndef DYNARMIC_BUILD_FINGERPRINT
+#define DYNARMIC_BUILD_FINGERPRINT 0x0ULL
 #endif
 
     constexpr std::uint64_t jit_artifact_dynarmic_build_fingerprint =
-        SHADE_DYNARMIC_BUILD_FINGERPRINT;
+        DYNARMIC_BUILD_FINGERPRINT;
     // A zero fingerprint means the dependency producer could not be identified
     // (for example, when Dynarmic is supplied without its Git metadata).  Such
     // a key cannot establish producer compatibility, so it must never authorize
