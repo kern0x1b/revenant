@@ -21,5 +21,3 @@ katabasis/docs/** linguist-documentation
 revenant-webkit/docs/** linguist-documentation
 frameworks/styx/docs/** linguist-documentation
 frameworks/eidolon/docs/** linguist-documentation
-
-frameworks/styx/** comments=upstream

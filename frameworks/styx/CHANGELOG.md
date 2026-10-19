@@ -16,10 +16,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   behind `#available`, so the module builds and runs at a 6.0 deployment target
   with availability checking on.
 
+- `URLSession.dataTaskPublisher(for:)` at Apple's level, marked iOS 7.
+- `Publishers.Merge` through `Merge8` and `MergeMany`, `Publishers.CombineLatest`
+  through `CombineLatest4`, `Publishers.CollectByTime` with
+  `collect(_:options:)`, and the equality and hashing Apple's interface declares.
+
 ### Changed
 - Folded the separate Dispatch and Foundation modules into the core and renamed
   the whole to `Combine`; dropped the `.ocombine` disambiguation machinery.
+- Styx is no longer a copy of OpenCombine's sources. The `charon@styx` recipe
+  fetches OpenCombine at its pinned commit and applies a patch series that
+  carries only content edits; it installs the patched tree laid out as the one
+  module, and the hades targets compile that tree. Upstream's tests run as the
+  `CombineTests` target, found by a Lua discovery; the SwiftPM manifest, the
+  Makefile, the gyb script and the LLDB script are gone.
 
 ### Removed
-- The `URLSession` publishers (iOS 7, and they need a TLS stack this build does
-  not carry).
+- The `OCombine` namespaces of `Optional.Publisher` and `Result.Publisher`.
+- The `DispatchTime.distance(to:)` supplement: the polyfill's own arithmetic is
+  what every platform runs.

@@ -2,13 +2,19 @@
 
 **Combine for the platforms Apple's framework never reached — one `import Combine`, down to iOS 6, armv7.**
 
-Styx is a source-level reimplementation of Apple's [Combine] reactive
-framework. It vends a single module named `Combine`, so code written against the
-system framework — `ObservableObject`, `@Published`, publishers, subjects,
-schedulers, `Timer.publish`, `NotificationCenter.publisher` — builds and runs
-unchanged on systems that have no Combine of their own: legacy iOS (tested on
-iOS 6.1.3, armv7), Linux, and WASI. It is built for the [Charon] toolchain's
-legacy-iOS work, where it is the reactive layer under [Eidolon]'s SwiftUI.
+Styx is [OpenCombine], a source-level reimplementation of Apple's [Combine]
+reactive framework, with a short series of patches that make it vend a single
+module named `Combine`, so code written against the system framework —
+`ObservableObject`, `@Published`, publishers, subjects, schedulers,
+`Timer.publish`, `NotificationCenter.publisher` — builds and runs unchanged on
+systems that have no Combine of their own: legacy iOS (tested on iOS 6.1.3,
+armv7). It is built for the [Charon] toolchain's legacy-iOS work, where it is
+the reactive layer under [Eidolon]'s SwiftUI.
+
+Styx is not a fork. The code is OpenCombine's, pinned at one upstream commit;
+what is ours is the patch series in `charon/packages/s/styx/patches/`, applied by
+the `charon@styx` recipe, and the targets in this folder that build the patched
+sources inside hades.
 
 ## What it does
 
@@ -17,60 +23,45 @@ legacy-iOS work, where it is the reactive layer under [Eidolon]'s SwiftUI.
   `ObservableObject`/`@Published`/`ObservableObjectPublisher`, the
   `Timer.publish` / `NotificationCenter.publisher` Foundation integration, and
   `DispatchQueue` / `RunLoop` / `OperationQueue` as `Scheduler`s — with the
-  natural spellings (`Timer.TimerPublisher`, `dispatchQueue` as a scheduler), no
-  disambiguation namespace.
+  natural spellings (`Timer.TimerPublisher`, `Optional.Publisher`,
+  `Result.Publisher`), no disambiguation namespace.
+- **What OpenCombine lacks, Apple declares.** `Publishers.Merge` through
+  `Merge8` and `MergeMany`, `Publishers.CombineLatest` through `CombineLatest4`,
+  `Publishers.CollectByTime` with `collect(_:options:)`, and the equality and
+  hashing Apple's interface declares in the open.
 - **Runs where Combine does not exist.** No dependency on any system Combine;
   verified on an iPhone 4S and an iPad 2 (iOS 6.1.3) and in emulation.
-- **Availability-honest on old iOS.** iOS 7-only calls (the `CFRunLoopTimer`
-  tolerance) sit behind `#available`, so the module compiles and runs correctly
-  at a 6.0 deployment target with availability checking on.
-
-### What is not included
-
-- **URLSession publishers** (`dataTaskPublisher`) — not implemented yet. The
-  Combine spec (`charon/packages/a/apple-backports/spec/Combine/swift.tsv`) has no
-  rows for them, and `URLSession` is iOS 7+, so on iOS 6.1.3 they depend on the
-  URLSession that `charon@apple-backports` carries. How this module reaches that
-  class is still to be decided.
-- The `Optional` and `Result` publishers are declared under an `OCombine`
-  namespace (`Optional.OCombine.Publisher`, `Result.OCombine.Publisher`), and
-  `Optional.Publisher` and `Result.Publisher` are typealiases of it. The names a
-  caller writes are the ones Apple declares; the declared path differs.
+- **Availability-honest on old iOS.** iOS 7-only API (the `CFRunLoopTimer`
+  tolerance, `URLSession.dataTaskPublisher`) sits behind `#available` or is
+  marked iOS 7, so the module compiles at a 6.0 deployment target with
+  availability checking on.
 
 ## How it works
 
-Apple ships Combine as a single framework. This fork's upstream split its
-sources into a core module plus separate Dispatch and Foundation modules, and
-guarded every Foundation/Dispatch extension behind a disambiguation namespace so
-it could coexist with a real Combine on newer OSes. On the platforms Styx
-targets there is no system Combine, so that split is only friction: Styx folds
-everything into one `Combine` module and exposes the plain API. The one C++
-translation unit that backs the locking primitives is compiled as a small helper
-library the module links.
+The `charon@styx` recipe fetches OpenCombine at its pinned commit and applies
+the patches in order. The patches carry only content edits. Putting the three
+upstream modules together is the build's work: the recipe installs the patched
+sources as one tree, `src/Combine` holding `Sources/OpenCombine` with
+`OpenCombineDispatch` under `Schedulers/` and `OpenCombineFoundation` under
+`Foundation/` (less the helper files the core already has under the same name),
+`src/CombineHelpers` holding the C++ helper `COpenCombineHelpers`, `src/Tests`
+holding upstream's tests and `src/utils` the header of its gyb templates.
 
-## Requirements
+There are two ways to take it:
 
-- A Swift toolchain and, for the legacy-iOS build, the [Charon] toolchain with
-  its Swift runtime packages installed. Styx is consumed there as the
-  `charon@styx` package.
-- For SwiftPM use on a platform without a system Combine (Linux, WASI): a recent
-  Swift toolchain. On Apple platforms the system `Combine` shadows this module,
-  so SwiftPM builds of it are meant for the no-Combine platforms.
+- `charon@styx` as it is: the recipe compiles that tree against
+  `charon@swift-runtime` and installs `libCombine.a`, `libCombineHelpers.a` and
+  the `Combine` module.
+- `charon@styx` with `sources = true`: the recipe installs only the tree, and
+  the project compiles it. This is what hades does.
 
 ## Build
 
-With SwiftPM, where no system Combine shadows the module:
-
-```bash
-swift build
-```
-
-Inside hades, `xmake.lua` makes Styx two targets of the hades project for iOS
-(`xmake f -p iphoneos -a armv7` at the hades top): `Combine`, the one module of
-`Sources/Combine`, and `CombineHelpers`, the C++ helper it imports. A target of
-another member links it with `add_deps("Combine")`. The layer that the
-`charon@styx` recipe puts over a pinned Styx (`charon/packages/s/styx/files`)
-is already part of these sources, so the targets take nothing from it.
+Inside hades, `xmake.lua` requires `charon@styx` with `sources = true` and makes
+two targets of the hades project for iOS (`xmake f -p iphoneos -a armv7` at the
+hades top) from the installed tree: `Combine`, the one module, and
+`CombineHelpers`, the C++ helper it imports. A target of another member links it
+with `add_deps("Combine")`.
 
 Outside hades, the legacy-iOS (armv7) build is taken through Charon as a
 package dependency:
@@ -79,6 +70,16 @@ package dependency:
 add_requires("charon@styx", {alias = "combine"})
 add_packages("combine")
 ```
+
+## Test
+
+`xmake build CombineTests` compiles upstream's `Tests/OpenCombineTests` against
+the module as one daemon, with the XCTest shim of `harness/XCTest.swift`; the
+test list is found by `harness/discover.lua` and leaves out what
+`harness/skip.txt` names. `xmake emulate run` starts it in the guest, and its
+exit status is the verdict. `xmake test CombineGenerated` expands each gyb
+template with charon's gyb (`charon/modules/gyb`) and checks the `GENERATED-*`
+source beside it is that expansion byte for byte.
 
 ## Usage
 
@@ -106,11 +107,10 @@ Timer.publish(every: 1, on: .main, in: .common)
 
 | Path | Holds |
 | --- | --- |
-| `Sources/Combine/` | the module: core, `Schedulers/`, `Foundation/` |
-| `Sources/COpenCombineHelpers/` | the C++ helper the module links (locking) |
-| `Tests/` | the regression suite (runs where no system Combine shadows it) |
-| `Package.swift` | the SwiftPM manifest |
-| `utils/` | `recursively_gyb.sh` (`make gyb`): expands each `Sources/**/*.swift.gyb` template into the `GENERATED-*` source beside it with charon's gyb (`charon/modules/gyb`, run by xmake) |
+| `xmake.lua` | the `Combine` and `CombineHelpers` targets on the patched tree, `CombineTests` and its `CombineXCTest` shim, and `CombineGenerated`, the gyb check |
+| `harness/` | the XCTest shim, the test discovery, the skip list and the Debian control of the test daemon |
+| `docs/` | the test results |
+| `../../charon/packages/s/styx/` | the recipe and the patch series |
 
 ## Documentation
 
@@ -128,12 +128,13 @@ included.
 
 ## License
 
-MIT, see [`LICENSE`](LICENSE). The MIT copyright notice is retained there as the
-license requires. Nothing third-party is vendored.
+MIT, see [`LICENSE`](LICENSE): OpenCombine's notice, which the code it covers
+carries wherever it ships, and the terms of our patches.
 
 Built with Claude (Anthropic). This project is developed with AI assistance,
 openly — see the commit history.
 
+[OpenCombine]: https://github.com/OpenCombine/OpenCombine
 [Combine]: https://developer.apple.com/documentation/combine
 [Charon]: https://github.com/kern0x1b/charon
 [Eidolon]: https://github.com/kern0x1b/eidolon
