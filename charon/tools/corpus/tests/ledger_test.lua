@@ -66,7 +66,8 @@ local function a_clang()
     end
     local home = os.getenv("HOME") or ""
     local found = os.files(path.join(home, ".xmake", "packages", "l", "llvm", "*", "*", "bin", "clang"))
-    table.sort(found)
+    local byteorder = import("byteorder", {rootdir = MODULES, anonymous = true})
+    byteorder.sort(found)
     if #found > 0 then
         return {found[#found]}
     end

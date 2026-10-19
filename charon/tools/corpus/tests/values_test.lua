@@ -6,6 +6,7 @@ local swift = import("values_swift", {rootdir = TOOLS, anonymous = true})
 local values_const = import("values_const", {rootdir = TOOLS, anonymous = true})
 local common = import("values_common", {rootdir = TOOLS, anonymous = true})
 local workspace = import("workspace", {rootdir = path.join(CHARON, "modules"), anonymous = true})
+local byteorder = import("byteorder", {rootdir = path.join(CHARON, "modules"), anonymous = true})
 
 local checks, failures = 0, {}
 
@@ -23,7 +24,7 @@ end
 
 local function sorted_names(map)
     local out = table.keys(map)
-    table.sort(out)
+    byteorder.sort(out)
     return table.concat(out, ", ")
 end
 

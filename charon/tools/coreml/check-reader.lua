@@ -34,7 +34,8 @@ function main(out)
         sources = {{"tools", "ml-dump.c"}, {"core", "CharonMLProto.c"}, {"core", "CharonMLSchema.c"}}})
     local failures = 0
     local models = os.files(path.join(out, "models", "*.mlmodel"))
-    table.sort(models)
+    local byteorder = import("byteorder", {rootdir = path.join(os.scriptdir(), "..", "..", "modules"), anonymous = true})
+    byteorder.sort(models)
     for _, model in ipairs(models) do
         local name = path.basename(model)
         local actual, err = path.join(out, name .. ".actual"), path.join(out, name .. ".err")
