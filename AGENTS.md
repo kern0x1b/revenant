@@ -45,7 +45,7 @@ Consequences to respect:
 | `Sources/Combine/` | the module — core at the top, `Schedulers/`, `Foundation/` |
 | `Sources/CombineHelpers/` | the C++ helper the module links (locking primitives) |
 | `Tests/` | the regression suite (runs where no system Combine shadows the module) |
-| `utils/` | `gyb` source-generation helpers |
+| `utils/` | Lua generators of the `GENERATED-*` Combine sources (`utils/gyb/`, run by `make gyb` with xmake) |
 | `Package.swift` | the SwiftPM manifest |
 
 ## 3. How to build, and how to check

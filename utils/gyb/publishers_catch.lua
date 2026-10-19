@@ -1,3 +1,18 @@
+-- Publishers.Catch.swift.gyb as a Lua generator: the template's text, with the loop of its %-lines written as Lua.
+-- The output is GENERATED-Publishers.Catch.swift, which the Combine target compiles.
+local support = import("support", {rootdir = os.scriptdir(), anonymous = true})
+
+local OUT = path.join(os.scriptdir(), "..", "..", "Sources", "Combine", "Publishers", "GENERATED-Publishers.Catch.swift")
+
+local out, env = {}, {}
+
+local function emit(text)
+    out[#out + 1] = support.fill(text, env)
+end
+
+env.template_header = support.header()
+
+emit([==[
 ${template_header}
 //
 //  Publishers.Catch.swift
@@ -6,9 +21,9 @@ ${template_header}
 //  Created by Sergej Jaskiewicz on 25.12.2019.
 //
 
-%{
-instantiations = ['Catch', 'TryCatch']
-}%
+]==])
+local instantiations = {"Catch", "TryCatch"}
+emit([==[
 extension Publisher {
 
     /// Handles errors from an upstream publisher by replacing it with another publisher.
@@ -184,8 +199,12 @@ extension Publishers {
         }
     }
 }
-% for instantiation in instantiations:
-%     throws_modifier = ' throws' if instantiation == 'TryCatch' else ''
+]==])
+for _, instantiation in ipairs(instantiations) do
+    env.instantiation = instantiation
+    env.throws_modifier = instantiation == "TryCatch" and " throws" or ""
+
+    emit([==[
 
 extension Publishers.${instantiation} {
     private final class Inner<Downstream: Subscriber>
@@ -194,11 +213,17 @@ extension Publishers.${instantiation} {
           CustomReflectable,
           CustomPlaygroundDisplayConvertible
         where Downstream.Input == Upstream.Output,
-%     if instantiation == 'Catch':
+]==])
+    if instantiation == 'Catch' then
+        emit([==[
               Downstream.Failure == NewPublisher.Failure
-%     else:
+]==])
+    else
+        emit([==[
               Downstream.Failure == Error
-%     end
+]==])
+    end
+    emit([==[
     {
         struct UncaughtS: Subscriber,
                           CustomStringConvertible,
@@ -333,9 +358,13 @@ extension Publishers.${instantiation} {
                 case .pre:
                     state = .pendingPost
                     lock.unlock()
-%     if instantiation == 'Catch':
+]==])
+    if instantiation == 'Catch' then
+        emit([==[
                     handler(error).subscribe(CaughtS(inner: self))
-%     else:
+]==])
+    else
+        emit([==[
                     do {
                         try handler(error).subscribe(CaughtS(inner: self))
                     } catch let anotherError {
@@ -344,7 +373,9 @@ extension Publishers.${instantiation} {
                         lock.unlock()
                         downstream.receive(completion: .failure(anotherError))
                     }
-%     end
+]==])
+    end
+    emit([==[
                 case .cancelled:
                     lock.unlock()
                 case .pendingPre, .post, .pendingPost:
@@ -380,11 +411,17 @@ extension Publishers.${instantiation} {
             }
             state = .cancelled
             lock.unlock()
-%     if instantiation == 'Catch':
+]==])
+    if instantiation == 'Catch' then
+        emit([==[
             downstream.receive(completion: completion)
-%     else:
+]==])
+    else
+        emit([==[
             downstream.receive(completion: completion.eraseError())
-%     end
+]==])
+    end
+    emit([==[
         }
 
         func request(_ demand: Subscribers.Demand) {
@@ -437,7 +474,9 @@ extension Publishers.${instantiation} {
         var playgroundDescription: Any { return description }
     }
 }
-% end
+]==])
+end
+emit([==[
 
 private func completionBeforeSubscription(file: StaticString = #file,
                                           line: UInt = #line) -> Never {
@@ -452,3 +491,6 @@ private func requestBeforeSubscription(file: StaticString = #file,
                file: file,
                line: line)
 }
+]==])
+
+support.write(OUT, table.concat(out))

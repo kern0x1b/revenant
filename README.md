@@ -103,7 +103,7 @@ Timer.publish(every: 1, on: .main, in: .common)
 | `Sources/COpenCombineHelpers/` | the C++ helper the module links (locking) |
 | `Tests/` | the regression suite (runs where no system Combine shadows it) |
 | `Package.swift` | the SwiftPM manifest |
-| `utils/` | source-generation helpers (`gyb`) |
+| `utils/` | Lua generators of the `GENERATED-*` Combine sources (`utils/gyb/`, run by `make gyb` with xmake) |
 
 ## Documentation
 

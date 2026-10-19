@@ -1,3 +1,18 @@
+-- RootProtocols.swift.gyb as a Lua generator: the template's text, with the loops of its %-lines written as Lua.
+-- The output is GENERATED-RootProtocols.swift, which the Combine target compiles.
+local support = import("support", {rootdir = os.scriptdir(), anonymous = true})
+
+local OUT = path.join(os.scriptdir(), "..", "..", "Sources", "Combine", "GENERATED-RootProtocols.swift")
+
+local out, env = {}, {}
+
+local function emit(text)
+    out[#out + 1] = support.fill(text, env)
+end
+
+env.template_header = support.header()
+
+emit([==[
 ${template_header}
 //
 //  RootProtocols.swift
@@ -6,10 +21,16 @@ ${template_header}
 //  Created by Sergej Jaskiewicz on 10.06.2019.
 //
 
-%{
-    variants = [(True, '#if compiler(>=5.7)'), (False, '#else')]
-}%
-% for primary_associated_types_supported, guard in variants:
+]==])
+local variants = {{true, "#if compiler(>=5.7)"}, {false, "#else"}}
+for _, variant in ipairs(variants) do
+    local primary_associated_types_supported, guard = variant[1], variant[2]
+    env.guard = guard
+    env.output_generic = primary_associated_types_supported and "<Output, Failure>" or ""
+    env.input_generic = primary_associated_types_supported and "<Input, Failure>" or ""
+    env.scheduler_generic = primary_associated_types_supported and "<SchedulerTimeType>" or ""
+
+    emit([==[
 ${guard}
 /// Declares that a type can transmit a sequence of values over time.
 ///
@@ -47,7 +68,7 @@ ${guard}
 /// - Add the `@Published` annotation to a property of one of your own types. In doing so,
 ///   the property gains a publisher that emits an event whenever the property’s value
 ///   changes. See the `Published` type for an example of this approach.
-public protocol Publisher${'<Output, Failure>' if primary_associated_types_supported else ''} {
+public protocol Publisher${output_generic} {
 
     /// The kind of values published by this publisher.
     associatedtype Output
@@ -75,7 +96,7 @@ public protocol Publisher${'<Output, Failure>' if primary_associated_types_suppo
 /// A subject is a publisher that you can use to ”inject” values into a stream, by calling
 /// its `send()` method. This can be useful for adapting existing imperative code to the
 /// Combine model.
-public protocol Subject${'<Output, Failure>' if primary_associated_types_supported else ''}: AnyObject, Publisher {
+public protocol Subject${output_generic}: AnyObject, Publisher {
 
     /// Sends a value to the subscriber.
     ///
@@ -107,7 +128,7 @@ public protocol Subject${'<Output, Failure>' if primary_associated_types_support
 ///
 /// Use `makeConnectable()` to create a `ConnectablePublisher` from any publisher whose
 /// failure type is `Never`.
-public protocol ConnectablePublisher${'<Output, Failure>' if primary_associated_types_supported else ''}: Publisher {
+public protocol ConnectablePublisher${output_generic}: Publisher {
 
     /// Connects to the publisher, allowing it to produce elements, and returns
     /// an instance with which to cancel publishing.
@@ -139,7 +160,7 @@ public protocol ConnectablePublisher${'<Output, Failure>' if primary_associated_
 ///   it receives a completion signal and each time it receives a new element.
 /// - `assign(to:on:)` writes each newly-received value to a property identified by
 ///   a key path on a given instance.
-public protocol Subscriber${'<Input, Failure>' if primary_associated_types_supported else ''}: CustomCombineIdentifierConvertible {
+public protocol Subscriber${input_generic}: CustomCombineIdentifierConvertible {
 
     /// The kind of values this subscriber receives.
     associatedtype Input
@@ -181,7 +202,7 @@ public protocol Subscriber${'<Input, Failure>' if primary_associated_types_suppo
 /// with the convenience functions like `.milliseconds(500)`. Schedulers can accept
 /// options to control how they execute the actions passed to them. These options may
 /// control factors like which threads or dispatch queues execute the actions.
-public protocol Scheduler${'<SchedulerTimeType>' if primary_associated_types_supported else ''} {
+public protocol Scheduler${scheduler_generic} {
 
     /// Describes an instant in time for this scheduler.
     associatedtype SchedulerTimeType: Strideable
@@ -216,5 +237,11 @@ public protocol Scheduler${'<SchedulerTimeType>' if primary_associated_types_sup
                   options: SchedulerOptions?,
                   _ action: @escaping () -> Void) -> Cancellable
 }
-% end
+]==])
+end
+
+emit([==[
 #endif
+]==])
+
+support.write(OUT, table.concat(out))

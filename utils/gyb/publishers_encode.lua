@@ -1,3 +1,18 @@
+-- Publishers.Encode.swift.gyb as a Lua generator: the template's text, with the loop of its %-lines written as Lua.
+-- The output is GENERATED-Publishers.Encode.swift, which the Combine target compiles.
+local support = import("support", {rootdir = os.scriptdir(), anonymous = true})
+
+local OUT = path.join(os.scriptdir(), "..", "..", "Sources", "Combine", "Publishers", "GENERATED-Publishers.Encode.swift")
+
+local out, env = {}, {}
+
+local function emit(text)
+    out[#out + 1] = support.fill(text, env)
+end
+
+env.template_header = support.header()
+
+emit([==[
 ${template_header}
 //
 //  Publishers.Encode.swift.gyb
@@ -6,9 +21,9 @@ ${template_header}
 //  Created by Joseph Spadafora on 6/22/19.
 //
 
-%{
-instantiations = ['Encode', 'Decode']
-}%
+]==])
+local instantiations = {"Encode", "Decode"}
+emit([==[
 extension Publisher {
 
     /// Encodes the output from upstream using a specified encoder.
@@ -160,7 +175,12 @@ extension Publishers {
         }
     }
 }
-% for instantiation in instantiations:
+]==])
+for _, instantiation in ipairs(instantiations) do
+    env.instantiation = instantiation
+    env.lower = string.lower(instantiation)
+
+    emit([==[
 
 extension Publishers.${instantiation} {
     private final class Inner<Downstream: Subscriber>
@@ -177,7 +197,7 @@ extension Publishers.${instantiation} {
 
         private let downstream: Downstream
 
-        private let ${instantiation.lower()}: (Upstream.Output) throws -> Output
+        private let ${lower}: (Upstream.Output) throws -> Output
 
         private let lock = UnfairLock.allocate()
 
@@ -187,10 +207,10 @@ extension Publishers.${instantiation} {
 
         fileprivate init(
             downstream: Downstream,
-            ${instantiation.lower()}: @escaping (Upstream.Output) throws -> Output
+            ${lower}: @escaping (Upstream.Output) throws -> Output
         ) {
             self.downstream = downstream
-            self.${instantiation.lower()} = ${instantiation.lower()}
+            self.${lower} = ${lower}
         }
 
         deinit {
@@ -217,7 +237,7 @@ extension Publishers.${instantiation} {
             }
             lock.unlock()
             do {
-                return try downstream.receive(${instantiation.lower()}(input))
+                return try downstream.receive(${lower}(input))
             } catch {
                 lock.lock()
                 finished = true
@@ -273,4 +293,7 @@ extension Publishers.${instantiation} {
         var playgroundDescription: Any { return description }
     }
 }
-% end
+]==])
+end
+
+support.write(OUT, table.concat(out))
