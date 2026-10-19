@@ -16,21 +16,21 @@ armv7), in one repository. Each member keeps its own folder, history, `README.md
 Applications built on the platform (telegram-build, cydia, soundcloud-fix, kindle-sync-fix) are not members: they
 consume charon as an xmake repository.
 
-## Layout beside the members
+## One xmake project
+
+`xmake.lua` at the top is the project: it includes every member's own `xmake.lua`, so all targets are one graph and
+a member uses another's target with `add_deps`. `xmake f -y && xmake` at the top builds everything, `xmake build
+<target>` one target, `xmake test` the tests.
 
 | Path | What it is |
 | --- | --- |
-| `third_party/<name>/UPSTREAM` | a third-party dependency we change or pin: its upstream (`url`, then `commit` for git or `sha256` for an archive) |
-| `third_party/<name>/patches/` | our changes to it, as `git format-patch` files applied in order |
-| `third_party/fetch.lua` | `xmake l third_party/fetch.lua <name> [<dir>]`: the pinned upstream plus the patches, in `.deps/<name>` by default |
+| `third_party/packages/<l>/<name>/` | an xmake package of third-party code: the upstream by url and commit or checksum, our changes in `patches/` applied in order by `add_patches` |
 | `tools/check.lua` | `xmake l tools/check.lua [<member> ...]`: the members' checks that need no device or firmware |
 | `tools/publish.lua` | `xmake l tools/publish.lua <member>`: a member's history as a repository of its own (below) |
-| `.deps/`, `.build/` | fetched dependencies and check builds; not committed |
 
-A fork of third-party code is never a copy here: `dynarmic` is MC-XiaoXiao's dynarmic at a commit plus our arm64
-backend as patches, `boost` the release archive by its checksum, `xmake` the release tag plus our patches. A fetch
-is keyed by the pin and the patches' checksums, so it runs again only when one of them changes. Shade's CMake build
-fetches its two by itself when they are missing.
+Third-party code is never a copy here: `dynarmic` is MC-XiaoXiao's dynarmic at a commit plus our arm64 backend as
+patches, `boost` the 1.81.0 release archive by its checksum, `xmake` the v3.1.1 tag plus our patches to its addon
+handling.
 
 ## Members build each other from this tree
 
