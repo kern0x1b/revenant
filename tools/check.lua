@@ -1,4 +1,4 @@
-local root = path.directory(os.scriptdir())
+local root = path.absolute(path.directory(os.scriptdir()))
 
 local checks = {}
 

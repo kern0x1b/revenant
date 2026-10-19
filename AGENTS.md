@@ -12,7 +12,7 @@ The workspace contract (`$HOME/Git/projects/ios/AGENTS.md`) applies. Inside hade
   does and why goes in its commit message; knowledge a reader of the code needs goes in the member's `docs/`.
   `./xmakew l tools/comments.lua check [path ...]` finds comments, `strip` removes them, and `verify [rev]` proves that
   the files changed since `rev` differ from it in comments only (clang's raw tokens, Swift's parse tree, Lua's
-  bytecode). Files that carry upstream text are marked `comments=upstream` in `.gitattributes`.
+  bytecode). Files that carry upstream text (`comments=upstream`) or whose comments are the test data (`comments=fixture`) are marked in `.gitattributes`.
 - Third-party code is a package of `third_party/packages/<letter>/<name>/`: the upstream by url and commit or
   checksum, our changes as `git format-patch` files in its `patches/`, applied in order by `add_patches`. Never
   commit a copy of upstream code.
