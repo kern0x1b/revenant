@@ -1,0 +1,14 @@
+{
+  "name": "psychopomp",
+  "owner": { "name": "kern0x1b", "url": "https://github.com/kern0x1b" },
+  "metadata": {
+    "description": "Build modern apps for old iOS releases and old devices."
+  },
+  "plugins": [
+    {
+      "name": "psychopomp",
+      "source": "./",
+      "description": "From an empty directory to a .deb for iOS 5, 6, 7 and later: interview, install, project, code, build, emulator check, packaging, Cydia."
+    }
+  ]
+}

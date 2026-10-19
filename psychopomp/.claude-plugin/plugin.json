@@ -1,0 +1,10 @@
+{
+  "name": "psychopomp",
+  "version": "0.1.0",
+  "description": "Skills that take a coding agent from an empty directory to a .deb: a modern app, Swift and SwiftUI included, for iOS 5, 6, 7 and later on old devices, built with Charon, checked in the Shade emulator, packaged for a device or a Cydia repository.",
+  "author": { "name": "kern0x1b", "url": "https://github.com/kern0x1b" },
+  "homepage": "https://github.com/kern0x1b/psychopomp",
+  "repository": "https://github.com/kern0x1b/psychopomp",
+  "license": "MIT",
+  "keywords": ["ios", "legacy-ios", "armv7", "jailbreak", "cydia", "xmake", "swift", "swiftui", "emulator"]
+}
