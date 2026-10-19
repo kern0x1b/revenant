@@ -4,18 +4,11 @@ package("eidolon")
     set_license("MIT")
     set_policy("package.strict_compatibility", true)
 
-    -- Inside hades the sources are the eidolon folder beside charon, as this checkout has it (modules/hades.lua
-    -- says how it is versioned and staged). Outside hades they are a pinned commit of eidolon's repository.
-    local hades_eidolon = path.join(os.scriptdir(), "..", "..", "..", "..", "eidolon")
-    if os.isfile(path.join(os.scriptdir(), "..", "..", "..", "..", "third_party", "fetch.lua")) and os.isdir(hades_eidolon) then
-        set_sourcedir(path.absolute(hades_eidolon))
-    else
-        add_urls("https://github.com/kern0x1b/eidolon.git")
-        add_versions("2026.09.23", "10f87e02eaf4545dfaff7fe30ed0d69643bbad5e")
-        add_versions("2026.10.14", "9f6a4aeb716d6b928bcc995d859c0f41f0c4663c")
-        add_versions("2026.10.15", "f324b949eb3bac3fc4ef73e08712ff0a528b11b7")
-        add_versions("2026.10.16", "12a737b35ae64e1f4c4f1964197367841fe588d3")
-    end
+    add_urls("https://github.com/kern0x1b/eidolon.git")
+    add_versions("2026.09.23", "10f87e02eaf4545dfaff7fe30ed0d69643bbad5e")
+    add_versions("2026.10.14", "9f6a4aeb716d6b928bcc995d859c0f41f0c4663c")
+    add_versions("2026.10.15", "f324b949eb3bac3fc4ef73e08712ff0a528b11b7")
+    add_versions("2026.10.16", "12a737b35ae64e1f4c4f1964197367841fe588d3")
 
     -- Eidolon is compiled against the runtime a port takes, and against Styx built against that same runtime: what the
     -- port asks of the runtime it asks here too, and Eidolon passes it on to both. (charon@swift rule refuses a link with
@@ -26,10 +19,6 @@ package("eidolon")
     add_configs("recipe", {description = "The digest of this recipe, so a changed recipe is a different package.", default = hash.strhash128("xmake.lua=" .. hash.sha256(path.join(os.scriptdir(), "xmake.lua"))), type = "string", readonly = true})
 
     on_load("iphoneos", function (package)
-        if package:sourcedir() then
-            local hades = import("hades", {rootdir = path.join(package:scriptdir(), "..", "..", "..", "modules"), anonymous = true})
-            package:version_set(hades.version(package:sourcedir()))
-        end
         local configs = {shared = package:config("shared") or nil, backports = package:config("backports") or nil,
                          backports_uikit = package:config("backports_uikit") or nil}
         package:add("deps", "charon@swift-runtime", {alias = "swift-runtime", configs = configs})
@@ -41,9 +30,6 @@ package("eidolon")
 
     on_install("iphoneos", function (package)
         local modules = path.join(package:scriptdir(), "..", "..", "..", "modules")
-        if package:sourcedir() then
-            os.cd(import("hades", {rootdir = modules, anonymous = true}).stage(package, package:sourcedir()))
-        end
         local swift = import("apple.swift", {rootdir = modules, anonymous = true})
         local toolchain = assert(package:toolchains(), "Eidolon is built with the apple-ios toolchain")[1]
         toolchain:load()
