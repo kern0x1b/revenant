@@ -32,13 +32,11 @@ Third-party code is never a copy here: `dynarmic` is MC-XiaoXiao's dynarmic at a
 patches, `boost` the 1.81.0 release archive by its checksum, `xmake` the v3.1.1 tag plus our patches to its addon
 handling.
 
-## One xmake project
+### The members for iOS
 
-The top `xmake.lua` is the project; it includes every member's top `xmake.lua`, so the members' targets are one graph
-and a member uses another's library with `add_deps`. styx's `Combine` and `CombineHelpers`, eidolon's `SwiftUI`, the
-eidolon demo, snapshots and engine tests, and `eidolonrt` are targets of that graph; charon's packages are third-party
-code to them (the Swift runtime, libc++, the backports, the SDK and the tools). The members for iOS are built with
-`xmake f -p iphoneos -a armv7`.
+styx's `Combine` and `CombineHelpers`, eidolon's `SwiftUI`, the eidolon demo, snapshots and engine tests, and
+`eidolonrt` are targets of the graph for iphoneos; charon's packages are third-party code to them (the Swift runtime,
+libc++, the backports, the SDK and the tools). They are built with `xmake f -p iphoneos -a armv7`.
 
 charon is both the package repository and the addon (toolchain and rules) of those builds, from the `charon/` folder
 of this checkout. xmake reads an addon only from the addons installed in its global directory, and installing a
