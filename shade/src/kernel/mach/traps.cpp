@@ -62,14 +62,14 @@ void CompatibilityKernel::dispatch_mach(Cpu& cpu, std::uint32_t trap)
     }
     auto& registers = cpu.registers();
     switch (trap) {
-    case 3: // iOS ARM fast trap: mach_absolute_time
+    case 3:
     {
         const auto absolute_time = shared_state_->clock.now();
         registers[0] = static_cast<std::uint32_t>(absolute_time);
         registers[1] = static_cast<std::uint32_t>(absolute_time >> 32U);
     }
         return;
-    case 33: { // semaphore_signal_trap
+    case 33: {
         std::optional<CompatibilityKernel::WokenThread> woken_thread;
         {
             std::lock_guard mach_lock { shared_state_->mach_mutex };
@@ -79,7 +79,7 @@ void CompatibilityKernel::dispatch_mach(Cpu& cpu, std::uint32_t trap)
         wake_thread_and_maybe_preempt(cpu, woken_thread);
         return;
     }
-    case 34: { // semaphore_signal_all_trap
+    case 34: {
         std::vector<CompatibilityKernel::WokenThread> woken_threads;
         {
             std::lock_guard mach_lock { shared_state_->mach_mutex };
@@ -89,7 +89,7 @@ void CompatibilityKernel::dispatch_mach(Cpu& cpu, std::uint32_t trap)
         wake_threads_and_maybe_preempt(cpu, woken_threads);
         return;
     }
-    case 35: { // semaphore_signal_thread_trap
+    case 35: {
         std::optional<CompatibilityKernel::WokenThread> woken_thread;
         {
             std::lock_guard mach_lock { shared_state_->mach_mutex };
@@ -99,17 +99,17 @@ void CompatibilityKernel::dispatch_mach(Cpu& cpu, std::uint32_t trap)
         wake_thread_and_maybe_preempt(cpu, woken_thread);
         return;
     }
-    case 36: // semaphore_wait_trap
+    case 36:
         wait_on_semaphore(cpu, registers[0], 0, std::nullopt, false);
         return;
-    case 37: // semaphore_wait_signal_trap
+    case 37:
         wait_on_semaphore(cpu, registers[0], registers[1], std::nullopt, false);
         return;
-    case 38: // semaphore_timedwait_trap
-    case 39: { // semaphore_timedwait_signal_trap
+    case 38:
+    case 39: {
         const auto nsec = trap == 38 ? registers[2] : registers[3];
         if (nsec >= 1'000'000'000U) {
-            registers[0] = 4; // KERN_INVALID_ARGUMENT
+            registers[0] = 4;
             return;
         }
         const auto sec = trap == 38 ? registers[1] : registers[2];
@@ -119,14 +119,14 @@ void CompatibilityKernel::dispatch_mach(Cpu& cpu, std::uint32_t trap)
             cpu, registers[0], trap == 39 ? registers[1] : 0, interval, false);
         return;
     }
-    case 31: // mach_msg_trap
+    case 31:
         dispatch_mach_message(cpu);
         return;
-    case 32: // mach_msg_overwrite_trap: ARM passes argument eight in r8.
+    case 32:
         dispatch_mach_message(cpu, registers[8] != 0U
                 ? std::optional { registers[8] } : std::nullopt);
         return;
-    case 26: { // mach_reply_port
+    case 26: {
         std::lock_guard mach_lock { shared_state_->mach_mutex };
         const auto port = shared_state_->allocate_mach_object();
         static_cast<void>(
@@ -138,21 +138,21 @@ void CompatibilityKernel::dispatch_mach(Cpu& cpu, std::uint32_t trap)
                 .value_or(0);
         return;
     }
-    case 27: // thread_self_trap
+    case 27:
         dispatch_mach_thread_self_trap(cpu);
         return;
-    case 28: // task_self_trap
+    case 28:
         registers[0] = process_.task_port;
         return;
-    case 29: // host_self_trap
+    case 29:
         registers[0] = process_.host_port;
         return;
-    case 44: { // task_name_for_pid(target_task, pid, task_name_out)
+    case 44: {
         constexpr std::uint32_t kern_failure = 5;
         const auto target_task = registers[0];
         const auto requested_pid = registers[1];
         const auto output_address = registers[2];
-        std::uint32_t result_port = 0; // MACH_PORT_NULL on failure
+        std::uint32_t result_port = 0;
         std::uint32_t result = kern_failure;
         {
             std::lock_guard mach_lock { shared_state_->mach_mutex };
@@ -197,21 +197,20 @@ void CompatibilityKernel::dispatch_mach(Cpu& cpu, std::uint32_t trap)
                                     xnu::ipc::Right::Send))
                             .value_or(0);
                     if (result_port != 0)
-                        result = 0; // KERN_SUCCESS
+                        result = 0;
                 }
             }
         }
-        // XNU deliberately ignores copyout failure for these legacy traps.
         static_cast<void>(memory_.write32(output_address, result_port));
         registers[0] = result;
         return;
     }
-    case 45: { // task_for_pid(target_task, pid, task_name_out)
+    case 45: {
         constexpr std::uint32_t kern_failure = 5;
         const auto target_task = registers[0];
         const auto requested_pid = registers[1];
         const auto output_address = registers[2];
-        std::uint32_t result_port = 0; // MACH_PORT_NULL on failure
+        std::uint32_t result_port = 0;
         std::uint32_t result = kern_failure;
         {
             std::lock_guard mach_lock { shared_state_->mach_mutex };
@@ -243,16 +242,15 @@ void CompatibilityKernel::dispatch_mach(Cpu& cpu, std::uint32_t trap)
                                               xnu::ipc::Right::Send))
                                       .value_or(0);
                     if (result_port != 0)
-                        result = 0; // KERN_SUCCESS
+                        result = 0;
                 }
             }
         }
-        // XNU deliberately ignores copyout failure for these legacy traps.
         static_cast<void>(memory_.write32(output_address, result_port));
         registers[0] = result;
         return;
     }
-    case 46: { // pid_for_task(task_name, pid_out)
+    case 46: {
         constexpr std::uint32_t kern_failure = 5;
         const auto task_name = registers[0];
         const auto output_address = registers[1];
@@ -269,29 +267,23 @@ void CompatibilityKernel::dispatch_mach(Cpu& cpu, std::uint32_t trap)
                 task != shared_state_->task_port_pids.end() &&
                 shared_state_->processes.contains(task->second)) {
                 pid = task->second;
-                result = 0; // KERN_SUCCESS
+                result = 0;
             }
         }
-        // Darwin 8 writes -1 even when port_name_to_task fails, and ignores a
-        // copyout error when selecting the trap's return code.
         static_cast<void>(memory_.write32(output_address, pid));
         registers[0] = result;
         return;
     }
-    case 89: { // mach_timebase_info_trap
-        // absolute_time_ is expressed directly in nanoseconds.
+    case 89: {
         const auto address = registers[0];
         if (!memory_.write32(address, 1) || !memory_.write32(address + 4, 1)) {
-            registers[0] = 1; // KERN_INVALID_ADDRESS
+            registers[0] = 1;
         } else {
             registers[0] = 0;
         }
         return;
     }
-    case 90: { // mach_wait_until_trap
-        // XNU passes the absolute deadline as a little-endian 64-bit
-        // argument in r0/r1. Suspend only this guest thread; the cooperative
-        // scheduler wakes it when virtual monotonic time reaches the deadline.
+    case 90: {
         const auto deadline = static_cast<std::uint64_t>(registers[0]) |
                               (static_cast<std::uint64_t>(registers[1]) << 32U);
         const auto now = shared_state_->clock.now();
@@ -303,7 +295,7 @@ void CompatibilityKernel::dispatch_mach(Cpu& cpu, std::uint32_t trap)
                 " deadline=" + std::to_string(deadline) + "\n");
             ++timer_trace_count_;
         }
-        registers[0] = 0; // KERN_SUCCESS
+        registers[0] = 0;
         if (deadline > now) {
             std::optional<PendingTimer::BootstrapRetry> bootstrap_retry;
             {
@@ -315,12 +307,6 @@ void CompatibilityKernel::dispatch_mach(Cpu& cpu, std::uint32_t trap)
                     shared_state_->pending_bootstrap_retries.erase(pending);
                 }
             }
-            // A missing service is not ready merely because launchd returned an
-            // empty transfer. Keep a small retry floor; the scheduler will
-            // still wake this timer early when the service generation advances.
-            // Turning every failed lookup into an immediate wake creates a
-            // guest-side busy loop for optional services such as
-            // com.apple.musicplayer.
             constexpr std::uint64_t bootstrap_retry_backoff =
                 100ULL * darwin::mach::scheduler::nanoseconds_per_millisecond;
             const auto effective_deadline =
@@ -376,9 +362,6 @@ void CompatibilityKernel::dispatch_mach(Cpu& cpu, std::uint32_t trap)
             return;
         }
 
-        // NONE and DEPRESS remain runnable, but XNU ends the current quantum.
-        // UserDefined8 is the scheduler-only yield reason: main.cpp does not
-        // move the thread to a wait queue and clears it on the next round.
         scheduler_yields_[cpu.processor_id()] =
             SchedulerYieldRequest { option == switch_option_depress,
                 option_time_ms };
@@ -457,7 +440,7 @@ void CompatibilityKernel::dispatch_mach(Cpu& cpu, std::uint32_t trap)
                 current_nanoseconds));
         return;
     }
-    case 91: { // mk_timer_create_trap
+    case 91: {
         std::lock_guard mach_lock { shared_state_->mach_mutex };
         const auto object = shared_state_->allocate_mach_object();
         shared_state_->mach_timers.emplace(object,
@@ -479,7 +462,7 @@ void CompatibilityKernel::dispatch_mach(Cpu& cpu, std::uint32_t trap)
                       " object=" + std::to_string(object) + "\n");
         return;
     }
-    case 92: { // mk_timer_destroy_trap
+    case 92: {
         std::lock_guard mach_lock { shared_state_->mach_mutex };
         const auto name = registers[0];
         const auto object = resolve_name_with_right(
@@ -491,16 +474,13 @@ void CompatibilityKernel::dispatch_mach(Cpu& cpu, std::uint32_t trap)
             return;
         }
         shared_state_->mach_timers.erase(timer);
-        // Tear down the task-local receive name through the common ipc_right
-        // path. It marks foreign Send names dead and drains queued rights
-        // before removing the backing timer port.
         registers[0] =
             destroy_port_name_locked(*shared_state_, process_.pid, name)
                 ? darwin::mach::success
                 : darwin::mach::invalid_argument;
         return;
     }
-    case 93: { // mk_timer_arm_trap
+    case 93: {
         const auto name = registers[0];
         const auto deadline = static_cast<std::uint64_t>(registers[1]) |
                               (static_cast<std::uint64_t>(registers[2]) << 32U);
@@ -521,7 +501,7 @@ void CompatibilityKernel::dispatch_mach(Cpu& cpu, std::uint32_t trap)
                       " deadline=" + std::to_string(deadline) + "\n");
         return;
     }
-    case 94: { // mk_timer_cancel_trap
+    case 94: {
         const auto name = registers[0];
         const auto result_address = registers[1];
         std::uint64_t armed_time = 0;
@@ -549,8 +529,8 @@ void CompatibilityKernel::dispatch_mach(Cpu& cpu, std::uint32_t trap)
         }
         return;
     }
-    case 41: // init_process
-        registers[0] = 0; // KERN_SUCCESS / boolean false for swtch
+    case 41:
+        registers[0] = 0;
         return;
     case darwin::mach::scheduler::swtch_pri_trap: {
         const auto should_yield = scheduler_runnable_query_ &&
@@ -583,9 +563,9 @@ void CompatibilityKernel::dispatch_mach(Cpu& cpu, std::uint32_t trap)
     }
     default:
         trace_unknown(cpu, "Mach trap", trap);
-        registers[0] = 4; // KERN_INVALID_ARGUMENT
+        registers[0] = 4;
         return;
     }
 }
 
-} // namespace shade
+}

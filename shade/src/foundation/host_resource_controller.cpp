@@ -63,7 +63,7 @@ namespace {
         return configured_reserve;
     }
 
-} // namespace
+}
 
 ArtifactCompactionAdmission::ArtifactCompactionAdmission()
     : ArtifactCompactionAdmission { Config { } }
@@ -187,10 +187,6 @@ bool ArtifactCompactionTaskRecord::request_cancellation(
             std::memory_order_acquire)) {
         return false;
     }
-    // A terminal publisher can win between the active-state observation and
-    // the timestamp CAS above. Recheck and roll back so cancellation never
-    // reports success after terminal publication. If terminal publication wins
-    // after this acquire, the request linearizes first and remains valid.
     const auto confirmed = state_.load(std::memory_order_acquire);
     if (confirmed == ArtifactCompactionTaskState::Queued ||
         confirmed == ArtifactCompactionTaskState::Running) {
@@ -475,9 +471,6 @@ void HostResourceController::worker_loop()
             try {
                 task.work();
             } catch (...) {
-                // Host maintenance and optional compilation are isolated from
-                // guest execution. A failed task is observable through its
-                // absence, not an exception escaping the worker thread.
             }
         }
         const auto elapsed = Clock::now() - started;
@@ -522,4 +515,4 @@ void HostResourceController::stop()
     workers_.clear();
 }
 
-} // namespace shade
+}

@@ -26,8 +26,6 @@ namespace kernel_iokit::graphics {
 
     [[nodiscard]] bool matches_service(std::span<const std::byte> matching);
 
-    // The caller holds KernelSharedState::mach_mutex. The service is published
-    // only by the device model that advertises this accelerator family.
     [[nodiscard]] std::uint32_t ensure_service_locked(
         KernelSharedState& state, std::uint32_t platform_expert_object);
 
@@ -45,9 +43,6 @@ namespace kernel_iokit::graphics {
         std::uint32_t scalar_output_capacity,
         std::uint32_t inband_output_capacity);
 
-    // Handles the accelerator-specific IOKit wire routines. A null result means
-    // that the connection is not an accelerator connection or the message is
-    // for another generic IOKit path.
     [[nodiscard]] std::optional<std::uint32_t> handle_mach_request(
         AddressSpace& memory, KernelSharedState& state,
         const ProcessContext& process, std::uint32_t message_id,
@@ -55,10 +50,8 @@ namespace kernel_iokit::graphics {
         std::uint32_t receive_size, std::uint32_t connection_object,
         std::uint32_t local_port);
 
-    // Explicit IOServiceClose still has the owning AddressSpace available, so
-    // it can release accelerator mappings immediately.
     void close_connection(AddressSpace& memory, KernelSharedState& state,
         std::uint32_t connection_object);
 
-} // namespace kernel_iokit::graphics
-} // namespace shade
+}
+}

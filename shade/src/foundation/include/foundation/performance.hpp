@@ -67,8 +67,6 @@ enum class PerfSurfaceKind : std::uint8_t {
 inline constexpr auto perf_surface_kind_count =
     static_cast<std::size_t>(PerfSurfaceKind::Count);
 
-// Temporary frame-hitch probe. Remove after the Vulkan submission stalls are
-// localized.
 enum class PerfSubmitReason : std::uint8_t {
     Other,
     MbxFlush,
@@ -88,8 +86,6 @@ enum class PerfSubmitReason : std::uint8_t {
 inline constexpr auto perf_submit_reason_count =
     static_cast<std::size_t>(PerfSubmitReason::Count);
 
-// Temporary per-frame HLE work probe. Remove after the cold unlock stall is
-// localized.
 enum class PerfDiagnosticGraphicsHleKind : std::uint8_t {
     BlitCopy,
     BlitColor,
@@ -186,11 +182,6 @@ struct HlePerformanceSnapshot {
     std::uint64_t nanoseconds { };
 };
 
-// Per-guest-process CPU attribution is collected only inside an explicit
-// display performance window.  Keeping this separate from the global
-// histograms lets transition diagnostics distinguish application work from
-// SpringBoard and system-service work without adding a production hot-path
-// branch when telemetry is disabled.
 struct DiagnosticProcessSnapshot {
     std::uint32_t process_id { };
     std::uint64_t cpu_runs { };
@@ -227,8 +218,6 @@ struct DiagnosticSourceSnapshot {
     PerfDiagnosticSourceKind kind { };
     std::uint32_t process_id { };
     std::uint32_t number { };
-    // Scheduler sources are keyed by concrete Guest thread, queue side, and
-    // runnable generation so distinct wakeups are never merged.
     std::uint64_t runnable_generation { };
     std::uint64_t calls { };
     std::uint64_t nanoseconds { };
@@ -270,8 +259,6 @@ struct PerformanceSnapshot {
     std::uint64_t jit_stable_table_collisions { };
     std::uint64_t jit_rsb_hits { };
     std::uint64_t jit_rsb_misses { };
-    // Deprecated aliases retained for consumers of the former summary shape.
-    // New code must use the separate fast-link/table/RSB fields above.
     std::uint64_t jit_stable_link_hits { };
     std::uint64_t jit_stable_link_misses { };
     std::uint64_t jit_host_yield_checks { };
@@ -393,18 +380,11 @@ public:
         return cpu_source_diagnostics_configured_.load(
             std::memory_order_acquire);
     }
-    // CPU phase timing is deliberately limited to explicit perf windows. It
-    // performs several host-clock reads per guest slice and must not perturb
-    // ordinary execution or the unmeasured boot path.
     [[nodiscard]] bool cpu_source_diagnostics_enabled() const
     {
         return enabled() && cpu_source_diagnostics_configured() &&
                display_window_active_.load(std::memory_order_acquire);
     }
-    // Native block lookup observation is an explicit opt-in diagnostic. It
-    // is intentionally independent of the display-window CPU phase switch:
-    // when disabled, Dynarmic receives a null observer and the guest lookup
-    // path has no host-side callback or tracker probe.
     void set_native_lookup_diagnostics(bool enabled)
     {
         native_lookup_diagnostics_configured_.store(
@@ -416,8 +396,6 @@ public:
                                 std::memory_order_acquire);
     }
 
-    // Ticks per translated block (`--perf-block-profile`). The profile records
-    // only inside an enabled perf summary.
     void set_block_profile_diagnostics(bool enabled)
     {
         block_profile_.set_enabled(enabled);
@@ -432,9 +410,6 @@ public:
     }
 
     void record_jit(std::uint64_t creation_nanoseconds = 0);
-    // Background precompilation uses this always-on history to reserve time
-    // for one non-preemptible Dynarmic block even when verbose perf output is
-    // disabled.
     void record_jit_block_compile(std::uint64_t nanoseconds);
     [[nodiscard]] std::uint64_t jit_block_compile_p95_nanoseconds() const
     {
@@ -469,8 +444,6 @@ public:
         std::uint64_t fast_link_misses, std::uint64_t stable_table_probes,
         std::uint64_t stable_table_collisions, std::uint64_t rsb_hits,
         std::uint64_t rsb_misses);
-    // Compatibility overload for callers built against the former mixed
-    // dispatch counter API. It does not affect the new separate counters.
     void record_jit_dispatch(std::uint64_t stable_link_hits,
         std::uint64_t stable_link_misses, std::uint64_t rsb_hits,
         std::uint64_t rsb_misses);
@@ -489,9 +462,6 @@ public:
     void record_scheduler_preemption_deferred_consume();
     void record_scheduler_quantum_expiry();
     void record_translation_block();
-    // Blocks first read from the dyld shared cache's address range. The cache
-    // is the same read-only code at the same addresses in every process, so
-    // this counts the work every process repeats for it.
     void record_translation_block_shared_region();
     void record_cpu_execution(std::uint64_t ticks);
     void record_svc();
@@ -509,10 +479,6 @@ public:
     void record_display_submission(std::uint64_t frame_sequence,
         std::uint32_t owner_process_id,
         std::chrono::steady_clock::time_point submitted_at);
-    // Optional software-present diagnostics used to identify the semantic
-    // start and end of an animation independently from the perf-window first
-    // and last submission. The previous visible frame is retained while the
-    // diagnostic is enabled so the first in-window frame has a real baseline.
     void record_diagnostic_frame_content(std::uint64_t frame_sequence,
         std::uint32_t owner_process_id,
         std::chrono::steady_clock::time_point submitted_at, std::uint32_t width,
@@ -533,8 +499,6 @@ public:
         std::uint32_t thread,
         std::chrono::steady_clock::time_point executed_at =
             std::chrono::steady_clock::now());
-    // Temporary frame-hitch timeline probes. Remove these together with the
-    // ordered display diagnostics once the exit/unlock stall is localized.
     void record_diagnostic_display_dequeue(std::uint64_t frame_sequence,
         std::chrono::steady_clock::time_point dequeued_at);
     void record_diagnostic_native_queue(std::uint64_t frame_sequence,
@@ -597,9 +561,6 @@ public:
     [[nodiscard]] PerformanceSnapshot snapshot() const;
 
 private:
-    // Four linear ranges retain useful precision from sub-millisecond host
-    // calls through multi-second teardown without growing with run duration:
-    // 10 us to 10 ms, 100 us to 100 ms, 1 ms to 1 s, and 10 ms to 10 s.
     static constexpr std::size_t latency_bucket_count = 3701;
     struct LatencyHistogram {
         std::array<std::atomic<std::uint64_t>, latency_bucket_count>
@@ -801,9 +762,6 @@ private:
     using DiagnosticSourceKey = std::tuple<PerfDiagnosticSourceKind,
         std::uint32_t, std::uint32_t, std::uint64_t>;
     static constexpr std::size_t diagnostic_source_capacity = 4096;
-    // Source diagnostics are explicitly opt-in, so serialize the bounded
-    // table to make (thread, runnable generation) insertion atomic. The
-    // normal scheduler path returns before touching this lock.
     mutable std::mutex diagnostic_source_mutex_;
     struct DiagnosticSourceCounter {
         std::atomic<std::uint64_t> key { };
@@ -857,4 +815,4 @@ private:
 [[nodiscard]] std::string format_display_performance_summary(
     const PerformanceSnapshot& snapshot, std::string_view label);
 
-} // namespace shade
+}

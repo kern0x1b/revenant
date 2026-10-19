@@ -2,8 +2,6 @@ import UIKit
 import CoreGraphics
 
 public struct NavigationPath: Equatable {
-    /// How the path's elements are written down and read back. Only a path that was given a
-    /// representation can be encoded, and one without says so by having none.
     public struct CodableRepresentation: Codable, Equatable {
         var items: [AnyHashable] = []
         var read: ((any Decoder) throws -> [AnyHashable])?

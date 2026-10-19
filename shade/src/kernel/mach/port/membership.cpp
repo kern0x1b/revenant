@@ -30,7 +30,7 @@ namespace {
     constexpr std::uint32_t mach_receive_invalid_data = 0x10004008U;
     constexpr std::uint32_t reply_size = 36;
 
-} // namespace
+}
 
 bool CompatibilityKernel::dispatch_mach_port_membership_message(
     Cpu& cpu, const MachMessageRequest& request)
@@ -115,4 +115,4 @@ bool CompatibilityKernel::dispatch_mach_port_membership_message(
     return true;
 }
 
-} // namespace shade
+}

@@ -32,11 +32,10 @@ namespace {
 
     std::uint64_t decay_once(std::uint64_t usage)
     {
-        // sched_decay_shifts[1] in XNU priority.c: 1/2 + 1/8 = 5/8.
         return (usage >> 1U) + (usage >> 3U);
     }
 
-} // namespace
+}
 
 XnuScheduler::XnuScheduler(std::uint64_t quantum_ticks,
     std::uint64_t scheduler_tick_ticks, std::size_t processor_count)
@@ -56,9 +55,6 @@ XnuScheduler::XnuScheduler(std::uint64_t quantum_ticks,
 void XnuScheduler::set_dispatch_diagnostics(bool enabled)
 {
     dispatch_diagnostics_enabled_ = enabled;
-    // A perf window must not inherit queue age from before its semantic
-    // boundary. Existing runnable threads begin producing samples only after
-    // their next in-window enqueue.
     for (auto& [thread, record] : threads_) {
         static_cast<void>(thread);
         record.enqueued_at = { };
@@ -289,9 +285,6 @@ XnuThreadWakeResult XnuScheduler::wake_thread(XnuThreadId thread)
         performance_counters().record_scheduler_wakeup(true, true);
         return XnuThreadWakeResult { true, true };
     }
-    // A queued runnable thread already has a scheduler-visible wake. The
-    // caller still records/finishes its Mach event, but need not repeat the
-    // preemption query for an unchanged queue state.
     if (record.queued || record.suspend_count != 0) {
         if (record.suspend_count != 0)
             record.resume_runnable = true;
@@ -711,12 +704,6 @@ bool XnuScheduler::complete_slice(XnuThreadId thread,
         performance_counters().record_scheduler_quantum_expiry();
     }
     if (completion == XnuSliceCompletion::HostCooperate && !quantum_expired) {
-        // A host wall-time boundary is not an XNU thread_switch/yield and
-        // must not reset the Guest quantum, metered computation, or dynamic
-        // priority.  It does need to release the emulator's queue-head
-        // continuation contract: otherwise an equal-priority peer can remain
-        // runnable for hundreds of host milliseconds while an expensive HLE
-        // syscall consumes almost no Guest instruction ticks.
         transition_state(thread, record, XnuThreadState::Runnable);
         performance_counters().record_scheduler_runnable_transition();
         begin_runnable_generation(record);
@@ -794,8 +781,6 @@ std::int32_t XnuScheduler::clamp_priority(std::int32_t priority)
 std::uint32_t XnuScheduler::priority_usage_shift(
     std::uint64_t scheduler_tick_ticks)
 {
-    // sched_timebase_init() scales the 8 Hz interval by 5/3, then finds the
-    // first right shift that brings it down to BASEPRI_DEFAULT.
     auto scaled_interval = (scheduler_tick_ticks / 3U) * 5U +
                            ((scheduler_tick_ticks % 3U) * 5U) / 3U;
     std::uint32_t shift = 0;
@@ -811,9 +796,6 @@ void XnuScheduler::begin_runnable_generation(ThreadRecord& record)
 {
     if (++record.runnable_generation == 0)
         ++record.runnable_generation;
-    // A requeue caused by a genuine runnable transition must not reuse the
-    // queue age from a prior wake or prior slice. Priority-only reordering
-    // does not call this helper and therefore retains the current generation.
     record.enqueued_at = { };
 }
 
@@ -913,10 +895,6 @@ bool XnuScheduler::candidate_is_better(
     if (left.realtime && left.realtime_deadline != right.realtime_deadline) {
         return left.realtime_deadline < right.realtime_deadline;
     }
-    // QueuePosition::Front is the scheduler's continuation contract.  The
-    // local and processor-set queues are selected as one ordered set, so a
-    // plain enqueue age comparison would let an older global thread displace
-    // a thread that still owns the remainder of its current quantum.
     if (left.front_continuation != right.front_continuation)
         return left.front_continuation;
     if (left.enqueue_sequence != right.enqueue_sequence)
@@ -1313,4 +1291,4 @@ std::uint32_t XnuScheduler::timeshare_quanta() const
         (processor_count + run_queue_count / 2U) / run_queue_count);
 }
 
-} // namespace shade
+}

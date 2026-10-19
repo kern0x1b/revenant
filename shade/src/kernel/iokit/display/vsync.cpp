@@ -166,15 +166,6 @@ namespace {
             static_cast<std::uint32_t>(registration.sequence));
         write_word(
             message.bytes, argument_offset + 1U * sizeof(std::uint32_t), 0);
-        // IOMobileFramebufferNotifyFunc forwards all six natural_t values to
-        // the firmware callback. Both GraphicsServices' HeartbeatVBLCallback
-        // and LayerKit's LKDisplayLinkCallback consume arguments 2 and 3 as the
-        // 64-bit sampled frame time. QuartzCore's IOMFBServer adds arguments 4
-        // and 5 to that sample to obtain the next host time and also publishes
-        // the same value as CVTimeStamp.videoRefreshPeriod. Pass one physical
-        // panel period: zero prevents a completed frame from scheduling the
-        // next animation update, while duplicating the absolute deadline
-        // advances time twice.
         write_word(message.bytes, argument_offset + 2U * sizeof(std::uint32_t),
             static_cast<std::uint32_t>(deadline));
         write_word(message.bytes, argument_offset + 3U * sizeof(std::uint32_t),
@@ -191,7 +182,7 @@ namespace {
         return message;
     }
 
-} // namespace
+}
 
 std::optional<MethodResult> dispatch_connect_method(KernelSharedState& state,
     const ProcessContext& process, std::uint32_t connection_object,
@@ -216,8 +207,6 @@ std::optional<MethodResult> dispatch_connect_method(KernelSharedState& state,
         return MethodResult { iokit_abi::success, { external ? 0U : 1U } };
     }
 
-    // An external controller is present even with no monitor attached. Its
-    // connection state and power requests must never change the built-in LCD.
     if (external && selector == static_cast<std::uint32_t>(
                                    iokit_abi::MobileFramebufferSelector::
                                        GetDigitalOutState)) {
@@ -289,17 +278,8 @@ std::optional<MethodResult> dispatch_connect_method(KernelSharedState& state,
         if (was_enabled != vsync.enabled)
             vsync.last_notification_frame_time.reset();
         if (!vsync.enabled) {
-            // A message queued before disable belongs to the old registration
-            // window. Do not let a sleeping receiver consume it after selector
-            // 9 has been turned off: selector-off means no callback and no
-            // frame. The scanout surface remains untouched, so the last real
-            // frame stays visible until the next fixed-phase enable.
             discard_queued_vsync_messages_locked(state, vsync.notification_port,
                 connection_object, vsync.registration_generation);
-            // Disabling selector 9 cancels the old notification window. A
-            // queued message discarded above can no longer enter NotifyFunc, so
-            // retire its host-only callback watermark with the same
-            // registration semantics.
             vsync.callback_sequence = vsync.sequence;
             vsync.swap_sequence = vsync.sequence;
         }
@@ -311,11 +291,6 @@ std::optional<MethodResult> dispatch_connect_method(KernelSharedState& state,
         if (vsync.enabled) {
             const auto now = state.clock.now();
             const auto period = iokit_abi::display_vsync::period_absolute_time;
-            // The LCD scan phase is independent of client registration.
-            // Preserve a future pulse across the disable/enable pairs emitted
-            // by GraphicsServices; repeatedly scheduling at now + period lets a
-            // busy client chase the deadline forever and starves its animation
-            // callback.
             if (!vsync.next_deadline || *vsync.next_deadline <= now) {
                 vsync.next_deadline = now - now % period + period;
             }
@@ -371,9 +346,6 @@ std::optional<MethodResult> dispatch_connect_method(KernelSharedState& state,
                 if (belongs_to_preceding_lock &&
                     !state.host_display_pending_lock_power_off_sequences
                         .empty()) {
-                    // Panel-off requests follow their Lock events in FIFO
-                    // order. Consume exactly one generation; an old request
-                    // cannot acknowledge a newer lock/wake cycle.
                     state.host_display_pending_lock_power_off_sequences
                         .pop_front();
                     if (state.host_display_hardware_wake_pending ||
@@ -381,9 +353,6 @@ std::optional<MethodResult> dispatch_connect_method(KernelSharedState& state,
                         requested_power_state = 1U;
                     }
                 } else if (state.host_display_hardware_wake_pending) {
-                    // A physical Home or Sleep/Wake press owns panel power
-                    // until the guest acknowledges the wake. The guest-visible
-                    // event keeps its original identity.
                     requested_power_state = 1U;
                 }
             } else {
@@ -563,9 +532,6 @@ void deliver_due_vsync_locked(KernelSharedState& state, std::uint64_t deadline)
         state.iokit_display_vsync_deadlines.erase(
             state.iokit_display_vsync_deadlines.begin());
 
-        // Multiple client registrations can share one physical panel pulse.
-        // Count that internal pulse once while preserving every registration's
-        // existing guest notification and deadline advancement below.
         if (state.display_vsync_last_delivered_deadline != indexed_deadline) {
             state.display_vsync_last_delivered_deadline = indexed_deadline;
             ++state.display_vsync_pulse_count;
@@ -576,10 +542,6 @@ void deliver_due_vsync_locked(KernelSharedState& state, std::uint64_t deadline)
         if (registration_it == state.iokit_display_vsync.end())
             continue;
         auto& registration = registration_it->second;
-        // Vsync is driven by a kernel-owned timer, so it can fire after the
-        // client has torn down its ipc_space.  Do not recreate a queue for a
-        // dead notification port via operator[]; retire the registration
-        // instead.
         if (!state.mach_port_objects.contains(registration.notification_port)) {
             state.iokit_display_vsync.erase(registration_it);
             continue;
@@ -598,10 +560,6 @@ void deliver_due_vsync_locked(KernelSharedState& state, std::uint64_t deadline)
                     : indexed_deadline;
             ++registration.sequence;
             state.enqueue_mach_message_locked(registration.notification_port,
-                // Physical timer deadlines can be coalesced while the prior
-                // callback is pending. Advance the guest-visible sample by one
-                // panel period per notification actually delivered so
-                // animation state cannot jump over undisplayed frames.
                 make_vsync_message(
                     connection_object, registration, frame_time));
             registration.last_notification_frame_time = frame_time;
@@ -611,12 +569,6 @@ void deliver_due_vsync_locked(KernelSharedState& state, std::uint64_t deadline)
                 registration.sequence);
             performance_counters().record_display_vsync_queued();
         } else {
-            // A completed callback can race with retirement of its queued
-            // message. In that case this pulse was not hidden by an active
-            // animation callback, so keep the continuous sample baseline on
-            // the physical panel phase. A genuinely pending callback retains
-            // its last delivered sample and therefore cannot skip animation
-            // states when the host is late.
             if (registration.callback_sequence >= registration.sequence)
                 registration.last_notification_frame_time = indexed_deadline;
             performance_counters().record_display_vsync_coalesced();
@@ -643,4 +595,4 @@ void close_connection_locked(
     state.iokit_display_connections.erase(connection_object);
 }
 
-} // namespace shade::kernel_iokit::display
+}

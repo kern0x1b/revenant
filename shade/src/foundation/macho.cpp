@@ -370,9 +370,6 @@ namespace {
             address += delta;
             decoded.push_back(static_cast<std::uint32_t>(address));
         }
-        // The cap itself is a valid bounded result: once the maximum trusted
-        // starts are decoded, do not scan an untrusted tail merely to find its
-        // terminator.
         if (!terminated && decoded.size() != maximum_function_starts)
             return;
         starts = std::move(decoded);
@@ -405,7 +402,7 @@ namespace {
             static_cast<std::int64_t>(file_stat.st_ctim.tv_nsec) };
     }
 
-} // namespace
+}
 
 MachOImage MachOImage::parse(const std::filesystem::path& path,
     ArmArchitectureVersion architecture,
@@ -508,18 +505,7 @@ MachOImage MachOImage::parse(const std::filesystem::path& path,
         };
     }
 
-    // App bundles may carry a classic FAT container. Select the best slice for
-    // the guest architecture instead of making each caller know how to unpack
-    // it; ARMv7 remains compatible with an ARMv6 slice when no v7 slice exists.
-    // A shared-cache image is already an ARM slice inside a larger container,
-    // so its header offset must remain absolute and FAT selection is skipped.
     const std::span<const std::byte> container = source_bytes;
-    // ContentIdentity names the bytes on disk, not the architecture-specific
-    // view selected below.  The watcher and file identity cache hash the
-    // complete container, so using the same identity here is required for
-    // cold catalog scans, loader lookups, and hot refreshes to agree.  FAT
-    // images always compute this value locally because a caller-provided
-    // identity from an older catalog may have named only a selected slice.
     const auto container_magic = read_be_u32(container, 0U);
     const bool fat_container =
         !image_header_offset.has_value() && container_magic == fat_magic;
@@ -593,9 +579,6 @@ MachOImage MachOImage::parse(const std::filesystem::path& path,
         seed_shared_file_identity(
             path, *image.file_generation_, image.content_identity_);
     }
-    // share_immutable_snapshot may return an older shared_ptr held by another
-    // parser. Rebind the span after that publication so it can never retain a
-    // pointer into a replaced vector.
     const auto bytes = image.byte_span();
     if (read_u32(bytes, static_cast<std::size_t>(header_offset)) != mh_magic) {
         throw std::runtime_error { "expected a little-endian 32-bit Mach-O: " +
@@ -1112,9 +1095,6 @@ std::optional<std::uint32_t> MachOImage::find_objc_method(
         return string_equals(*name, class_name);
     };
 
-    // Objective-C 2 stores pointers to class_t records in a dedicated
-    // class-list section. Follow class_t -> class_ro_t -> method_list_t and
-    // honor the entry stride published by the runtime metadata.
     for (const auto& segment : segments_) {
         for (const auto& section : segment.sections) {
             if (section.name != "__objc_classlist")
@@ -1176,9 +1156,6 @@ std::optional<std::uint32_t> MachOImage::find_objc_method(
         }
     }
 
-    // Objective-C 2 categories carry additional methods outside the class's
-    // primary method list.  Framework-private API is commonly published this
-    // way, so include category lists in semantic HLE lookup as well.
     for (const auto& segment : segments_) {
         for (const auto& section : segment.sections) {
             if (section.name != "__objc_catlist")
@@ -1226,10 +1203,6 @@ std::optional<std::uint32_t> MachOImage::find_objc_method(
             if (section.segment != "__OBJC" || section.name != "__class") {
                 continue;
             }
-            // Objective-C 1 class records retained the offsets used below,
-            // but their trailing runtime fields make the total record stride
-            // vary between old toolchains. Scan aligned record candidates so
-            // semantic lookup does not bake in either the 40- or 48-byte form.
             for (std::uint64_t section_offset = 0;
                 section_offset + objc1_class_method_lists_offset +
                     sizeof(std::uint32_t) <=
@@ -1260,9 +1233,6 @@ std::optional<std::uint32_t> MachOImage::find_objc_method(
                 if (!lists || *lists == 0U || *lists == 0xffffffffU) {
                     continue;
                 }
-                // The common Objective-C 1.x form points directly at one
-                // method list. Some images instead use a null-terminated array
-                // of list pointers; accept both layouts.
                 if (const auto direct = search_list(*lists, method_size))
                     return direct;
                 for (std::uint32_t list_index = 0;
@@ -1383,10 +1353,6 @@ void MachOImage::map_into(
                             ? std::shared_ptr<const std::vector<std::byte>> { }
                             : bytes_,
                         immutable_file_view_, batch_context)) {
-                    // File backing is an optimization for immutable text, not
-                    // part of the Mach-O loading contract. A transient host
-                    // mapping failure must retain the original anonymous-copy
-                    // behavior instead of terminating the whole emulator.
                     map_anonymous(static_cast<std::uint32_t>(file_guest_start),
                         static_cast<std::uint32_t>(file_guest_end));
                 }
@@ -1445,4 +1411,4 @@ std::string mach_cpu_name(std::uint32_t cpu_type, std::uint32_t cpu_subtype)
     }
 }
 
-} // namespace shade
+}

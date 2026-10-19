@@ -24,9 +24,6 @@ struct GuestExecutionBudgetRequest {
     bool latency_sensitive { };
 };
 
-// Core host-execution policy for an XNU-selected guest thread. It chooses only
-// the wall-clock boundary passed to Dynarmic; XNU remains the owner of runnable
-// selection, priorities, quanta, realtime policy and guest preemption.
 class GuestExecutionPolicy {
 public:
     explicit GuestExecutionPolicy(std::chrono::nanoseconds response_period);
@@ -52,4 +49,4 @@ private:
     std::map<XnuThreadId, ThreadHistory> histories_;
 };
 
-} // namespace shade
+}

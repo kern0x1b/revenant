@@ -49,4 +49,4 @@ namespace shade::darwin::error {
     inline constexpr std::uint32_t not_connected = 57;
     inline constexpr std::uint32_t connection_refused = 61;
     inline constexpr std::uint32_t no_attribute = 93;
-} // namespace shade::darwin::error
+}

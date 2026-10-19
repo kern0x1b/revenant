@@ -57,15 +57,11 @@ struct HostSocketResult {
     std::vector<std::byte> bytes;
     std::vector<std::byte> address;
     std::vector<std::byte> destination_address;
-    // Virtual Darwin interface index (lo0=1, en0=2), never a host ifindex.
     std::optional<std::uint32_t> interface_index;
     std::optional<std::uint32_t> hop_limit;
     std::shared_ptr<HostSocket> accepted_socket;
 };
 
-// Owns a non-blocking host socket while keeping every host ABI detail outside
-// the compatibility kernel. Guest addresses are always Darwin sockaddr byte
-// sequences; no host sockaddr object crosses this boundary.
 class HostSocket {
 public:
     static HostSocketCreateResult create(HostNetworkPolicy policy,
@@ -124,4 +120,4 @@ private:
     bool receive_hop_limit_ { };
 };
 
-} // namespace shade
+}

@@ -29,4 +29,4 @@ inline constexpr std::array<std::string_view, 2> directory_names { "null",
     return false;
 }
 
-} // namespace shade::bsd::null_device
+}

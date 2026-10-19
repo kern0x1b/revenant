@@ -1,6 +1,3 @@
-// devtime.c -- on-device wall-clock benchmark: translated (armv7-lifted-from-arm64)
-// vs native armv7 for each compute kernel, plus resident-memory reporting.
-// Runs as a normal iOS CLI process (has libSystem), unlike the -nostdlib emulator harness.
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -10,7 +7,7 @@
 #include <mach/mach_time.h>
 
 #include "xl_state.h"
-#include "kernel_addrs.h"   // generated: kernel_count, kernel_names[], kernel_addrs[]
+#include "kernel_addrs.h"
 
 typedef struct State State;
 typedef void (*xl_lifted)(State *);
@@ -50,10 +47,6 @@ uint64_t native_run(unsigned which, uint8_t *arena, uint32_t size);
 #define ARENA (8u * 1024u * 1024u)
 #define STACK (2u * 1024u * 1024u)
 
-// Per-kernel work size, matching the emulator harness (count.py). For the hash/text
-// kernels this is a byte count; for sort/list/geometry it is an element count (the
-// lifted arm64 code uses 8-byte longs, native armv7 uses 4-byte, so the arena is sized
-// generously); for matrix it is the dimension.
 static const uint32_t kernel_size[] = { 1u<<16, 1u<<16, 1u<<16, 20000, 20000, 20000, 60, 1u<<16 };
 
 static void fill(uint8_t *arena, uint32_t size)
@@ -86,11 +79,8 @@ int main(void)
     mach_timebase_info_data_t tb;
     mach_timebase_info(&tb);
 
-    // RSS-overhead mode: a small arena (no 16 MB test scaffolding) and a single pass,
-    // so the reported resident size reflects the translation machinery (binary + lifted
-    // code touched + State + stack) rather than the benchmark's own data.
     int rss_mode = getenv("XL_RSS") != NULL;
-    uint32_t arena_bytes = rss_mode ? (2u * 1024u * 1024u) : ARENA;  // 2 MB: fits all kernels (list 20000*16=320KB), far below the 16 MB perf scaffolding
+    uint32_t arena_bytes = rss_mode ? (2u * 1024u * 1024u) : ARENA;
     uint64_t base_iters = rss_mode ? 1 : 200;
 
     uint64_t rss_baseline = rss_bytes();
@@ -99,7 +89,7 @@ int main(void)
     fill(seed, arena_bytes);
 
     uint8_t *stack = malloc(STACK);
-    State *state = calloc(1, 4096);      // >= V31 offset + slack
+    State *state = calloc(1, 4096);
     uint32_t stack_top = (uint32_t)(uintptr_t)stack + STACK;
 
     printf("kernel        native_ns   xlate_ns   xl/native   match\n");
@@ -108,20 +98,17 @@ int main(void)
         uint32_t sz = kernel_size[k];
         uint64_t iters = base_iters;
 
-        // Correctness: one run each from an identical arena.
         memcpy(arena, seed, arena_bytes);
         uint64_t rn = native_run(k, arena, sz);
         memcpy(arena, seed, arena_bytes);
         uint64_t rx = xlate_run(kernel_addrs[k], arena, sz, state, stack_top);
         int match = (rn == rx);
 
-        // Native timing.
         memcpy(arena, seed, arena_bytes);
         uint64_t t0 = mach_absolute_time();
         for (uint64_t i = 0; i < iters; i++) native_run(k, arena, sz);
         uint64_t tn = mach_absolute_time() - t0;
 
-        // Translated timing.
         memcpy(arena, seed, arena_bytes);
         t0 = mach_absolute_time();
         for (uint64_t i = 0; i < iters; i++) xlate_run(kernel_addrs[k], arena, sz, state, stack_top);

@@ -7,10 +7,8 @@ public enum AccessibilityTextContentType { case plain, console, fileSystem, mess
 public enum MoveCommandDirection { case up, down, left, right }
 public struct PresentationDetent: Hashable {
     let name: String
-    /// the app's own detent type, when it named one: its height is what the type computes
     let customType: Any.Type?
     init(name: String, custom: Any.Type? = nil) { self.name = name; customType = custom }
-    /// The height the app's type computes from the context, which is the screen on this platform.
     var customHeight: CGFloat? {
         guard let customType else { return nil }
         return (customType as? any CustomPresentationDetent.Type)?.height(in: Context(maxDetentValue: maxDetentValue))
@@ -21,12 +19,9 @@ public struct PresentationDetent: Hashable {
     public static let medium = PresentationDetent(name: "medium")
     public static let large = PresentationDetent(name: "large")
     public static func height(_ height: CGFloat) -> PresentationDetent { PresentationDetent(name: "height") }
-    /// The detent an app's own type describes. Its height is the one it computes from the context, and
-    /// the context's largest detent is the screen, because a modal screen of iOS 6 is the whole screen.
     public static func custom<D: CustomPresentationDetent>(_ type: D.Type) -> PresentationDetent {
         PresentationDetent(name: "custom-\(String(describing: type))", custom: type)
     }
-    /// The largest detent this platform allows a modal screen to be: the screen, which is all of it here.
     public var maxDetentValue: CGFloat { Context.maximum }
 
     public static func fraction(_ fraction: CGFloat) -> PresentationDetent { PresentationDetent(name: "fraction") }
@@ -99,8 +94,6 @@ extension View {
         ignored(self, "dropDestination", "a drag of this release is a gesture, not a session: UIDragInteraction and UIDropInteraction are iOS 11, and the release hands an app no drag session and no preview to carry a payload in — a table of rows is moved with .onMove, and a drag of one's own is a DragGesture")
     }
     public func copyable<T>(_ payload: @autoclosure @escaping () -> [T]) -> some View {
-        // the edit menu of this release belongs to a text view, so what a view of its own offers on a long press is the
-        // release's own sheet, with the same Copy item - and what is copied is the payload, as the pasteboard holds it
         onLongPressGesture {
             showReleaseMenu([("Copy", { copyToPasteboard(payload()) })], in: UIApplication.shared.keyWindow?.rootViewController?.view)
         }
@@ -169,12 +162,9 @@ extension View {
         ignored(self, "presentationCornerRadius", "a form sheet and a page sheet of this release are rectangles with the corners of iOS 6, and a UIViewController here has no corner radius of its own to give")
     }
     public func presentationBackground<S: ShapeStyle>(_ style: S) -> some View {
-        // a modal screen of this release is painted in the white the release gives it, and this is the colour that takes
-        // the place of that white
         if let color = style._uiColor {
             return _ModifiedView(content: self, modifier: PresentationBackgroundModifier(color: color))
         }
-        // a style that is not one colour (a gradient, a material) has no single colour to paint a screen with
         _Unsupported.note("presentationBackground(style)", "a presented screen of iOS 6 is painted in one colour, so a style that is not one colour paints none of it")
         return _ModifiedView(content: self, modifier: PresentationBackgroundModifier(color: nil))
     }
@@ -251,8 +241,6 @@ extension View {
         statusBarHidden(hidden)
     }
     public func submitScope(_ isBlocking: Bool = true) -> some View {
-        // a blocking scope is the return key of a field of several lines: it runs the submit action of the screen instead of
-        // being a line of its own, which is what -textView:shouldChangeTextInRange:replacementText: is for
         _ModifiedView(content: self, modifier: EnvironmentModifier(apply: { $0.submitBlocksReturn = isBlocking }, onUpdate: nil))
     }
     public func digitalCrownRotation<V: BinaryFloatingPoint>(_ binding: Binding<V>) -> some View {

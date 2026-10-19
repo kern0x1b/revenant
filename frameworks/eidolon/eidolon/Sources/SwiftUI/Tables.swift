@@ -18,9 +18,6 @@ public protocol TableColumnContent {
     associatedtype TableColumnSortComparator
     associatedtype TableColumnBody
     var _columns: [_AnyTableColumn<TableRowValue>] { get }
-    /// A column's own alignment, which is what the table draws it with. It is a requirement and not an
-    /// extension member, because the table reaches it through the protocol and an extension member would
-    /// not be dispatched.
     func alignment(_ alignment: TableColumnAlignment) -> Self
 }
 
@@ -44,7 +41,6 @@ public struct TableColumn<RowValue: Identifiable, Sort, Content: View, Label: Vi
         [_AnyTableColumn(title: title, cell: { cell($0) }, sortKey: sortKey, readKey: readKey,
                          columnAlignment: alignment)]
     }
-    /// The alignment the app gave this column, kept so the table draws it with.
     var alignment: TableColumnAlignment { columnAlignment }
     public func width(_ width: CGFloat? = nil) -> Self { self }
     public func width(min: CGFloat? = nil, ideal: CGFloat? = nil, max: CGFloat? = nil) -> Self { self }
@@ -109,9 +105,6 @@ public struct TableColumnBuilder<RowValue: Identifiable, Sort> {
         }
         return TupleTableColumnContent(value: (repeat each columns), _columns: all)
     }
-    // The three conditional forms below are the ones Apple's TableColumnBuilder declares, with Apple's
-    // constraints: a builder that is one column wide cannot take two, and a builder that sorts cannot
-    // be given a column that does not.
     public static func buildEither<T, F>(first: T) -> _ConditionalContent<T, F>
         where RowValue == T.TableRowValue, T: TableColumnContent, F: TableColumnContent,
               T.TableColumnSortComparator == Never, T.TableRowValue == F.TableRowValue,
@@ -136,7 +129,6 @@ public struct TableColumnBuilder<RowValue: Identifiable, Sort> {
     @_disfavoredOverload
     public static func buildLimitedAvailability<C: TableColumnContent>(_ content: C) -> _AnyTableColumnContent<RowValue, Never>
         where C.TableRowValue == RowValue, C.TableColumnSortComparator == Never { _AnyTableColumnContent(content) }
-    /// The `if #unavailable` case: there are no columns, so the empty set is what the builder is left with.
     public static func buildLimitedAvailability() -> _AnyTableColumnContent<RowValue, Sort> {
         _AnyTableColumnContent(_EmptyTableColumnContent<RowValue, Sort>())
     }
@@ -171,13 +163,9 @@ public struct TableForEachContent<Data: RandomAccessCollection, RowContent: Tabl
     public var _rows: [Data.Element] { Array(data) }
 }
 
-/// A row content of any concrete type, which is what a builder hands on when it wraps one -- the table
-/// row counterpart of the `AnyView` a view builder produces.
 public struct _AnyTableRowContent<Value: Identifiable>: TableRowContent {
     public typealias TableRowValue = Value
     public typealias TableRowBody = Never
-    // the rows are projected where the wrapper is made: an existential cannot say which value it holds,
-    // and the builder hands this on to whatever is built next
     public let _rows: [Value]
     init<C: TableRowContent>(_ content: C) where C.TableRowValue == Value { _rows = content._rows }
 }
@@ -192,7 +180,6 @@ public struct _AnyTableColumnContent<RowValue: Identifiable, Sort>: TableColumnC
     }
 }
 
-/// No columns at all: what an `if #unavailable` leaves the builder with.
 public struct _EmptyTableColumnContent<RowValue: Identifiable, Sort>: TableColumnContent {
     public typealias TableRowValue = RowValue
     public typealias TableColumnSortComparator = Sort
@@ -226,7 +213,6 @@ public struct TableRowBuilder<Value: Identifiable> {
         }
         return TupleTableRowContent(value: (repeat each rows), _rows: all)
     }
-    // As above: Apple's TableRowBuilder conditional forms, with its constraints.
     public static func buildIf<C>(_ content: C?) -> C? where Value == C.TableRowValue, C: TableRowContent { content }
     public static func buildEither<T, F>(first: T) -> _ConditionalContent<T, F>
         where Value == T.TableRowValue, T: TableRowContent, F: TableRowContent, T.TableRowValue == F.TableRowValue {
@@ -238,7 +224,6 @@ public struct TableRowBuilder<Value: Identifiable> {
     }
     public static func buildLimitedAvailability<C: TableRowContent>(_ content: C) -> _AnyTableRowContent<Value>
         where C.TableRowValue == Value { _AnyTableRowContent(content) }
-    /// The `if #unavailable` case: no rows, so the empty set is what the builder is left with.
     public static func buildLimitedAvailability() -> _AnyTableRowContent<Value> {
         _AnyTableRowContent(EmptyTableRowContent<Value>())
     }
@@ -258,13 +243,9 @@ public struct Table<Value: Identifiable, Rows: TableRowContent, Columns: TableCo
     var selection: SelectionBox?
     var sortOrder: Binding<[KeyPathComparator<Value>]>?
     var customizationBehavior: TableColumnCustomizationBehavior = .all
-    /// What the table reads: the order the app gave and the columns it hid, by the title a column has
-    /// here. The app's own `TableColumnCustomization<Value>` is projected into this, so the type the
-    /// table stores needs no constraint on the element's identifier.
     struct ColumnVisibility { var order: [String] = []; var hidden: [String] = [] }
     var columnCustomization: ColumnVisibility?
 
-    /// The columns the table draws: the app's order, and only the ones it leaves visible.
     var visibleColumns: [_AnyTableColumn<Value>] {
         let all = columns._columns
         guard let customization = columnCustomization, customizationBehavior.contains(.visibility) else { return all }
@@ -275,13 +256,10 @@ public struct Table<Value: Identifiable, Rows: TableRowContent, Columns: TableCo
     }
     public var body: AnyView {
         if UIDevice.current.userInterfaceIdiom == .pad { _Unsupported.pendingNote("Table columns on iPad") }
-        // the app sorts from the binding, the table only shows the order it is given
         var ordered = rows._rows
         if let sortOrder {
             for comparator in sortOrder.wrappedValue.reversed() {
                 ordered.sort { a, b in
-                    // Comparable through the runtime: a value of any Comparable type is asked to
-                    // compare itself, which is what `<` and `>` on Comparable reduce to.
                     let selector = NSSelectorFromString("compare:")
                     func compare(_ left: any Comparable, _ right: any Comparable) -> Int? {
                         guard let both = left as? NSObject, let other = right as? NSObject else { return nil }
@@ -304,7 +282,6 @@ public struct Table<Value: Identifiable, Rows: TableRowContent, Columns: TableCo
             }
         } }
         if sortOrder == nil { return AnyView(list) }
-        // the titles, then the rows they sort
         return AnyView(VStack(spacing: 0) {
             TableHeader(columns: shown, sortOrder: sortOrder)
             list
@@ -332,9 +309,6 @@ extension View {
     public func tableStyle<S: TableStyle>(_ style: S) -> some View { self }
 }
 
-// What a view contributes to a table's rows and columns, as Apple's interface declares it: a view that
-// is itself table content passes its own row value through, and only the body it has no content for is
-// Never. A view that is not table content does not conform at all, so a Text can never reach a table.
 extension Never: TableRowContent {
     public typealias TableRowValue = Never
     public typealias TableRowBody = Never
@@ -368,13 +342,10 @@ extension Group: TableColumnContent where Content: TableColumnContent {
     public var _columns: [_AnyTableColumn<Content.TableRowValue>] { content._columns }
 }
 
-// The `of:` family: the row value is named rather than inferred from the rows closure, and the rows
-// themselves are built by the row builder, as the 26.2 interface declares.
 extension Table {
     public init(of type: Value.Type, @TableColumnBuilder<Value, Never> columns: () -> Columns, @TableRowBuilder<Value> rows: () -> Rows) {
         self.init(columns: columns, rows: rows)
     }
-    /// Both at once, as 26.2 declares for iOS: the order the rows are in and the columns the app shows.
     public init(of type: Value.Type, sortOrder: Binding<[KeyPathComparator<Value>]>,
                 columnCustomization: Binding<TableColumnCustomization<Value>>,
                 @TableColumnBuilder<Value, Never> columns: () -> Columns, @TableRowBuilder<Value> rows: () -> Rows)
@@ -388,8 +359,6 @@ extension Table {
         self.init(columns: columns, rows: rows)
         project(columnCustomization.wrappedValue)
     }
-    /// The order and the visibility the app gave, read the way a table reads them: the i-th column is the
-    /// column of the row order[i], so what an app hides is the column of the row it named.
     mutating func project(_ given: TableColumnCustomization<Value>) where Value.ID: Codable {
         var titles: [String] = []
         var hiddenTitles: [String] = []
@@ -400,9 +369,6 @@ extension Table {
         }
         columnCustomization = ColumnVisibility(order: titles, hidden: hiddenTitles)
     }
-    // The sorted family: the binding is the app's own, the table reads it and writes the order a tap
-    // on a sortable column's header asks for -- the same column again with the order turned, or that
-    // column first and forward when it is a new one.
     public init(of type: Value.Type, sortOrder: Binding<[KeyPathComparator<Value>]>, @TableColumnBuilder<Value, Never> columns: () -> Columns, @TableRowBuilder<Value> rows: () -> Rows) {
         self.init(columns: columns, rows: rows)
         self.sortOrder = sortOrder
@@ -436,8 +402,6 @@ extension Table {
     }
 }
 
-/// How a column is ordered: the key it sorts on, and whether that key runs forward. This is what a
-/// `Table`'s `sortOrder` binding carries, and what a tap on a sortable column's header writes into it.
 @frozen public struct KeyPathComparator<Value>: Equatable {
     public typealias Key = KeyPath<Value, any Comparable>
     public let key: AnyKeyPath
@@ -447,8 +411,6 @@ extension Table {
         self.key = key as AnyKeyPath; self.ascending = ascending
         read = { value in value[keyPath: key] as any Comparable }
     }
-    /// What a tap on this column's title writes: the same column again with the order turned when it
-    /// is already the first one, and that column first and forward when it is a new one.
     func ordering(_ comparators: [KeyPathComparator<Value>], after column: KeyPathComparator<Value>) -> [KeyPathComparator<Value>] {
         if comparators.first?.key == column.key {
             var turned = comparators
@@ -457,7 +419,6 @@ extension Table {
         }
         return [KeyPathComparator(existing: column.key, read: column.read)] + comparators.filter { $0.key != column.key }
     }
-    /// The same order, made from a column that already knows how to read its own key.
     init(existing key: AnyKeyPath, read: @escaping (Value) -> any Comparable) {
         self.key = key; ascending = true; self.read = read
     }
@@ -467,8 +428,6 @@ extension Table {
 }
 
 extension KeyPathComparator {
-    /// What a tap on a sortable column's header writes: the same column again with the order turned
-    /// when it is already the first one, and that column first and forward when it is a new one.
     func ordering<C: Comparable>(_ comparators: [KeyPathComparator<Value>], after key: KeyPath<Value, C>) -> [KeyPathComparator<Value>] {
         if comparators.first?.key == (key as AnyKeyPath) {
             var turned = comparators
@@ -479,8 +438,6 @@ extension KeyPathComparator {
     }
 }
 
-// A ForEach over a collection, whose content is rows rather than views: what a table's `rows:` closure
-// holds. The view form of the same type stays a View; this one is only table content.
 extension ForEach where Content: TableRowContent {
     public init<Data: RandomAccessCollection>(_ data: Data, @TableRowBuilder<Data.Element> content: @escaping (Data.Element) -> Content)
         where Data.Element: Identifiable {
@@ -493,7 +450,6 @@ extension ForEach where Content: TableRowContent {
     }
 }
 
-// The sorted form over a collection: the same rule, one more shape.
 extension Table {
     public init<Data: RandomAccessCollection>(_ data: Data, sortOrder: Binding<[KeyPathComparator<Value>]>,
                                               @TableColumnBuilder<Value, Never> columns: () -> Columns)
@@ -524,9 +480,6 @@ extension Table {
     }
 }
 
-// The arrow that says a column is sorted. A triangle drawn as a path, because the release has no
-// artwork to borrow; the direction is the rotation the shape pipeline already applies to any shape,
-// and the colour is the fill it already applies, so a shape needs no node of its own.
 struct TableSortArrow: Shape {
     public func path(in whole: CGRect) -> Path {
         let w = min(whole.size.width, 8), h = min(whole.size.height, 6)
@@ -545,9 +498,6 @@ struct TableSortArrow: Shape {
     }
 }
 
-/// The titles of a table's columns. A sortable title is a button: a tap writes into the table's own
-/// binding the order the rule says -- the same column again with the order turned, and a new column in
-/// front and forward -- and the title that is sorted shows which way it runs.
 struct TableHeader<Value: Identifiable>: View {
     let columns: [_AnyTableColumn<Value>]
     let sortOrder: Binding<[KeyPathComparator<Value>]>?
@@ -580,10 +530,6 @@ struct TableHeader<Value: Identifiable>: View {
     }
 }
 
-/// What a table lets an app do with its columns. On iOS 6 a table is the release's own table view: its
-/// columns cannot be dragged into a new order and their widths are not the app's to set, so `visibility`
-/// is the one that reaches the engine -- a column that is not visible is not drawn -- and the other two
-/// are the values an app passes and the release has nowhere to show.
 public struct TableColumnCustomizationBehavior: OptionSet {
     public let rawValue: UInt
     public init(rawValue: UInt) { self.rawValue = rawValue }
@@ -593,7 +539,6 @@ public struct TableColumnCustomizationBehavior: OptionSet {
     public static let all: TableColumnCustomizationBehavior = [.reorder, .resize, .visibility]
 }
 
-/// How a column's content sits in the column, and how numbers line up under a numbering system.
 public struct TableColumnAlignment: Hashable {
     let horizontal: HorizontalAlignment?
     let numbering: String?
@@ -615,8 +560,6 @@ public struct TableColumnAlignment: Hashable {
     public var hashValue: Int { var h = Hasher(); hash(into: &h); return h.finalize() }
 }
 
-/// Which columns a table shows, and in what order: the app's own list, written back when the user
-/// changes it. The table reads the order for the columns it draws and the ids for which are visible.
 @frozen public struct TableColumnCustomization<Value: Identifiable> where Value.ID: Codable {
     public typealias ID = Value.ID
     public var visibility: [ID: Bool]
@@ -624,16 +567,12 @@ public struct TableColumnAlignment: Hashable {
     public init() { visibility = [:]; order = [] }
     public mutating func resetOrder() { order = [] }
     public func encode(to encoder: any Encoder) throws {
-        // the order, and the visibility of each column by the identifier the column carries: the ids are
-        // the element's own type, so this is Codable wherever the element's is
         var container = encoder.singleValueContainer()
         try container.encode(order)
         try container.encode(Set(visibility.filter { !$0.value }.keys))
     }
 }
 
-/// A conditional row or column is the optional of one: a builder's `buildIf` hands back `C?`, and the
-/// block that follows takes it, so the optional has to be content too.
 extension Optional: TableRowContent where Wrapped: TableRowContent {
     public typealias TableRowValue = Wrapped.TableRowValue
     public typealias TableRowBody = Never
@@ -648,8 +587,6 @@ extension Optional: TableColumnContent where Wrapped: TableColumnContent, Wrappe
 }
 
 
-/// The two arms of a conditional in a table's builder are content, so a column or a row written as an `if`
-/// is the content the builder returns -- which is what Apple's two `buildEither` overloads hand back.
 extension _ConditionalContent: TableColumnContent
     where TrueContent: TableColumnContent, FalseContent: TableColumnContent,
           TrueContent.TableRowValue == FalseContent.TableRowValue,

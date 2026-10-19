@@ -19,8 +19,6 @@ namespace {
 
     void greatest_common_divisor(UserlandHleCall& call)
     {
-        // ccn uses fixed-width, little-endian ARM32 units, including leading
-        // zero units. Read both operands before writing to allow output aliasing.
         const auto units = call.argument(0);
         constexpr std::uint32_t maximum_units = 512U;
         if (units == 0U || units > maximum_units) {
@@ -56,8 +54,6 @@ namespace {
                                              call.memory(), context, *reduction)
                                        : std::nullopt;
         const auto units = call.memory().read32(context);
-        // Bound host allocation and work. Larger operands retain the original
-        // firmware path, including its own allocation and error semantics.
         constexpr std::uint32_t maximum_units = 512U;
         if (!profile || !units || *units == 0U || *units > maximum_units) {
             call.resume_original_persistently();
@@ -85,7 +81,7 @@ namespace {
         call.set_return(0U);
     }
 
-} // namespace
+}
 
 void register_core_crypto_hle(UserlandHleRegistry& registry)
 {
@@ -97,4 +93,4 @@ void register_core_crypto_hle(UserlandHleRegistry& registry)
     }
 }
 
-} // namespace shade
+}

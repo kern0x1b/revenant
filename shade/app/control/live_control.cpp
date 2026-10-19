@@ -130,7 +130,7 @@ namespace {
         return std::chrono::milliseconds { duration_ms };
     }
 
-} // namespace
+}
 
 LiveControl::LiveControl(int descriptor, DisplayGeometry geometry,
     SystemGestures system_gestures)
@@ -309,10 +309,6 @@ std::vector<LiveControlCommand> LiveControl::parse_line(std::string line)
         command.button_hold = *duration;
         return { std::move(command) };
     }
-    // `home` is the public command: it injects the physical Home/Menu button,
-    // whose effect is context-sensitive firmware behavior (wake while asleep,
-    // App exit while awake). Keep the old spelling as an undocumented input
-    // alias so existing control scripts do not break.
     if (operation == "home" || operation == "wake") {
         std::string trailing;
         if (parser >> trailing)
@@ -513,4 +509,4 @@ std::vector<LiveControlCommand> LiveControl::parse_line(std::string line)
     return { std::move(command) };
 }
 
-} // namespace shade
+}

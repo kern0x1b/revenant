@@ -29,8 +29,6 @@ namespace {
         std::string_view format { "I" };
     };
 
-    // Keep this table limited to nodes for which the compatibility kernel has
-    // a value handler.
     constexpr std::array named_objects {
         NamedObject {
             "kern.ostype", control_kernel, kernel_operating_system_type,
@@ -102,7 +100,7 @@ namespace {
             hardware_bus_frequency_max },
     };
 
-} // namespace
+}
 
 std::optional<ObjectMetadata> describe_object(
     std::uint32_t control, std::uint32_t selector)
@@ -139,4 +137,4 @@ std::optional<ObjectIdentifier> resolve_name(std::string_view name)
     return std::nullopt;
 }
 
-} // namespace shade::darwin::sysctl
+}

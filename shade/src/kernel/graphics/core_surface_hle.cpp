@@ -76,8 +76,6 @@ namespace {
         data_offset,
     };
 
-    // Bytes in guest memory are B,G,R,A; when read as a little-endian uint32_t
-    // this is the DisplayState 0xAARRGGBB representation without conversion.
     constexpr std::uint32_t success = 0;
 
     std::optional<ApplicationDisplay> application_display_for_process(
@@ -103,7 +101,7 @@ namespace {
         return profile ? application_display_geometry(*profile, output) : output;
     }
 
-} // namespace
+}
 
 CoreSurfaceHle::CoreSurfaceHle(UserlandHleRegistry& registry,
     std::shared_ptr<DisplayState> display,
@@ -120,10 +118,6 @@ CoreSurfaceHle::CoreSurfaceHle(UserlandHleRegistry& registry,
     registry.register_prefix(std::string { io_surface_image },
         std::string { surface_transport::io_surface_client.symbol_prefix },
         [this](UserlandHleCall& call) { dispatch(call); });
-    // These public helpers construct the firmware's client wrapper around a
-    // transport identifier. Keep that native object lifecycle and intercept
-    // only the private transport transaction that would otherwise require
-    // the unavailable CoreSurface kernel user client.
     for (const auto symbol :
         { client_buffer_alloc, client_buffer_wrap_image }) {
         registry.register_function(std::string { core_surface_image },
@@ -225,9 +219,6 @@ bool CoreSurfaceHle::refresh_default_scanout(
         return false;
     }
 
-    // A freshly allocated CoreSurface is zero-filled.  Do not replace the
-    // display's opaque-black power-on frame until the firmware has actually
-    // rendered something into the LCD backing store.
     if (std::none_of(pixels->begin(), pixels->end(),
             [](std::uint32_t pixel) { return pixel != 0; })) {
         last_scanout_pixels_ = *pixels;
@@ -360,9 +351,6 @@ void CoreSurfaceHle::finish_create_from_dictionary(
         decoded_row_bytes <= std::numeric_limits<std::uint32_t>::max()) {
         bytes_per_row = static_cast<std::uint32_t>(decoded_row_bytes);
     }
-    // CoreSurface also transports encoded and otherwise opaque byte buffers.
-    // Those formats have no host-side bytes-per-pixel interpretation, but the
-    // firmware still supplies an exact pitch, height, and allocation size.
     const auto row_bytes = bytes_per_pixel == 0U
                                ? static_cast<std::uint64_t>(bytes_per_row)
                                : decoded_row_bytes;
@@ -380,10 +368,6 @@ void CoreSurfaceHle::finish_create_from_dictionary(
         address <= std::numeric_limits<std::uint32_t>::max() - offset;
     const auto base = valid_address ? address + offset : 0;
 
-    // The CoreSurface compatibility wrapper can forward a framebuffer request
-    // whose dictionary contains only the pixel format.  The native transport
-    // supplies the display geometry for that form; keep the same implicit
-    // default instead of returning a null client that the firmware will use.
     if (address == 0 && size == 0 && surface_width == 0 &&
         surface_height == 0 && bytes_per_row == 0 && offset == 0 &&
         format == surface_pixel_format_bgra) {
@@ -490,9 +474,6 @@ std::uint32_t CoreSurfaceHle::lookup_buffer(UserlandHleCall& call,
                             shared->mapping_size, mapping_lease_token);
                     }
                 } else {
-                    // import() installs the complete page range or nothing.
-                    // Do not unmap on failure: the guest may have occupied
-                    // this candidate after the availability check.
                     recycle_imported_mapping(
                         mapping_address, shared->mapping_size);
                 }
@@ -565,9 +546,6 @@ std::uint32_t CoreSurfaceHle::create_buffer(UserlandHleCall& call,
     auto backing = SurfaceStore::Backing { id, base, size, width, height,
         bytes_per_row, pixel_format, { } };
     backing.provenance.producer_process_id = call.process_id();
-    // Only the legacy continuously scanned display surface needs per-store
-    // generations. Ordinary CoreSurface/IOSurface buffers publish completed
-    // CPU writes at their explicit synchronization boundary instead.
     if (pixel_format == surface_pixel_format_bgra &&
         id == iokit_abi::mobile_framebuffer_default_surface_id &&
         !call.memory().track_write_generation(base, size)) {
@@ -783,9 +761,6 @@ void CoreSurfaceHle::submit(Buffer& buffer, UserlandHleCall& call)
             }
         }
     }
-    // Unlock publishes guest writes to the CoreSurface backing. Once the
-    // firmware has entered transactional hardware-layer presentation, only
-    // IOMobileFramebuffer SwapEnd may turn those backing updates into scanout.
     if (presentation_tracker_ && presentation_tracker_->has_presented_frame()) {
         return;
     }
@@ -845,9 +820,6 @@ void CoreSurfaceHle::dispatch(UserlandHleCall& call)
         const auto client = create_buffer(call, base, allocation_size, width,
             height, bytes_per_row, pixel_format, false);
         const auto* buffer = find(client);
-        // The firmware's CoreSurfaceClientBufferAlloc owns the public wrapper
-        // and expects the transport transaction to return its numeric object
-        // identifier. Keep the HLE client private to the transport layer.
         if (buffer == nullptr || !call.memory().write32(output, buffer->id)) {
             call.set_return(1);
             return;
@@ -914,8 +886,6 @@ void CoreSurfaceHle::dispatch(UserlandHleCall& call)
     const auto argument = call.argument(0);
     auto* buffer = find(argument);
     if (buffer == nullptr) {
-        // Also accept a direct transport identifier or a native client object
-        // carrying that identifier at its profile-defined offset.
         auto client = clients_by_id_.find({ argument, transport });
         if (client == clients_by_id_.end() &&
             argument <= std::numeric_limits<std::uint32_t>::max() -
@@ -1032,9 +1002,6 @@ void CoreSurfaceHle::dispatch(UserlandHleCall& call)
             surfaces_->synchronize_from_guest(call.memory(), buffer->id));
         call.set_return(success);
     } else if (operation == "Unlock" || operation == "UnlockPlane") {
-        // A matching explicit Lock is authoritative. WrapClientImage also
-        // owns an implicit lock and later calls Unlock with its options in r1,
-        // so preserve that firmware argument when no explicit Lock was seen.
         auto options = call.argument(1);
         if (!buffer->lock_options.empty()) {
             options = buffer->lock_options.back();
@@ -1073,4 +1040,4 @@ void CoreSurfaceHle::dispatch(UserlandHleCall& call)
     }
 }
 
-} // namespace shade
+}

@@ -185,7 +185,7 @@ namespace {
         return Point { numerator.x / denominator, numerator.y / denominator };
     }
 
-} // namespace
+}
 
 void Mbx2dHle::quad_color(UserlandHleCall& call)
 {
@@ -415,8 +415,6 @@ void Mbx2dHle::quad_copy(
             minimum_v = std::min(minimum_v, coordinate.y);
             maximum_v = std::max(maximum_v, coordinate.y);
         }
-        // Firmware texture coordinates address pixel centers, so a full source
-        // may end at half a pixel inside its nominal extent.
         constexpr auto texture_edge_tolerance = 1.0F;
         if (minimum_u > texture_edge_tolerance ||
             maximum_u + texture_edge_tolerance <
@@ -428,13 +426,6 @@ void Mbx2dHle::quad_copy(
             return false;
         }
 
-        // The firmware's first full-screen handoff quad reserves the
-        // destination top band but still addresses the whole source surface,
-        // squeezing the application's client snapshot into the remaining
-        // extent. Keep the source at its native client height; the destination
-        // position already accounts for the reserved band. Later quads are
-        // fractional zoom bounds and intentionally retain firmware texture
-        // coordinates.
         const auto source_content_height =
             std::min(static_cast<float>(source->height), bottom - top);
         const auto texture_height = maximum_v - minimum_v;
@@ -785,4 +776,4 @@ void Mbx2dHle::quad_copy(
             : mbx2d_abi::failure);
 }
 
-} // namespace shade
+}

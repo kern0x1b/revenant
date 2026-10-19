@@ -26,11 +26,6 @@ _Static_assert(sizeof(va_list) == sizeof(char *), "host va_list must be a pointe
 #include <dlfcn.h>
 #include <mach-o/loader.h>
 
-// kevent's changelist and eventlist are arrays of struct kevent sized by nchanges/nevents, and
-// struct kevent's layout differs between the arm64 guest (8-byte ident/data/udata, 32 bytes total)
-// and the armv7 host (4-byte, 20 bytes). The generated bridge marshals only the first element, so a
-// call registering more than one change (Realm's commit listener adds two EVFILT_READ filters at
-// once) passes garbage for the rest and the registration fails. Marshal every element by hand.
 struct xl_gkevent {
     uint64_t ident;
     int16_t filter;
@@ -88,59 +83,15 @@ void xl_manual_kevent(void *pack)
     free(ev);
     p->r = (uint64_t)(int64_t)r;
 }
-// Mirror fatal diagnostics into the crash-log file too: under SpringBoard stderr goes to a
-// console we cannot fetch, so a trap's message (which symbol) would otherwise be lost.
 static void xl_diag(const char *line)
 {
     int fd = open("/private/var/charon/xlate-crash.log", O_WRONLY | O_CREAT | O_APPEND, 0666);
     if (fd >= 0) { dprintf(fd, "%s", line); close(fd); }
 }
 
-// libswiftCore's own initializer (ImageInspectionMachO.cpp's swift::initializeProtocolLookup,
-// initializeTypeMetadataRecordLookup, ...) registers a dyld add-image callback to learn every
-// loaded image's __swift5_proto/__swift5_types/__swift5_protos sections -- how Swift resolves a
-// generic type's conditional conformances (Dictionary<Key, Value> needing Key: Hashable) and
-// dynamic casts (`as? SomeProtocol`) at run time. _dyld_register_func_for_add_image is not
-// something xlgen bridges (a lifted call to it resolves straight through to the real host
-// libSystem symbol, an ordinary import); measured live on device (a temporary logging override,
-// since reverted) that the callback DOES fire once per HOST image -- the translated executable
-// itself, then every real armv7 dylib it links -- and NEVER for any of the four guest images
-// (app, libswiftCore, libc++, libc++abi), which this recompiler merges into that one host
-// executable ahead of time and never "loads" the way dyld loads a dylib. So the __swift5_*
-// sections that exist -- in the ORIGINAL guest dylibs, copied byte for byte into the translated
-// binary by EmitGuestData (xlate/src/xlate.cpp) -- are never seen by anything that walks them by
-// asking dyld what is loaded: Swift's own conformance/type-metadata tables come up empty, and any
-// runtime instantiation needing one (e.g. _DictionaryStorage<String, Int>.allocate, which needs
-// String's Hashable witness) returns null.
-//
-// This overrides the real _dyld_register_func_for_add_image (a strong definition of the exact
-// same external name wins over libSystem's for every caller linked into this executable: ordinary
-// Mach-O local-symbol-first resolution, not an interposition trick) to hand the registered
-// callback each guest image's REAL Mach-O header -- xlate/src/xlate.cpp's WriteStateHeader
-// generates xl_guest_images[] from the exact host addresses EmitGuestData placed each image's
-// __TEXT (header included) at, with the slide (Image::slide()) that relates it back to the
-// addresses its own load commands were written against -- exactly as dyld would for an image
-// already loaded when the registration call is made (which, for this recompiler, is always: every
-// guest image exists from process start). getsectiondata (xlgen.cpp's manual bridge for it)
-// already recognizes a 64-bit (guest) mach_header and walks ITS OWN load commands rather than the
-// host's, so once Swift's callback is handed one of these, its usual getsectiondata(mh, "__TEXT",
-// "__swift5_types", &size) calls resolve to the real guest section data, translated-address slide
-// and all -- no further change needed there.
-//
-// Host images still go through the real host dyld (forwarded via dlsym(RTLD_NEXT, ...)): measured
-// that Swift's callback DOES get called for those today (unchanged, harmless -- none of this
-// target's host frameworks carry __swift5_* sections, the same as any non-Swift dylib on a real
-// device), and forwarding keeps that path exactly as a real app's would behave, including for
-// anything dlopen'd later. _dyld_register_func_for_remove_image is not bridged: measured
-// (nm -u libswiftCore.dylib) that libswiftCore never imports it, so there is nothing to feed.
 void _dyld_register_func_for_add_image(void (*func)(const struct mach_header *mh, intptr_t vmaddr_slide))
 {
 #ifndef XL_TEST_NO_DYLD_IMAGE_BRIDGE
-    // XL_TEST_NO_DYLD_IMAGE_BRIDGE: corpus/swiftconformance's own control build defines this to
-    // compile a variant with exactly this loop compiled out, everything else unchanged, so its
-    // check.sh can compare a build with the bridge against one without it -- not a runtime
-    // feature flag, nothing sets this outside that one fixture's own scripts/translate.sh
-    // invocation (XL_EXTRA_CFLAGS).
     for (unsigned i = 0; i < xl_guest_image_count; i++) {
         func((const struct mach_header *)xl_guest_images[i].header, xl_guest_images[i].slide);
     }
@@ -153,9 +104,6 @@ void _dyld_register_func_for_add_image(void (*func)(const struct mach_header *mh
     }
 }
 
-// openat and the rest of the *at family arrived after iOS 6, so emulate openat: an absolute path
-// (or AT_FDCWD) is a plain open; a relative path is resolved against the directory fd's own path,
-// recovered with F_GETPATH. This covers what a translated app's file I/O needs without the syscall.
 int xl_shim_openat(int dirfd, const char *path, int flags, int mode)
 {
     static int trace = -1;
@@ -180,11 +128,6 @@ int xl_shim_openat(int dirfd, const char *path, int flags, int mode)
     return open(full, flags, mode);
 }
 
-// The *at family (mkdirat, unlinkat, fstatat, renameat, symlinkat, readlinkat, fchmodat, fchownat, linkat,
-// faccessat, fdopendir) arrived in iOS 8, so on iOS 6 the symbols do not exist and an app that calls one (iSH's
-// filesystem layer uses all of them) halts in dyld at the first call. Emulate each the way xl_shim_openat does:
-// an absolute path, or AT_FDCWD, is the plain call; a relative path is resolved against the directory fd's own
-// path (F_GETPATH) first.
 static int xl_at_path(int dirfd, const char *path, char *out)
 {
     if (!path) {
@@ -209,8 +152,8 @@ static int xl_at_path(int dirfd, const char *path, char *out)
 #define XL_AT(fd, path, body) do { char full_[PATH_MAX]; if (xl_at_path((fd), (path), full_) == -1) return -1; return (body); } while (0)
 
 int xl_shim_mkdirat(int fd, const char *path, mode_t mode) { XL_AT(fd, path, mkdir(full_, mode)); }
-int xl_shim_unlinkat(int fd, const char *path, int flag) { XL_AT(fd, path, (flag & 0x0080 /* AT_REMOVEDIR */) ? rmdir(full_) : unlink(full_)); }
-int xl_shim_fstatat(int fd, const char *path, struct stat *st, int flag) { XL_AT(fd, path, (flag & 0x0020 /* AT_SYMLINK_NOFOLLOW */) ? lstat(full_, st) : stat(full_, st)); }
+int xl_shim_unlinkat(int fd, const char *path, int flag) { XL_AT(fd, path, (flag & 0x0080 ) ? rmdir(full_) : unlink(full_)); }
+int xl_shim_fstatat(int fd, const char *path, struct stat *st, int flag) { XL_AT(fd, path, (flag & 0x0020 ) ? lstat(full_, st) : stat(full_, st)); }
 ssize_t xl_shim_readlinkat(int fd, const char *path, char *buf, size_t size) { char full_[PATH_MAX]; if (xl_at_path(fd, path, full_) == -1) return -1; return readlink(full_, buf, size); }
 int xl_shim_fchmodat(int fd, const char *path, mode_t mode, int flag) { XL_AT(fd, path, (flag & 0x0020) ? lchmod(full_, mode) : chmod(full_, mode)); }
 int xl_shim_fchownat(int fd, const char *path, uid_t uid, gid_t gid, int flag) { XL_AT(fd, path, (flag & 0x0020) ? lchown(full_, uid, gid) : chown(full_, uid, gid)); }
@@ -240,8 +183,6 @@ int xl_shim_symlinkat(const char *target, int fd, const char *linkpath)
     return symlink(target, full_);
 }
 
-// fdopendir: a DIR from an open directory fd -- reopen the fd's own path (F_GETPATH) and give the original fd back
-// to the caller's ownership rules by closing it, as fdopendir would consume it.
 DIR *xl_shim_fdopendir(int fd)
 {
     char dir[PATH_MAX];
@@ -253,9 +194,6 @@ DIR *xl_shim_fdopendir(int fd)
     return d;
 }
 
-// utimensat(fd, path, const struct timespec times[2], flag): the times are an ARRAY of two guest timespecs
-// (16 bytes each), which the generic bridge would marshal one element of. UTIME_NOW = -1, UTIME_OMIT = -2 in
-// tv_nsec; an omitted time keeps the file's current one.
 void xl_manual_utimensat(void *pack)
 {
     struct __attribute__((packed)) { uint64_t fd, path, times, flag, r; } *p = pack;
@@ -288,10 +226,6 @@ void xl_manual_utimensat(void *pack)
     p->r = (uint64_t)(int64_t)((p->flag & 0x0020) ? lutimes(full_, tv) : utimes(full_, tv));
 }
 
-// readdir: iOS 6's struct dirent has a 32-bit inode (d_ino, d_reclen, d_type, d_namlen, d_name[256]), the arm64
-// one the 64-bit form (d_ino, d_seekoff, d_reclen, d_namlen, d_type, d_name[1024]) -- the layouts genuinely
-// differ, so convert each entry into a per-thread guest-layout buffer (valid until the next readdir, which is all
-// POSIX promises). The DIR* itself is an opaque host handle passed through unchanged.
 struct xl_gdirent {
     uint64_t d_ino;
     uint64_t d_seekoff;
@@ -328,10 +262,6 @@ void xl_manual_readdir(void *pack)
     p->r = (uint64_t)(uintptr_t)g;
 }
 
-// signal(): returns the previous handler -- a function pointer, which the generic bridge cannot represent.
-// SIG_DFL (0), SIG_IGN (1) and SIG_ERR (-1) pass straight through. A real guest handler cannot run as a host
-// signal handler (it is translated guest code), so it is not installed and the request is logged; the previous
-// disposition is reported as SIG_DFL.
 void xl_manual_signal(void *pack)
 {
     struct __attribute__((packed)) { uint64_t sig, handler, r; } *p = pack;
@@ -349,9 +279,6 @@ void xl_manual_signal(void *pack)
     p->r = old == SIG_ERR ? (uint64_t)-1 : old == SIG_IGN ? 1 : 0;
 }
 
-// The exec family: argv and envp are arrays of the guest's 8-byte pointers where the host's are 4 bytes wide, so each
-// vector is narrowed into a host array. exec returns only when it fails, with errno set; the arrays are freed with errno
-// kept. The list forms (execl, execle, execlp) collect their arguments in guest code (xlgen) and arrive here as vectors.
 static char **xl_narrow_vector(uint64_t guest, const char *symbol, unsigned index)
 {
     if (!guest)
@@ -435,9 +362,6 @@ void xl_manual_execve(void *pack)
     errno = saved;
 }
 
-// SQLite's 64-bit entry points (bind_blob64/bind_text64/malloc64/realloc64, SQLite 3.8.7+) are absent from iOS 6's
-// libsqlite3, so a call halts in dyld. Each is the 32-bit function with a wider length: forward, and refuse a length
-// beyond INT_MAX as the real one does (SQLITE_TOOBIG) -- running a destructor the caller handed over, as SQLite does.
 int xl_shim_sqlite3_bind_blob64(struct sqlite3_stmt *stmt, int index, const void *data, unsigned long long n, void (*destructor)(void *))
 {
     if (n > 0x7fffffffULL) {
@@ -455,7 +379,7 @@ int xl_shim_sqlite3_bind_text64(struct sqlite3_stmt *stmt, int index, const char
             destructor((void *)data);
         return SQLITE_TOOBIG;
     }
-    if (encoding == SQLITE_UTF16 || encoding == 3 /* SQLITE_UTF16LE */ || encoding == 4 /* SQLITE_UTF16BE */)
+    if (encoding == SQLITE_UTF16 || encoding == 3  || encoding == 4 )
         return sqlite3_bind_text16(stmt, index, data, (int)n, destructor);
     return sqlite3_bind_text(stmt, index, data, (int)n, destructor);
 }
@@ -463,8 +387,6 @@ int xl_shim_sqlite3_bind_text64(struct sqlite3_stmt *stmt, int index, const char
 void *xl_shim_sqlite3_malloc64(unsigned long long n) { return n > 0x7fffffffULL ? NULL : sqlite3_malloc((int)n); }
 void *xl_shim_sqlite3_realloc64(void *p, unsigned long long n) { return n > 0x7fffffffULL ? NULL : sqlite3_realloc(p, (int)n); }
 
-// Failure trace for bridged libc calls (flag file /private/var/charon/xl-trace-errno; called from every generated
-// signed-integer-returning bridge): when the call returned -1, log "name errno=N first-arg [path]" to xl-errno.log.
 void xl_errno_trace(const char *name, int64_t result, uint64_t first_argument, uint64_t second_argument)
 {
     if (result != -1)
@@ -499,37 +421,32 @@ void xl_errno_trace(const char *name, int64_t result, uint64_t first_argument, u
     errno = saved;
 }
 
-// CCRandomGenerateBytes (CommonCrypto, iOS 8+) is absent from iOS 6 -- the first call halts dyld. arc4random_buf is
-// the same thing (a cryptographically strong generator) and exists on iOS 6; kCCSuccess is 0.
 int xl_shim_CCRandomGenerateBytes(void *bytes, size_t count)
 {
     if (!bytes && count)
-        return -4300; /* kCCRNGFailure */
+        return -4300;
     arc4random_buf(bytes, count);
     return 0;
 }
 
-// clock_gettime / clock_getres (POSIX clocks) arrived in iOS 10; on iOS 6 the symbols do not exist and the first call halts
-// dyld. Map the Darwin clock ids onto what iOS 6 has: wall clock from gettimeofday, the monotonic/uptime clocks from
-// mach_absolute_time, CPU-time clocks from getrusage.
 #include <mach/mach_time.h>
 #include <sys/resource.h>
 int xl_shim_clock_gettime(int clock_id, struct timespec *ts)
 {
     if (!ts) { errno = EFAULT; return -1; }
     switch (clock_id) {
-    case 0: { /* CLOCK_REALTIME */
+    case 0: {
         struct timeval tv;
         gettimeofday(&tv, NULL);
         ts->tv_sec = tv.tv_sec;
         ts->tv_nsec = (long)tv.tv_usec * 1000;
         return 0;
     }
-    case 4: /* CLOCK_MONOTONIC_RAW */
-    case 6: /* CLOCK_MONOTONIC */
-    case 8: /* CLOCK_UPTIME_RAW */
-    case 5: /* CLOCK_MONOTONIC_RAW_APPROX */
-    case 9: /* CLOCK_UPTIME_RAW_APPROX */ {
+    case 4:
+    case 6:
+    case 8:
+    case 5:
+    case 9:  {
         static mach_timebase_info_data_t base;
         if (!base.denom)
             mach_timebase_info(&base);
@@ -538,8 +455,8 @@ int xl_shim_clock_gettime(int clock_id, struct timespec *ts)
         ts->tv_nsec = (long)(ns % 1000000000ULL);
         return 0;
     }
-    case 12: /* CLOCK_PROCESS_CPUTIME_ID */
-    case 16: /* CLOCK_THREAD_CPUTIME_ID */ {
+    case 12:
+    case 16:  {
         struct rusage ru;
         getrusage(RUSAGE_SELF, &ru);
         ts->tv_sec = ru.ru_utime.tv_sec + ru.ru_stime.tv_sec;
@@ -559,13 +476,10 @@ int xl_shim_clock_getres(int clock_id, struct timespec *ts)
         errno = EINVAL;
         return -1;
     }
-    if (ts) { ts->tv_sec = 0; ts->tv_nsec = 1000; } /* microsecond granularity at worst */
+    if (ts) { ts->tv_sec = 0; ts->tv_nsec = 1000; }
     return 0;
 }
 
-// Functions newer than iOS 6 that Zebra's dependencies reference (found with the device-side symbol probe):
-// __exp10 is 10^x; sqlite3_prepare_v3 is prepare_v2 plus flags (hints only); CGImageGetUTType (iOS 9) has no iOS 6
-// equivalent, so an unknown type (NULL) is the honest answer; CGImageSourceRemoveCacheAtIndex only drops a cache.
 #include <math.h>
 double xl_shim_exp10(double x) { return pow(10.0, x); }
 int xl_shim_sqlite3_prepare_v3(sqlite3 *db, const char *sql, int n, unsigned int flags, sqlite3_stmt **stmt, const char **tail)
@@ -576,8 +490,6 @@ int xl_shim_sqlite3_prepare_v3(sqlite3 *db, const char *sql, int n, unsigned int
 const void *xl_shim_CGImageGetUTType(void *image) { (void)image; return NULL; }
 void xl_shim_CGImageSourceRemoveCacheAtIndex(void *source, size_t index) { (void)source; (void)index; }
 
-// Typed memory operations (iOS 16 / macOS 13): the type-id is only an allocator hint for
-// heap partitioning, so dropping it and calling the plain allocator is always correct.
 void *xl_shim_malloc_type_malloc(size_t size, unsigned long long type_id)
 {
     (void)type_id;
@@ -605,12 +517,6 @@ void *xl_shim_malloc_type_aligned_alloc(size_t alignment, size_t size, unsigned 
     return p;
 }
 
-// zlib. A guest z_stream (arm64: 112 bytes, 8-byte pointers and uLong) cannot be handed to the host's armv7
-// zlib (56 bytes), and zlib keeps a back-pointer to the stream inside its internal state, so marshalling the
-// struct by copy (a fresh temporary per call) makes every inflate/deflate after init fail its state check.
-// Instead each guest stream owns ONE persistent host z_stream (its address kept in the guest struct's own
-// `state` field, which the guest never touches); every call copies the guest's in/out fields to it, calls the
-// real zlib, and copies the results back. The guest's zalloc/zfree/opaque are ignored (host allocators).
 struct xl_gzstream {
     uint64_t next_in;
     uint32_t avail_in, pad0;
@@ -653,7 +559,6 @@ static void xl_z_out(struct xl_gzstream *g, z_streamp z)
     g->adler = z->adler;
 }
 
-// Allocate the mirror, run the host init (given as a callback), and publish it through g->state.
 static int xl_z_init(struct xl_gzstream *g, int (^init)(z_streamp))
 {
     z_streamp z = calloc(1, sizeof *z);
@@ -700,9 +605,6 @@ XL_Z_CALL(deflateReset, 1, deflateReset(z))
 XL_Z_END(inflateEnd)
 XL_Z_END(deflateEnd)
 
-// __assert_rtn: every failed assert() in a guest lands here. Under SpringBoard stderr goes nowhere we can fetch, so
-// write the assertion (expression, function, file, line) to the crash log before aborting -- otherwise an app's own
-// consistency check fails with no explanation.
 void xl_manual___assert_rtn(void *pack)
 {
     struct __attribute__((packed)) { uint64_t func, file, line, expr, r; } *p = pack;
@@ -712,8 +614,6 @@ void xl_manual___assert_rtn(void *pack)
              (const char *)xl_narrow_pointer(p->file, "__assert_rtn", 1), (int)p->line);
     fputs(line, stderr);
     xl_diag(line);
-    // The values an assertion tested are usually in the caller's frame: dump the printable bytes just above the
-    // guest stack pointer (non-printables as '.') so a failing string check shows the string.
     State *state = xl_current_state();
     uint64_t sp = XL_REG(state, SP);
     if (sp && sp < 0x40000000u) {
@@ -729,8 +629,6 @@ void xl_manual___assert_rtn(void *pack)
     abort();
 }
 
-// exit()/_exit(): an app that gives up (an unrecoverable startup error) leaves no crash and no message, so a run that
-// simply vanishes is undiagnosable. Log the status and the guest call chain to the crash log first.
 void xl_log_guest_frames(const char *why);
 void xl_manual_exit(void *pack)
 {
@@ -770,11 +668,6 @@ void xl_narrowing_fault(const char *symbol, unsigned index, uint64_t value)
     abort();
 }
 
-// __cxa_atexit(func, arg, dso): a translated app's C++ static initializers register their
-// destructors here. The destructor is guest code, so we cannot hand its address to the
-// host C++ runtime (which would call it with the host ABI); we record (func, arg) and run
-// them ourselves, newest first, through xl_invoke at process exit. On iOS the app is
-// usually killed rather than exited cleanly, so these seldom run -- matching the platform.
 static pthread_mutex_t xl_cxa_lock = PTHREAD_MUTEX_INITIALIZER;
 static struct xl_cxa_entry { uint64_t func, arg; } *xl_cxa_list;
 static unsigned xl_cxa_count, xl_cxa_cap, xl_cxa_armed;
@@ -804,26 +697,14 @@ void xl_manual___cxa_atexit(void *pack)
     p->r = 0;
 }
 
-// C++ ABI operator new/delete -> host allocator. The returned host-heap pointer is within
-// the process, so guest code uses it directly; new[]/delete[] share the same allocation.
 struct xl_alloc_pack { uint64_t a0, r; } __attribute__((packed));
 void xl_manual__Znwm(void *pack) { struct xl_alloc_pack *p = pack; p->r = (uint64_t)(uintptr_t)malloc((size_t)p->a0); }
 void xl_manual__Znam(void *pack) { struct xl_alloc_pack *p = pack; p->r = (uint64_t)(uintptr_t)malloc((size_t)p->a0); }
 void xl_manual__ZdlPv(void *pack) { struct xl_alloc_pack *p = pack; free((void *)(uintptr_t)p->a0); }
 void xl_manual__ZdaPv(void *pack) { struct xl_alloc_pack *p = pack; free((void *)(uintptr_t)p->a0); }
 
-// NSGetUncaughtExceptionHandler returns a function pointer (unbridgeable result). A fresh
-// process has no guest-installed handler, so return NULL; the runtime's own uncaught handler
-// remains in effect.
 void xl_manual_NSGetUncaughtExceptionHandler(void *pack) { struct { uint64_t r; } *p = pack; p->r = 0; }
 
-// Thread-local storage. xlate emits xl_tlv_regions (one per guest image with __thread_vars): the
-// address range of that image's TLV descriptors and its per-thread template (the __thread_data
-// initial bytes at data_start for data_size, followed by data_size..total_size zero-filled). A
-// TLV access calls _tlv_bootstrap(descriptor); we find the owning region, lazily allocate this
-// thread's block for that region (a pthread_key per region frees it at thread exit), and return
-// block + the descriptor's offset (its 3rd 64-bit word). The block is host-heap memory, usable by
-// guest code directly. This is the recompiler's stand-in for the arm64 TLV support dyld lacks here.
 struct xl_tlv_region {
     uint32_t vars_start;
     uint32_t vars_end;
@@ -916,8 +797,6 @@ void xl_format_marshal(struct xl_format *format, const char *text, void *object,
     int object_format = object != NULL;
     if (object_format)
         text = [(NSString *)object UTF8String];
-    // SQLite's printf is its own dialect: %q/%Q/%w/%z are string conversions (quote-escaped, NULL-as-NULL,
-    // identifier-escaped, freed-after), NOT the C length modifiers 'q'/'z'.
     int sqlite_dialect = symbol && !strncmp(symbol, "sqlite3_", 8);
     struct xl_buffer out = {0}, args = {0};
     size_t next = 0;
@@ -1004,7 +883,6 @@ void xl_format_marshal(struct xl_format *format, const char *text, void *object,
                 fprintf(stderr, "xlate: %s: unsupported conversion in format \"%s\"\n", symbol, text);
                 abort();
             }
-            /* fall through: a SQLite string conversion is a pointer argument */
         case 's': case 'S': case 'p': case '@': {
             if (conversion == '@' && !object_format) {
                 fprintf(stderr, "xlate: %s: %%@ outside an object format\n", symbol);
@@ -1016,8 +894,6 @@ void xl_format_marshal(struct xl_format *format, const char *text, void *object,
                 abort();
             }
             uint32_t pointer = (uint32_t)value;
-            // Modern Foundation/libc print "(null)" for a NULL %s/%S argument; iOS 6's CoreFoundation dereferences
-            // it (a null-pointer SIGSEGV inside strlen), and the guest was written against the modern behaviour.
             if (!pointer && (conversion == 's' || conversion == 'S')) {
                 static const char null_utf8[] = "(null)";
                 static const unsigned short null_utf16[] = {'(', 'n', 'u', 'l', 'l', ')', 0};
@@ -1045,10 +921,6 @@ void xl_format_marshal(struct xl_format *format, const char *text, void *object,
     format->object = object_format ? [[NSString alloc] initWithUTF8String:out.data] : NULL;
 }
 
-// On Apple's arm64 ABI every variadic argument is passed on the stack and va_list is a plain
-// pointer to those contiguous 8-byte slots — the same shape the variadic bridge already spills
-// — so a guest va_list marshals exactly like the flat argument array. (This differs from the
-// AAPCS64 register-save-area va_list used on other platforms.)
 void xl_format_marshal_valist(struct xl_format *format, const char *text, void *object, uint64_t guest_valist, const char *symbol)
 {
     xl_format_marshal(format, text, object, (const uint64_t *)(uintptr_t)guest_valist, symbol);

@@ -1,17 +1,8 @@
--- ours3.lua: the 'ours' surface in the three columns surf-diff.lua reads.
---
---     xmake l ours3.lua ours.tsv > ours-3.tsv      (a file already at three columns is passed through)
---
--- ours.lua writes four: owner, kind, name, and the file the declaration is in. The file is what tells a reader where a
--- name came from and nothing else needs it, so this drops it; a row whose owner, kind and name are equal to another's
--- collapses, because the sets surf-diff partitions are of declarations and two files for one declaration are one row.
-
 local text = import("lib.text", {rootdir = path.join(os.scriptdir(), "..", ".."), anonymous = true})
 
 local COLUMNS = 3
 local OURS = 4
 
--- the lines of a file as Python's iteration gives them: a final newline ends the last line and adds none
 local function lines_of(content)
     local lines = text.split(content, "\n")
     if lines[#lines] == "" then
@@ -43,7 +34,6 @@ local function convert(file)
             end
         end
     end
-    -- sorted(rows) over tuples: owner, then kind, then name
     table.sort(rows, function(a, b)
         for i = 1, COLUMNS do
             if a[i] ~= b[i] then

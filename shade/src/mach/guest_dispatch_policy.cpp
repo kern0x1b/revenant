@@ -19,7 +19,7 @@ namespace {
         return info && info->state == XnuThreadState::Runnable;
     }
 
-} // namespace
+}
 
 GuestDispatchPolicy::GuestDispatchPolicy(
     std::chrono::nanoseconds response_period)
@@ -46,10 +46,6 @@ GuestDispatchDecision GuestDispatchPolicy::decide_interactive_process(
         preferred_process_burst_ = 0U;
     }
     if (preferred_process_burst_ >= preferred_process_burst_limit) {
-        // Return one selection to the ordinary XNU queue after every bounded
-        // role burst. The queue can still choose this process naturally, but
-        // an unrelated higher-priority dependency cannot be starved by host
-        // foreground QoS.
         preferred_process_burst_ = 0U;
         return { };
     }
@@ -67,10 +63,6 @@ GuestDispatchDecision GuestDispatchPolicy::decide(
         observed_interaction_generation_ =
             observation.interaction_generation;
         interaction_deadline_ = observation.now + interaction_lease_;
-        // Do not carry the receiver of an older interaction into a new one.
-        // Reacquire the process from the real service receive owner; an exact
-        // consuming Guest thread can refine the same identity below. No
-        // application or firmware identity is inferred here.
         input_process_ = observation.input_receiver_process;
     }
 
@@ -184,13 +176,6 @@ GuestDispatchDecision GuestDispatchPolicy::decide(
         return decision;
     }
     if (input_process_ && observation.now < interaction_deadline_) {
-        // Input delivery often wakes a run-loop receiver which then hands work
-        // to another thread in the same process. Keep that real dependency
-        // preferred for a bounded lease instead of discarding all input
-        // locality after one exact-thread dispatch. If it blocks, immediately
-        // fall through to the active process; if it remains runnable, the
-        // existing burst limit still yields every fourth selection to XNU's
-        // ordinary queue.
         if (scheduler.highest_priority_runnable_thread(*input_process_)) {
             auto decision = decide_interactive_process(scheduler,
                 *input_process_, GuestDispatchReason::InputProcess);
@@ -213,4 +198,4 @@ GuestDispatchDecision GuestDispatchPolicy::decide(
     return result;
 }
 
-} // namespace shade
+}

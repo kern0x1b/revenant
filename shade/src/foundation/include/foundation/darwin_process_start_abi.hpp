@@ -11,12 +11,9 @@
 
 namespace shade {
 
-// Darwin loaders differ in whether apple[0] is a bare path or a keyed
-// executable_path entry. Select the audited loader contract through a named
-// profile rather than inferring it from a firmware or application name.
 enum class DarwinInitialAppleVectorAbi : std::uint8_t {
     KeyedExecutablePath,
     LegacyExecutablePath,
 };
 
-} // namespace shade
+}

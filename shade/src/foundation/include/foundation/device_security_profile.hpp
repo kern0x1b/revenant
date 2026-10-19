@@ -65,19 +65,9 @@ inline constexpr std::array<std::byte, 52>
         std::byte { 0x2f },
     };
 
-// The early ARMv7 firmware starts keybagd through the AppleKeyStore IOKit
-// service. This is a device capability boundary: legacy models without the
-// hardware-backed key store keep the service absent, while the virtualized
-// ARMv7 models publish the matching guest-visible endpoint.
 struct KeyBagCapabilities {
     bool apple_key_store_available { };
-    // A virtual data volume has no physical effaceable-storage locker. The
-    // firmware's no-effaceable-storage property selects its ordinary plist
-    // keybag path, which is the recoverable path used by this simulator.
     bool effaceable_storage_available { true };
-    // iOS 4-era keybagd uses AppleEffaceableStorage directly. A virtual
-    // endpoint keeps that firmware path intact when the guest has no physical
-    // locker; its state is owned by the data-volume bootstrap model.
     bool virtual_effaceable_storage_available { };
     std::array<std::byte, 52> virtual_effaceable_storage_blob {
         default_virtual_effaceable_storage_blob
@@ -88,12 +78,10 @@ inline constexpr KeyBagCapabilities legacy_keybag_capabilities {
     .apple_key_store_available = false,
 };
 
-// Virtual key store with firmware-owned plist keybags and a virtual locker.
-// Also used by ARMv6 devices whose supported firmware needs this service.
 inline constexpr KeyBagCapabilities virtual_keybag_capabilities {
     .apple_key_store_available = true,
     .effaceable_storage_available = false,
     .virtual_effaceable_storage_available = true,
 };
 
-} // namespace shade
+}

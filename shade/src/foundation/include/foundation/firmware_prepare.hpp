@@ -41,8 +41,6 @@ enum class FirmwareArtifactSeedMode : std::uint8_t {
     return "catalog-only";
 }
 
-// All limits are host-side preparation limits. They bound optional work only;
-// a runtime can always fall back to demand JIT when preparation is incomplete.
 struct FirmwarePrepareLimits {
     std::size_t max_file_blocks { 128U };
     std::size_t max_image_blocks { 128U };
@@ -126,4 +124,4 @@ private:
     std::map<ContentIdentity, ExecutableCatalogFileGeneration> completed_state_;
 };
 
-} // namespace shade
+}

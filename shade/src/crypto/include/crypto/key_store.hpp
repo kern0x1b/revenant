@@ -18,9 +18,6 @@
 
 namespace shade {
 
-// Symmetric class keys for the virtual device's no-passcode system bag.
-// The persistent secret belongs to device state, outside the guest filesystem
-// and disposable translation caches. Wrapped keys remain firmware-owned data.
 class KeyStore {
 public:
     [[nodiscard]] static std::shared_ptr<KeyStore> open(
@@ -42,4 +39,4 @@ private:
     std::array<std::byte, 32> secret_;
 };
 
-} // namespace shade
+}

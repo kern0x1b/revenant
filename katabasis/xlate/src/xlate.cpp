@@ -174,7 +174,6 @@ bool LayoutAndResolve(Program &program, bool strict) {
       } else if (stub.symbol.rfind(kTrapPrefix, 0) == 0) {
         program.stub_to_host[host] = "xl_h_" + stub.symbol.substr(strlen(kTrapPrefix));
       } else if (stub.weak) {
-        // Unbound, its slot holds zero: the code that calls it checks first, and never reaches the stub.
         if (program.exports.Find({}, stub.symbol)) {
           errs() << "xlate: " << image->path() << ": weak import " << stub.symbol << " of " << stub.library
                  << " is left unbound although a guest image defines that name; a bind takes the library it names\n";
@@ -192,8 +191,6 @@ bool LayoutAndResolve(Program &program, bool strict) {
   return ok;
 }
 
-// The symbols no host library has to supply: every bind of that name, by any input image, is answered by an input image
-// through the library the bind names. A name one image binds to a guest library and another to the host's stays out.
 bool WriteResolved(Program &program) {
   std::set<std::string> answered, host;
   auto note = [&](const std::string &library, const std::string &symbol) {
@@ -206,7 +203,6 @@ bool WriteResolved(Program &program) {
     for (auto &[vmaddr, bind] : image->binds()) {
       note(bind.library, bind.symbol);
     }
-    // A name the image re-exports is an import of its own in the symbol table (nm -u shows it, N_INDR).
     for (auto &[name, target] : image->reexports()) {
       (program.exports.Find(target.library, target.symbol) ? answered : host).insert(name);
     }
@@ -245,12 +241,6 @@ class Lifter {
     int failed = ll_func_decode_cfg(func, address, ReadCode, &program_);
     Function *lifted = nullptr;
     if (!failed) {
-      // ll_func_lift returns null when rellume cannot lift the function (e.g. an
-      // instruction pattern it does not model, as in some hand-written crash-reporter
-      // code). Guard the unwrap: a null here must become a skipped function (handled by
-      // the caller as a failure), not cast<Function>(null). The function is then absent
-      // from the lookup table and any call to it faults at runtime -- the same trap
-      // treatment as an unbridged import -- so the rest of the app still builds and runs.
       LLVMValueRef raw = ll_func_lift(func);
       lifted = raw ? unwrap<Function>(raw) : nullptr;
     }
@@ -419,9 +409,6 @@ class JumpTables {
     return value;
   }
 
-  // Strip pointer<->int and integer width casts to reach the value the compiler actually
-  // range-checks and uses as the table index (e.g. the `sub w8, w0, #min` result), so that
-  // LVI bounds it and iteration runs over the real table domain, not a wider parent value.
   static Value *StripCasts(Value *value) {
     for (;;) {
       value = Strip(value);
@@ -465,12 +452,6 @@ class JumpTables {
       return true;
     }
     if (auto gep = dyn_cast<GEPOperator>(value)) {
-      // A jump table access may be scaled: InstCombine turns `ldrh [x9, x8, lsl #1]`
-      // into `getelementptr [2 x i8], ptr base, index` (element stride 2) and the
-      // signed-word `ldrsw [x9, x8, lsl #2]` into a stride-4 element. Accept any GEP and
-      // let Evaluate apply the per-element stride via the data layout. Latch the index onto
-      // the GEP's own varying operand (past casts, but not past the `sub` that produces the
-      // table index) — that is the value the range check bounds and the true iteration domain.
       if (!FindIndex(gep->getPointerOperand(), index, depth + 1)) {
         return false;
       }
@@ -530,9 +511,6 @@ class JumpTables {
       if (!base) {
         return std::nullopt;
       }
-      // Walk the indices honouring each level's stride: an array/pointer index scales by
-      // the indexed element's allocation size, a struct index by the field offset. Without
-      // this a scaled table (`[2 x i8]`/`[4 x i8]` elements) would be read at the wrong stride.
       uint64_t address = *base;
       auto gti = gep_type_begin(gep);
       for (unsigned i = 1; i < gep->getNumOperands(); ++i, ++gti) {
@@ -618,10 +596,6 @@ class JumpTables {
     return std::nullopt;
   }
 
-  // The conditional branches that must be taken a given way to reach `bb`, walking up the
-  // chain of single-predecessor blocks. For a switch this captures the range check that
-  // gates the table-load block, which InstCombine may encode opaquely to LVI (e.g. as an
-  // xor of two comparisons), letting us bound the table by evaluating the guard per index.
   std::vector<std::pair<Value *, bool>> Guards(BasicBlock *bb) {
     std::vector<std::pair<Value *, bool>> guards;
     for (int steps = 0; steps < 32 && bb; ++steps) {
@@ -660,8 +634,6 @@ class JumpTables {
         limit = std::min<uint64_t>(limit, range.getUnsignedMax().getZExtValue() + 1);
       }
     }
-    // Only guards expressed purely in terms of the index can bound the table; probe each once
-    // with two index values to discard guards that depend on other (unknown) state.
     std::vector<std::pair<Value *, bool>> guards;
     for (auto &guard : Guards(load->getParent())) {
       if (Evaluate(guard.first, index, 0, load, 0, 0) && Evaluate(guard.first, index, 1, load, 0, 0)) {
@@ -673,23 +645,6 @@ class JumpTables {
       return;
     }
     for (uint64_t i = 0; i < limit; ++i) {
-      // Every index in [0, limit) the guards admit is read, with no early exit on leaving a
-      // once-entered domain: reviewed 2026-09-27 (chasing the demo's counts.sorted{} fault) --
-      // an earlier version of this loop broke out the moment a previously-accepted run of indices
-      // left the guarded domain, on the assumption that the domain is one contiguous range. It is
-      // not, in general: swift::Demangle::__runtime::getUnspecialized guards its table dispatch
-      // with `(kind - 13) unsigned >= 6` (excluding the contiguous hole [13, 18], handled by a
-      // separate, earlier special case) *and then* `kind <= 0x10f` before the table load, so the
-      // admitted domain is {0..12} ∪ {19..271} — two ranges with a gap. The old code accepted
-      // indices 0..12, then broke the instant it saw 13 fall outside the domain, silently
-      // dropping every target reachable only through 19..271 (including the one this demo's own
-      // guest images depend on) with no diagnostic at all: the address was never even attempted,
-      // so it never shows as a "cannot decode function" failure either, only as a runtime jump
-      // into never-lifted code. corpus/jumptable reproduces the shape (a table dispatch reachable
-      // only through a kind value on the far side of a gap) and fails the same way with this
-      // fix reverted. Bounded by `limit` regardless (the LVI-derived max, or the 4096 default
-      // cap), so this is not an unbounded scan -- just one that does not quit early on a
-      // non-contiguous domain.
       bool in_domain = true;
       for (auto &guard : guards) {
         auto value = Evaluate(guard.first, index, i, load, 0, 0);
@@ -819,9 +774,6 @@ Overrides ObjCOverrides(Module &module, const std::vector<xlate::ObjCImage> &obj
       auto list = [&](bool present, const char *part) -> Constant * {
         return present ? symbol(name(part)) : ConstantInt::get(i32, 0);
       };
-      // The override replaces the guest protocol_t in place, so it must consume exactly the
-      // guest structure's bytes (its `size` field) — a fixed 96 over-claims smaller protocols
-      // and clobbers whatever __data follows them (e.g. constant-string pointers used as keys).
       uint64_t occupied = protocol.size >= 44 ? protocol.size : 96;
       auto protocol_type = StructType::get(
           context, {i32, i32, i32, i32, i32, i32, i32, i32, i32, i32, i32, ArrayType::get(i8, occupied - 44)}, true);
@@ -862,12 +814,6 @@ bool EmitGuestData(Program &program, Module &module, std::vector<GuestSegment> &
   bool ok = true;
   unsigned image_index = 0;
   for (auto &image : program.images) {
-    // Every host segment costs a segment index, and a Mach-O bind opcode encodes the segment index in 4 bits: a
-    // bind in the 17th or later segment silently becomes a bind into segment 0 (__PAGEZERO) and dyld rejects the
-    // binary ("malformed binding opcodes ... beyond end of segment __PAGEZERO"). An app that lifts its embedded
-    // frameworks plus libc++/libc++abi exceeds 16 segments at three per image (TEXT, DATA_CONST, DATA, LLVM, ...).
-    // Merge an image's non-TEXT segments into ONE __X<i>DATA segment when they are address-contiguous (real Mach-O
-    // segments are): the chunks are emitted in address order with alignment 1, so every address is preserved.
     bool merge_data = true;
     {
       uint64_t previous_end = 0;
@@ -1042,7 +988,6 @@ void EmitTables(Program &program, Lifter &lifter, Module &module) {
     for (auto &section : image->sections()) {
       uint32_t section_type = section.flags & MachO::SECTION_TYPE;
       if (section_type == MachO::S_MOD_INIT_FUNC_POINTERS) {
-        // Classic __mod_init_func: an array of pointers, resolved via rebases.
         for (uint64_t offset = 0; offset + 8 <= section.size; offset += 8) {
           auto rebase = image->rebases().find(section.addr + offset);
           if (rebase != image->rebases().end()) {
@@ -1050,12 +995,6 @@ void EmitTables(Program &program, Lifter &lifter, Module &module) {
           }
         }
       } else if (section_type == MachO::S_INIT_FUNC_OFFSETS) {
-        // Modern __init_offsets: an array of 32-bit offsets from the image base
-        // (the mach header / lowest vmaddr), not pointers, so there is no rebase
-        // -- dyld computes each initializer as load_address + offset. Recent
-        // libc++/libc++abi emit their C++ runtime setup here, so missing this
-        // section leaves e.g. typed operator new uninitialized (libc++abi aborts
-        // with "typed operator new invoked before its static initializer").
         for (uint64_t offset = 0; offset + 4 <= section.size; offset += 4) {
           uint32_t rel = 0;
           if (!image->ReadBytes(image->host(section.addr + offset), reinterpret_cast<uint8_t *>(&rel), 4)) {
@@ -1072,12 +1011,6 @@ void EmitTables(Program &program, Lifter &lifter, Module &module) {
   new GlobalVariable(module, i32, true, GlobalValue::ExternalLinkage, ConstantInt::get(i32, initializers.size()),
                      "xl_initializer_count");
 
-  // Thread-local storage. An arm64 image carries native TLV descriptors in __DATA,__thread_vars
-  // (each {thunk, key, offset}, the thunk bound to __tlv_bootstrap) and a per-thread template made
-  // of __thread_data (initialized) followed by __thread_bss (zero-filled); dyld would allocate and
-  // initialize a block per thread and rewrite the thunks. iOS 6 has none of this, so emit the
-  // template geometry per image and let the runtime service __tlv_bootstrap: given a descriptor it
-  // finds the owning region here, lazily allocates the per-thread block, and returns block+offset.
   auto tlv_type = StructType::get(context, {i32, i32, i32, i32, i32});
   std::vector<Constant *> tlv_regions;
   for (auto &image : program.images) {
@@ -1118,8 +1051,6 @@ bool WriteLayout(const std::vector<GuestSegment> &segments) {
     errs() << "xlate: " << LayoutOutput << ": " << ec.message() << "\n";
     return false;
   }
-  // Several guest segments can share one host segment (see EmitGuestData): one -segaddr at the lowest address,
-  // writable if any member is.
   std::vector<std::string> order;
   std::map<std::string, uint64_t> lowest;
   std::map<std::string, bool> writable;
@@ -1166,19 +1097,6 @@ bool WriteStateHeader(const Program &program) {
       os << "#define XL_GUEST_" << macro << " 0x" << Hex(program.images[index]->host(vmaddr)) << "u\n";
     }
   }
-  // Every guest image's own Mach-O header, at its final translated address, with the slide that
-  // relates it back to the addresses its own load commands were written against -- what a real
-  // dyld would hand a registered add-image callback for it. EmitGuestData (this file) copies each
-  // image's segments byte for byte, __TEXT's own header and load commands included, so the
-  // pointer below is a REAL arm64 mach_header_64 with REAL section records (__swift5_proto,
-  // __swift5_types, ...), not a synthesized stand-in: runtime/bridge.m's own
-  // _dyld_register_func_for_add_image hands these to whatever libswiftCore registers, since
-  // nothing else ever tells it these images exist (this recompiler links every guest image into
-  // one host executable ahead of time; there is no later dyld "loaded" event for any of them).
-  // slide is Image::slide() itself (the same value host() adds to a link-time vmaddr), printed
-  // signed: for an image linked with a preferred base above XL_BASE (the common dylib case, base
-  // 0), it is a large positive number; for the main app image (preferred base far above XL_BASE)
-  // it is negative, and unsigned wraparound in host()'s own arithmetic already relies on that.
   os << "struct xl_guest_image { const void *header; long slide; };\n";
   os << "static const struct xl_guest_image xl_guest_images[] = {\n";
   for (auto &image : program.images) {
@@ -1255,7 +1173,7 @@ int Coverage(Program &program) {
   return 0;
 }
 
-}  // namespace
+}
 
 int main(int argc, char **argv) {
   cl::ParseCommandLineOptions(argc, argv, "xlate: arm64 Mach-O to armv7 LLVM bitcode");
@@ -1272,14 +1190,6 @@ int main(int argc, char **argv) {
     }
     program.images.push_back(std::move(image));
   }
-  // Structural, not measured-by-hand: every guest image, every xlate invocation (manifest pass
-  // and full lift alike -- this runs before either branch below), is scanned for mrs .,
-  // TPIDRRO_EL0 and every load/store off the register it lands in. runtime/runtime.c backs
-  // TPIDRRO_EL0 with a small fake TSD block sized and zero-filled for exactly one measured
-  // access (coordination/crutches.md, "TPIDRRO_EL0 backed by a mostly-zero block"); this scan is
-  // what makes that measurement provably scoped instead of a one-time claim -- a guest image
-  // touching any other offset fails the build here, naming exactly where, rather than silently
-  // reading zero on device.
   {
     std::vector<std::string> tsd_violations;
     for (auto &image : program.images) {

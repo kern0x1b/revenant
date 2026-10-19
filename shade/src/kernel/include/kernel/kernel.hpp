@@ -146,8 +146,6 @@ public:
     using TaskMemoryShareQuery =
         std::function<std::optional<SharedTaskMemoryRange>(
             std::uint32_t, std::uint32_t, std::uint32_t)>;
-    // Pages to place in an address space as a vm_remap does: where (or
-    // anywhere under a mask), with what protection, shared or copied.
     struct RemapPlacement {
         std::uint32_t requested_address { };
         std::uint32_t size { };
@@ -161,13 +159,8 @@ public:
         std::uint32_t result { };
         std::uint32_t address { };
     };
-    // Maps the placement into the address space of another process, which the
-    // handler finds by process identifier; nothing answers for a process that
-    // is gone.
     using TaskMemoryRemapHandler =
         std::function<std::optional<RemapResult>(std::uint32_t, RemapPlacement)>;
-    // The placement of a vm_remap in one address space, which is the same
-    // wherever the caller's task name pointed.
     [[nodiscard]] static RemapResult remap_into(
         AddressSpace& memory, RemapPlacement placement);
     using MappedExecutableHandler =
@@ -182,8 +175,6 @@ public:
         std::optional<DarwinKernelConfiguration> configuration = std::nullopt,
         std::shared_ptr<hfs::GuestIdTable> guest_ids = nullptr);
 
-    // The seed of the emulated /dev/random and /dev/urandom, a xorshift64 stream. The default is fixed, so a deterministic
-    // run (bounded by --ticks) draws the same bytes every boot; any other boot seeds it from the host (EmulatorSession).
     static constexpr std::uint64_t kDefaultRandomSeed = 0x69a5'1e8d'4c3b'2701ULL;
     void seed_random(std::uint64_t seed);
 
@@ -193,10 +184,6 @@ public:
         shared_state_->key_store = std::move(key_store);
     }
     void dispatch(Cpu& cpu, std::uint32_t svc_immediate);
-    // The host scheduler calls this only after committing a guest thread to
-    // Waiting. Darwin workqueues use that transition to remove a blocked
-    // worker from their active-concurrency count and start queued work on a
-    // replacement worker when needed.
     void notify_thread_blocked(std::size_t processor);
 
     [[nodiscard]] ProcessContext& process() { return process_; }
@@ -315,29 +302,20 @@ public:
         task_memory_remap_handler_ = std::move(handler);
     }
     [[nodiscard]] std::uint32_t deliver_signal(std::uint32_t signal);
-    // A fault taken by the guest thread on a processor, as the CPU reported
-    // it: what an ARM exception is before XNU turns it into a signal.
     struct GuestFault {
         enum class Kind : std::uint8_t {
-            DataAccess,       // load or store the page does not allow
-            InstructionFetch, // execution from a page that is not executable
-            Undefined,        // an instruction the processor does not decode
-            Breakpoint,       // BKPT with no debugger attached
+            DataAccess,
+            InstructionFetch,
+            Undefined,
+            Breakpoint,
         };
         Kind kind { };
-        std::uint32_t pc { };      // the instruction that faulted
-        std::uint32_t address { }; // the address it touched
+        std::uint32_t pc { };
+        std::uint32_t address { };
         bool write { };
     };
-    // Delivers the signal a device raises for this fault: SIGSEGV for an
-    // unmapped address, SIGBUS for one the page's protection forbids,
-    // SIGILL, SIGTRAP. The thread continues in its handler, or the process
-    // has to die of the returned signal (blocked, ignored or defaulted, or no
-    // room for the signal frame), as XNU's threadsignal does.
     [[nodiscard]] std::optional<std::uint32_t> deliver_fault_signal(
         Cpu& cpu, const GuestFault& fault);
-    // Runs the handlers of signals that became deliverable while this thread
-    // was away: XNU delivers them on the thread's way back to user mode.
     void deliver_pending_signals(Cpu& cpu);
     [[nodiscard]] std::optional<SchedulerYieldRequest> consume_scheduler_yield(
         std::size_t processor_id);
@@ -349,7 +327,6 @@ public:
     }
     void initialize_boot_display(std::vector<std::uint32_t> pixels)
     {
-        // Only the initial session, before any guest frame, seeds the panel.
         if (display_state_->presented_frames() != 0)
             return;
         display_state_->replace_pixels(std::move(pixels));
@@ -436,11 +413,6 @@ public:
         return shared_state_->clock.wall_time();
     }
     [[nodiscard]] std::size_t bootstrap_checked_in_service_count() const;
-    // Report the threads of this process still waiting for a mach reply that
-    // has not come within the given guest time. A run that ends while a thread
-    // waits names what it waited on, which no message-level line can: a
-    // request the kernel does not answer looks exactly like one a guest server
-    // answers slowly until the reply never arrives.
     void report_stalled_receives(std::uint64_t threshold_nanoseconds) const;
     void set_wall_time(std::uint64_t unix_time_nanoseconds)
     {
@@ -450,11 +422,7 @@ public:
     {
         set_wall_time(unix_time_nanoseconds);
     }
-    // Refreshes the process-local firmware framebuffer into the shared host
-    // display. Most processes have no scanout surface and return immediately.
     bool refresh_display_scanout();
-    // The default scanout may be imported into several task-local stores. Its
-    // publishing task remains the owner whose address space drives scanout.
     [[nodiscard]] bool owns_display_scanout() const;
     bool set_virtual_processor_count(std::size_t processor_count);
     void set_preferred_wifi_networks(std::vector<std::string> ssids)
@@ -476,9 +444,6 @@ public:
         bsd::baseband_device::State::TransmitSink sink);
     void enqueue_touch_input(const TouchInput& input);
     void enqueue_system_button(const SystemButtonInput& input);
-    // Returns the live receive owner of the firmware's hardware-input service.
-    // Host scheduling may use this identity as a bounded dependency hint; the
-    // Guest still owns event routing, thread state, and priority.
     [[nodiscard]] std::optional<std::uint32_t>
     graphics_input_receiver_process_id() const;
     void set_ringer_switch_active(bool active);
@@ -510,16 +475,8 @@ public:
     bool deliver_pending_io(Cpu& cpu);
     [[nodiscard]] std::optional<std::size_t> pending_mach_receiver_processor(
         std::uint32_t object);
-    // Scheduler-facing event dispatch. A guest thread can block in only one
-    // syscall at a time, so this avoids probing every unrelated pending table.
     bool deliver_pending_event(Cpu& cpu);
-    // Return only blocked CPU contexts whose readiness may have changed. The
-    // kernel owns the topology/generation/deadline gate so an idle frontend has
-    // an O(1) fast path and never rediscovers wait state by scanning CPUs.
     [[nodiscard]] std::vector<std::size_t> pending_event_poll_candidates();
-    // Returns the graphics input sequence delivered while waking this guest
-    // thread. The scheduler consumes it immediately to record runnable/dispatch
-    // latency without assigning meaning to unrelated wakeups.
     [[nodiscard]] std::optional<std::uint64_t>
     take_last_delivered_graphics_input(std::size_t processor);
     [[nodiscard]] std::optional<std::uint64_t> next_timer_deadline() const;
@@ -527,33 +484,16 @@ public:
     [[nodiscard]] std::optional<std::uint64_t>
     next_display_vsync_deadline() const;
     [[nodiscard]] std::optional<std::size_t> display_vsync_receiver_processor();
-    // Return the exact queued Mach receiver or, after synchronous mach_msg
-    // delivery, the processor that now owns the uncompleted firmware callback.
-    // This is host-only scheduling metadata and does not alter the receive ABI.
     [[nodiscard]] std::optional<std::size_t>
     display_vsync_dependency_processor();
-    // Returns the last guest processor observed inside the real display
-    // notification callback. This is host scheduling metadata only; callers
-    // must fall back to display_vsync_receiver_processor() when unavailable.
     [[nodiscard]] std::optional<std::size_t> display_vsync_callback_processor();
-    // Return the processor currently between the firmware NotifyFunc and
-    // SwapEnd boundaries. This closes only the host scheduling dependency; the
-    // Guest callback, frame count, and timing remain firmware-owned.
     [[nodiscard]] std::optional<std::pair<std::size_t, std::uint64_t>>
     display_vsync_inflight_callback_dependency();
-    // True only while a real queued VSync notification has not yet reached the
-    // firmware NotifyFunc boundary. This is host scheduling metadata and does
-    // not synthesize callbacks or keep selector 9 enabled.
     [[nodiscard]] bool display_vsync_callback_pending();
     void advance_absolute_time(std::uint64_t deadline);
     void advance_time_by(std::uint64_t interval);
-    // The clock is shared by every process, while device registrations are
-    // process-local. The boot scheduler calls this for sibling kernels after
-    // advancing the shared clock through one representative kernel.
     void service_time_dependent_devices(std::uint64_t deadline);
     [[nodiscard]] std::string wait_reason(std::size_t processor) const;
-    // The id thread_selfid gives the guest thread on this processor: what
-    // libpthread records as a mutex owner, so a dump can name the holder.
     [[nodiscard]] std::optional<std::uint32_t> guest_thread_id(
         std::size_t processor) const
     {
@@ -568,10 +508,6 @@ private:
 
     void enqueue_system_button_impl(
         const SystemButtonInput& input, bool force_home_transition);
-    // Host-originated graphics events are published directly into the shared
-    // Mach queues. Unlike a guest mach_msg send, that path has no sender CPU
-    // from which to wake the receiver, so notify each owning runtime after
-    // publishing the queue entry.
     void wake_graphics_input_receivers();
 
     struct MachMessageRequest {
@@ -724,8 +660,6 @@ private:
     void bsd_success(
         Cpu& cpu, std::uint32_t value, std::uint32_t second_value = 0);
     void bsd_error(Cpu& cpu, std::uint32_t error);
-    // Unmaps guest memory and retires translated code of any executable
-    // mapping it removed.
     bool unmap_memory(Cpu& cpu, std::uint32_t address, std::uint32_t size);
     [[nodiscard]] bool protect_memory(Cpu& cpu, std::uint32_t address,
         std::uint32_t size, MemoryPermission permissions);
@@ -814,8 +748,6 @@ private:
     bool copy_socket_address(std::uint32_t address,
         std::uint32_t length_address,
         std::span<const std::byte> socket_address);
-    // Completes a local-stream accept when a connection is queued. A false
-    // return means the blocking call must remain suspended.
     bool complete_unix_accept(Cpu& cpu, std::uint32_t listener_fd,
         std::uint32_t address, std::uint32_t length_address);
     [[nodiscard]] std::optional<std::uint32_t> install_host_socket(
@@ -853,9 +785,6 @@ private:
     [[nodiscard]] bool descriptor_valid(std::uint32_t fd) const;
     [[nodiscard]] std::uint16_t descriptor_poll_revents(
         std::int32_t fd, std::uint16_t events) const;
-    // EVFILT_MACHPORT reports the task-local receive name that currently has a
-    // queued message. For a port set this is the ready member, not the set
-    // name.
     [[nodiscard]] std::optional<std::uint32_t> ready_mach_port_name(
         std::uint32_t name) const;
     [[nodiscard]] std::optional<std::uint32_t> ready_mach_kevent_name(
@@ -987,23 +916,15 @@ private:
     std::map<std::uint32_t, std::uint32_t> vm_purgable_states_;
     std::set<std::size_t> disabled_thread_signals_;
     std::array<std::array<std::uint32_t, 4>, 32> signal_actions_ { };
-    // Each thread's signal mask, by the processor slot it runs on: on XNU the
-    // mask belongs to the uthread, and sigprocmask and __pthread_sigmask
-    // change the calling thread's.
     std::map<std::size_t, std::uint32_t> thread_signal_masks_;
     [[nodiscard]] std::uint32_t& signal_mask(std::size_t processor)
     {
         return thread_signal_masks_[processor];
     }
-    // A thread starts with its creator's mask (uthread_alloc); a workqueue
-    // thread with every asynchronous signal blocked (~workq_threadmask).
     void start_thread_signals(std::size_t processor,
         std::optional<std::size_t> creator, bool workqueue = false);
     void end_thread_signals(std::size_t processor);
-    // Signals sent to the process, caught by a handler or blocked in every
-    // thread when they arrived, for whichever thread lets them through first.
     std::uint32_t pending_signals_ { };
-    // Signals sent to one thread - pthread_kill - that only it may take.
     std::map<std::size_t, std::uint32_t> thread_pending_signals_;
     struct AlternateSignalStack {
         std::uint32_t base { };
@@ -1017,12 +938,8 @@ private:
         std::uint32_t address { };
         std::uint32_t sender { };
         std::uint32_t sender_uid { };
-        // __darwin_arm_exception_state: exception, fsr, far.
         std::array<std::uint32_t, 3> exception_state { };
     };
-    // Builds the signal frame on the thread's stack and enters the handler
-    // through the trampoline sigaction registered. False when there is no
-    // handler to run or the frame does not fit.
     bool send_signal_frame(
         Cpu& cpu, std::uint32_t signal, const GuestSignalInfo& info);
     void dispatch_sigreturn(Cpu& cpu);
@@ -1111,4 +1028,4 @@ private:
     std::mutex mutex_;
 };
 
-} // namespace shade
+}

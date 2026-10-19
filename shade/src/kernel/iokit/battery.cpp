@@ -57,7 +57,7 @@ namespace {
             { value ? std::byte { 1 } : std::byte { 0 } } };
     }
 
-} // namespace
+}
 
 bool matches_service(std::span<const std::byte> matching)
 {
@@ -87,9 +87,6 @@ std::uint32_t ensure_service_locked(KernelSharedState& state)
         "Current Capacity", number_property(default_capacity_percent));
     properties.emplace(
         "Max Capacity", number_property(default_capacity_percent));
-    // IOPowerSources normalizes the registry names above to the compact keys
-    // consumed by PowerManagement and SpringBoard. Publish both forms because
-    // the older firmware calls both the raw registry and normalized paths.
     properties.emplace(
         "CurrentCapacity", number_property(default_capacity_percent));
     properties.emplace(
@@ -109,4 +106,4 @@ std::uint32_t ensure_service_locked(KernelSharedState& state)
     return object;
 }
 
-} // namespace shade::kernel_iokit::battery
+}

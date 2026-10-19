@@ -1,6 +1,3 @@
-// The 128-bit division routines the arm64 compiler-rt provides to Swift's Int128 and libc++: guest code,
-// compiled for arm64 and lifted with the image that calls it, so the armv7 result needs no 128-bit
-// libcall of its own. Restoring long division, since the routines must not divide 128-bit values.
 typedef unsigned __int128 u128;
 typedef __int128 s128;
 

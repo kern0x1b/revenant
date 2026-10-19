@@ -41,4 +41,4 @@ private:
     HidAccelerometer accelerometer_;
 };
 
-} // namespace shade
+}

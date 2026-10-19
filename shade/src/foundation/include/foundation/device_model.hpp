@@ -16,8 +16,6 @@
 
 namespace shade {
 
-// Guest hardware contract, composed from independent capability profiles.
-// Host renderer, windowing and execution resources belong to the session host.
 struct DeviceModel {
     DeviceIdentity identity;
     DeviceProcessorProfile processor;
@@ -34,4 +32,4 @@ struct DeviceModel {
     [[nodiscard]] static const DeviceModel* find(std::string_view product_type);
 };
 
-} // namespace shade
+}

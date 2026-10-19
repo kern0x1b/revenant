@@ -35,7 +35,6 @@ namespace kernel_iokit::jpeg {
 
     [[nodiscard]] bool matches_service(std::span<const std::byte> matching);
 
-    // The caller holds KernelSharedState::mach_mutex.
     [[nodiscard]] std::uint32_t ensure_service_locked(
         KernelSharedState& state, std::uint32_t platform_expert_object);
 
@@ -48,5 +47,5 @@ namespace kernel_iokit::jpeg {
         std::uint32_t scalar_output_capacity,
         std::uint32_t inband_output_capacity);
 
-} // namespace kernel_iokit::jpeg
-} // namespace shade
+}
+}

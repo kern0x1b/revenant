@@ -41,8 +41,6 @@ namespace kernel_iokit::display {
         std::uint32_t receive_size, std::uint32_t connection_object,
         std::uint32_t local_port);
 
-    // Callers hold KernelSharedState::mach_mutex for the three scheduler
-    // helpers.
     [[nodiscard]] std::optional<std::uint64_t> next_vsync_deadline_locked(
         const KernelSharedState& state);
     void remove_vsync_deadline_index_locked(
@@ -54,5 +52,5 @@ namespace kernel_iokit::display {
     void close_connection_locked(
         KernelSharedState& state, std::uint32_t connection_object);
 
-} // namespace kernel_iokit::display
-} // namespace shade
+}
+}

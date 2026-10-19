@@ -120,10 +120,6 @@ namespace {
         std::vector<std::byte> description(resource_description_size);
         write_word(description, 0U, handle);
         write_word(description, 4U, *region);
-        // The compatibility renderer shares one guest-visible address space for
-        // CPU and emulated-device access. Keeping both addresses identical lets
-        // the firmware build its native command stream without a second
-        // hardware VM.
         write_word(description, 8U, *region);
         write_word(description, 12U, exposed_size);
         write_word(description, 16U, resource_type);
@@ -201,7 +197,7 @@ namespace {
         return MethodResult { iokit_abi::success, { *region }, { } };
     }
 
-} // namespace
+}
 
 bool matches_service(std::span<const std::byte> matching)
 {
@@ -261,9 +257,6 @@ std::optional<MethodResult> dispatch_connect_method(AddressSpace& memory,
             if (!inband_input.empty() || inband_output_capacity != 0U ||
                 !scalar_input.empty() || scalar_output_capacity < 1U)
                 return MethodResult { iokit_abi::bad_argument, { }, { } };
-            // MBXGLEngine stores this scalar as its selected device identifier.
-            // The iPhone1,1 has one integrated MBX device, represented by
-            // identifier zero.
             return MethodResult { iokit_abi::success,
                 { integrated_device_identifier }, { } };
         }
@@ -289,10 +282,6 @@ std::optional<MethodResult> dispatch_connect_method(AddressSpace& memory,
                 scalar_input[0] != integrated_device_identifier ||
                 scalar_input[1] != 0U)
                 return MethodResult { iokit_abi::bad_argument, { }, { } };
-            // The host GLES backend already owns command submission. This
-            // handshake binds the firmware engine to the selected virtual
-            // device without duplicating the hardware queue in the guest kernel
-            // model.
             return MethodResult { iokit_abi::success, { }, { } };
         }
         if (selector == static_cast<std::uint32_t>(Selector::GetCommandQueue)) {
@@ -342,4 +331,4 @@ void close_connection(AddressSpace& memory, KernelSharedState& state,
     }
 }
 
-} // namespace shade::kernel_iokit::mbx
+}

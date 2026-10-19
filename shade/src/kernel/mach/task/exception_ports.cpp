@@ -41,8 +41,6 @@ namespace {
     constexpr std::uint32_t task_get_request_size = 36;
     constexpr std::uint32_t task_set_request_size = 60;
     constexpr std::size_t maximum_exception_handlers = 32;
-    // Darwin 9 MIG reserves the complete array of 32 port descriptors before
-    // NDR/masksCnt, then compacts only the three scalar arrays to masksCnt.
     constexpr std::uint32_t exception_reply_array_base_size =
         darwin::mig_wire::complex_descriptor_base +
         static_cast<std::uint32_t>(maximum_exception_handlers) *
@@ -141,7 +139,7 @@ namespace {
         return groups;
     }
 
-} // namespace
+}
 
 bool CompatibilityKernel::dispatch_mach_task_exception_message(
     Cpu& cpu, const MachMessageRequest& request)
@@ -365,4 +363,4 @@ bool CompatibilityKernel::dispatch_mach_task_exception_message(
     return true;
 }
 
-} // namespace shade
+}

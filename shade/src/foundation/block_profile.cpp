@@ -39,8 +39,6 @@ namespace {
         return text;
     }
 
-    // The image of an address in one process, with each process's table read
-    // from the profile once.
     class ImageLookup {
     public:
         explicit ImageLookup(const GuestBlockProfile& profile)
@@ -61,7 +59,7 @@ namespace {
         std::map<std::uint32_t, GuestImageTable> tables_;
     };
 
-} // namespace
+}
 
 GuestImageTable::GuestImageTable(std::vector<GuestImage> images)
     : images_ { std::move(images) }
@@ -74,8 +72,6 @@ GuestImageTable::GuestImageTable(std::vector<GuestImage> images)
 
 const GuestImage* GuestImageTable::find(std::uint32_t address) const
 {
-    // The last image loaded at or below the address is the only candidate:
-    // dyld never maps two images over each other.
     const auto next = std::upper_bound(images_.begin(), images_.end(), address,
         [](std::uint32_t value, const GuestImage& image) {
             return value < image.load_address;
@@ -300,7 +296,6 @@ std::vector<MappedCallerRow> map_caller_rows(const GuestBlockProfile& profile)
             mapped.image = image->path;
             mapped.offset = row.entry - image->load_address;
         }
-        // The Thumb bit of LR is not part of the address the call returns to.
         const auto returns_to = row.caller & ~1U;
         if (const auto* image = images.find(row.pid, returns_to)) {
             mapped.caller_image = image->path;
@@ -392,7 +387,6 @@ StackAttribution attribute_stack(std::uint32_t pc, std::uint32_t lr,
 {
     if (in_ranges(own, pc))
         return { StackAttribution::Kind::Self, pc };
-    // The Thumb bit of LR is not part of the address the call returns to.
     const auto returns_to = lr & ~1U;
     if (in_ranges(own, returns_to))
         return { StackAttribution::Kind::Caller, returns_to };
@@ -410,7 +404,6 @@ StackAttribution attribute_stack(std::uint32_t pc, std::uint32_t lr,
         if (in_ranges(own, caller))
             return { StackAttribution::Kind::Caller, caller };
         outermost.address = caller;
-        // The stack grows down, so each caller's frame lies above its callee's.
         if (*next <= current)
             break;
         current = *next;
@@ -432,8 +425,6 @@ std::vector<std::uint32_t> capture_stack_chain(std::uint32_t pc,
         if (!next || !saved_lr)
             break;
         frames.push_back(*saved_lr & ~1U);
-        // The same climb rule as attribute_stack: a frame that does not go up
-        // ends the walk after its return address was recorded.
         if (*next <= current)
             break;
         current = *next;
@@ -482,7 +473,7 @@ namespace {
         return "system";
     }
 
-} // namespace
+}
 
 std::string format_stack_table(const std::vector<MappedStackRow>& rows)
 {
@@ -679,4 +670,4 @@ std::string format_chain_table(
     return text;
 }
 
-} // namespace shade
+}

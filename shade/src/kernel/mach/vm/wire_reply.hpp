@@ -51,11 +51,11 @@ inline bool write_simple_reply(AddressSpace& memory, std::uint32_t address,
         0U,
         0U,
         identifier + 100U,
-        0U, // NDR migration/character/float representation word
-        1U, // NDR little-endian integer representation word
+        0U,
+        1U,
         result,
     };
     return write_words(memory, address, reply);
 }
 
-} // namespace shade::mach_vm_support
+}

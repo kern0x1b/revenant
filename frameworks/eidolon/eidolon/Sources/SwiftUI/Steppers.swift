@@ -8,7 +8,6 @@ protocol StepperLike {
     var stepperEditing: (Bool) -> Void { get }
 }
 
-// Steps a value in whole strides inside optional bounds, the way Stepper(value:in:step:) does.
 func stepping<V: Strideable>(_ value: Binding<V>, in bounds: ClosedRange<V>?, by step: V.Stride) -> (increment: () -> Void, decrement: () -> Void) {
     ({
         let next = value.wrappedValue.advanced(by: step)

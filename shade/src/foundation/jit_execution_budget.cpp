@@ -39,10 +39,6 @@ void JitHostExecutionBudget::observe(
     auto sample =
         std::max<std::uint64_t>(1U, elapsed_nanoseconds / blocks_executed);
 
-    // A callback, signal, or one unusually costly translation should tighten
-    // the next run promptly without permanently poisoning the predictor.
-    // Likewise, cached execution may increase throughput by at most one
-    // quarter of the measured gap per observation.
     const auto lower =
         std::max<std::uint64_t>(1U, estimated_nanoseconds_per_block_ / 8U);
     const auto upper = estimated_nanoseconds_per_block_ >
@@ -59,4 +55,4 @@ void JitHostExecutionBudget::observe(
     }
 }
 
-} // namespace shade
+}

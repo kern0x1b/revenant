@@ -28,4 +28,4 @@ struct JitCodeCacheBudget {
 [[nodiscard]] std::size_t adaptive_jit_code_cache_size(
     const HostMemoryBudgetSnapshot& memory);
 
-} // namespace shade::runtime_detail
+}

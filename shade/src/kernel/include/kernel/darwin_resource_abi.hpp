@@ -39,9 +39,6 @@ inline constexpr std::uint32_t rusage_children = 0xffff'ffffU;
 inline constexpr std::size_t rusage_arm32_word_count = 18;
 inline constexpr std::size_t rusage_arm32_size =
     rusage_arm32_word_count * sizeof(std::uint32_t);
-// Darwin's UNIX03 libc wrappers set this private bit before entering the
-// kernel. xnu strips it in getrlimit/dosetrlimit after retaining whether
-// strict POSIX error behavior was requested.
 inline constexpr std::uint32_t posix_flag = 0x1000;
 
 [[nodiscard]] constexpr std::uint32_t selector(std::uint32_t raw)
@@ -71,4 +68,4 @@ struct Limit {
     return limits;
 }
 
-} // namespace shade::darwin::resource
+}

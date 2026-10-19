@@ -16,7 +16,6 @@ namespace {
     constexpr std::uint32_t dyld_all_image_info_version_offset = 0;
     constexpr std::uint32_t dyld_all_image_info_count_offset = 4;
     constexpr std::uint32_t dyld_all_image_info_array_offset = 8;
-    // dyldImageLoadAddress, in the layout that version 2 and later have.
     constexpr std::uint32_t dyld_all_image_info_dyld_offset = 20;
     constexpr std::uint32_t dyld_all_image_info_dyld_version = 2;
     constexpr std::uint32_t dyld_image_info_size = 12;
@@ -27,13 +26,10 @@ namespace {
     constexpr std::uint32_t macho_ncmds_offset = 16;
     constexpr std::uint32_t maximum_load_commands = 1024;
     constexpr std::uint32_t lc_segment = 0x1U;
-    // segment_command: cmd, cmdsize, segname[16], vmaddr, vmsize, ...
     constexpr std::uint32_t segment_name_offset = 8;
     constexpr std::uint32_t segment_vmsize_offset = 28;
     constexpr std::size_t segment_name_size = 16;
 
-    // The __TEXT vmsize from the image's 32-bit Mach-O load commands, or 0 when
-    // the header cannot be read.
     std::uint32_t text_size_of(const AddressSpace& memory, std::uint32_t load)
     {
         const auto magic = memory.read32(load);
@@ -61,7 +57,7 @@ namespace {
         return 0U;
     }
 
-} // namespace
+}
 
 GuestImageTable read_guest_image_table(
     const AddressSpace& memory, std::uint32_t all_image_info_address)
@@ -86,8 +82,6 @@ GuestImageTable read_guest_image_table(
         images.push_back(
             GuestImage { *path, *load, text_size_of(memory, *load) });
     }
-    // dyld is not in the list it keeps of the images it loaded, so its own
-    // load address comes from the all-image-info header.
     const auto version = memory.read32(
         all_image_info_address + dyld_all_image_info_version_offset);
     const auto dyld_load =
@@ -103,4 +97,4 @@ GuestImageTable read_guest_image_table(
     return GuestImageTable { std::move(images) };
 }
 
-} // namespace shade
+}

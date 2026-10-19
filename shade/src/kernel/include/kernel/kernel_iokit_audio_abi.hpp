@@ -13,16 +13,11 @@
 
 namespace shade::kernel_iokit::audio {
 
-// Describes the firmware-facing IOAudio user-client ABI. Selection follows the
-// provider protocol exposed in the IOKit registry, rather than an OS version,
-// product build, process, or application.
 struct IOKitAudioAbi {
     struct RegistryKeys {
         std::string_view device_name;
         std::string_view device_manufacturer;
         std::string_view device_uid;
-        // Newer IOAudio2 clients use this numeric capability to classify the
-        // physical transport before constructing their route database.
         std::string_view transport_type;
         std::string_view clock_domain;
         std::string_view exclusive_access_owner;
@@ -103,4 +98,4 @@ struct IOKitAudioAbi {
     [[nodiscard]] static const IOKitAudioAbi& io_audio2();
 };
 
-} // namespace shade::kernel_iokit::audio
+}

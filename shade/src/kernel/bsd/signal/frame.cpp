@@ -28,15 +28,15 @@
 namespace shade {
 namespace {
 
-    constexpr std::uint32_t action_on_stack = 0x0001U;    // SA_ONSTACK
-    constexpr std::uint32_t action_reset_hand = 0x0004U;  // SA_RESETHAND
-    constexpr std::uint32_t action_no_defer = 0x0010U;    // SA_NODEFER
-    constexpr std::uint32_t action_siginfo = 0x0040U;     // SA_SIGINFO
-    constexpr std::uint32_t info_style_traditional = 1U;  // UC_TRAD
-    constexpr std::uint32_t info_style_flavor = 30U;      // UC_FLAVOR
-    constexpr std::uint32_t stack_on = 0x0001U;           // SS_ONSTACK
-    constexpr std::uint32_t stack_disable = 0x0004U;      // SS_DISABLE
-    constexpr std::uint32_t minimum_signal_stack = 32768U; // MINSIGSTKSZ
+    constexpr std::uint32_t action_on_stack = 0x0001U;
+    constexpr std::uint32_t action_reset_hand = 0x0004U;
+    constexpr std::uint32_t action_no_defer = 0x0010U;
+    constexpr std::uint32_t action_siginfo = 0x0040U;
+    constexpr std::uint32_t info_style_traditional = 1U;
+    constexpr std::uint32_t info_style_flavor = 30U;
+    constexpr std::uint32_t stack_on = 0x0001U;
+    constexpr std::uint32_t stack_disable = 0x0004U;
+    constexpr std::uint32_t minimum_signal_stack = 32768U;
 
     constexpr std::uint32_t signal_illegal = 4U;
     constexpr std::uint32_t signal_trap = 5U;
@@ -64,15 +64,12 @@ namespace {
         return value & ~(to - 1U);
     }
 
-    // The fault status a data or prefetch abort reports: a translation fault
-    // for an unmapped page, a permission fault for a mapped one, and the
-    // write bit of the data fault status register.
     std::uint32_t fault_status(bool mapped, bool write)
     {
         return (mapped ? 0x0fU : 0x07U) | (write ? 0x800U : 0U);
     }
 
-} // namespace
+}
 
 bool CompatibilityKernel::send_signal_frame(
     Cpu& cpu, std::uint32_t signal, const GuestSignalInfo& info)
@@ -121,17 +118,17 @@ bool CompatibilityKernel::send_signal_frame(
         was_on_alternate || enters_alternate ? alternate.size : 0U,
         alternate.disabled ? stack_disable
                            : (was_on_alternate ? stack_on : 0U),
-        0U, // uc_link
+        0U,
         mcontext_bytes,
         mcontext,
     };
     const std::array<std::uint32_t, siginfo_bytes / 4U> signal_info {
         signal,
-        0U, // si_errno
+        0U,
         static_cast<std::uint32_t>(info.code),
         info.sender,
         info.sender_uid,
-        0U, // si_status
+        0U,
         info.address,
     };
 
@@ -223,14 +220,11 @@ void CompatibilityKernel::dispatch_sigreturn(Cpu& cpu)
     }
     for (std::size_t index = 0; index < 16; ++index)
         registers[index] = thread[index];
-    // Whatever the frame says, the thread goes back to user mode with
-    // interrupts enabled.
     cpu.set_cpsr((thread[16] & ~0x1ffU) | (thread[16] & thumb_bit) |
                  user_mode);
     alternate_signal_stacks_[cpu.processor_id()].active =
         (*on_stack & 1U) != 0U;
     signal_mask(cpu.processor_id()) = *mask & ~unblockable;
-    // No return value: the registers are the interrupted thread's again.
 }
 
 void CompatibilityKernel::dispatch_sigaltstack(Cpu& cpu)
@@ -293,10 +287,8 @@ std::optional<std::uint32_t> CompatibilityKernel::deliver_fault_signal(
     switch (fault.kind) {
     case GuestFault::Kind::DataAccess:
     case GuestFault::Kind::InstructionFetch:
-        // ux_exception: EXC_BAD_ACCESS is SIGSEGV for an address with nothing
-        // mapped (KERN_INVALID_ADDRESS) and SIGBUS for a protection failure.
         signal = mapped ? signal_bus : signal_segmentation;
-        info.code = mapped ? 2 /* BUS_ADRERR */ : 1 /* SEGV_MAPERR */;
+        info.code = mapped ? 2  : 1 ;
         info.address = fault.address;
         info.exception_state = {
             fault.kind == GuestFault::Kind::InstructionFetch ? 3U : 4U,
@@ -306,25 +298,21 @@ std::optional<std::uint32_t> CompatibilityKernel::deliver_fault_signal(
         break;
     case GuestFault::Kind::Undefined:
         signal = signal_illegal;
-        info.code = 1; // ILL_ILLOPC
+        info.code = 1;
         info.address = fault.pc;
         break;
     case GuestFault::Kind::Breakpoint:
         signal = signal_trap;
-        info.code = 1; // TRAP_BRKPT
+        info.code = 1;
         info.address = fault.pc;
         break;
     }
     info.sender = process_.pid;
     info.sender_uid = process_.uid;
 
-    // The interrupted context resumes at the faulting instruction, so a
-    // handler that repairs the cause and returns runs it again.
     cpu.registers()[15] = fault.pc;
     const bool blocked =
         (signal_mask(cpu.processor_id()) & (1U << (signal - 1U))) != 0U;
-    // A synchronous fault cannot wait: blocked, ignored or defaulted, the
-    // process takes the default action.
     if (blocked || !send_signal_frame(cpu, signal, info))
         return signal;
     return std::nullopt;
@@ -337,7 +325,6 @@ void CompatibilityKernel::deliver_pending_signals(Cpu& cpu)
     const auto processor = cpu.processor_id();
     auto& own = thread_pending_signals_[processor];
     const auto mask = signal_mask(processor);
-    // The thread's own signals first, then the process's.
     auto* source = (own & ~mask) != 0U ? &own : &pending_signals_;
     const auto deliverable = *source & ~mask;
     if (deliverable == 0U)
@@ -352,23 +339,16 @@ void CompatibilityKernel::deliver_pending_signals(Cpu& cpu)
     const auto handler = signal_actions_[signal][0];
     if (handler != darwin::signal::default_action &&
         handler != darwin::signal::ignore_action) {
-        // A handler with no room for its frame: XNU's sendsig gives up and
-        // the process dies of SIGILL.
         if (!send_signal_frame(cpu, signal, info))
             exit_process(0, signal_illegal);
     } else {
-        // The disposition changed while it was pending: take it as it is now.
         static_cast<void>(deliver_signal(signal));
     }
-    // One frame per return to user mode; the next one stacks on it when the
-    // thread comes back.
 }
 
 void CompatibilityKernel::start_thread_signals(std::size_t processor,
     std::optional<std::size_t> creator, bool workqueue)
 {
-    // kern_sig.c: the signals a thread raises itself, which a workqueue thread
-    // still takes; every other one is blocked for it.
     constexpr std::uint32_t synchronous =
         (1U << (4U - 1U)) | (1U << (5U - 1U)) | (1U << (6U - 1U)) |
         (1U << (7U - 1U)) | (1U << (8U - 1U)) | (1U << (10U - 1U)) |
@@ -391,4 +371,4 @@ void CompatibilityKernel::end_thread_signals(std::size_t processor)
     alternate_signal_stacks_.erase(processor);
 }
 
-} // namespace shade
+}

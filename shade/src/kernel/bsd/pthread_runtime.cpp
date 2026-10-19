@@ -26,9 +26,6 @@ namespace {
 
     constexpr std::uint32_t workqueue_stack_size = 512U * 1024U;
     constexpr std::uint32_t pthread_dynamic_base = 0x1000'0000U;
-    // Darwin 10.4 ARM32 passes the embedded TSD base at this pthread_t
-    // member to thread_set_tsd_base. Darwin 10.3 keeps TPIDRURO equal to
-    // pthread_t itself, so select this offset through the ABI contract.
     constexpr std::uint32_t pthread_tsd_base_offset = 0x48U;
 
     [[nodiscard]] bool supports_bsdthread_register_v1(
@@ -87,8 +84,6 @@ namespace {
         state[3] = item.address;
         state[4] = reuse ? 1U : 0U;
         if (item.delivery == DarwinWorkqueueDelivery::DispatchThread) {
-            // The requested-thread SPI passes no workitem. Userland owns the
-            // work queues and receives priority/reuse/overcommit in flags.
             constexpr std::uint32_t dispatch_spi = 0x00040000U;
             constexpr std::uint32_t reused_thread = 0x00020000U;
             state[3] = 0;
@@ -102,7 +97,7 @@ namespace {
         return state;
     }
 
-} // namespace
+}
 
 bool DarwinPthreadRuntime::register_process(
     DarwinPthreadRegistration registration)
@@ -282,9 +277,6 @@ bool CompatibilityKernel::service_bsd_workqueue(Cpu* requesting_cpu)
             thread_scheduling_state_query_
                 ? thread_scheduling_state_query_(process_.pid, processor)
                 : std::optional<XnuThreadState> { };
-        // A worker blocked in a Mach/BSD wait is still assigned to the
-        // workqueue, but XNU removes it from the active concurrency count.
-        // Missing scheduler information is conservatively treated as active.
         if (!scheduling_state ||
             *scheduling_state != XnuThreadState::Waiting) {
             ++active_worker_count;
@@ -422,9 +414,6 @@ void CompatibilityKernel::notify_thread_blocked(std::size_t processor)
     if (!pthread_runtime_.worker(worker_processor))
         return;
 
-    // complete_slice can consume a pending wake instead of transitioning the
-    // thread to Waiting. Confirm the committed state so that race does not
-    // temporarily exceed the workqueue's requested concurrency.
     const auto state =
         thread_scheduling_state_query_
             ? thread_scheduling_state_query_(process_.pid, worker_processor)
@@ -443,7 +432,6 @@ void CompatibilityKernel::notify_thread_blocked(std::size_t processor)
 bool CompatibilityKernel::dispatch_bsd_pthread(Cpu& cpu, std::uint32_t number)
 {
     const auto profile = shared_state_->darwin_abi.pthread_abi;
-    // The thread identity query is independent of the registration layout.
     const bool supports_thread_identity =
         number == 372 && profile == DarwinPthreadAbi::BsdThreadRegisterV2;
     if (!supports_bsdthread_register_v1(profile) && !supports_thread_identity)
@@ -451,7 +439,7 @@ bool CompatibilityKernel::dispatch_bsd_pthread(Cpu& cpu, std::uint32_t number)
 
     auto& registers = cpu.registers();
     switch (number) {
-    case 360: { // bsdthread_create, Darwin 10 ARM32 v1
+    case 360: {
         constexpr std::uint32_t guard_size = AddressSpace::page_size;
         constexpr std::uint32_t dynamic_base = 0x1000'0000U;
         constexpr std::uint32_t custom_stack = 0x0100'0000U;
@@ -557,7 +545,7 @@ bool CompatibilityKernel::dispatch_bsd_pthread(Cpu& cpu, std::uint32_t number)
             cpu.request_guest_preemption();
         return true;
     }
-    case 361: { // bsdthread_terminate, Darwin 10 ARM32 v1
+    case 361: {
         const auto stack_address = registers[0];
         const auto stack_size = registers[1];
         const auto thread_port = registers[2];
@@ -638,7 +626,7 @@ bool CompatibilityKernel::dispatch_bsd_pthread(Cpu& cpu, std::uint32_t number)
         cpu.halt(Dynarmic::HaltReason::UserDefined1);
         return true;
     }
-    case 366: { // bsdthread_register, Darwin 10 ARM32 v1
+    case 366: {
         const DarwinPthreadRegistration registration { registers[0],
             registers[1], registers[2], registers[3], registers[4],
             registers[5] };
@@ -654,7 +642,7 @@ bool CompatibilityKernel::dispatch_bsd_pthread(Cpu& cpu, std::uint32_t number)
         bsd_success(cpu, 0);
         return true;
     }
-    case 367: { // workq_open, Darwin 10 ARM32 v1
+    case 367: {
         if (!pthread_runtime_.open_workqueue(virtual_processor_count_,
                 workqueue_priority_count_for_abi(profile))) {
             bsd_error(cpu, bsd_support::invalid_argument);
@@ -665,15 +653,13 @@ bool CompatibilityKernel::dispatch_bsd_pthread(Cpu& cpu, std::uint32_t number)
         bsd_success(cpu, 0);
         return true;
     }
-    case 368: { // workq_kernreturn, Darwin 10 ARM32 v1
+    case 368: {
         constexpr std::uint32_t queue_add = 1U;
         constexpr std::uint32_t queue_remove = 2U;
         constexpr std::uint32_t thread_return = 4U;
         constexpr std::uint32_t thread_set_concurrency = 8U;
         constexpr std::uint32_t query_dispatch_spi = 16U;
         constexpr std::uint32_t request_dispatch_threads = 32U;
-        // Feature discovery precedes workq_open. XNU only requires that the
-        // process has registered its pthread entry points at this stage.
         if (registers[0] == query_dispatch_spi) {
             if (pthread_runtime_.registration())
                 bsd_success(cpu, 0);
@@ -688,8 +674,6 @@ bool CompatibilityKernel::dispatch_bsd_pthread(Cpu& cpu, std::uint32_t number)
 
         const auto operation = registers[0];
         const auto item_address = registers[1];
-        // workq_kernreturn's Darwin 10 ABI is (options, item, affinity, prio).
-        // Keep affinity opaque and decode the queue/overcommit bits from prio.
         const auto affinity = registers[2];
         const auto raw_priority = registers[3];
         const auto priority =
@@ -796,7 +780,7 @@ bool CompatibilityKernel::dispatch_bsd_pthread(Cpu& cpu, std::uint32_t number)
         bsd_error(cpu, bsd_support::invalid_argument);
         return true;
     }
-    case 372: { // thread_selfid
+    case 372: {
         const auto thread_object =
             thread_object_for_processor(cpu.processor_id());
         if (!thread_object) {
@@ -811,4 +795,4 @@ bool CompatibilityKernel::dispatch_bsd_pthread(Cpu& cpu, std::uint32_t number)
     }
 }
 
-} // namespace shade
+}

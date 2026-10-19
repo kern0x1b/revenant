@@ -78,8 +78,6 @@ namespace {
 
     constexpr std::string_view hle_plan_magic_v2 { "SHADE-HLE-PLAN" };
     constexpr std::uint32_t hle_plan_artifact_version_v2 = 2U;
-    // Increment when metadata lookup semantics change without changing the
-    // serialized plan layout, so persisted plans are rebuilt from the firmware.
     constexpr std::uint32_t hle_plan_builder_version = 6U;
     constexpr std::size_t hle_plan_header_size_v2 = 123U;
     constexpr std::size_t hle_plan_patch_record_size_v2 = 69U;
@@ -178,9 +176,6 @@ namespace {
         return name.empty() ? std::string_view { "unknown" } : name;
     }
 
-    // Temporary frame-hitch diagnostic. Split MBX calls by their firmware
-    // symbol while preserving the normal subsystem aggregation for every other
-    // HLE.
     std::string_view hle_performance_bucket(
         std::string_view image_suffix, std::string_view symbol)
     {
@@ -228,8 +223,6 @@ namespace {
 
     bool thumb_instruction_is_32_bit(std::uint16_t instruction) noexcept
     {
-        // Thumb-2 instructions have one of the 11101, 11110, or 11111 first
-        // halfword prefixes. Thumb-1's unconditional branch occupies 11100.
         return (instruction & 0xf800U) >= 0xe800U;
     }
 
@@ -271,11 +264,6 @@ namespace {
             const auto literal_address = (instruction & (1U << 23U)) != 0U
                                              ? original_pc + immediate
                                              : original_pc - immediate;
-            // A PC-relative first instruction cannot simply be copied to the
-            // trampoline: its literal address would move with the PC. Load the
-            // original absolute literal address first, then execute the
-            // equivalent register-indirect load before returning to the second
-            // instruction.
             const std::array words {
                 condition | 0x059f0008U | (target_register << 12U),
                 condition | 0x05900000U | (target_register << 16U) |
@@ -319,20 +307,13 @@ namespace {
         };
         const auto append_arm_return = [&](std::vector<std::byte>& code,
                                            std::uint32_t target) {
-            // BX pc enters ARM state at the next aligned word. The ARM literal
-            // load then returns to the requested Thumb address without
-            // borrowing a guest register or changing condition flags.
-            append_halfword(code, 0x4778U); // bx pc
-            append_halfword(code, 0x46c0U); // nop / ARM alignment
-            append_word(code, 0xe51ff004U); // ldr pc, [pc, #-4]
+            append_halfword(code, 0x4778U);
+            append_halfword(code, 0x46c0U);
+            append_word(code, 0xe51ff004U);
             append_word(code, target | 1U);
         };
 
         if (original.size() == 4U) {
-            // ARMv7 may start a Thumb entry with a Thumb-2 instruction. Keep
-            // both halfwords together; resuming at entry + 2 would execute the
-            // second halfword as an unrelated instruction and can corrupt the
-            // guest stack.
             std::vector<std::byte> code;
             code.reserve(original.size() + 3U * sizeof(std::uint32_t));
             code.insert(code.end(), original.begin(), original.end());
@@ -354,9 +335,6 @@ namespace {
                 original_pc + ((instruction & 0xffU) << 2U);
             std::vector<std::byte> code;
             code.reserve(5U * sizeof(std::uint32_t));
-            // Load the original absolute literal address into the destination,
-            // then perform the load that the relocated Thumb instruction
-            // intended.
             append_halfword(code, static_cast<std::uint16_t>(
                                       0x4800U | (target_register << 8U) | 3U));
             append_halfword(
@@ -377,7 +355,7 @@ namespace {
             code.reserve(5U * sizeof(std::uint32_t));
             append_halfword(code, static_cast<std::uint16_t>(
                                       0x4800U | (target_register << 8U) | 3U));
-            append_halfword(code, 0x46c0U); // nop
+            append_halfword(code, 0x46c0U);
             append_arm_return(code, entry + 2U);
             append_word(code, address);
             return code;
@@ -413,7 +391,7 @@ namespace {
             code.reserve(7U * sizeof(std::uint32_t));
             append_halfword(
                 code, static_cast<std::uint16_t>(0xd006U | (condition << 8U)));
-            append_halfword(code, 0x46c0U); // nop
+            append_halfword(code, 0x46c0U);
             append_arm_return(code, entry + 2U);
             append_arm_return(code, taken);
             return code;
@@ -422,7 +400,7 @@ namespace {
         std::vector<std::byte> code;
         code.reserve(4U * sizeof(std::uint32_t));
         code.insert(code.end(), original.begin(), original.end());
-        append_halfword(code, 0x46c0U); // align the state transition
+        append_halfword(code, 0x46c0U);
         append_arm_return(code, entry + 2U);
         return code;
     }
@@ -497,7 +475,7 @@ namespace {
         return expected_units ? std::optional { result } : std::nullopt;
     }
 
-} // namespace
+}
 
 std::size_t UserlandHleRegistry::SharedHlePlan::patch_count() const noexcept
 {
@@ -807,9 +785,6 @@ std::optional<std::string> UserlandHleCall::objc_string_argument(
     if (object == 0 || maximum_size == 0)
         return std::nullopt;
 
-    // Objective-C 1.x NSString objects used by the firmware have either an
-    // external byte/UTF-16 buffer with a length word, or an inline null-
-    // terminated UTF-16 payload immediately after the isa/info words.
     const auto data = memory_.read32(object + 8U);
     const auto length = memory_.read32(object + 12U);
     if (data && length && *data != 0 && *length <= maximum_size) {
@@ -1718,9 +1693,6 @@ UserlandHleRegistry::ParsedImageCacheEntry& UserlandHleRegistry::cached_image(
     if (cached != parsed_image_cache_.end() &&
         cached->second.architecture == architecture &&
         cached->second.registration_generation == registration_generation_) {
-        // Shared-cache callers supply the already parsed immutable image.
-        // Standalone callers validate the pathname through the generation-aware
-        // file identity cache before reusing their local registry entry.
         if (parsed_image && parsed_image->content_identity() ==
                                 cached->second.content_identity) {
             if (performance_counters().enabled())
@@ -1819,16 +1791,9 @@ std::size_t UserlandHleRegistry::install_mapped_image_impl(Cpu& cpu,
         hle_relevant_images.fetch_add(1, std::memory_order_relaxed);
     const auto use_shared_plan =
         cache_file_index && cache_image_index && shared_hle_plan_ != nullptr;
-    // Do not fall back to a full shared-cache container parse when the
-    // immutable generation did not provide image metadata.
     if (image_header_offset && !parsed_image && !use_shared_plan)
         return 0;
 
-    // Shared-cache mappings are delivered as many VM ranges. Most ranges do
-    // not contain an HLE entry; avoid allocating the per-range patch queues and
-    // rescanning the registration tables for those ranges. The image index is
-    // generation-scoped and already includes guest-function entries, so a
-    // missing vector is a complete no-op for this mapping.
     const std::vector<std::size_t>* shared_image_patches = nullptr;
     if (use_shared_plan) {
         shared_image_patches = shared_hle_plan_->patches_for_image(
@@ -1848,9 +1813,6 @@ std::size_t UserlandHleRegistry::install_mapped_image_impl(Cpu& cpu,
         std::uint32_t address { };
         bool thumb { };
     };
-    // A framework may also be loaded temporarily beside its shared-cache
-    // image. Keep a live callable binding instead of replacing it with an
-    // alias that dyld can unload as soon as a bundle query finishes.
     const auto publish_symbol = [&](const std::string& name,
                                     std::uint32_t address, bool thumb) {
         const auto existing = installed_symbols_.find(name);
@@ -2029,9 +1991,6 @@ std::size_t UserlandHleRegistry::install_mapped_image_impl(Cpu& cpu,
                 continue;
             bool queued = false;
             if (symbol.thumb_definition()) {
-                // Thumb SVC has only an eight-bit immediate. The concrete
-                // handler is recovered from installed_calls_ using PC-2 during
-                // dispatch.
                 const auto instruction = make_thumb_hle_patch(patch_size);
                 queued = queue_patch(runtime_address, instruction,
                     InstalledCall { registration->id, symbol.name,
@@ -2218,11 +2177,6 @@ std::size_t UserlandHleRegistry::install_mapped_image_impl(Cpu& cpu,
         if (!memory_.copy_in_batch(writes)) {
             if (collect_stats)
                 hle_batch_failures.fetch_add(1, std::memory_order_relaxed);
-            // The batch preflight is the atomic boundary for MAP_PRIVATE/COW
-            // HLE installation. A partial per-patch fallback could expose a
-            // mixed image to guest execution and would make invalidation
-            // accounting depend on the failure order, so fail the mapping
-            // transaction instead.
             throw std::runtime_error {
                 "shared-cache HLE patch batch preflight failed"
             };
@@ -2347,9 +2301,6 @@ bool UserlandHleRegistry::dispatch(
         return false;
     }
 
-    // Dynarmic exposes the architectural PC after SVC. Thumb HLEs share one
-    // immediate and are selected by their two-byte entry address; ARM HLEs
-    // retain the encoded registration id used by the original implementation.
     const auto entry = cpu.registers()[15] - (thumb ? 2U : 4U);
     if (!thumb &&
         (svc_immediate & userland_hle_call_mask) ==
@@ -2361,9 +2312,6 @@ bool UserlandHleRegistry::dispatch(
         UserlandHleCall call { *this, cpu, memory_, output_, process_id,
             thread_callback_symbol };
         pending->second(call);
-        // A host-backed driver owns one persistent guest callback thread. Park
-        // it between device periods; the scheduler restores its registers and
-        // wakes the same slot when the next buffer is due.
         cpu.halt(Dynarmic::HaltReason::UserDefined5);
         return true;
     }
@@ -2415,7 +2363,6 @@ bool UserlandHleRegistry::dispatch(
         return false;
     }
 
-    // The mapping supplies the concrete symbol for prefix HLEs.
     const std::string_view symbol =
         installed != installed_calls_.end()
             ? std::string_view { installed->second.symbol }
@@ -2617,11 +2564,6 @@ bool UserlandHleRegistry::deliver_deferred_guest_function(
         return false;
     }
 
-    // A service callback belongs at the consumer thread's event-loop boundary,
-    // not at an arbitrary syscall made while the initiating UI action is still
-    // unwinding. A receive-only mach_msg trap is the stable Darwin boundary at
-    // which CFRunLoop is about to wait for its next source. Run the pending
-    // callback there, then restore and retry the original receive.
     constexpr std::int32_t mach_message_trap = -31;
     constexpr std::uint32_t mach_receive_message = 0x2U;
     const auto& boundary_registers = cpu.registers();
@@ -2915,4 +2857,4 @@ void UserlandHleRegistry::inherit_mappings(const UserlandHleRegistry& parent)
     pending_thread_callbacks_.clear();
 }
 
-} // namespace shade
+}

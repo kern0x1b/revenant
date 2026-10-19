@@ -46,9 +46,6 @@ namespace {
     constexpr std::uint64_t activation_budget_nanoseconds = 8'000'000U;
     constexpr std::uint64_t activation_portable_budget_nanoseconds =
         8'000'000U;
-    // Same-slab prediction for a live interactive image is deliberately a
-    // micro-batch. It can make progress between display callbacks without
-    // becoming a frame-sized lock or host-CPU tenant.
     constexpr std::uint64_t interactive_budget_nanoseconds = 1'000'000U;
     constexpr std::uint64_t predictive_budget_nanoseconds = 2'000'000U;
     constexpr std::uint64_t offline_budget_nanoseconds = 500'000U;
@@ -79,16 +76,13 @@ namespace {
                    : static_cast<std::uint64_t>(duration.count());
     }
 
-} // namespace
+}
 
 JitNativePredictionPolicy JitWorkPolicy::native_prediction_policy(
     std::size_t native_slab_bytes) noexcept
 {
     constexpr std::size_t maximum_prediction_bytes =
         256U * 1024U * 1024U;
-    // Native output varies by block. One KiB is deliberately conservative for
-    // choosing an ordering horizon; the emitter's measured byte cap below is
-    // authoritative and stops prediction before it can consume demand space.
     constexpr std::size_t estimated_native_bytes_per_location = 1024U;
     const auto demand_floor =
         JitCodeCacheGovernor::minimum_demand_working_set_bytes;
@@ -199,8 +193,6 @@ JitWorkDecision JitWorkPolicy::decide(
             saturating_add(
                 historical_block, compile_reserve_margin_nanoseconds));
         maximum_blocks = interactive_block_limit;
-        // Live-image prediction is strictly spare-deadline work. Retain most
-        // of the available slack even after the fixed reserve is satisfied.
         deadline_budget_divisor = 4U;
     } else if (work == JitWorkClass::ActivationPortable) {
         maximum_budget = activation_portable_budget_nanoseconds;
@@ -208,9 +200,6 @@ JitWorkDecision JitWorkPolicy::decide(
             saturating_add(
                 historical_block, compile_reserve_margin_nanoseconds));
         maximum_blocks = activation_block_limit;
-        // Interactive translation runs on an independent executor. Native
-        // publication is serialized per slab, while portable workers avoid
-        // the slab entirely; both retain half of short deadline slack.
         deadline_budget_divisor = 2U;
     } else if (work == JitWorkClass::PredictiveNative) {
         maximum_budget = predictive_budget_nanoseconds;
@@ -224,9 +213,6 @@ JitWorkDecision JitWorkPolicy::decide(
             *observation.display_quiet_for < offline_display_quiet) {
             return { 0U, 0U, JitWorkBlockReason::DisplayBusy };
         }
-        // Without a finite timer, explicit guest quiescence is the only
-        // evidence that portable persistence will not compete with useful
-        // work. A finite deadline is protected by the larger reserve below.
         if (!observation.deadline_remaining &&
             (!observation.guest_idle_for ||
                 *observation.guest_idle_for < offline_guest_quiet)) {
@@ -255,4 +241,4 @@ JitWorkDecision JitWorkPolicy::decide(
     return { budget, maximum_blocks, JitWorkBlockReason::None };
 }
 
-} // namespace shade
+}

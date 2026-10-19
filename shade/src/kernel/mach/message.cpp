@@ -80,7 +80,7 @@ namespace {
         return write_message_words(memory, message_address, reply);
     }
 
-} // namespace
+}
 
 void CompatibilityKernel::dispatch_mach_message(
     Cpu& cpu, std::optional<std::uint32_t> receive_address)
@@ -147,16 +147,10 @@ void CompatibilityKernel::dispatch_mach_message(
         message_address + darwin::mig_wire::header_local_port_offset);
     const auto message_id = memory_.read32(
         message_address + darwin::mig_wire::header_identifier_offset);
-    // A send-only mach_msg legitimately carries MACH_PORT_NULL in the local
-    // header slot.  Keep the optional reply port distinct from a failed read.
     if (!bits || !remote_port || !message_id) {
-        registers[0] = 0x1000000eU; // MACH_SEND_INVALID_MEMORY
+        registers[0] = 0x1000000eU;
         return;
     }
-    // Synthetic MIG providers currently encode their reply in the request
-    // buffer. A distinct overwrite target must use queued IPC, never silently
-    // overwrite a read-only caller's input. Kernel destinations are rejected
-    // below until those providers expose separate reply storage.
     const auto separate_receive = wants_receive && receive_address &&
         *receive_address != message_address;
     if (!separate_receive) {
@@ -246,9 +240,6 @@ void CompatibilityKernel::dispatch_mach_message(
         if (*message_id ==
                 mig_message_id(xnu::mig::bootstrap::Routine::get_self) &&
             *remote_port == process_.bootstrap_port && registers[3] >= 40U) {
-            // The root bootstrap provider can query its own job port before it has
-            // created a server receive loop. Handle only this structural
-            // self-owned case; child requests continue to route to their provider.
             std::uint32_t job_name = 0U;
             {
                 std::lock_guard mach_lock { shared_state_->mach_mutex };
@@ -299,12 +290,6 @@ void CompatibilityKernel::dispatch_mach_message(
                 registers[2], registers[3], *remote_port, *local_port,
                 IOKitMachCallSite { registers[15], registers[14], registers[7] },
                 surface_store_.get())) {
-            // A flattened UIKit client may establish its display timing after its
-            // event route, with no LayerKit context to provide another callback.
-            // The common readiness helper validates process identity, launch
-            // intent, prewarm state, event ownership, and live display
-            // participation before it can publish a foreground scene, so unrelated
-            // IOKit traffic is inert.
             graphics_services_input::activate_resolved_application(
                 *shared_state_, process_.pid, scene_coordinator_.get());
             registers[0] = *result;
@@ -427,12 +412,6 @@ void CompatibilityKernel::dispatch_mach_message(
             }
         }
 
-        // The host source fallback replaces the hardware render worker only after
-        // the guest media service has selected, opened, and prepared its source.
-        // Complete the current-source rate operation at that boundary: routing it
-        // into the native renderer would synchronously wait for the replaced
-        // worker and trigger the service's RPC-timeout recovery. All source and
-        // item lifecycle messages continue through the firmware service.
         if (wants_send && local_port && *local_port != xnu::ipc::null_name &&
             registers[2] >= darwin::mig_wire::message_header_size &&
             registers[2] <= 64U * 1024U &&
@@ -474,9 +453,6 @@ void CompatibilityKernel::dispatch_mach_message(
         if (*message_id ==
                 mig_message_id(xnu::mig::bootstrap::Routine::look_up) &&
             process_.pid == 1 && registers[3] >= 36) {
-            // launchd probes its own bootstrap namespace before its server
-            // receive loop exists. Match XNU/launchd's normal early negative
-            // lookup; requests from child processes are routed to PID 1 below.
             registers[0] = write_bootstrap_lookup_failure(
                                memory_, message_address, *local_port, *message_id)
                                ? 0U
@@ -628,14 +604,6 @@ void CompatibilityKernel::dispatch_mach_message(
                           *remote_port, *destination_source_right)
                     : std::nullopt;
             bool destination_uses_received_type = false;
-            // Received MIG headers retain MAKE_SEND/MAKE_SEND_ONCE in some old
-            // libSystem paths even though copyout installed the resulting send
-            // right. Locally-created messages such as pthread's recycle
-            // message, however, legitimately address a receive right with
-            // MAKE_SEND. Accept both representations while preserving the
-            // resulting right type. A retained MAKE_SEND_ONCE is a use of the
-            // already-copied-out SendOnce right and must consume it just like
-            // MOVE_SEND_ONCE.
             if (!destination_object && destination_right &&
                 destination_source_right != destination_right) {
                 destination_object = resolve_name_with_right(*shared_state_,
@@ -658,11 +626,6 @@ void CompatibilityKernel::dispatch_mach_message(
                     registers[0] = darwin::mach_message::receive_invalid_data;
                     return;
                 }
-                // ipc_kobject_server initializes a generic mig_reply_error_t
-                // before looking up the routine. A valid kernel object with no
-                // matching demux entry therefore returns MIG_BAD_ID; it is
-                // neither an invalid Mach destination nor a message for a
-                // user-space server.
                 mach_lock.unlock();
                 trace_unknown(cpu, "MIG routine", *message_id);
                 if (*local_port == xnu::ipc::null_name) {
@@ -701,9 +664,6 @@ void CompatibilityKernel::dispatch_mach_message(
                         : darwin::mach_message::receive_invalid_data;
                 return;
             }
-            // A task-local send name resolves to one global ipc_port
-            // object. Port-set membership is retained separately because
-            // a receive right may be temporarily in transit.
             const auto is_port_set_member = std::any_of(
                 shared_state_->mach_port_sets.begin(),
                 shared_state_->mach_port_sets.end(), [&](const auto& port_set) {
@@ -715,10 +675,6 @@ void CompatibilityKernel::dispatch_mach_message(
                 destination_object &&
                 (shared_state_->mach_port_objects.contains(remote_object) ||
                     is_port_set_member);
-            // CoreFoundation deliberately uses a zero-timeout send for run-loop
-            // wakeups. XNU rejects a duplicate wakeup once the port's
-            // one-message queue is full; allowing it to grow without bound
-            // starves the main run loop during periodic display notifications.
             if (routable &&
                 (registers[1] & darwin::mach_message::option_send_timeout) !=
                     0 &&
@@ -787,12 +743,6 @@ void CompatibilityKernel::dispatch_mach_message(
                         reply_object = transfer->object;
                         reply_right = transfer->right;
                     } else {
-                        // The destination is valid, but the reply right is not
-                        // present in the sender's IPC namespace (or its
-                        // disposition is invalid). ipc_kmsg_copyin reports this
-                        // as a send-right error; treating it as an unknown trap
-                        // incorrectly terminates otherwise healthy servers
-                        // which intentionally probe optional rights.
                         registers[0] = darwin::mach_message::send_invalid_right;
                         return;
                     }
@@ -847,12 +797,6 @@ void CompatibilityKernel::dispatch_mach_message(
                     }
                 }
 
-                // ipc_kmsg_copyin validates every MOVE right before mutating
-                // the sender's ipc_space. Do the same preflight here. Without
-                // it, a malformed message that repeats one MOVE_SEND/
-                // MOVE_RECEIVE name could consume the first right, fail on the
-                // second, and leave the queue/in-flight bookkeeping
-                // inconsistent even though no message was enqueued.
                 if (routable) {
                     std::map<std::pair<std::uint32_t, std::uint32_t>,
                         std::uint32_t>
@@ -916,8 +860,6 @@ void CompatibilityKernel::dispatch_mach_message(
                         }
                     }
                     if (!routable) {
-                        // MACH_SEND_INVALID_RIGHT; no MOVE right has been
-                        // consumed yet.
                         registers[0] = darwin::mach_message::send_invalid_right;
                         return;
                     }
@@ -965,10 +907,6 @@ void CompatibilityKernel::dispatch_mach_message(
                 } else if (routable && destination_move_disposition == 17U &&
                            destination_right &&
                            *destination_right == xnu::ipc::Right::Send) {
-                    // MOVE_SEND removes the sender's last ipc_entry reference,
-                    // but the queued destination still owns that Send right
-                    // until delivery or discard. Keep it out of
-                    // no-senders/reclaimer decisions.
                     destination_send_object = destination_object;
                 }
                 if (routable) {
@@ -979,7 +917,7 @@ void CompatibilityKernel::dispatch_mach_message(
                         if (right == xnu::ipc::Right::Send) {
                             ++shared_state_->mach_inflight_send_rights[object];
                         }
-                        if (disposition == 20U) { // MAKE_SEND
+                        if (disposition == 20U) {
                             static_cast<void>(shared_state_->mach_port_objects
                                     .increment_make_send_count(object));
                         }
@@ -1094,10 +1032,6 @@ void CompatibilityKernel::dispatch_mach_message(
                     static_cast<std::uint32_t>(*local_pending_receiver));
             } else if (remote_owner != process_.pid &&
                        mach_message_wake_handler_ && remote_owner != 0) {
-                // The sender's CompatibilityKernel does not own the receiver's
-                // pending-mach map. The app-level callback resolves that map
-                // and wakes the selected receiver without touching Dynarmic
-                // from a different host thread.
                 receiver_wake_result =
                     mach_message_wake_handler_(remote_owner, remote_object);
             }
@@ -1198,9 +1132,6 @@ void CompatibilityKernel::dispatch_mach_message(
             }
         }
     }
-    // Invalid destination names are an ordinary Mach IPC result. MIG servers
-    // also use a null destination when a demux routine returns MIG_NO_REPLY;
-    // neither case is an unknown kernel call and neither may halt the guest.
     if (wants_send && registers[2] >= darwin::mig_wire::message_header_size &&
         registers[2] <= 64U * 1024U &&
         (*remote_port == xnu::ipc::null_name || !unsupported_known_right)) {
@@ -1232,4 +1163,4 @@ void CompatibilityKernel::dispatch_mach_message(
     return;
 }
 
-} // namespace shade
+}

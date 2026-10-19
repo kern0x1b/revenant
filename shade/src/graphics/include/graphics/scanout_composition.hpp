@@ -19,11 +19,6 @@
 
 namespace shade {
 
-// Tracks retained scanout pages used by legacy compositors. A compositor may
-// build a translucent scene in a local render target and source-over it onto
-// alternating scanout surfaces. The physical driver preserves the compositor
-// background without carrying the previous transition result into the next
-// page; model that boundary independently of the host rendering backend.
 class ScanoutComposition {
 public:
     void reset();
@@ -39,10 +34,6 @@ public:
         std::span<const GlesRasterVertex> vertices, std::uint32_t mode,
         CommandEncoder& encoder, bool& restored);
 
-    // Records a direct source layer beneath later translucent draws in a local
-    // scene texture. When that scene is translated onto scanout, the same
-    // source-space layer can be replayed instead of sampling the background at
-    // the scene's destination coordinates.
     void observe_local_background_draw(
         const std::shared_ptr<HostSurface>& target,
         const GlesRasterState& state, const GlesResourceStore& resources,
@@ -91,4 +82,4 @@ private:
     LocalSceneBackground local_scene_background_;
 };
 
-} // namespace shade
+}

@@ -32,8 +32,6 @@ inline constexpr std::uint32_t operation_oid_format = 4;
 inline constexpr std::uint32_t vfs_generic = 0;
 inline constexpr std::uint32_t vfs_max_type_number = 1;
 inline constexpr std::uint32_t vfs_conf = 2;
-// The built-in VFS table reserves the type slots through devfs (type 19), so
-// VFS_MAXTYPENUM returns the next available type number.
 inline constexpr std::uint32_t vfs_max_type_number_value = 20;
 inline constexpr std::uint32_t kernel_operating_system_type = 1;
 inline constexpr std::uint32_t kernel_operating_system_release = 2;
@@ -76,8 +74,6 @@ inline constexpr std::uint32_t hardware_l3_settings = 21;
 inline constexpr std::uint32_t hardware_l3_cache_size = 22;
 inline constexpr std::uint32_t hardware_memory_size = 24;
 inline constexpr std::uint32_t hardware_available_cpu = 25;
-// hw.* nodes XNU registers with OID_AUTO: their numbers start at CTL_AUTO_START
-// and guests only learn them through sysctl.name2oid.
 inline constexpr std::uint32_t hardware_physical_cpu = 0x100;
 inline constexpr std::uint32_t hardware_physical_cpu_max = 0x101;
 inline constexpr std::uint32_t hardware_logical_cpu = 0x102;
@@ -101,24 +97,18 @@ struct ObjectMetadata {
 [[nodiscard]] std::vector<std::byte> encode_object_format(
     const ObjectMetadata& metadata);
 
-// Resolves the fixed nodes currently projected by the compatibility kernel.
-// Dynamic OID_AUTO nodes can be added here as their values are exposed.
 [[nodiscard]] std::optional<ObjectIdentifier> resolve_name(
     std::string_view name);
 
-// Returns the selected device profile string projected by a CTL_HW selector.
 [[nodiscard]] std::optional<std::string_view> hardware_string(
     std::uint32_t selector, std::string_view machine, std::string_view model);
 
-// Encodes the stable prefix consumed by KERN_PROCARGS clients:
-// executable path, word alignment, argv strings, then environment strings.
 [[nodiscard]] std::vector<std::byte> encode_process_arguments(
     std::string_view executable_path, std::span<const std::string> arguments,
     std::span<const std::string> environment);
 
-// KERN_PROCARGS2 inserts argc between the aligned executable path and argv.
 [[nodiscard]] std::vector<std::byte> encode_process_arguments2(
     std::string_view executable_path, std::span<const std::string> arguments,
     std::span<const std::string> environment);
 
-} // namespace shade::darwin::sysctl
+}

@@ -1,7 +1,6 @@
 import UIKit
 import CoreGraphics
 
-// What a field shows and what it does with what is typed: a plain text binding, or a value shown through a Formatter.
 struct TextFieldModel {
     var display: () -> String
     var edited: (String) -> Void

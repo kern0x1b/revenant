@@ -114,7 +114,6 @@ bool is_matrix_type(TypeId type)
 
 namespace ast {
 
-    // Declared in the order of TypeId's bool, int and float families.
     enum class Kind : std::uint8_t { Bool, Int, Float };
 
     constexpr bool is_matrix(TypeId type)
@@ -137,7 +136,6 @@ namespace ast {
         return Kind::Float;
     }
 
-    // The width of a vector or the order of a matrix; 1 for a scalar.
     constexpr int dimension(TypeId type)
     {
         if (is_matrix(type))
@@ -345,7 +343,6 @@ namespace ast {
         const std::vector<Function*>* overloads { };
         std::string name;
         std::vector<std::unique_ptr<Node>> args;
-        // 1 for a leaf, else one more than the tallest argument.
         std::uint16_t height { 1 };
     };
 
@@ -396,12 +393,6 @@ namespace ast {
         std::unique_ptr<Node> value;
     };
 
-    // Whether an argument for an out or inout parameter can be written: an
-    // l-value (a variable, an element or a field of one, or a swizzle without
-    // repeated components) whose variable is not read-only. A const, a uniform,
-    // an attribute, a fragment's varying or a built-in such as gl_FragCoord is
-    // read-only, and so is anything that is not an l-value (GLSL ES 1.00
-    // sections 5.8 and 6.1.1).
     bool may_write(const Node& argument)
     {
         const Node* current = &argument;
@@ -419,7 +410,7 @@ namespace ast {
         return current->type == Node::Type::Variable && !current->read_only;
     }
 
-} // namespace ast
+}
 
 struct Module::Impl {
     Stage stage { Stage::Vertex };
@@ -429,15 +420,11 @@ struct Module::Impl {
     std::vector<std::unique_ptr<ast::Function>> functions;
     std::map<std::string, std::vector<ast::Function*>, std::less<>> overloads;
     ast::Function* main { };
-    // The slots of the built-ins a shader writes, cleared before every run.
     std::vector<std::uint32_t> output_slots;
 };
 
 namespace {
 
-    // A float as an int, for what an index or a size takes: a value that is
-    // not a number or lies outside the range of an int is clamped, never cast
-    // as it is.
     int clamped_int(double x)
     {
         constexpr double limit = 2147483520.0;
@@ -446,36 +433,16 @@ namespace {
         return static_cast<int>(std::clamp(x, -limit, limit));
     }
 
-    // The values one call's locals may take on the run's stack; the stack
-    // holds this many in all (main's frame and every active call's).
     constexpr std::uint32_t stack_values = 1024;
 
-    // What macro expansion may produce. Both bounds are far above any shader
-    // of the era (the compositor's are a few hundred tokens) and keep a guest's
-    // macros from growing the host's memory or time without limit: a macro
-    // that expands to sixteen copies of another, eight deep, is 16^8 tokens
-    // from a few hundred bytes of source.
     constexpr std::size_t maximum_tokens = 65536;
 
-    // How deeply the arguments of macro calls may contain macro calls.
     constexpr int maximum_expansion_depth = 16;
 
-    // How deep a shader may nest, in what the compiler and the run recurse
-    // through. A guest chooses the shape of its source, and a few thousand
-    // tokens of "(" or "{" or "a+a+a+..." would take a host thread's stack
-    // (a guest's GL calls run on a thread with the default 512 KB). The parser
-    // recurses at most maximum_parse_nesting levels of statements and
-    // expressions; a tree is at most maximum_tree_height tall, so building,
-    // running and destroying it recurse as far; and a run, whatever the calls
-    // between, nests at most maximum_run_nesting evaluations and statements.
     constexpr int maximum_parse_nesting = 32;
     constexpr std::uint16_t maximum_tree_height = 128;
     constexpr std::uint32_t maximum_run_nesting = 256;
 
-    // The values of a shader's globals, attributes, uniforms and varyings
-    // together (an array counts its length; a matrix is one value). Every
-    // instance of a module holds a copy, and a guest can declare thousands of
-    // arrays of 256 in a few kilobytes of source.
     constexpr std::size_t maximum_global_values = 4096;
     constexpr std::size_t maximum_scanned_bytes = 4U * 1024U * 1024U;
 
@@ -511,11 +478,6 @@ namespace {
 
     bool digit(char c) { return c >= '0' && c <= '9'; }
 
-    // Turns GLSL ES source into tokens. The preprocessor is the subset shaders
-    // use in practice: #version, #extension and #pragma (ignored); #define and
-    // #undef of object-like and function-like macros, as C++ defines them
-    // (without # stringizing, which GLSL ES has no strings for); and #if,
-    // #ifdef, #ifndef, #else and #endif over defined(NAME), NAME, 0 and 1.
     class Lexer {
     public:
         explicit Lexer(std::string_view source)
@@ -550,23 +512,16 @@ namespace {
             bool active { };
         };
 
-        // What the lexer reads from the source: a token, or a directive (its
-        // text after the '#', in token.text).
         struct Item {
             bool directive { };
             Token token;
         };
 
-        // A token that expansion may hide. A macro's name inside its own
-        // expansion is an ordinary identifier, so each piece carries the names
-        // it may not expand.
         struct Piece {
             Token token;
             std::vector<std::string> hidden;
         };
 
-        // What expansion reads: the pieces pushed back first, then the source
-        // (the arguments of a call are a stream of their own, with no source).
         struct Stream {
             std::deque<Piece> pushed;
             bool from_source { };
@@ -583,8 +538,6 @@ namespace {
             return conditions_.empty() || conditions_.back().active;
         }
 
-        // Tokenizes text. A macro's body is tokenized with body set: it has no
-        // directives, and # and ## are punctuation.
         std::vector<Item> lex(std::string_view text, int first_line, bool body)
         {
             std::vector<Item> items;
@@ -738,9 +691,6 @@ namespace {
             return tokens;
         }
 
-        // The next piece of a stream. The source runs each directive as it
-        // reaches it and skips the tokens that a false condition hides; a
-        // stream that is used up gives an End token.
         Piece next(Stream& stream)
         {
             if (!stream.pushed.empty()) {
@@ -778,9 +728,6 @@ namespace {
             out.push_back(std::move(piece));
         }
 
-        // Expands a stream into out. A macro's name is replaced by its body,
-        // which is read again with the name hidden from it. depth counts the
-        // expansions of arguments that this one is inside.
         void expand(Stream& stream, std::vector<Piece>& out, int depth)
         {
             for (;;) {
@@ -794,7 +741,6 @@ namespace {
                     emit(out, std::move(piece));
                     continue;
                 }
-                // Copied, because reading the arguments may run a #undef.
                 const std::string name = found->first;
                 const Macro macro = found->second;
                 if (!macro.function_like) {
@@ -859,24 +805,17 @@ namespace {
             }
         }
 
-        // The body of a macro with its parameters replaced. An argument is
-        // expanded first, unless ## joins it to a neighbour; ## pastes the
-        // tokens on either side of it. Every piece of the result hides names.
         std::vector<Piece> substitute(const Macro& macro,
             const std::vector<std::vector<Piece>>& arguments,
             const std::vector<std::vector<Piece>>& expanded,
             const std::vector<std::string>& hidden, int line)
         {
-            // Every invocation is charged, even one whose body is empty: a
-            // macro that expands to nothing sixteen times, eight deep, is
-            // 16^8 invocations.
             work_ += macro.body.size() + 1;
             if (work_ > maximum_scanned_bytes)
                 refuse(line, "the shader's macros expand to too much text");
             std::vector<Piece> out;
             const auto& body = macro.body;
             bool pasting = false;
-            // Whether out ends with an operand that a following ## pastes onto.
             bool joinable = false;
             for (std::size_t i = 0; i < body.size(); ++i) {
                 const auto& token = body[i];
@@ -931,8 +870,6 @@ namespace {
             return out;
         }
 
-        // The token ## makes of two: their spellings written together, read
-        // again as one token.
         Piece glue(const Piece& left, const Piece& right, int line)
         {
             const auto spelled = left.token.text + right.token.text;
@@ -988,8 +925,6 @@ namespace {
             return static_cast<std::size_t>(found - macro.parameters.begin());
         }
 
-        // The names of a function-like macro's parameters, from the text
-        // between its parentheses.
         static std::vector<std::string> parameters(
             std::string_view list, int line)
         {
@@ -1142,8 +1077,6 @@ namespace {
             if (name == "define") {
                 if (w.size() < 2 || !identifier_start(w[1].front()))
                     refuse(line, "#define needs a name");
-                // The name is the first word after the keyword. Searching the
-                // text for it would find a letter inside "define" first.
                 const auto at = text.find_first_not_of(
                     " \t\r", text.find(name) + name.size());
                 const auto after = at + w[1].size();
@@ -1315,8 +1248,6 @@ namespace {
                    word == "sampler3D" || word == "sampler2DRect";
         }
 
-        // Symbols ------------------------------------------------------------
-
         const Symbol* lookup(const std::string& name) const
         {
             for (auto scope = scopes_.rbegin(); scope != scopes_.rend();
@@ -1342,8 +1273,6 @@ namespace {
             return slot;
         }
 
-        // A global with a storage class (or a built-in) is part of the module's
-        // interface; a plain global is private to the shader.
         std::uint32_t declare_global(const std::string& name, TypeId type,
             std::uint32_t array_size, std::optional<Storage> storage,
             bool read_only)
@@ -1374,9 +1303,6 @@ namespace {
             declare_global(name, type, 0, Storage::Builtin, read_only);
         }
 
-        // Gives the function being parsed count more values of frame. A frame
-        // that cannot fit the run's stack is refused here, where the guest's
-        // declaration is, never at run time after a write has gone past it.
         void reserve(std::uint32_t count, int line)
         {
             if (count > stack_values - frame_size_)
@@ -1401,8 +1327,6 @@ namespace {
             scope[name] = symbol;
             return symbol;
         }
-
-        // Declarations -------------------------------------------------------
 
         void skip_precision()
         {
@@ -1582,8 +1506,6 @@ namespace {
                 overloads.push_back(target);
                 impl_.functions.push_back(std::move(function));
             } else {
-                // Redeclaration: keep the parameter slots of this declaration
-                // for a body that follows it.
                 target->parameters = function->parameters;
             }
             if (accept(";")) {
@@ -1605,8 +1527,6 @@ namespace {
                 impl_.main = target;
         }
 
-        // Statements ---------------------------------------------------------
-
         std::unique_ptr<ast::Statement> make_statement(
             ast::Statement::Type type, int line)
         {
@@ -1616,7 +1536,6 @@ namespace {
             return statement;
         }
 
-        // After the opening brace.
         std::unique_ptr<ast::Statement> block_rest()
         {
             auto block =
@@ -1672,7 +1591,6 @@ namespace {
                 } else if (constant) {
                     refuse(line, "a const needs an initializer");
                 }
-                // The initializer is parsed before the name is declared.
                 const auto symbol = declare_local(name, *type, array_size);
                 if (constant) {
                     scopes_.back()[name].read_only = true;
@@ -1811,9 +1729,6 @@ namespace {
             return result;
         }
 
-        // Expressions --------------------------------------------------------
-
-        // Gives parent its next argument, keeping the tree within bounds.
         void add_arg(ast::Node& parent, std::unique_ptr<ast::Node> child)
         {
             const auto height = static_cast<unsigned>(child->height) + 1U;
@@ -1824,7 +1739,6 @@ namespace {
             parent.args.push_back(std::move(child));
         }
 
-        // Counts one level of the parser's recursion for as long as it lives.
         class Nesting {
         public:
             Nesting(Parser& parser, int line)
@@ -1880,11 +1794,6 @@ namespace {
                 refuse(line, "the target of an assignment is not writable");
         }
 
-        // An argument for an out or inout parameter must be writable. The
-        // overloads declared so far decide it: when every one of them with this
-        // many parameters takes the argument as out or inout, the call needs a
-        // writable argument whichever is chosen. Where they disagree the choice
-        // is made at run time, and the call checks its own chosen overload there.
         void require_out_arguments(const ast::Node& call, int line)
         {
             const auto argc = call.args.size();
@@ -2261,7 +2170,6 @@ namespace {
 
     constexpr std::uint32_t maximum_depth = 32;
 
-    // A reference to components of a stored value, for assignment.
     struct Reference {
         Value* base { };
         std::array<std::uint8_t, 16> components { };
@@ -2273,7 +2181,7 @@ namespace {
 
     float truncate_toward_zero(float x) { return std::trunc(x); }
 
-} // namespace
+}
 
 struct Instance::State {
     explicit State(const Module::Impl& module)
@@ -2288,18 +2196,13 @@ struct Instance::State {
     std::vector<Value> stack;
     const TextureAccess* textures { };
     std::uint64_t steps { };
-    // What the run may take: the invocation's share, or what is left of the
-    // draw's.
     std::uint64_t step_limit { maximum_steps };
     std::uint32_t base { };
     std::uint32_t top { };
     std::uint32_t depth { };
-    // The evaluations and statements now being executed, calls included.
     std::uint32_t nesting { };
     Value returned;
 
-    // One level of the run's recursion, counted for as long as it lives (an
-    // exception that leaves the run unwinds the count with it).
     class Nest {
     public:
         Nest(State& state, int line)
@@ -2329,8 +2232,6 @@ struct Instance::State {
             fail(line, step_limit < maximum_steps ? "the draw ran too long"
                                                   : "the shader ran too long");
     }
-
-    // Values -------------------------------------------------------------
 
     static Value read(const Reference& reference)
     {
@@ -2438,8 +2339,6 @@ struct Instance::State {
         return result;
     }
 
-    // Operators ----------------------------------------------------------
-
     static Value arithmetic(
         ast::Op op, const Value& a, const Value& b, int line)
     {
@@ -2487,8 +2386,6 @@ struct Instance::State {
                 }
                 return r;
             }
-            // A matrix times a scalar falls through to the component-wise
-            // case below.
         }
         const int na = ast::count_of(a.type);
         const int nb = ast::count_of(b.type);
@@ -2587,8 +2484,6 @@ struct Instance::State {
             fail(line, "unsupported operator");
         }
     }
-
-    // Built-in functions -------------------------------------------------
 
     template <class F>
     static Value componentwise(const Value* args, int argc, F function)
@@ -2743,8 +2638,6 @@ struct Instance::State {
         case B::Mix:
             need(3);
             require_float_genus(args, 3, line);
-            // mix(x, y, a): the widest argument may be a, so order the
-            // operands by hand.
             {
                 Value result = ast::make(args[0].type);
                 const int n = ast::count_of(args[0].type);
@@ -2767,7 +2660,6 @@ struct Instance::State {
             need(3);
             require_float_genus(args, 3, line);
             {
-                // Edges first: the value is the last argument.
                 Value result = ast::make(args[2].type);
                 const int n = ast::count_of(args[2].type);
                 const int n0 = ast::count_of(args[0].type);
@@ -2973,8 +2865,6 @@ struct Instance::State {
         fail(line, "unsupported built-in");
     }
 
-    // Constructors -------------------------------------------------------
-
     static Value construct(TypeId type, const Value* args, int argc, int line)
     {
         if (argc < 1)
@@ -3035,10 +2925,6 @@ struct Instance::State {
         return result;
     }
 
-    // Calls --------------------------------------------------------------
-
-    // Evaluated arguments live on the stack above the frame in use, so a call
-    // allocates nothing.
     class Arguments {
     public:
         Arguments(State& state, std::size_t count, int line)
@@ -3115,9 +3001,6 @@ struct Instance::State {
         ++depth;
         const auto flow = exec(*chosen->body);
         --depth;
-        // A return statement leaves its value in returned. A body that ends
-        // without one returns an undefined value (GLSL ES 1.00 section 6.1):
-        // zero here, not whatever a call inside the body returned last.
         Value result = flow == Flow::Return ? returned
                                             : ast::make(chosen->result);
         base = saved_base;
@@ -3131,7 +3014,6 @@ struct Instance::State {
                                 std::string { type_name(result.type) } +
                                 ", not " +
                                 std::string { type_name(chosen->result) });
-        // The callee's frame is still intact above the stack top.
         for (std::size_t i = 0; i < argc; ++i)
             if (chosen->parameters[i].direction !=
                 ast::Parameter::Direction::In)
@@ -3141,8 +3023,6 @@ struct Instance::State {
     }
 
     struct Discarded { };
-
-    // Expressions --------------------------------------------------------
 
     Value eval(const ast::Node& node)
     {
@@ -3293,8 +3173,6 @@ struct Instance::State {
         fail(node.line, "unsupported expression");
     }
 
-    // Statements ---------------------------------------------------------
-
     bool truth(const ast::Node& condition)
     {
         const auto value = eval(condition);
@@ -3399,8 +3277,6 @@ struct Instance::State {
     }
 };
 
-// Module ---------------------------------------------------------------
-
 Module::Module(std::shared_ptr<const Impl> impl)
     : impl_(std::move(impl))
 {
@@ -3448,8 +3324,6 @@ const Variable* Module::find(std::string_view name) const
     return nullptr;
 }
 
-// Instance -------------------------------------------------------------
-
 Instance::Instance(std::shared_ptr<const Module> module)
     : module_(std::move(module))
     , state_(std::make_unique<State>(module_->impl()))
@@ -3486,7 +3360,6 @@ bool Instance::run(const TextureAccess* textures)
     state.top = 0;
     state.depth = 0;
     state.nesting = 0;
-    // However the run ends, its steps count against the draw.
     struct Settle {
         std::uint64_t& total;
         const State& state;
@@ -3502,7 +3375,6 @@ bool Instance::run(const TextureAccess* textures)
             state.globals[initializer.slot] = value;
         }
         const auto& main = *impl.main;
-        // The compiler refuses a bigger frame; the run does not rest on that.
         if (main.frame_size > stack_values)
             fail(
                 main.body->line, "the stack is too small for main's variables");
@@ -3523,4 +3395,4 @@ bool Instance::run(const TextureAccess* textures)
     return true;
 }
 
-} // namespace shade::glsl
+}

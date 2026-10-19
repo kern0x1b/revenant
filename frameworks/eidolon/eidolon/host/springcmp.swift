@@ -1,9 +1,3 @@
-// springcmp.swift: the port's Spring against Apple's SwiftUI.Spring, number by number, on the host. The port's
-// Springs.swift is compiled beside this file (it names no type of its own module but Apple's Animatable and
-// VectorArithmetic, so the host's SwiftUI is imported in front of it); `Spring` is then the port's and
-// `SwiftUI.Spring` is Apple's. It prints every number that differs by more than 1e-9 and the worst difference.
-//   d=$(mktemp -d); (echo "import SwiftUI"; cat ../Sources/SwiftUI/Springs.swift) > $d/Springs.swift
-//   cp springcmp.swift $d/main.swift && swiftc -O $d/main.swift $d/Springs.swift -o $d/springcmp && $d/springcmp
 import SwiftUI
 typealias Mine = Spring
 typealias Apple = SwiftUI.Spring
@@ -43,8 +37,6 @@ for (duration, bounce) in forms {
     for _ in 0..<6 { m.update(value: &vm, velocity: &sm, target: 1, deltaTime: 1.0 / 60); a.update(value: &va, velocity: &sa, target: 1, deltaTime: 1.0 / 60) }
     note("six frames value", vm, va); note("six frames velocity", sm, sa)
 }
-// which springs are equal: Apple's compares what it stores (the damped frequency, the decay and the mass), so
-// the spring of a response and a ratio is the spring of a duration and the bounce that is one minus it
 var pairs = 0
 func same(_ what: String, _ mine: Bool, _ apple: Bool) {
     pairs += 1
@@ -79,9 +71,6 @@ same("critical system and a duration", Mine(mass: 1, stiffness: 157.913670417429
      Apple(mass: 1, stiffness: 157.91367041742973, damping: 25.132741228718345) == Apple(duration: 0.5, bounce: 0))
 print("compared", pairs, "pairs of springs for equality")
 
-// Animation.spring(_:) of a spring against the animation of a pair of numbers, and against the animation of another spring:
-// Apple's animation holds a response and a fraction taken back out of the spring, the port's holds `asFluid` and
-// compares by `heldNumbers`
 var made: [(Mine, Apple)] = []
 let grid = [0.1, 0.15, 0.25, 0.3, 0.5, 0.75, 1, 1.5, 2, 3], ratios = [0.1, 0.2, 0.3, 0.5, 0.7, 0.825, 0.85, 0.9, 1.0, 1.25, 1.5, 2]
 for r in grid { for z in ratios { made.append((Mine(response: r, dampingRatio: z), Apple(response: r, dampingRatio: z))) } }
@@ -103,11 +92,6 @@ for (mine, apple) in made {
 }
 print("compared", animations, "pairs of animations for equality")
 
-// Animation.interpolatingSpring: Apple's is a SpringAnimation holding a mass, a stiffness and a damping (the numbers of the
-// spring it was made of read back, or the ones it was given), not the fluid animation of a response and a fraction. The held
-// numbers are read out of it by reflection; its values are asked of it through an AnimationContext, which has no public
-// initializer, so one is put together in memory from an AnimationState and EnvironmentValues (a 26-byte struct: the state at
-// 0, the environment at 8, two flags after them). The port's own types are InterpolatingSpring, Springs.swift.
 func makeContext<V: VectorArithmetic>(_: V.Type = Double.self) -> AnimationContext<V> {
     let memory = UnsafeMutableRawPointer.allocate(byteCount: 32, alignment: 8)
     memory.initializeMemory(as: UInt8.self, repeating: 0, count: 32)
@@ -162,7 +146,6 @@ for (name, mine, apple) in interpolating {
     }
 }
 print("compared", solved, "values of interpolating springs")
-// where it is over: the last moment it answers and the first it does not, to a billionth of a second, and the answer before that
 var settled = 0
 func compareEnds(_ name: String, _ mine: InterpolatingSpring, _ apple: Animation) {
     settled += 1
@@ -188,8 +171,6 @@ for (m, k, c) in [(1.0, 100.0, 0.0), (1.0, 100.0, 1e-6), (1.0, 100.0, -2.0), (0.
 }
 print("compared", settled, "ends of interpolating springs")
 
-// an interpolating spring on a vector (a pair, as a CGPoint or a CGSize is animated): the speed it starts with is a multiple of the distance of
-// every component, so each component goes as the scalar one does, and the pair is over when the scalar is, whatever its length
 var pairsAsked = 0
 for (name, mine, apple) in interpolating where name.contains("v 1.5") || name.contains("v -2") {
     for (x, y) in [(3.0, 4.0), (-0.3, 0.4), (60.0, -80.0), (0.0, 7.0)] {
@@ -205,8 +186,6 @@ for (name, mine, apple) in interpolating where name.contains("v 1.5") || name.co
 }
 print("asked Apple's interpolating springs", pairsAsked, "times of a pair")
 
-// the blend of a spring moves nothing in time: Apple's answers for a spring are the same whatever blend it was given
-// (and its end and logical completion with them)
 func answersOf(_ animation: Animation, distance: Double, at times: [Double]) -> [Double?] {
     var context = makeContext()
     return times.map { animation.animate(value: distance, time: $0, context: &context) }
@@ -222,9 +201,6 @@ for (r, z) in [(0.5, 0.825), (0.15, 0.86), (1.0, 0.5), (0.3, 1.0), (0.4, 1.4)] {
 }
 print("compared", blended, "blends against none")
 
-// the fluid spring: Apple's steps its spring a three-hundredth of a second at a time and answers a staircase, and answers nothing
-// from the step whose state is close to the target and at rest; the answers come from one context, in step order, because the
-// animation integrates from the state it kept (a question asked cold, far into the animation, is answered wrongly)
 var fluidAsked = 0, fluidEnds = 0
 func compareFluid(_ name: String, _ mine: Mine, _ apple: Animation, distance: Double, limit: Int = 3000) {
     let track = FluidTrack(mine, distance: distance), end = track.end(by: Double(limit) / 300) ?? .infinity
@@ -250,12 +226,10 @@ for r in [0.1, 0.15, 0.25, 0.3, 0.5, 0.75, 1, 1.5, 2, 3] {
 for (r, b) in [(0.5, 0.0), (0.5, 0.15), (0.5, 0.3), (0.15, 0.15), (0.35, -0.4)] {
     for d in [0.5, 4, 60] { compareFluid("duration \(r) bounce \(b)", Mine(duration: r, bounce: b), Animation.spring(duration: r, bounce: b), distance: d) }
 }
-// a response shorter than the step allows, a spring that is not damped, one that is damped by a negative, or by too much, or by nothing
 for (r, z) in [(0.0, 0.8), (-1.0, 0.8), (0.0001, 0.8), (0.02, 0.5), (0.0296, 0.5), (0.03, 0.5), (0.5, 0.0), (0.5, 0.001), (0.5, -0.5), (0.5, 50), (0.5, Double.nan), (Double.nan, 0.5)] {
     compareFluid("odd response \(r) fraction \(z)", Mine(response: r, dampingRatio: z), Animation.spring(response: r, dampingFraction: z), distance: 1)
 }
 print("asked Apple's fluid spring", fluidAsked, "times; it ended", fluidEnds, "of its runs")
-// a vector rests when its length does, and moves along its direction as the unit solution does
 var vectorAsked = 0
 for (r, z) in [(0.5, 0.825), (0.3, 0.4), (1.0, 1.0), (0.4, 1.5)] {
     for (x, y) in [(3.0, 4.0), (-0.3, 0.4), (60.0, -80.0), (0.003, 0.004)] {
@@ -273,8 +247,6 @@ for (r, z) in [(0.5, 0.825), (0.3, 0.4), (1.0, 1.0), (0.4, 1.5)] {
     }
 }
 print("asked Apple's fluid spring", vectorAsked, "times of a pair")
-// a spring that is hardly damped rests after hours, and Apple's goes on answering until then: no horizon, the same first step it answers
-// nothing at as the one this finds (steps asked one after the other, from one context, as above)
 var longAsked = 0
 for z in [1e-3, 1e-4, 1e-5] {
     let track = FluidTrack(Mine(response: 0.5, dampingRatio: z), distance: 1), apple = Animation.spring(response: 0.5, dampingFraction: z)
@@ -290,9 +262,6 @@ for z in [1e-3, 1e-4, 1e-5] {
 }
 print("asked Apple's fluid spring", longAsked, "times of springs that rest after hours")
 
-// .speed and .delay, in every order: Apple's animation is `rate * (t - delay)` seconds into its own time, so a speed after a delay
-// scales it and a delay after a speed does not, and two delays add. The answers come step by step from one context (a fluid
-// spring integrates from the state it kept), with steps finer than a three-hundredth of a second of the animation's own time.
 enum Retime { case speed(Double), delay(Double), complete(Double), `repeat`(Int, Bool), forever(Bool) }
 func retime(_ animation: Animation, _ ops: [Retime]) -> Animation {
     ops.reduce(animation) { all, op in
@@ -319,12 +288,9 @@ func retimed(_ retiming: Retiming, _ ops: [Retime]) -> Retiming {
 var retimedAsked = 0
 func compareRetimed(_ name: String, _ apple: Animation, _ ops: [Retime], distance: Double, natural: Double, base: BaseTrack) {
     let retiming = retimed(Retiming(), ops), mine = AnimationCourse(base, retiming: retiming)
-    // an animation asked first for a moment past its end (a negative delay longer than it is) is answered by Apple's fluid spring
-    // from the state it began with, one step on, and is not asked here
     if mine.position(elapsed: 0).done { return }
     var context = makeContext()
     let step = 1 / (300 * max(retiming.rate, 1))
-    // how long it lasts, for how many steps to ask: where it is over by a thousand seconds (one that never is is asked for 600 steps)
     var length = Double.infinity
     var probe = 0.0
     while probe < 1000 { if mine.position(elapsed: probe).done { length = probe; break }; probe += 0.05 }
@@ -363,11 +329,6 @@ for (name, held, apple) in [("mass 1 stiffness 100 damping 10", InterpolatingSpr
 }
 print("asked Apple", retimedAsked, "times of springs that were sped up, slowed down and delayed")
 
-// .repeatCount and .repeatForever, in every order with .speed and .delay: the calls before it are in every pass (a delay before it is a delay
-// before each pass, and a pass played back to front starts with that delay and plays the animation underneath from its end), the calls after
-// it are around the passes as a whole. Apple's repeat restarts a pass at the first question it is asked after the animation underneath
-// answered nothing, so a pass starts up to one step of the questions late and the passes drift by it: the answers are taken to be Apple's
-// when they are the ones of the port at some moment within the drift, and the end when it is within it
 var repeatedAsked = 0
 func compareRepeated(_ name: String, _ apple: Animation, _ ops: [Retime], base: BaseTrack, step: Double, until: Double) {
     let retiming = retimed(Retiming(), ops), mine = AnimationCourse(base, retiming: retiming)
@@ -394,7 +355,6 @@ func compareRepeated(_ name: String, _ apple: Animation, _ ops: [Retime], base: 
             nearest = min(nearest, abs(v - got!))
             u += step / 8
         }
-        // at the question that finds a pass over Apple's answers where the pass ends (nothing, or all of it), and starts the next at the one after
         let atPassEnd = (got! == 0 || got! == 1) && (jumps || nearest < step)
         if !atPassEnd && (got! < low - 1e-9 || got! > high + 1e-9) { print("DIFF repeated", name, ops, "at", t, "apple", got!, "mine between", low, high) }
         j += 1
@@ -413,9 +373,6 @@ for ops in repeatedCases {
     }
 }
 print("asked Apple", repeatedAsked, "times of animations that repeat")
-// what the calls come to is not what makes two animations equal: Apple's animation holds the calls, so a speed of one, a delay of nothing,
-// and two delays that add to another are each another animation than the one without them, and two are equal when the same calls were made
-// in the same order; every sequence of up to three calls from five, on a spring and on a curve, paired with every other
 let equalityOps: [Retime] = [.speed(1), .speed(2), .delay(0), .delay(1), .complete(1)]
 var equalitySequences: [[Retime]] = [[]]
 for _ in 0..<3 { equalitySequences += equalitySequences.filter { $0.count == equalitySequences.map(\.count).max()! }.flatMap { sequence in equalityOps.map { sequence + [$0] } } }
@@ -430,8 +387,6 @@ for base in [Animation.linear(duration: 1), Animation.spring(response: 0.5, damp
 }
 print("compared", equalitySequences.count * equalitySequences.count * 2, "pairs of retimed animations for equality")
 
-// a custom animation under the calls: the time it is asked for is the one the calls make of the time it is given (the last call made first, a
-// speed multiplying it and a delay taking it off to nothing), it answers no velocity and does not merge, once any call has been made on it
 nonisolated(unsafe) var customAsked: [Double] = []
 struct Recording: CustomAnimation {
     func animate<V: VectorArithmetic>(value: V, time: TimeInterval, context: inout AnimationContext<V>) -> V? { customAsked.append(time); return time >= 8 ? nil : value }
@@ -447,7 +402,6 @@ for ops in equalitySequences + [[.speed(-1)], [.delay(1), .speed(-1)], [.speed(-
         customAsked = []
         _ = apple.animate(value: 1.0, time: t, context: &context)
         customTimes += 1
-        // a repeat only means something up to the first question it is answered nothing to (the passes after it restart from the question)
         if mine.repeated != nil && t > 1.9 { continue }
         let got = customAsked.first ?? .nan
         if abs(got - mine.baseTime(at: t)) > 1e-12 && !(got == 0 && mine.baseTime(at: t) == 0) { print("DIFF custom time", ops, "at", t, "apple", got, "mine", mine.baseTime(at: t)) }
@@ -459,9 +413,6 @@ for ops in equalitySequences + [[.speed(-1)], [.delay(1), .speed(-1)], [.speed(-
 }
 print("asked Apple", customTimes, "times of a custom animation under calls")
 
-// Spring.settlingDuration, in every form: Apple's settles a spring that oscillates when the envelope of its swing is under epsilon
-// (the logarithm of the distance plus what the speed adds to the decay, over epsilon, over the decay, and no less than nothing), and
-// one that does not a tenth of a second (added up) after the last tenth at which it is epsilon or more away
 var settlings = 0
 func settle(_ what: String, _ mine: Double, _ apple: Double) {
     settlings += 1
@@ -494,7 +445,6 @@ for (name, m, a) in sweptSprings {
         }
     }
 }
-// the springs no one means, and the numbers that are not
 for z in [0.0, -0.2, 1.0, 2.0, 0.5, Double.nan] {
     let m = Mine(response: 0.5, dampingRatio: z), a = Apple(response: 0.5, dampingRatio: z)
     for (target, v0, eps) in [(1.0, 0.0, 0.001), (1e-4, 0.0, 0.001), (0.0, 0.0, 0.001), (0.0, 5.0, 0.001), (1.0, 0.0, 0.0), (1.0, 0.0, -1.0), (1.0, 0.0, 1e-300), (1.0, 0.0, Double.nan), (Double.nan, 0.0, 0.001), (1.0, Double.nan, 0.001)] {
@@ -505,8 +455,6 @@ for r in [0.0, -1.0, Double.nan, 1e-9, 1e5] {
     settle("response \(r)", Mine(response: r, dampingRatio: 0.5).settlingDuration, Apple(response: r, dampingRatio: 0.5).settlingDuration)
     settle("response \(r) with a speed", Mine(response: r, dampingRatio: 0.5).settlingDuration(target: 1.0, initialVelocity: 3, epsilon: 0.001), Apple(response: r, dampingRatio: 0.5).settlingDuration(target: 1.0, initialVelocity: 3, epsilon: 0.001))
 }
-// the response a settling duration asks for (Apple solves it by an iteration of its own, so the two agree to a few hundred-thousandths, and
-// not at all for a ratio within a millionth of one below it, where its iteration is off by up to seven in a hundred)
 for z in [0.3, 0.5, 0.7, 0.9, 1.0, 1.3, 2.0] {
     for t in [0.2, 0.5, 1.0, 2.5] {
         for eps in [0.01, 0.001, 1e-5] {
@@ -523,8 +471,6 @@ for (t, z, eps) in [(1e-9, 0.5, 0.001), (0.005, 0.5, 0.001), (0.01, 0.5, 0.001),
     let (m, a) = ((mine.response, mine.dampingRatio), (apple.response, apple.dampingRatio))
     if !((m.0.isNaN && a.0.isNaN) || abs(m.0 - a.0) <= 5e-5 * abs(a.0)) || !((m.1.isNaN && a.1.isNaN) || abs(m.1 - a.1) <= 1e-12) { print("DIFF settling response for a settling of \(t) at ratio \(z) epsilon \(eps) mine", m, "apple", a) }
 }
-// where it stops answering: Apple's looks at the first 1013 tenths of a second, and the spring that is still out at the last of them is
-// over at once. The response at which it starts to is found by halving, and the answer is asked just under it and just over
 func settleCap(_ what: String, _ ratio: Double, _ target: Double, _ eps: Double, _ v0: Double) {
     var lo = 1.0, hi = 400.0
     for _ in 0..<70 {
@@ -538,8 +484,6 @@ func settleCap(_ what: String, _ ratio: Double, _ target: Double, _ eps: Double,
     if Mine(response: lo * (1 - 1e-9), dampingRatio: ratio).settlingDuration(target: target, initialVelocity: v0, epsilon: eps) < 101 { print("DIFF settling cap", what, "answered under 101 s at", lo) }
 }
 for (z, target, eps, v0) in [(1.0, 1.0, 0.001, 0.0), (2.0, 1.0, 0.001, 0.0), (1.0, 5.0, 0.01, 0.0), (1.0, 0.3, 0.001, 3.0), (1.5, 100.0, 1e-4, -4.0)] { settleCap("ratio \(z) target \(target) epsilon \(eps) speed \(v0)", z, target, eps, v0) }
-// and for an interpolating spring that is critical: the stiffness at which it starts to, for three masses, the first tenth inside at
-// 101.2 s on one side and none by then on the other
 func passes(_ apple: Animation) -> Bool {
     var context = makeContext()
     return apple.animate(value: 1, time: 0, context: &context) != nil

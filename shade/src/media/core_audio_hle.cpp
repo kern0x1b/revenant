@@ -39,23 +39,23 @@ namespace {
     constexpr std::uint32_t baseband_output_stream = 5;
     constexpr std::uint32_t baseband_input_device = 6;
     constexpr std::uint32_t baseband_input_stream = 7;
-    constexpr std::uint32_t device_name_property = 0x6e616d65; // 'name'
-    constexpr std::uint32_t device_streams_property = 0x73746d23; // 'stm#'
-    constexpr std::uint32_t nominal_sample_rate_property = 0x6e737274; // 'nsrt'
+    constexpr std::uint32_t device_name_property = 0x6e616d65;
+    constexpr std::uint32_t device_streams_property = 0x73746d23;
+    constexpr std::uint32_t nominal_sample_rate_property = 0x6e737274;
     constexpr std::uint32_t available_sample_rates_property =
-        0x6e737223; // 'nsr#'
-    constexpr std::uint32_t buffer_frame_size_property = 0x6673697a; // 'fsiz'
-    constexpr std::uint32_t volume_scalar_property = 0x766f6c6d; // 'volm'
-    constexpr std::uint32_t device_is_running_property = 0x676f696e; // 'goin'
-    constexpr std::uint32_t physical_format_property = 0x70667420; // 'pft '
+        0x6e737223;
+    constexpr std::uint32_t buffer_frame_size_property = 0x6673697a;
+    constexpr std::uint32_t volume_scalar_property = 0x766f6c6d;
+    constexpr std::uint32_t device_is_running_property = 0x676f696e;
+    constexpr std::uint32_t physical_format_property = 0x70667420;
     constexpr std::uint32_t available_physical_formats_property =
-        0x70667461; // 'pfta'
-    constexpr std::uint32_t jack_connected_property = 0x6a61636b; // 'jack'
-    constexpr std::uint32_t device_mute_property = 0x646d7574; // 'dmut'
-    constexpr std::uint32_t mute_property = 0x6d757465; // 'mute'
-    constexpr std::uint32_t solo_property = 0x736f6c6f; // 'solo'
-    constexpr std::uint32_t unsupported_property = 0x77686f3f; // 'who?'
-    constexpr std::uint32_t parameter_error = 0xffffffce; // -50
+        0x70667461;
+    constexpr std::uint32_t jack_connected_property = 0x6a61636b;
+    constexpr std::uint32_t device_mute_property = 0x646d7574;
+    constexpr std::uint32_t mute_property = 0x6d757465;
+    constexpr std::uint32_t solo_property = 0x736f6c6f;
+    constexpr std::uint32_t unsupported_property = 0x77686f3f;
+    constexpr std::uint32_t parameter_error = 0xffffffce;
     constexpr std::string_view virtual_device_name {
         "WM8758 Output Device audio0"
     };
@@ -63,8 +63,8 @@ namespace {
     constexpr std::string_view baseband_input_name { "Baseband Input" };
     constexpr double media_sample_rate = 44100.0;
     constexpr double telephony_sample_rate = 8000.0;
-    constexpr std::uint32_t linear_pcm_format = 0x6c70636d; // 'lpcm'
-    constexpr std::uint32_t linear_pcm_flags = 0xc; // signed integer, packed
+    constexpr std::uint32_t linear_pcm_format = 0x6c70636d;
+    constexpr std::uint32_t linear_pcm_flags = 0xc;
     constexpr std::uint32_t stream_format_size = 40;
     constexpr std::uint32_t ranged_stream_format_size = 56;
     constexpr std::uint32_t audio_timestamp_size = 64;
@@ -127,10 +127,6 @@ namespace {
 
     bool is_route_property(std::uint32_t property)
     {
-        // The first-generation CoreAudio driver represents hardware crosspoints
-        // as printable four-character source-to-destination selectors (for
-        // example, "bb2w"). Treat the family as virtual routing state,
-        // independent of any particular source or codec name.
         const std::array characters {
             static_cast<unsigned char>(property >> 24U),
             static_cast<unsigned char>(property >> 16U),
@@ -216,11 +212,11 @@ namespace {
         store64(result, 0, std::bit_cast<std::uint64_t>(sample_rate));
         store32(result, 8, linear_pcm_format);
         store32(result, 12, linear_pcm_flags);
-        store32(result, 16, bytes_per_frame); // bytes per packet
-        store32(result, 20, 1); // frames per packet
+        store32(result, 16, bytes_per_frame);
+        store32(result, 20, 1);
         store32(result, 24, bytes_per_frame);
         store32(result, 28, channels);
-        store32(result, 32, 16); // bits per channel
+        store32(result, 32, 16);
         return result;
     }
 
@@ -260,7 +256,7 @@ namespace {
         return memory.copy_in(address, timestamp);
     }
 
-} // namespace
+}
 
 CoreAudioHle::CoreAudioHle(
     UserlandHleRegistry& registry, std::shared_ptr<AudioService> service)
@@ -452,12 +448,8 @@ std::optional<CoreAudioHle::ScheduledIoProc> CoreAudioHle::take_due_io_proc(
     callback.registers[0] = registration.device;
     callback.registers[1] = registration.timestamp;
     callback.registers[2] =
-        0; // no emulated input buffers on this output device
+        0;
     callback.registers[3] = 0;
-    // A host-scheduled callback does not pass through libpthread's usual thread
-    // entry trampoline. Early firmware reads its pthread base directly from r9;
-    // later libSystem reads the CP15 user thread pointer. Preserve both pieces
-    // of the owning firmware thread context without selecting a build version.
     callback.registers[9] = registration.thread_r9;
     callback.cthread_self = registration.cthread_self;
     callback.registers[13] = stack_pointer;
@@ -680,7 +672,6 @@ void CoreAudioHle::device_property(UserlandHleCall& call)
     }
     const auto property = call.argument(3);
     if (property == device_streams_property) {
-        // The legacy API scopes each device's stream list using isInput.
         if ((call.argument(2) != 0) != device->input) {
             const std::array<std::byte, 0> empty { };
             call.set_return(write_sized_data(
@@ -923,8 +914,6 @@ void CoreAudioHle::stream_set_property(UserlandHleCall& call)
 
 void CoreAudioHle::object_property(UserlandHleCall& call)
 {
-    // The firmware owns the HAL system object and its plug-in object tree.
-    // In particular, device UID translation must reach that native registry.
     if (find_device(call.argument(0)) == nullptr) {
         call.resume_original_persistently();
         return;
@@ -933,7 +922,7 @@ void CoreAudioHle::object_property(UserlandHleCall& call)
     const auto property = call.memory().read32(address).value_or(0);
     if (property == jack_connected_property) {
         std::array<std::byte, sizeof(std::uint32_t)> data { };
-        store32(data, 0, 0); // The emulator has no wired headset attached.
+        store32(data, 0, 0);
         call.set_return(
             write_sized_data(call, call.argument(4), call.argument(5), data)
                 ? 0U
@@ -981,10 +970,6 @@ void CoreAudioHle::object_set_property(UserlandHleCall& call)
 
 void CoreAudioHle::property_listener(UserlandHleCall& call)
 {
-    // The adapter owns only its synthetic compatibility objects. Listeners for
-    // the firmware HAL's object tree must remain native: plug-ins use the
-    // system object's initialization transition to perform their deferred
-    // setup.
     if (find_device(call.argument(0)) == nullptr &&
         find_stream(call.argument(0)) == nullptr) {
         call.resume_original_persistently();
@@ -1003,8 +988,6 @@ void CoreAudioHle::create_native_io_proc(UserlandHleCall& call)
         call.set_return(parameter_error);
         return;
     }
-    // HAL objects retain their native IOProc registration: route and stream
-    // usage queries depend on it. The host only schedules the saved callback.
     if (find_device(device) == nullptr) {
         call.resume_original_persistently(
             [this, device, callback, client_data, output_id](
@@ -1082,9 +1065,6 @@ void CoreAudioHle::destroy_native_io_proc(UserlandHleCall& call)
 
 void CoreAudioHle::start_native_io_at_time(UserlandHleCall& call)
 {
-    // The first-generation HAL's start-at-time path is equivalent to an
-    // immediate start when no hardware clock is present. Reuse the same
-    // registration and callback buffer setup as AudioDeviceStart.
     start_io(call);
 }
 
@@ -1265,4 +1245,4 @@ void CoreAudioHle::stop_io(UserlandHleCall& call)
     call.set_return(0);
 }
 
-} // namespace shade
+}

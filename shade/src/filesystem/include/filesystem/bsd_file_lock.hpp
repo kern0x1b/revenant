@@ -29,7 +29,6 @@ enum class AdvisoryLockKind : std::uint8_t {
 struct RecordLockRange {
     AdvisoryLockKind kind { AdvisoryLockKind::Shared };
     std::uint64_t start { };
-    // A disengaged end is the POSIX l_len == 0 form extending through EOF.
     std::optional<std::uint64_t> end;
 };
 
@@ -39,9 +38,6 @@ struct RecordLockConflict : RecordLockRange {
 
 class AdvisoryFileLockRegistry;
 
-// XNU attaches flock locks to struct fileglob (the open file description),
-// rather than to a process or an fd-table slot.  This object is consequently
-// shared by dup(2), fork(2), and SCM_RIGHTS transfers.
 class RegularFileOpenDescription {
 public:
     RegularFileOpenDescription(std::uint64_t identifier,
@@ -72,8 +68,6 @@ public:
     [[nodiscard]] std::shared_ptr<RegularFileOpenDescription> open(
         std::uint32_t permanent_file_id, int host_descriptor);
 
-    // Returns false only when another open description owns an incompatible
-    // lock.  Conversion of a description's own lock is atomic.
     [[nodiscard]] bool try_acquire(
         const RegularFileOpenDescription& description, AdvisoryLockKind kind);
     void release(const RegularFileOpenDescription& description);
@@ -103,4 +97,4 @@ private:
     std::map<std::uint32_t, std::vector<OwnedRecordLock>> record_locks_;
 };
 
-} // namespace shade::bsd
+}

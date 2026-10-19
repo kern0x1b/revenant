@@ -37,14 +37,11 @@ namespace {
         return result;
     }
 
-} // namespace
+}
 
 bool CompatibilityKernel::dispatch_mach_vm_kernel_rpc_trap(
     Cpu& cpu, std::uint32_t trap)
 {
-    // ARM32 libsystem exports both 64-bit mach_vm_* and pointer-sized
-    // vm_* direct traps. Keep their fast paths in one handler;
-    // the MIG entry points remain the fallback when the target is not valid.
     if (trap != 10U && trap != 11U && trap != 12U && trap != 13U &&
         trap != 14U && trap != 15U)
         return false;
@@ -53,9 +50,6 @@ bool CompatibilityKernel::dispatch_mach_vm_kernel_rpc_trap(
     if (shared_state_->darwin_abi.mach_kernel_rpc ==
             DarwinMachKernelRpcAbi::DirectWideVmAndPortTraps &&
         (trap == 11U || trap == 13U || trap == 15U)) {
-        // The wide-only trap table removed vm_allocate/vm_deallocate and
-        // repurposed slot 15 from vm_protect to mach_vm_map. Let libsystem's
-        // native slow path use the complete MIG mapping implementation.
         registers[0] = darwin::mach_message::send_invalid_destination;
         return true;
     }
@@ -105,11 +99,6 @@ bool CompatibilityKernel::dispatch_mach_vm_kernel_rpc_trap(
     }
 
     if (trap == 14U) {
-        // _kernelrpc_mach_vm_protect_trap uses two 64-bit arguments in the
-        // ARM32 register image: address r1:r2 and size r3:r4, followed by
-        // set_maximum and new_protection in r5/r6.  The guest address space is
-        // 32-bit, so reject values that cannot be represented before touching
-        // the mapping.
         const auto address = static_cast<std::uint64_t>(registers[1]) |
                              (static_cast<std::uint64_t>(registers[2]) << 32U);
         const auto size = static_cast<std::uint64_t>(registers[3]) |
@@ -126,9 +115,6 @@ bool CompatibilityKernel::dispatch_mach_vm_kernel_rpc_trap(
     }
 
     if (trap == 15U) {
-        // _kernelrpc_vm_protect_trap takes the address by value. The fifth
-        // argument (new_protection) is moved from the stack into r4 by the
-        // native ARM32 trampoline; r3 is set_maximum.
         registers[0] = protect_memory(cpu, registers[1], registers[2],
                            memory_permissions(registers[4]))
                            ? darwin::mach::success
@@ -136,9 +122,6 @@ bool CompatibilityKernel::dispatch_mach_vm_kernel_rpc_trap(
         return true;
     }
 
-    // XNU's direct deallocation traps are 12 and 13 across the supported
-    // ARM32 variants. Treat already-unmapped pages as successful and reuse the
-    // same AddressSpace operation as the MIG vm_deallocate path.
     const bool wide = trap == 12U;
     const auto address = static_cast<std::uint64_t>(registers[1]) |
         (wide ? static_cast<std::uint64_t>(registers[2]) << 32U : 0U);
@@ -156,4 +139,4 @@ bool CompatibilityKernel::dispatch_mach_vm_kernel_rpc_trap(
     return true;
 }
 
-} // namespace shade
+}

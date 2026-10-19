@@ -215,10 +215,6 @@ extension PresentationDetent {
     }
 }
 
-/// A detent whose height the app decides, from the context it is given. iOS 6's modal screens have no
-/// detents to size -- they are always the whole screen -- so the height an app computes has nothing to
-/// measure against and `PresentationDetent.Context.maxDetentValue` is the screen: the context is handed
-/// the largest detent the release would allow, which here is the screen itself.
 extension PresentationDetent.Context {
     public static var maximum: CGFloat { max(UIScreen.main.bounds.size.width, UIScreen.main.bounds.size.height) }
 }

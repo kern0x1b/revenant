@@ -16,7 +16,6 @@ struct RowTraits {
     var background: UIColor?
     var trailingFullSwipe = true
     var leadingFullSwipe = true
-    // what the table draws between rows, where the app has something to say about it: nil leaves the table's own line
     var separator: Visibility?
     var separatorTint: UIColor?
 }
@@ -62,7 +61,6 @@ func swipeButtons(_ view: any View, destructive: Bool = false, tint: UIColor? = 
     }
     if let group = view as? GroupView { return group.childViews.flatMap { swipeButtons($0, destructive: destructive, tint: tint) } }
     if let modified = view as? ModifiedViewLike {
-        // .tint(...) on a swipe button is the colour of its background
         var inner = tint
         if let environment = modified.modifierValue as? EnvironmentModifier {
             var values = EnvironmentValues()
@@ -112,7 +110,6 @@ extension View {
     }
     public func swipeActions<T: View>(edge: HorizontalEdge = .trailing, allowsFullSwipe: Bool = true, @ViewBuilder content: () -> T) -> some View {
         let buttons = swipeButtons(content())
-        // a row swipes from the leading side, in colours and by full swipe, only where UIKit's swipe actions exist
         if !SwipeActionsBridge.available && (edge == .leading || buttons.contains { $0.tint != nil }) {
             _Unsupported.note("swipeActions(edge: .leading)", "a UITableView row on iOS 6 swipes only from the trailing side, in one colour; the swipe actions of later iOS, which the backports carry, do more")
         }

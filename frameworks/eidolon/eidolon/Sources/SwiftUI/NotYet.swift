@@ -1,9 +1,6 @@
 import UIKit
 import CoreGraphics
 
-// Объявлено, чтобы приложение собиралось и запускалось, но пока не реализовано: каждое такое место
-// один раз пишет строку в журнал и попадает в отчёт прогона. Это временное состояние, не «нет в системе».
-
 public protocol ButtonStyle {
     associatedtype Body: View
     typealias Configuration = ButtonStyleConfiguration
@@ -130,8 +127,6 @@ extension DisclosureGroupStyle where Self == AutomaticDisclosureGroupStyle {
 
 protocol WrappedView { var wrapped: any View { get } }
 
-/// How a date picker is drawn. iOS 6 has one `UIDatePicker`, the wheel, so a style says which of the
-/// things around it are drawn and the wheel itself is what it always is.
 public protocol DatePickerStyle {
     associatedtype Body: View
     typealias Configuration = DatePickerStyleConfiguration
@@ -139,8 +134,6 @@ public protocol DatePickerStyle {
     @ViewBuilder func makeBody(configuration: Configuration) -> Body
 }
 
-/// The view the style puts above the wheel; nothing at all is the release's own picker alone, which is
-/// what Apple's own default `_Body` gives.
 extension DatePickerStyle {
     public func _body(configuration: Configuration) -> EmptyView { EmptyView() }
 }
@@ -167,7 +160,6 @@ public struct DatePickerStyleConfiguration {
 
 public struct WheelDatePickerStyle: DatePickerStyle {
     public init() {}
-    /// The wheel of the release, with the label above it, which is where SwiftUI puts it.
     public func makeBody(configuration: Configuration) -> AnyView {
         AnyView(configuration.label)
     }
@@ -191,11 +183,8 @@ public struct GraphicalDatePickerStyle: DatePickerStyle {
     }
 }
 
-/// A date in a field, with the wheel under it: the cell of a grouped table on iOS 6, which is exactly
-/// what this style is there for.
 public struct FieldDatePickerStyle: DatePickerStyle {
     public init() {}
-    /// The date in a field with the label beside it, as a cell of a grouped table shows one.
     public func makeBody(configuration: Configuration) -> AnyView {
         AnyView(HStack(alignment: .center, spacing: 8) {
             configuration.label
@@ -205,10 +194,8 @@ public struct FieldDatePickerStyle: DatePickerStyle {
     }
 }
 
-/// The same field with the two steppers beside it that walk the date by a day or an hour.
 public struct StepperFieldDatePickerStyle: DatePickerStyle {
     public init() {}
-    /// The same field with the label and the two steppers of iOS 6 beside it.
     public func makeBody(configuration: Configuration) -> AnyView {
         AnyView(HStack(alignment: .center, spacing: 8) {
             configuration.label

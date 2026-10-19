@@ -23,4 +23,4 @@ void Fixed8PixelBlender::source_over(std::span<const std::uint32_t> source,
     }
 }
 
-} // namespace shade
+}

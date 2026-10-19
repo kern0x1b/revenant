@@ -77,15 +77,12 @@ namespace {
                        state, task, object, xnu::ipc::Right::PortSet);
         }
 
-        // A direct receiver remains attached to the cached port object across a
-        // rename and later port-set insertion. It must stop only when the
-        // receive right is gone or the object is otherwise invalidated.
         return state.mach_port_objects.contains(object) &&
                task_owns_mach_right_locked(
                    state, task, object, xnu::ipc::Right::Receive);
     }
 
-} // namespace
+}
 
 bool CompatibilityKernel::deliver_pending_mach(Cpu& cpu)
 {
@@ -155,9 +152,6 @@ CompatibilityKernel::display_vsync_callback_processor()
             !registration.last_callback_processor) {
             continue;
         }
-        // Prefer the registration whose receive is currently pending. Multiple
-        // display connections can coexist during a foreground handoff; this
-        // keeps a stale callback observation from winning over the active one.
         if (preferred_pending_mach_receiver_locked(
                 registration.notification_port)) {
             return static_cast<std::size_t>(
@@ -197,13 +191,6 @@ bool CompatibilityKernel::display_vsync_callback_pending()
     return std::any_of(shared_state_->iokit_display_vsync.begin(),
         shared_state_->iokit_display_vsync.end(), [this](const auto& entry) {
             const auto& registration = entry.second;
-            // A queued notification is not callback work yet. Its exact
-            // blocked Mach receiver is handled by
-            // display_vsync_dependency_processor(); using the previous
-            // callback processor before this pulse is received can starve the
-            // run-loop dependency that will consume it. The callback becomes
-            // pending only after successful Mach copyout establishes the
-            // receiver watermark.
             return registration.enabled &&
                    registration.owner_pid == process_.pid &&
                    registration.callback_sequence <
@@ -226,11 +213,6 @@ bool CompatibilityKernel::deliver_pending_mach_if_ready_locked(
     if (pending == pending_mach_receives_.end())
         return false;
 
-    // Every enqueue, receive-right invalidation and port-set topology change
-    // advances this generation while holding mach_mutex. If neither it nor the
-    // Guest deadline changed, the previous empty-queue result is still valid;
-    // avoid taking the global IPC lock and walking the task namespace for every
-    // host scheduler pass.
     const auto queue_generation =
         shared_state_->mach_queue_generation_snapshot();
     if (pending->second.receive_object &&
@@ -240,11 +222,6 @@ bool CompatibilityKernel::deliver_pending_mach_if_ready_locked(
         return false;
     }
 
-    // A blocked receive is attached to the object selected at receive start.
-    // XNU wakes it with MACH_RCV_PORT_CHANGED when that queue is destroyed or
-    // the receive right is lost; adding a set link keeps the direct waiter on
-    // the original object. A later reuse of the original name must never
-    // redirect the waiter to a different object.
     std::lock_guard mach_lock { shared_state_->mach_mutex };
     if (!pending_mach_receive_is_usable_locked(
             *shared_state_, process_.pid, pending->second)) {
@@ -276,12 +253,6 @@ CompatibilityKernel::preferred_pending_mach_receiver_locked(
         }
     };
 
-    // XNU represents a receive port as a compound FIFO wait queue. Direct
-    // waiters are queue elements, while each containing port set contributes a
-    // persistent link whose own FIFO contains that set's waiters. Posting to
-    // the port walks those elements recursively and wakes the first receiver.
-    // Reconstruct that choice here so host CPU polling order cannot redirect a
-    // shared-port message to a later port set.
     for (auto& [processor, pending] : pending_mach_receives_) {
         if (!pending_mach_receive_is_usable_locked(
                 *shared_state_, process_.pid, pending)) {
@@ -394,10 +365,6 @@ CompatibilityKernel::receive_mach_message_locked(PendingMachReceive& receive,
             outcome.status = darwin::mach_message::receive_timed_out;
             return outcome;
         }
-        // If another FIFO waiter owns an already-queued message, do not cache
-        // the current generation as empty. Once that waiter consumes the front
-        // item, this receiver may become eligible for the next item without an
-        // enqueue.
         if (!has_visible_message) {
             receive.observed_queue_generation =
                 shared_state_->mach_queue_generation_snapshot();
@@ -407,9 +374,6 @@ CompatibilityKernel::receive_mach_message_locked(PendingMachReceive& receive,
 
     const auto& pending_message = queue->second.front();
     if (selected_port_set) {
-        // XNU's prepost linkage is a FIFO. Keep the selected member at the
-        // tail while the message is being copied out so the next receive on
-        // this set starts at the following ready source.
         const auto preposts =
             shared_state_->mach_port_set_preposts.find(*selected_port_set);
         if (preposts != shared_state_->mach_port_set_preposts.end() &&
@@ -436,7 +400,7 @@ CompatibilityKernel::receive_mach_message_locked(PendingMachReceive& receive,
         queue->second.pop_front();
         shared_state_->note_mach_message_dequeued_locked(queued_port);
         discard_mach_message_rights_locked(*shared_state_, discarded);
-        outcome.status = 0x10004008U; // MACH_RCV_INVALID_DATA
+        outcome.status = 0x10004008U;
         return outcome;
     }
     outcome.message_size = static_cast<std::uint32_t>(received->message_size);
@@ -445,10 +409,6 @@ CompatibilityKernel::receive_mach_message_locked(PendingMachReceive& receive,
             (receive.options &
                 darwin::mach_message::option_receive_large) != 0U;
         if (report_only) {
-            // MACH_RCV_LARGE leaves the message queued and reports the
-            // message-proper size through the fake header's msgh_size field.
-            // libdispatch and the old GraphicsServices receiver use that
-            // value to grow their buffer before retrying the same message.
             const auto capacity = receive.receive_size;
             if (capacity >=
                     darwin::mig_wire::header_remote_port_offset &&
@@ -461,9 +421,6 @@ CompatibilityKernel::receive_mach_message_locked(PendingMachReceive& receive,
                 outcome.status = darwin::mach_message::receive_too_large;
             }
         } else {
-            // Without MACH_RCV_LARGE XNU consumes and destroys the oversized
-            // message, returning only the receive error. Leaving it queued
-            // would make a caller retry forever with the same capacity.
             auto discarded = std::move(queue->second.front());
             queue->second.pop_front();
             shared_state_->note_mach_message_dequeued_locked(queued_port);
@@ -473,12 +430,6 @@ CompatibilityKernel::receive_mach_message_locked(PendingMachReceive& receive,
         return outcome;
     }
 
-    // A queued message keeps the semantic right in its sidecar, but the
-    // backing ipc_port may have been retired while the receiver was asleep.
-    // Never let copyout recreate a live Send/Receive name for such an object.
-    // Send-like rights can still be represented as a dead name (the equivalent
-    // of ipc_right_copyout on a dead port); receive rights cannot be recovered
-    // once their port object is gone and invalidate the queued message.
     const auto copyout_received_right =
         [&](std::uint32_t object,
             xnu::ipc::Right right) -> std::optional<std::uint32_t> {
@@ -489,10 +440,6 @@ CompatibilityKernel::receive_mach_message_locked(PendingMachReceive& receive,
                 right != xnu::ipc::Right::SendOnce) {
                 return std::nullopt;
             }
-            // Directly retired legacy objects may not have gone through
-            // terminate_receive_object_locked. Normalize any stale namespace
-            // send entries before installing the dead-name result so a PID/name
-            // reuse cannot observe a resurrected Send right.
             static_cast<void>(
                 shared_state_->mach_namespaces.mark_object_dead(object));
             return shared_state_->mach_namespaces.copyout(process_.pid, object,
@@ -515,9 +462,7 @@ CompatibilityKernel::receive_mach_message_locked(PendingMachReceive& receive,
     };
 
     if (!shared_state_->mach_port_objects.contains(queued_port)) {
-        // A stale queue entry must not be copied out through a dead
-        // destination.
-        return fail_receive(0x10004008U); // MACH_RCV_INVALID_DATA
+        return fail_receive(0x10004008U);
     }
 
     const auto send_bits = read_little_word(pending_message.bytes, 0);
@@ -532,20 +477,17 @@ CompatibilityKernel::receive_mach_message_locked(PendingMachReceive& receive,
         reply_right = pending_message.reply_right
                           ? pending_message.reply_right
                           : right_for_disposition((send_bits >> 8U) & 0xffU);
-        // Preflight receive rights before destination copyout. This keeps a
-        // malformed/dead transfer from partially mutating the receiver's
-        // namespace and then failing halfway through delivery.
         if (reply_right &&
             ((!reply_object) || (*reply_right == xnu::ipc::Right::Receive &&
                                     !shared_state_->mach_port_objects.contains(
                                         *reply_object)))) {
-            return fail_receive(0x10004008U); // MACH_RCV_INVALID_DATA
+            return fail_receive(0x10004008U);
         }
     }
     for (const auto& transfer : pending_message.port_transfers) {
         if (transfer.right == xnu::ipc::Right::Receive &&
             !shared_state_->mach_port_objects.contains(transfer.object)) {
-            return fail_receive(0x10004008U); // MACH_RCV_INVALID_DATA
+            return fail_receive(0x10004008U);
         }
     }
 
@@ -556,9 +498,6 @@ CompatibilityKernel::receive_mach_message_locked(PendingMachReceive& receive,
         outcome.status = 0x10004008U;
         return outcome;
     }
-    // Mach copyout exposes the sender's reply capability in msgh_remote_port;
-    // the receive name is returned in msgh_local_port.  This is the wire-level
-    // swap that lets a MIG server reply using request.msgh_remote_port.
     write_little_word(received->bytes, 12, *destination_name);
 
     if (sender_reply_name != xnu::ipc::null_name) {
@@ -581,11 +520,6 @@ CompatibilityKernel::receive_mach_message_locked(PendingMachReceive& receive,
         }
     }
 
-    // Bootstrap lookup bookkeeping belongs to the launchd reply, not the
-    // outgoing request. The destination of this queued response is the global
-    // reply-port object recorded with the lookup request; the optional
-    // reply_object field describes the reply right carried by the message and
-    // is not the lookup destination.
     if (pending_message.sender_pid == 1U) {
         const auto service_resolution =
             graphics_services_input::record_bootstrap_reply_locked(
@@ -628,12 +562,6 @@ CompatibilityKernel::receive_mach_message_locked(PendingMachReceive& receive,
                 read_little_word(pending_message.bytes, offset);
             if (sender_name == xnu::ipc::null_name ||
                 sender_name == xnu::ipc::dead_name) {
-                // ipc_kmsg_copyout always exposes a port descriptor using its
-                // receive-side type, including descriptors that carry
-                // MACH_PORT_NULL or MACH_PORT_DEAD. Neither sentinel owns a
-                // capability. MIG validates the descriptor type before
-                // looking at the name, so retaining COPY_SEND/MAKE_SEND here
-                // incorrectly rejects a valid null result.
                 write_little_word(received->bytes, offset + 8U,
                     darwin::mig_wire::replace_descriptor_disposition(
                         descriptor_word,
@@ -777,7 +705,7 @@ CompatibilityKernel::receive_mach_message_locked(PendingMachReceive& receive,
 
     for (const auto& payload : pending_message.ool_payloads) {
         if (payload.descriptor_offset + 4U > received->bytes.size()) {
-            outcome.status = 0x10004008U; // MACH_RCV_INVALID_DATA
+            outcome.status = 0x10004008U;
             return outcome;
         }
         std::uint32_t copied_address = 0;
@@ -813,7 +741,7 @@ CompatibilityKernel::receive_mach_message_locked(PendingMachReceive& receive,
         queue->second.pop_front();
         shared_state_->note_mach_message_dequeued_locked(queued_port);
         discard_mach_message_rights_locked(*shared_state_, discarded);
-        outcome.status = 0x10004008U; // MACH_RCV_INVALID_DATA
+        outcome.status = 0x10004008U;
         return outcome;
     }
 
@@ -884,10 +812,6 @@ CompatibilityKernel::receive_mach_message_locked(PendingMachReceive& receive,
                 last_delivered_graphics_inputs_[receive.processor] =
                     delivered_input_sequence;
             } else {
-                // The receive found a message while this thread was already
-                // executing. It has no later Waiting -> Runnable transition;
-                // attributing a future host-side delivery to this sequence
-                // creates a false input stall.
                 performance_counters().record_diagnostic_input_runnable(
                     delivered_input_sequence, process_.pid,
                     static_cast<std::uint32_t>(receive.processor), entered_at);
@@ -902,11 +826,6 @@ CompatibilityKernel::receive_mach_message_locked(PendingMachReceive& receive,
                     *shared_state_, queued_port, *delivered_graphics_event_type,
                     scene_coordinator_.get());
             }
-            // Bootstrap service ports remain owned by launchd while a cold app
-            // is starting. Observe lifecycle delivery only after the receive
-            // right has reached its real process, so the route is bound to the
-            // receiver that actually consumed the firmware event rather than
-            // its temporary launchd owner.
             graphics_services_input::record_application_event_delivery_locked(
                 *shared_state_, delivered_sender_pid, queued_port,
                 *delivered_graphics_event_type, scene_coordinator_.get());
@@ -937,8 +856,8 @@ CompatibilityKernel::receive_mach_message_locked(PendingMachReceive& receive,
             }
         }
     }
-    outcome.status = copied ? 0U : 0x10004008U; // MACH_RCV_INVALID_DATA
+    outcome.status = copied ? 0U : 0x10004008U;
     return outcome;
 }
 
-} // namespace shade
+}

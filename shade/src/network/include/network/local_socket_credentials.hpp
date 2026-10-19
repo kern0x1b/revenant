@@ -10,8 +10,6 @@
 
 namespace shade::bsd {
 
-// Connection-time credentials, independent of the process holding the fd.
-// ARM32 xucred: version, effective uid, short group count, padding, 16 gids.
 class LocalSocketCredentials {
 public:
     LocalSocketCredentials(std::uint32_t uid, std::uint32_t gid)
@@ -28,7 +26,6 @@ public:
                     static_cast<std::byte>(value >> (index * 8U));
         };
         write32(4, uid_);
-        // The process credential model currently retains the effective group.
         bytes[8] = std::byte { 1 };
         write32(12, gid_);
         return bytes;
@@ -39,4 +36,4 @@ private:
     std::uint32_t gid_;
 };
 
-} // namespace shade::bsd
+}

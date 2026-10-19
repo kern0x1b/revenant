@@ -69,7 +69,6 @@ int main(void)
     frequency("hw.busfrequency_max", &bus_max);
     check("frequencies agree", cpu == cpu_max && bus == bus_max && cpu > bus, "current and maximum differ, or the bus is faster than the core");
 
-    // sysctl.name2oid then sysctl by number, the path sysctlbyname takes, must land on the same value.
     int mib[CTL_MAXNAME];
     size_t length = CTL_MAXNAME;
     int by_number = -1;

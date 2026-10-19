@@ -194,4 +194,4 @@ inline constexpr std::uint64_t maximum_resource_bytes =
     256ULL * 1024ULL * 1024ULL;
 inline constexpr std::uint32_t maximum_draw_vertices = 1'000'000U;
 
-} // namespace shade::gles_abi
+}

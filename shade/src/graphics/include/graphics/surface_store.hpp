@@ -37,19 +37,12 @@ inline constexpr std::uint32_t surface_pixel_format_bgra =
     surface_fourcc('B', 'G', 'R', 'A');
 inline constexpr std::uint32_t surface_pixel_format_rgb555 =
     surface_fourcc('R', 'G', '1', '5');
-// Public CoreSurface client images use 'L555' for the same little-endian,
-// opaque RGB555 layout exposed to MBX clients as 'RG15'. Keep both names so
-// imported metadata still reports the format chosen by the firmware.
 inline constexpr std::uint32_t surface_pixel_format_rgb555_le =
     surface_fourcc('L', '5', '5', '5');
-// Legacy CoreSurface's little-endian ARGB1555 client-image format. The
-// firmware names it 's551': bit 15 is alpha and bits 14:0 are RGB555.
 inline constexpr std::uint32_t surface_pixel_format_argb1555 =
     surface_fourcc('s', '5', '5', '1');
-// CoreVideo's packed 4:2:2 capture format: Y0 Cb Y1 Cr for each pixel pair.
 inline constexpr std::uint32_t surface_pixel_format_yuvs =
     surface_fourcc('y', 'u', 'v', 's');
-// CoreVideo/IOSurface's UYVY spelling for the same packed 4:2:2 samples.
 inline constexpr std::uint32_t surface_pixel_format_2vuy =
     surface_fourcc('2', 'v', 'u', 'y');
 
@@ -112,10 +105,6 @@ constexpr std::uint32_t surface_bytes_per_pixel(std::uint32_t pixel_format)
     return 0U;
 }
 
-// Each process owns one SurfaceStore with process-local virtual addresses.
-// Stores inherited across fork/spawn share a registry of page backings so a
-// CoreSurface transport ID can be imported into a different guest address
-// space without assuming that both tasks chose the same virtual address.
 class SurfaceStore {
 public:
     struct CpuSynchronizationOptions {
@@ -126,11 +115,7 @@ public:
     ~SurfaceStore();
 
     struct Provenance {
-        // The task that first published the backing. Importers retain this
-        // identity instead of replacing it with the compositor's task.
         std::uint32_t producer_process_id { };
-        // Assigned by the shared registry at publication time so reused
-        // process or transport identifiers still describe distinct surfaces.
         std::uint64_t publication_sequence { };
     };
 
@@ -152,18 +137,12 @@ public:
 
     void reset();
     void inherit_state(const SurfaceStore& parent);
-    // A fresh exec address space has no process-local CoreSurface mappings,
-    // but transport identifiers remain global kernel objects. Share only the
-    // registry; callers import individual mappings through Lookup as firmware
-    // passes their IDs between tasks.
     void share_registry(const SurfaceStore& peer);
     [[nodiscard]] std::uint32_t allocate_identifier();
     [[nodiscard]] std::uint64_t publication_watermark() const;
     [[nodiscard]] bool publish(AddressSpace& memory, Backing backing);
     [[nodiscard]] std::optional<SharedMapping> shared_mapping(
         std::uint32_t id) const;
-    // A kernel transport port retains its shared backing independently of
-    // every process-local client until the port object itself is reclaimed.
     [[nodiscard]] std::shared_ptr<SurfaceTransportLease>
     acquire_transport_lease(std::uint32_t id) const;
     [[nodiscard]] std::optional<Backing> import(
@@ -171,9 +150,6 @@ public:
     [[nodiscard]] std::optional<Backing> import(AddressSpace& memory,
         const SharedMapping& expected, std::uint32_t mapping_address,
         std::uint64_t* mapping_lease_token);
-    // CoreSurface wrappers and graphics API surfaces own the shared backing
-    // independently. Retain/release local ownership without duplicating the
-    // process mapping or the registry's per-store reference.
     [[nodiscard]] bool retain(std::uint32_t id);
     void release(std::uint32_t id);
     [[nodiscard]] std::optional<Backing> find(std::uint32_t id) const;
@@ -181,12 +157,8 @@ public:
         std::uint32_t id) const;
     [[nodiscard]] std::optional<std::vector<std::uint32_t>> read_argb(
         AddressSpace& memory, std::uint32_t id) const;
-    // CPU map is the explicit GPU completion/readback boundary. The resulting
-    // pixels are copied into the guest mapping for firmware access.
     [[nodiscard]] bool synchronize_for_cpu(AddressSpace& memory,
         std::uint32_t id, CpuSynchronizationOptions options) const;
-    // Imports guest CPU writes even when a newer GPU generation exists. This
-    // is the unlock/flush direction, not a GPU readback request.
     [[nodiscard]] bool synchronize_from_guest(
         AddressSpace& memory, std::uint32_t id) const;
     [[nodiscard]] bool write_argb(AddressSpace& memory, std::uint32_t id,
@@ -242,4 +214,4 @@ private:
     };
 };
 
-} // namespace shade
+}

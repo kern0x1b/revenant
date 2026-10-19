@@ -88,7 +88,7 @@ namespace {
         return entry->object;
     }
 
-} // namespace
+}
 
 std::optional<std::uint32_t> handle_clock_mach_request(AddressSpace& memory,
     KernelSharedState& state, ProcessContext& process, std::uint32_t message_id,
@@ -104,8 +104,6 @@ std::optional<std::uint32_t> handle_clock_mach_request(AddressSpace& memory,
     }
     {
         std::lock_guard lock { state.mach_mutex };
-        // MIG identifiers are local to a service. User-space protocols can
-        // reuse the clock subsystem's identifiers on their own receive ports.
         if (!clock_id_locked(state, process, remote_port))
             return std::nullopt;
     }
@@ -300,10 +298,6 @@ void enqueue_clock_alarm_reply_locked(KernelSharedState& state,
     std::uint32_t reply_object, std::uint32_t code, std::uint32_t alarm_type,
     std::uint64_t alarm_time)
 {
-    // A clock alarm retains a send-once reply right.  The receiving ipc_space
-    // may disappear before the deadline; never use operator[] here, because it
-    // would resurrect a queue for a dead port and make a later PID reuse see an
-    // unrelated reply.
     if (!state.mach_port_objects.contains(reply_object)) {
         return;
     }
@@ -368,4 +362,4 @@ void deliver_due_clock_alarms_locked(
     }
 }
 
-} // namespace shade
+}

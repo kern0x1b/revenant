@@ -26,7 +26,7 @@ namespace {
         }
     }
 
-} // namespace
+}
 
 void EventStream::enqueue(std::uint32_t event)
 {
@@ -124,4 +124,4 @@ void EventStream::prepare_record()
     record_event_count_ = 1;
 }
 
-} // namespace shade::darwin::network::apple80211_driver
+}

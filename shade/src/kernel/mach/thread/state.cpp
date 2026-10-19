@@ -51,7 +51,7 @@ namespace {
         return true;
     }
 
-} // namespace
+}
 
 bool CompatibilityKernel::dispatch_mach_thread_state_message(
     Cpu& cpu, const MachMessageRequest& request)
@@ -138,16 +138,16 @@ bool CompatibilityKernel::dispatch_mach_thread_state_message(
             const std::array<std::uint32_t,
                 darwin::mach::thread_info::basic_word_count>
                 basic_info {
-                    0, // user_time.seconds
-                    0, // user_time.microseconds
-                    0, // system_time.seconds
-                    0, // system_time.microseconds
-                    0, // cpu_usage
+                    0,
+                    0,
+                    0,
+                    0,
+                    0,
                     darwin::mach::thread_info::standard_policy,
                     darwin::mach::thread_info::waiting_state,
-                    0, // flags
-                    0, // suspend_count
-                    0, // sleep_time
+                    0,
+                    0,
+                    0,
                 };
             reply.insert(reply.end(), basic_info.begin(), basic_info.end());
         } else {
@@ -164,7 +164,7 @@ bool CompatibilityKernel::dispatch_mach_thread_state_message(
                         xnu::scheduler::maximum_user_priority),
                     priority,
                     priority,
-                    0, // depressed
+                    0,
                     priority,
                 };
             reply.insert(
@@ -321,4 +321,4 @@ bool CompatibilityKernel::dispatch_mach_thread_state_message(
     return true;
 }
 
-} // namespace shade
+}

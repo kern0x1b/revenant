@@ -47,7 +47,7 @@ namespace {
         return static_cast<std::int32_t>(call.argument(index));
     }
 
-} // namespace
+}
 
 Mbx2dHle::Mbx2dHle(UserlandHleRegistry& registry,
     std::shared_ptr<DisplayState> display,
@@ -231,9 +231,6 @@ Mbx2dHle::Mbx2dHle(UserlandHleRegistry& registry,
     };
     add("_mbx2DSwapSurface", present);
     add("_mbx2DSwapNotification", [](UserlandHleCall& call) {
-        // This is the completion callback attached to an enclosing
-        // IOMobileFramebuffer transaction. SwapEnd owns presentation after
-        // all layer surfaces have been installed.
         call.set_return(mbx_success);
     });
 
@@ -485,9 +482,6 @@ void Mbx2dHle::set_feature(
         state->enabled_features.insert(feature);
     } else {
         state->enabled_features.erase(feature);
-        // LayerKit brackets its affine/quad pass with the rotation feature.
-        // The scissor programmed for that pass must not leak into the regular
-        // 2D blits which follow (notably the lock-screen bottom bar).
         if (feature == mbx2d_abi::feature_rotation) {
             state->scissor.enabled = false;
         }
@@ -546,9 +540,6 @@ bool Mbx2dHle::synchronize_host_source(
 {
     if (!surface.host_surface || surface.core_surface_id == 0)
         return true;
-    // LayerKit can retain an MBX handle across multiple guest-side revisions
-    // without issuing another FlushSurfaces call. Publish exact guest changes
-    // when that handle is consumed, preserving unrelated GPU-owned pixels.
     const auto started = std::chrono::steady_clock::now();
     const auto synchronized = surface_store_->synchronize_from_guest(
         call.memory(), surface.core_surface_id);
@@ -634,8 +625,6 @@ bool Mbx2dHle::clip_region(BlitRegion& region, const ResolvedSurface* source,
             region.source_x, region.destination_x, region.width, source->width);
         clip_source_axis(region.source_y, region.destination_y, region.height,
             source->height);
-        // Source clipping can move the destination; apply destination bounds
-        // once more without changing the already-clipped source origin twice.
         clip_destination_axis(
             region.destination_x, region.source_x, region.width, left, right);
         clip_destination_axis(
@@ -1327,10 +1316,6 @@ void Mbx2dHle::submit_destination(UserlandHleCall& call, bool context_api)
         destination->height != display_->height()) {
         return;
     }
-    // Once firmware has completed a transactional hardware-layer frame,
-    // IOMobileFramebuffer SwapEnd owns scanout. MBX finish/swap still commits
-    // pixels to its CoreSurface backing, but presenting that individual render
-    // target would bypass the other retained layers.
     if (presentation_tracker_ && presentation_tracker_->has_presented_frame()) {
         return;
     }
@@ -1391,20 +1376,12 @@ void Mbx2dHle::flush_surfaces(UserlandHleCall& call)
         const auto core_surface_id = found->second.core_surface_id;
         if (found->second.client_backing)
             found->second.client_host_source_dirty = true;
-        // Both lists are unified-memory visibility barriers. Source publication
-        // makes CPU-rendered pixels available to a retained handle; destination
-        // invalidation does the same before GPU commands consume prior
-        // contents. Exact merging preserves unrelated native pixels in either
-        // direction.
         if (core_surface_id != 0 && !surface_store_->synchronize_from_guest(
                                         call.memory(), core_surface_id)) {
             call.set_return(mbx_failure);
             return;
         }
     }
-    // FlushSurfaces publishes unified-memory changes; it is not a command
-    // queue flush. Pending GPU work remains ordered until mbx2DFlush,
-    // mbx2DFinish, or a host consumer submits it.
     call.set_return(mbx_success);
 }
 
@@ -1430,4 +1407,4 @@ void Mbx2dHle::deferred(UserlandHleCall& call)
     call.set_return(mbx_success);
 }
 
-} // namespace shade
+}

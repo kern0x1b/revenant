@@ -36,7 +36,7 @@ namespace {
         }
     }
 
-} // namespace
+}
 
 std::vector<std::byte> OfflineControlPlane::consume(
     std::uint32_t channel, std::span<const std::byte> bytes)
@@ -55,10 +55,6 @@ std::vector<std::byte> OfflineControlPlane::consume(
             continue;
         const auto command = uppercase(line);
         line.clear();
-        // The Offline endpoint accepts complete local modem configuration
-        // lines, but never invents query payloads or unsolicited radio state.
-        // A bare final result is enough for the firmware to finish transport
-        // setup and then consume the existing CoreTelephony Offline profile.
         if (command.starts_with("AT")) {
             append(response, success_response);
         }
@@ -70,4 +66,4 @@ void OfflineControlPlane::reset() { lines_.clear(); }
 
 void OfflineControlPlane::reset(std::uint32_t channel) { lines_.erase(channel); }
 
-} // namespace shade::bsd::baseband_device
+}

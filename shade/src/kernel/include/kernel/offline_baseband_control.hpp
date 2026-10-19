@@ -16,9 +16,6 @@
 
 namespace shade::bsd::baseband_device {
 
-// Minimal command plane retained by an Offline serial-multiplexer endpoint.
-// It acknowledges complete AT command lines without inventing radio state or
-// unsolicited modem traffic.
 class OfflineControlPlane {
 public:
     [[nodiscard]] std::vector<std::byte> consume(
@@ -30,4 +27,4 @@ private:
     std::map<std::uint32_t, std::string> lines_;
 };
 
-} // namespace shade::bsd::baseband_device
+}

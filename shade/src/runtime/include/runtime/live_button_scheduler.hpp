@@ -16,8 +16,6 @@
 
 namespace shade {
 
-// Keeps a physical button Down event alive for a host-controlled duration and
-// emits the matching Up event without involving the window toolkit.
 class LiveButtonScheduler {
 public:
     void schedule(SystemButtonInput down, std::chrono::milliseconds hold);
@@ -35,4 +33,4 @@ private:
     std::deque<Event> events_;
 };
 
-} // namespace shade
+}

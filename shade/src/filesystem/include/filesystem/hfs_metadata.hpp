@@ -93,10 +93,8 @@ namespace attribute {
     inline constexpr std::uint32_t file_data_allocation_size = 0x00000400U;
     inline constexpr std::uint32_t file_resource_length = 0x00001000U;
     inline constexpr std::uint32_t file_resource_allocation_size = 0x00002000U;
-    // Exact Darwin 8 getattrlist_file_tab mask. Deprecated clump/file-type and
-    // extent attributes are defined in attr.h but rejected by getattrlist().
     inline constexpr std::uint32_t file_supported_mask = 0x0000362fU;
-} // namespace attribute
+}
 
 struct AttributeRequest {
     std::uint32_t common { };
@@ -151,15 +149,12 @@ struct MetadataOverride {
     std::optional<std::uint64_t> resource_allocation_size;
 };
 
-// Facts from the HFSX volume header in 694-5262-39-decrypted.dmg.  They are
-// deliberately independent of the host filesystem: the host is only the VFS
-// data backend and must not leak ext4/APFS volume geometry to iPhoneOS.
 struct VolumeMetadata {
     std::string name { "Heavenly1A543a.UserBundle" };
     std::string mount_point { "/" };
     std::string mounted_device { "/dev/disk0s1" };
     std::uint32_t filesystem_type { 17 };
-    std::uint32_t signature { 0x4858 }; // kHFSXSigWord, "HX"
+    std::uint32_t signature { 0x4858 };
     std::uint32_t block_size { 4096 };
     std::uint32_t total_blocks { 47'269 };
     std::uint32_t free_blocks { 5'832 };
@@ -168,16 +163,10 @@ struct VolumeMetadata {
     std::uint32_t file_count { 2'557 };
     std::uint32_t directory_count { 352 };
     std::uint32_t next_catalog_id { 2'929 };
-    std::uint32_t mount_flags { 0x00005001U }; // RDONLY|LOCAL|ROOTFS
+    std::uint32_t mount_flags { 0x00005001U };
     std::uint64_t encodings_used { 1 };
 };
 
-// The guest ids of a bounded (--ticks) run. A host inode is named by its host
-// identity (device, inode), which the host allocates in an order the run does
-// not control. The first sighting of an identity takes the id of its guest path;
-// later sightings of the same identity (also after a rename) keep it. Removing
-// the last link of an inode ends its entry, so a recycled host inode is a new
-// file with a new id. The table is shared by every kernel of one run.
 class GuestIdTable {
 public:
     struct Identity {
@@ -186,13 +175,9 @@ public:
         auto operator<=>(const Identity&) const = default;
     };
 
-    // The id of `identity`. On a first sighting the id is a hash of `guest_path`;
-    // when another identity already holds that id, the next free id is taken.
     [[nodiscard]] std::uint32_t id_for(
         const Identity& identity, std::string_view guest_path);
-    // Ends the entry of an identity whose last link was removed.
     void forget(const Identity& identity);
-    // The number of sightings whose path hash was already taken.
     [[nodiscard]] std::size_t collisions() const;
 
 private:
@@ -204,20 +189,13 @@ private:
 
 class MetadataProvider {
 public:
-    // A null `guest_ids` is a normal run: host-derived ids and plain removals.
     explicit MetadataProvider(std::filesystem::path root,
         std::shared_ptr<GuestIdTable> guest_ids = nullptr);
 
-    // The guest id of a host inode in a bounded run; nullopt in a normal run.
     [[nodiscard]] std::optional<std::uint32_t> table_id(std::uint64_t device,
         std::uint64_t inode, const std::filesystem::path& path) const;
-    // The host identity that removing `path` ends, or nullopt when another
-    // link keeps the inode alive or when there is no table. A directory has
-    // no second name, so removing it always ends its inode.
     [[nodiscard]] std::optional<GuestIdTable::Identity> last_link_identity(
         const std::filesystem::path& path) const;
-    // Removes a host name and ends the table entry of the inode it held the
-    // last link to.
     bool remove_name(
         const std::filesystem::path& path, std::error_code& error) const;
     void forget(const GuestIdTable::Identity& identity) const;
@@ -249,4 +227,4 @@ private:
     std::shared_ptr<GuestIdTable> guest_ids_;
 };
 
-} // namespace shade::hfs
+}

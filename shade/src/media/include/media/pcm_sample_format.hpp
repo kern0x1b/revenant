@@ -17,7 +17,6 @@ namespace shade {
 
 class PcmSampleFormat {
 public:
-    // Default hardware format: packed little-endian signed 16-bit PCM.
     PcmSampleFormat() = default;
     [[nodiscard]] static std::optional<PcmSampleFormat> from_lpcm(
         std::uint32_t flags, std::uint32_t bits);
@@ -31,4 +30,4 @@ private:
     bool floating_point_ { };
 };
 
-} // namespace shade
+}

@@ -14,8 +14,6 @@
 
 namespace shade::darwin::mach::thread_info {
 
-// XNU osfmk/mach/thread_info.h. All fields are natural_t words on
-// the 32-bit ARM ABI used by iPhone OS 1.x.
 constexpr std::uint32_t basic_flavor = 3;
 constexpr std::size_t basic_word_count = 10;
 
@@ -30,4 +28,4 @@ constexpr std::size_t timeshare_depress_priority_index = 4;
 constexpr std::uint32_t standard_policy = 1;
 constexpr std::uint32_t waiting_state = 3;
 
-} // namespace shade::darwin::mach::thread_info
+}

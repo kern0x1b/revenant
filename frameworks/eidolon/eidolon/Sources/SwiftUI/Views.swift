@@ -39,7 +39,6 @@ final class TextNode: LayoutNode {
         let t = view as! Text
         var font = env.scaled(t.font?.uiFont ?? env.fontValue ?? UIFont.systemFont(ofSize: 17))
         if t.isBold || env.textBold { font = UIFont.boldSystemFont(ofSize: font.pointSize) }
-        // a secondary run is the release's own smaller label: caption 1 against body
         if env.textScale == .secondary { font = UIFont.systemFont(ofSize: font.pointSize * Text.Scale.secondaryRatio) }
         let color = t.color?.uiColor ?? env.foregroundColor ?? .black
         let underlined = t.isUnderlined || env.textUnderline
@@ -126,7 +125,6 @@ public struct Color: View, PrimitiveView {
         uiColor = UIColor(red: CGFloat(red), green: CGFloat(green), blue: CGFloat(blue), alpha: CGFloat(opacity))
     }
     public init(_ uiColor: UIColor) { self.uiColor = uiColor }
-    // the system colours of SwiftUI in a light appearance, not the pure primaries of UIColor
     public static let red = Color(red: 1.0, green: 0.231, blue: 0.188), green = Color(red: 0.204, green: 0.780, blue: 0.349)
     public static let blue = Color(red: 0.0, green: 0.478, blue: 1.0), black = Color(.black)
     public static let white = Color(.white), gray = Color(red: 0.557, green: 0.557, blue: 0.576)
@@ -299,11 +297,8 @@ final class ButtonNode: LayoutNode {
     let pressTarget = ControlTarget()
     var button: UIButton { uiView as! UIButton }
     var styleBody: ((ButtonStyleConfiguration) -> any View)?
-    /// Apple's configuration carries no `isPressed`, so a primitive style that wants the press adopts the
-    /// port's `PressedButtonStyle`; the node keeps the body either way, and hands the press to it.
     var primitiveBody: ((PrimitiveButtonStyleConfiguration, Bool) -> any View)?
     var label: (any View)?
-    /// What `configuration.trigger()` of a primitive style performs, and the role it reads.
     var primitiveAction: () -> Void = {}
     var primitiveRole: ButtonRole?
     var styled: Node?
@@ -314,7 +309,6 @@ final class ButtonNode: LayoutNode {
 
     let plainText: Bool
 
-    // A label that is not one Text is drawn as it is, without the chrome iOS 6 puts on a titled button.
     init(plainText: Bool) {
         self.plainText = plainText
         let b = UIButton(type: plainText ? .roundedRect : .custom)
@@ -325,8 +319,6 @@ final class ButtonNode: LayoutNode {
         b.addTarget(pressTarget, action: #selector(ControlTarget.changed(_:)), for: .touchUpOutside)
         b.addTarget(pressTarget, action: #selector(ControlTarget.changed(_:)), for: .touchCancel)
         pressTarget.valueChanged = { [weak self] control in
-            // the primitive path keeps its body in `primitiveBody`, so a press is worth following on
-            // either path: a guard on `styleBody` alone would skip every primitive style
             guard let self, self.styleBody != nil || self.primitiveBody != nil else { return }
             self.pressed = (control as! UIButton).isHighlighted
             self.rebuildStyled()
@@ -340,8 +332,6 @@ final class ButtonNode: LayoutNode {
         if let style = env.primitiveButtonStyle {
             primitive = true
             styleBody = nil
-            // a style of the port draws the label and nothing else, so the tap is the node's; a style of an app owns its
-            // trigger (it calls `configuration.trigger()` from a Button or a gesture), and a tap that also fired would fire twice
             target.action = env.primitiveTriggersOnTap ? b.buttonAction : {}
             primitiveAction = b.buttonAction
             primitiveRole = (view as? RoleButtonLike)?.buttonRole
@@ -355,7 +345,6 @@ final class ButtonNode: LayoutNode {
         target.action = b.buttonAction
         styleBody = env.buttonStyle
         if styleBody == nil && !plainText {
-            // a button's label takes the tint (or the foreground colour set outside), as in SwiftUI
             let accent = Color(env.foregroundColor ?? env.tint ?? UIColor(red: 0.2, green: 0.45, blue: 0.85, alpha: 1))
             styleBody = { AnyView($0.label.foregroundColor(accent).opacity($0.isPressed ? 0.4 : 1)) }
         }

@@ -47,4 +47,4 @@ LiveTouchScheduler::next_deadline() const
                  };
 }
 
-} // namespace shade
+}

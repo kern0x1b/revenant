@@ -63,17 +63,11 @@ enum class JitArtifactValidationRejection : std::uint8_t {
 inline constexpr auto jit_artifact_validation_rejection_count =
     static_cast<std::size_t>(JitArtifactValidationRejection::Count);
 
-// Every field that can change the generated block or its calling convention
-// belongs in this key. In particular, no path or mtime participates in cache
-// identity.
 struct JitArtifactKey {
     PortableExecutableIdentity content_identity;
     PortableLayoutIdentity layout_identity;
     std::uint32_t guest_pc { };
     bool thumb { };
-    // Dynarmic's complete block location. guest_pc/thumb remain as readable
-    // fields for diagnostics, but this value is the cache identity for all
-    // CPSR/FPSCR/IT/single-step state that affects translation.
     std::uint64_t location_descriptor { };
     ArmArchitectureVersion architecture { ArmArchitectureVersion::Armv6K };
     ArmCpuModelKind cpu_model { ArmCpuModelKind::Arm1176JzfS };
@@ -113,44 +107,22 @@ struct JitConstantDependency {
 };
 
 struct JitArtifactData {
-    // This is a normalized, portable representation. It is deliberately not a
-    // copy of Dynarmic's native code cache.
     std::vector<std::byte> normalized_ir;
     std::vector<std::uint64_t> relocation_targets;
     std::vector<std::uint64_t> exit_locations;
     std::uint32_t instruction_count { };
-    // Translation timing is advisory metadata. It is useful for deciding
-    // whether an entry was produced by a real translation rather than a
-    // speculative profile hint, but it does not participate in executable
-    // artifact identity.
     std::uint64_t translation_nanoseconds { };
-    // Every executable page observed by Dynarmic while translating the block.
-    // Empty dependencies are not importable by the CPU integration.
     std::vector<JitCodeDependency> code_dependencies;
-    // Read-only values folded by Dynarmic's constant-memory pass.
     std::vector<JitConstantDependency> constant_dependencies;
 };
 
 struct JitArtifactLimits {
-    // Zero means unbounded. The default resident target matches the initial
-    // metadata budget; native code is still owned by Dynarmic's live cache.
     std::size_t resident_bytes { 64U * 1024U * 1024U };
     std::size_t persistence_bytes { };
-    // A disabled persistence store is a successful no-op on save and a cache
-    // miss on load. This lets the host disable optional storage under pressure
-    // without affecting Guest execution.
     bool persistence_enabled { true };
-    // Zero disables the filesystem free-space safety check.
     std::uintmax_t minimum_free_bytes { };
-    // A journal at or above this size is eligible for low-priority compaction.
-    // Zero disables automatic compaction.
     std::size_t compaction_bytes { 64U * 1024U * 1024U };
-    // Newly translated artifacts enter this bounded queue before the resident
-    // LRU can evict them. Zero disables asynchronous writeback.
     std::size_t writeback_bytes { 16U * 1024U * 1024U };
-    // Only persisted boot-working-set marks are eligible for startup payload
-    // prefetch. Both limits are hard caps so a seed cannot turn index startup
-    // back into an unbounded payload load.
     std::size_t startup_prefetch_entries { 256U };
     std::size_t startup_prefetch_bytes { 8U * 1024U * 1024U };
 };
@@ -159,9 +131,6 @@ struct JitArtifactStoreStats {
     std::uint64_t lookups { };
     std::uint64_t memory_hits { };
     std::uint64_t disk_hits { };
-    // Bounded, optional diagnostic breadcrumbs for reproducing a seeded hit.
-    // These are only populated for the first few hits and do not affect lookup
-    // admission or identity validation.
     std::uint64_t disk_hit_key_fingerprint_count { };
     std::array<std::uint64_t, 16> disk_hit_key_fingerprints { };
     std::uint64_t disk_read_retries { };
@@ -257,9 +226,6 @@ enum class JitDemandArtifactStageResult : std::uint8_t {
     TransientFailure,
 };
 
-// Executor-local retry state. The caller supplies a monotonically increasing
-// slice/attempt generation, so transient recovery never requires a clock read
-// or store access on a suppressed slice.
 class JitDemandArtifactTransientBackoff {
 public:
     [[nodiscard]] bool retry_due(
@@ -381,10 +347,6 @@ public:
     [[nodiscard]] JitArtifactLookup lookup(const JitArtifactKey& key,
         JitArtifactRetention retention = JitArtifactRetention::Normal,
         bool allow_disk_payload = true) const;
-    // Guest execution only submits and polls this bounded queue. The existing
-    // low-priority persistence worker performs payload I/O and IR
-    // deserialization, then publishes a one-shot prepared block for a later
-    // executor safe boundary.
     [[nodiscard]] JitArtifactBackgroundPrepareResult request_background_prepare(
         const JitArtifactKey& key,
         JitArtifactRetention retention =
@@ -410,9 +372,6 @@ public:
     void record_demand_probe_fingerprint_collision() const noexcept;
     void record_demand_probe_eviction() const noexcept;
     void record_demand_probe_size(std::size_t entries) const noexcept;
-    // Benefit-driven admission for runtime demand artifacts. The caller has
-    // already validated the payload; this method only records the estimate and
-    // rejects entries whose predicted saved translation cannot pay for loading.
     [[nodiscard]] bool admit_demand_artifact(
         std::uint64_t estimated_load_nanoseconds,
         std::uint64_t estimated_saved_nanoseconds,
@@ -422,18 +381,10 @@ public:
         JitArtifactRetention retention = JitArtifactRetention::Normal);
     [[nodiscard]] std::size_t size() const;
     [[nodiscard]] JitArtifactStoreStats stats() const;
-    // Changes whenever a new artifact becomes available to runtime lookups.
-    // Executors use this to retry a previously negative probe without polling
-    // the store on every CPU slice.
     [[nodiscard]] std::uint64_t publication_generation() const noexcept;
     void record_validation_rejection(
         JitArtifactValidationRejection rejection) const noexcept;
-    // Pressure reclamation removes only non-boot artifacts that have no
-    // external users. It never changes artifact validity or Guest execution;
-    // later runtime lookup simply falls back to the disk record or demand JIT.
     std::size_t trim_resident_bytes(std::size_t target_bytes) noexcept;
-    // Stops optional background persistence and releases queued artifacts.
-    // Guest execution and resident-cache lookups remain available.
     void cancel_writeback() noexcept;
     [[nodiscard]] bool compaction_needed() const noexcept;
     [[nodiscard]] JitArtifactCompactionResult compact_with_result(
@@ -442,16 +393,9 @@ public:
     [[nodiscard]] bool compact(
         CancellationCheck cancellation_check) const noexcept;
 
-    // Persistence is metadata-only. Initial snapshots carry an authenticated
-    // tail index and per-record checksums; incremental publications use a
-    // journal of authenticated compact indexes with per-record checksums.
-    // Loading malformed data leaves the existing store unchanged and lets
-    // execution fall back to JIT.
     [[nodiscard]] bool load(const std::filesystem::path& path) noexcept;
     [[nodiscard]] bool save() const noexcept;
     [[nodiscard]] bool save(const std::filesystem::path& path) const noexcept;
-    // Force a complete authenticated snapshot. Unlike save(), this never
-    // leaves a newly prepared seed dependent on an append journal.
     [[nodiscard]] bool finalize() const noexcept;
 
 private:
@@ -595,8 +539,6 @@ private:
         JitArtifactCompactionResult* compaction_result) const noexcept;
 
     mutable std::mutex mutex_;
-    // Pointer-keyed resident and pending metadata is anchored by the immutable
-    // artifact shared_ptr in each value. Their order lists borrow the same key.
     mutable ArtifactMap artifacts_;
     mutable std::list<const JitArtifactKey*> lru_;
     mutable std::list<const JitArtifactKey*>::iterator boot_lru_begin_;
@@ -612,8 +554,6 @@ private:
         JitArtifactKeyHash>
         background_prepared_;
     mutable std::list<JitArtifactKey> background_prepared_order_;
-    // unordered_map rehash preserves element addresses; wholesale index swaps
-    // always install the matching pointer order while holding mutex_.
     mutable std::vector<const JitArtifactKey*> disk_order_;
     JitArtifactLimits limits_;
     mutable std::size_t resident_bytes_ { };
@@ -644,9 +584,6 @@ private:
     mutable JitArtifactStoreStats stats_;
 };
 
-// Per-process mutable execution state. CPU registers, AddressSpace and HLE
-// tables remain owned by their existing runtime objects; this class only
-// supplies context identity and writable link cells for immutable artifacts.
 class ExecutionContext {
 public:
     ExecutionContext();
@@ -665,9 +602,6 @@ public:
         return process_id_.load(std::memory_order_acquire);
     }
 
-    // A CpuExecutionPool is created before the guest task receives its PID.
-    // Bind that metadata exactly once without replacing the context or any
-    // stable link-cell addresses already handed to executors.
     void bind_process_id(std::uint32_t process_id);
     [[nodiscard]] std::size_t create_link_cell();
     void link(std::size_t cell, std::uint64_t target_token);
@@ -678,9 +612,6 @@ public:
     [[nodiscard]] Dynarmic::A32::NativeCodeSlab*
     native_code_slab() const noexcept;
 
-    // Guest address-space changes are published once per process context. The
-    // slab owns the actual generation transition; this epoch lets each
-    // executor retire its private artifact probes at its next safe boundary.
     [[nodiscard]] std::uint64_t request_cache_clear();
     [[nodiscard]] std::uint64_t request_cache_range(
         std::uint32_t address, std::size_t length);
@@ -688,21 +619,12 @@ public:
     {
         return cache_invalidation_epoch_.load(std::memory_order_acquire);
     }
-    // Range invalidations retire only overlapping native blocks. Prediction
-    // plans use this narrower epoch so one local executable-page change does
-    // not restart a complete process-image scan.
     [[nodiscard]] std::uint64_t cache_clear_epoch() const noexcept
     {
         return cache_clear_epoch_.load(std::memory_order_acquire);
     }
-    // Returns true exactly once for each observed post-initial slab generation.
-    // Executors may call this concurrently; the shared context owns the
-    // observation so metrics are not multiplied by executor count.
     [[nodiscard]] bool observe_slab_generation(
         std::uint64_t generation) noexcept;
-    // The last generation observed at a safe executor boundary. Unlike the
-    // Dynarmic NativeCodeSlab::generation() query, this snapshot never waits
-    // for an outstanding invalidation to finish.
     [[nodiscard]] std::uint64_t observed_slab_generation() const noexcept
     {
         return observed_slab_generation_.load(std::memory_order_acquire);
@@ -727,4 +649,4 @@ private:
 
 [[nodiscard]] std::string disk_hit_fingerprint_text(const JitArtifactStoreStats& stats);
 
-} // namespace shade
+}

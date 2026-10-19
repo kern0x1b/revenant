@@ -21,14 +21,8 @@
 
 namespace shade::darwin {
 
-// Darwin 8 / iPhoneOS 1.0 ABI values used at the compatibility boundary.
-// Keep these names here instead of scattering host-incompatible literals
-// throughout syscall implementations.
-
 
 namespace aio {
-    // Darwin 8 ARM32 struct aiocb. off_t is 64-bit but only 4-byte aligned for
-    // this target, while pointers and size_t remain 32-bit.
     inline constexpr std::uint32_t descriptor_offset = 0;
     inline constexpr std::uint32_t file_offset_offset = 4;
     inline constexpr std::uint32_t buffer_offset = 12;
@@ -55,7 +49,7 @@ namespace aio {
     inline constexpr std::uint32_t list_wait = 2;
     inline constexpr std::uint32_t synchronize = 0x0080;
     inline constexpr std::uint32_t maximum_requests_per_process = 16;
-} // namespace aio
+}
 
 namespace open_flag {
     inline constexpr std::uint32_t access_mode = 0x0003;
@@ -67,14 +61,12 @@ namespace open_flag {
     inline constexpr std::uint32_t create = 0x0200;
     inline constexpr std::uint32_t truncate = 0x0400;
     inline constexpr std::uint32_t exclusive = 0x0800;
-} // namespace open_flag
+}
 
 namespace path_configuration {
-    // Darwin 8 sys/unistd.h.  This is the value applications store in termios
-    // control-character slots to disable the corresponding function.
     inline constexpr std::uint32_t disabled_control_character = 9;
     inline constexpr std::uint32_t disabled_control_character_value = 0xff;
-} // namespace path_configuration
+}
 
 namespace memory_advice {
     inline constexpr std::uint32_t normal = 0;
@@ -87,7 +79,7 @@ namespace memory_advice {
     inline constexpr std::uint32_t free_reusable = 7;
     inline constexpr std::uint32_t free_reuse = 8;
     inline constexpr std::uint32_t can_reuse = 9;
-} // namespace memory_advice
+}
 
 namespace fcntl_command {
     inline constexpr std::uint32_t get_descriptor_flags = 1;
@@ -97,43 +89,32 @@ namespace fcntl_command {
     inline constexpr std::uint32_t get_record_lock = 7;
     inline constexpr std::uint32_t set_record_lock = 8;
     inline constexpr std::uint32_t set_record_lock_wait = 9;
-    // Darwin file-cache hints. They affect kernel read strategy, not descriptor
-    // data or persistence, so the compatibility VFS may accept them as
-    // advisory.
     inline constexpr std::uint32_t set_read_ahead = 45;
     inline constexpr std::uint32_t set_no_cache = 48;
     inline constexpr std::uint32_t get_path = 50;
     inline constexpr std::uint32_t add_detached_signatures = 59;
-    // F_ADDFILESIGS registers the code signature embedded in the same file.
-    // Older dyld uses it when validating the dyld shared cache before mapping
-    // its logical library images.
     inline constexpr std::uint32_t add_file_signatures = 61;
-    // F_GETPROTECTIONCLASS reports the data-protection class associated with a
-    // file descriptor. The emulated data volume has no protection metadata,
-    // so the descriptor layer reports the unprotected class.
     inline constexpr std::uint32_t get_protection_class = 63;
-} // namespace fcntl_command
+}
 
 namespace ptrace_request {
     inline constexpr std::uint32_t trace_me = 0;
     inline constexpr std::uint32_t attach = 10;
     inline constexpr std::uint32_t deny_attach = 31;
-} // namespace ptrace_request
+}
 
 namespace record_lock {
     inline constexpr std::uint16_t read = 1;
     inline constexpr std::uint16_t unlock = 2;
     inline constexpr std::uint16_t write = 3;
 
-    // Darwin 8 ARM32 struct flock. off_t remains 64-bit while pid_t and
-    // pointers are 32-bit on the target firmware.
     inline constexpr std::uint32_t start_offset = 0;
     inline constexpr std::uint32_t length_offset = 8;
     inline constexpr std::uint32_t pid_offset = 16;
     inline constexpr std::uint32_t type_offset = 20;
     inline constexpr std::uint32_t whence_offset = 22;
     inline constexpr std::uint32_t size = 24;
-} // namespace record_lock
+}
 
 
 
@@ -157,13 +138,11 @@ namespace mach {
     inline constexpr std::uint32_t operation_timed_out = 49;
     inline constexpr std::uint32_t vm_flags_anywhere = 1;
     inline constexpr std::uint32_t vm_flags_overwrite = 0x4000U;
-} // namespace mach
+}
 
 namespace mig {
-    // Darwin 8 osfmk/mach/mig_errors.h. Keep the signed MIG value in its exact
-    // 32-bit wire representation.
-    inline constexpr std::uint32_t bad_id = 0xffff'fed1U; // -303
-} // namespace mig
+    inline constexpr std::uint32_t bad_id = 0xffff'fed1U;
+}
 
 namespace mach_message {
     inline constexpr std::uint32_t option_send = 0x0000'0001U;
@@ -193,7 +172,7 @@ namespace mach_message {
     {
         return remote | (local << 8U) | (complex ? bits_complex : 0U);
     }
-} // namespace mach_message
+}
 
 namespace arm_fast_trap {
     inline constexpr std::uint32_t syscall_number = 0x80000000U;
@@ -201,7 +180,7 @@ namespace arm_fast_trap {
     inline constexpr std::uint32_t data_cache_flush = 1;
     inline constexpr std::uint32_t thread_set_cthread_self = 2;
     inline constexpr std::uint32_t thread_get_cthread_self = 3;
-} // namespace arm_fast_trap
+}
 
 namespace syscall {
     inline constexpr std::uint32_t read = 3;
@@ -213,8 +192,6 @@ namespace syscall {
     inline constexpr std::uint32_t ptrace = 26;
     inline constexpr std::uint32_t kill = 37;
     inline constexpr std::uint32_t get_process_group = 81;
-    // gettid(2) reports a thread's temporary credential override, rather than
-    // returning a numeric thread identifier.
     inline constexpr std::uint32_t get_thread_identity = 286;
     inline constexpr std::uint32_t get_priority = 100;
     inline constexpr std::uint32_t unlink = 10;
@@ -292,10 +269,6 @@ namespace syscall {
     inline constexpr std::uint32_t pthread_sigmask = 329;
     inline constexpr std::uint32_t disable_thread_signal = 331;
     inline constexpr std::uint32_t semaphore_wait_signal = 334;
-    // iPhone OS 3.0's libSystem uses the pre-inline-timespec semwait ABI at
-    // syscall 370: the fifth argument points to an ARM32 {tv_sec,tv_nsec} pair.
-    // Keep this separate from syscall 334, whose sixth argument carries
-    // tv_nsec.
     inline constexpr std::uint32_t semaphore_wait_signal_timespec = 370;
     inline constexpr std::uint32_t get_audit_address = 357;
     inline constexpr std::uint32_t kqueue = 362;
@@ -317,11 +290,9 @@ namespace syscall {
     inline constexpr std::uint32_t posix_semaphore_try_wait = 272;
     inline constexpr std::uint32_t posix_semaphore_post = 273;
     inline constexpr std::uint32_t posix_semaphore_get_value = 274;
-} // namespace syscall
+}
 
 namespace filesystem_control {
-    // Darwin ARM32's package_ext_info is a pointer followed by two uint32_t
-    // fields. The ioctl request carries that 12-byte wire size in bits 16..28.
     inline constexpr std::uint32_t set_package_extensions = 0x800c4102U;
     inline constexpr std::uint32_t package_strings_offset = 0;
     inline constexpr std::uint32_t package_entry_count_offset = 4;
@@ -330,12 +301,9 @@ namespace filesystem_control {
     inline constexpr std::uint32_t maximum_package_entries = 1'024;
     inline constexpr std::uint32_t maximum_package_width = 255;
     inline constexpr std::uint32_t option_no_follow = 0x0000'0001U;
-} // namespace filesystem_control
+}
 
 namespace poll {
-    // Darwin's ARM32 pollfd is the native 8-byte {int fd, short events,
-    // short revents} layout. Keep the wire offsets explicit at the
-    // compatibility boundary instead of using the host's pollfd definition.
     inline constexpr std::uint32_t fd_offset = 0;
     inline constexpr std::uint32_t events_offset = 4;
     inline constexpr std::uint32_t revents_offset = 6;
@@ -351,14 +319,14 @@ namespace poll {
     inline constexpr std::uint16_t read_band = 0x0080;
     inline constexpr std::uint16_t write_band = 0x0100;
     inline constexpr std::uint16_t write_normal = out;
-} // namespace poll
+}
 
 namespace flock_operation {
     inline constexpr std::uint32_t shared = 0x01;
     inline constexpr std::uint32_t exclusive = 0x02;
     inline constexpr std::uint32_t non_blocking = 0x04;
     inline constexpr std::uint32_t unlock = 0x08;
-} // namespace flock_operation
+}
 
 namespace signal {
     inline constexpr std::uint32_t count = 32;
@@ -377,7 +345,7 @@ namespace signal {
     inline constexpr std::uint32_t information = 29;
     inline constexpr std::uint32_t default_action = 0;
     inline constexpr std::uint32_t ignore_action = 1;
-} // namespace signal
+}
 
 namespace extended_attribute {
     inline constexpr std::uint32_t no_follow = 0x0001;
@@ -390,19 +358,19 @@ namespace extended_attribute {
     inline constexpr std::string_view resource_fork_name {
         "com.apple.ResourceFork"
     };
-} // namespace extended_attribute
+}
 
 namespace io {
     inline constexpr std::uint32_t maximum_vector_count = 1024;
     inline constexpr std::size_t diagnostic_payload_bytes = 48;
-} // namespace io
+}
 
 namespace map_flag {
     inline constexpr std::uint32_t shared = 0x0001;
     inline constexpr std::uint32_t private_copy = 0x0002;
     inline constexpr std::uint32_t fixed = 0x0010;
     inline constexpr std::uint32_t anonymous = 0x1000;
-} // namespace map_flag
+}
 
 namespace memory_sync_flag {
     inline constexpr std::uint32_t asynchronous = 0x0001;
@@ -410,6 +378,6 @@ namespace memory_sync_flag {
     inline constexpr std::uint32_t kill_pages = 0x0004;
     inline constexpr std::uint32_t deactivate = 0x0008;
     inline constexpr std::uint32_t synchronous = 0x0010;
-} // namespace memory_sync_flag
+}
 
-} // namespace shade::darwin
+}

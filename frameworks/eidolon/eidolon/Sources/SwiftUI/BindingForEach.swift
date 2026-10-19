@@ -1,6 +1,5 @@
 import UIKit
 
-// The identity a ForEach asks for, so a collection of these needs no key path of its own.
 public struct _IndexedIdentifier<Index, ID: Hashable>: Identifiable {
     let index: Index
     public var id: ID { identity }
@@ -77,7 +76,6 @@ extension List where SelectionValue == Never {
     }
 }
 
-// A binding to a collection is a collection of bindings to its elements, as in SwiftUI: $items.filter { … }, ForEach($items).
 extension Binding: Sequence where Value: MutableCollection {
     public typealias Iterator = IndexingIterator<Binding<Value>>
 }

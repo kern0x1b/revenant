@@ -69,8 +69,6 @@ extension View {
         return _ModifiedView(content: self, modifier: EnvironmentModifier(apply: { $0.dynamicTypeSizeRange = bounds }, onUpdate: nil))
     }
     public func drawingGroup(opaque: Bool = false, colorMode: ColorRenderingMode = .nonLinear) -> some View {
-        // the options are the same values `RasterizationOptions` carries, and the same two the layer of
-        // iOS 6 has: a colour mode and an opaque flag are keys it has none of
         applyingToViews { view in
             view.layer.shouldRasterize = true
             var options = _RendererConfiguration.RasterizationOptions()
@@ -165,7 +163,6 @@ public struct AnyTransition {
     public static func offset(x: CGFloat = 0, y: CGFloat = 0) -> AnyTransition {
         offset(CGSize(width: x, height: y))
     }
-    // The old view is pushed out of the edge the new one came in by, as a stack of cards is.
     public static func push(from edge: Edge) -> AnyTransition {
         let opposite: Edge
         switch edge {

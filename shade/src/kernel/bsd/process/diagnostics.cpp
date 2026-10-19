@@ -25,4 +25,4 @@ std::vector<ProcessSnapshot> CompatibilityKernel::process_snapshots() const
     return snapshots;
 }
 
-} // namespace shade
+}

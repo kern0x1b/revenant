@@ -1,24 +1,7 @@
--- types-surface.lua: write bridge/apple-types.txt from the SDK's own 26.2 interfaces, so the list the ledger counts
--- against is generated rather than kept by hand.
---
--- The list used to be hand-kept and had been since the repository's first commit, which is how a family the interface
--- declares - `TextEditorStyle` and its three styles - was missing from it. It is now every public type and typealias
--- the SDK of 26.2 declares in the module of this framework, and apple-types-ios.txt the part of it an iOS app can
--- actually use.
---
--- The source is the SDK of 26.2, not fw/: fw/ is the interface of 16.4, which has no widget, no `TextEditorStyle` and
--- no window, and generating from it would drop every type this port exists to carry.
---
---     xmake l types-surface.lua [SDK26]        (default: the charon SDK 26.2 checkout)
-
 local text = import("lib.text", {rootdir = path.join(os.scriptdir(), ".."), anonymous = true})
 
 local here = os.scriptdir()
--- set by main: the SDK, and the two roots its interfaces are read from
 local sdk, frameworks, stdlib
--- the modules the inventory covers: SwiftUI's own surface, which is what an app writes against. The standard library,
--- Foundation and UIKit are reachable through it and are not listed here - the hand-kept list never had them, and
--- SCOPE widens the list when a review asks for it.
 local scope = os.getenv("APPLE_26_SCOPE")
 if scope == nil then
     scope = "SwiftUI,SwiftUICore"
@@ -32,13 +15,11 @@ local function startswith(s, prefix, at)
     return text.startswith(s, prefix, at)
 end
 
--- \s+ at position q: the position after the whitespace, or nil
 local function spaces_at(s, q)
     local _, e = string.find(s, "^%s+", q)
     return e and e + 1 or nil
 end
 
--- the keyword at q, followed by whitespace: the position after that whitespace, or nil
 local function keyword_at(s, q, word)
     if not startswith(s, word, q) then
         return nil
@@ -46,8 +27,6 @@ local function keyword_at(s, q, word)
     return spaces_at(s, q + #word)
 end
 
--- The rest of DECL after its attribute group, from q: the access group, the kind, the name, and the last position.
---     ((?:public|open|package)\s+)(?:final\s+|indirect\s+|@frozen\s+)*(struct|class|enum|protocol|typealias|actor)\s+(\w+)
 local function declaration_at(s, q)
     local access_end = nil
     for _, word in ipairs(ACCESS) do
@@ -85,15 +64,11 @@ local function declaration_at(s, q)
     return nil
 end
 
--- One attribute of the group, `@[\w.()]+\s*(?:\([^)]*\)\s*)?`, at p. The regex tries the longest run of name characters
--- first, then the parenthesised argument before none; every way it can end is handed to try, in that order, and the
--- first one try accepts wins.
 local function attribute_then(s, p, try)
     local _, longest = string.find(s, "^@[%w_%.%(%)]+", p)
     if not longest then
         return nil
     end
-    -- `[\w.()]+` takes at least one character after the @
     for name_end = longest, p + 2, -1 do
         local after_name = name_end + 1
         local ws = spaces_at(s, after_name) or after_name
@@ -113,8 +88,6 @@ local function attribute_then(s, p, try)
     return nil
 end
 
--- DECL.match(s): the attribute text, the access group, the kind and the name, or nil. The attribute group is
--- `(?:ATTRIBUTE)*`, greedy: each way of taking one more attribute is tried before the way of taking none.
 local function match_decl(s)
     local function from(q)
         local found = declaration_at(s, q)
@@ -134,7 +107,6 @@ local function match_decl(s)
     return {attrs = string.sub(s, 1, found.start - 1), access = found.access, kind = found.kind, name = found.name}
 end
 
--- the interfaces of the modules in scope: the frameworks' first, then the stdlib's, each in sorted order
 local function interfaces()
     local out = {}
     for _, root in ipairs({frameworks, stdlib}) do
@@ -158,7 +130,6 @@ local function interfaces()
     return out
 end
 
--- the text of a file of one line per row: nothing for no rows, else each row ends in a newline
 local function rows_text(rows)
     if #rows == 0 then
         return ""
@@ -199,10 +170,6 @@ function main(...)
     for _, file in ipairs(interfaces()) do
         local module = string.gsub(path.filename(path.directory(file)), "%.swiftmodule$", "")
         local lines = text.split(io.readfile(file), "\n")
-        -- a type declared inside another is not a module-level name, and a doc or comment line is not a declaration:
-        -- take only lines that start with an attribute or a public keyword at the left. The SDK writes @available on
-        -- the line above the declaration it belongs to and on no declaration's own line at all, so a declaration's
-        -- attributes are its own line and the @-lines above it.
         local above = {}
         for _, line in ipairs(lines) do
             local stripped = text.lstrip(line)

@@ -232,7 +232,7 @@ namespace {
         stats.deadline_stops += static_cast<std::size_t>(batch.deadline_stops);
     }
 
-} // namespace
+}
 
 FirmwarePreparer::FirmwarePreparer(std::filesystem::path rootfs,
     std::filesystem::path catalog_manifest, std::filesystem::path host_cache,
@@ -397,8 +397,6 @@ FirmwarePrepareStats FirmwarePreparer::run()
     artifact_limits.writeback_bytes = 0U;
     artifact_limits.compaction_bytes = 0U;
     if (limits_.artifact_seed_mode == FirmwareArtifactSeedMode::CatalogOnly) {
-        // Catalog-only comparison runs must not load, rewrite, or otherwise
-        // perturb an existing artifact seed.
         artifact_limits.persistence_enabled = false;
         artifact_limits.persistence_bytes = 0U;
     }
@@ -458,9 +456,6 @@ FirmwarePrepareStats FirmwarePreparer::run()
         }
         candidates.push_back(std::move(*candidate));
     }
-    // Expand the startup closure using catalog dependency names. Matching is
-    // deliberately path-only and only affects preparation order; every image is
-    // still validated from its current file generation before translation.
     std::queue<std::size_t> closure_queue;
     for (std::size_t index = 0; index < candidates.size(); ++index) {
         if (candidates[index].priority == 0U) {
@@ -500,10 +495,6 @@ FirmwarePrepareStats FirmwarePreparer::run()
         });
     stats.candidates = candidates.size();
 
-    // Value selection is intentionally deterministic and identity-safe. The
-    // catalog remains the source of boot-critical points; a bounded historical
-    // profile can replace catalog points for non-critical service/application
-    // images, where it represents the observed first-frame/main-page path.
     std::size_t profile_blocks_remaining = limits_.max_profile_hotset_blocks;
     for (auto& candidate : candidates) {
         switch (limits_.artifact_seed_mode) {
@@ -528,10 +519,6 @@ FirmwarePrepareStats FirmwarePreparer::run()
                 profile_blocks_remaining -= selected;
                 stats.profile_hotset_selected += selected;
             } else {
-                // ProfileHotset is deliberately profile-only. A catalog
-                // fallback would silently turn a bounded experiment into a
-                // broad static seed and recreate the critical-closure startup
-                // cost this mode is intended to measure.
                 candidate.reliable_entry_points.clear();
             }
             candidate.boot_working_set = use_profile;
@@ -721,4 +708,4 @@ FirmwarePrepareStats FirmwarePreparer::run()
     return stats;
 }
 
-} // namespace shade
+}

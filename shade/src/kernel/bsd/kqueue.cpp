@@ -16,10 +16,10 @@ void CompatibilityKernel::dispatch_bsd_kqueue(Cpu& cpu, std::uint32_t number)
 {
     auto& registers = cpu.registers();
     switch (number) {
-    case 362: { // kqueue
+    case 362: {
         const auto fd = allocate_file_descriptor();
         if (!fd) {
-            bsd_error(cpu, 24); // EMFILE
+            bsd_error(cpu, 24);
             return;
         }
         virtual_descriptors_.emplace(*fd, "kqueue");
@@ -27,8 +27,8 @@ void CompatibilityKernel::dispatch_bsd_kqueue(Cpu& cpu, std::uint32_t number)
         bsd_success(cpu, *fd);
         return;
     }
-    case 363: // kevent
-    case 369: { // kevent64
+    case 363:
+    case 369: {
         const bool extended = number == 369U;
         const KeventWireFormat wire { extended };
         const auto timeout_address = registers[extended ? 6U : 5U];
@@ -83,8 +83,6 @@ void CompatibilityKernel::dispatch_bsd_kqueue(Cpu& cpu, std::uint32_t number)
             const auto data = value->data;
             const auto user_data = value->user_data;
             const auto signed_filter = value->filter;
-            // File descriptors, task IDs and Mach names remain natural-sized.
-            // Timer/user identifiers and opaque cookies retain all 64 bits.
             if (signed_filter != darwin::kqueue::filter_user &&
                 signed_filter != darwin::kqueue::filter_timer &&
                 ident > UINT32_MAX) {
@@ -165,11 +163,6 @@ void CompatibilityKernel::dispatch_bsd_kqueue(Cpu& cpu, std::uint32_t number)
                         }
                     }
                     if (found != queue->second.end()) {
-                        // EV_ADD modifies an existing knote. Preserve the
-                        // consumed position of notes that remain selected so an
-                        // edge arriving before the update remains pending. A
-                        // newly selected note starts at the current generation
-                        // and does not synthesize historical activity.
                         const auto retains_exec_note =
                             (found->filter_flags &
                                 darwin::kqueue::process_note_exec) != 0U &&
@@ -204,8 +197,6 @@ void CompatibilityKernel::dispatch_bsd_kqueue(Cpu& cpu, std::uint32_t number)
                         (filter_flags & darwin::kqueue::user_note_trigger) !=
                             0U) {
                         found->user_triggered = true;
-                        // EV_CLEAR consumes a user event's current trigger,
-                        // not future NOTE_TRIGGER edges with identical data.
                         found->clear_delivered = false;
                     }
                     const auto operand =
@@ -310,4 +301,4 @@ void CompatibilityKernel::dispatch_bsd_kqueue(Cpu& cpu, std::uint32_t number)
     }
     }
 }
-} // namespace shade
+}

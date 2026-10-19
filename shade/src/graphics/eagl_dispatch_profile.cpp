@@ -12,16 +12,12 @@
 namespace shade {
 
 namespace {
-    // The layout of the flags word a GLI driver is given when EAGL creates a
-    // context, by the size of the dispatch table the driver reports. The 0xe48
-    // row is read from the iOS 6.1.3 GLEngine's gliCreateContext: bit 4 selects
-    // an ES 3 context, else bit 3 an ES 2 one, else bit 2 an ES 1 one.
     struct FlagsLayout {
         std::uint32_t dispatch_bytes;
         std::uint32_t mask;
         std::uint32_t es1;
         std::uint32_t es2;
-        std::uint32_t es3; // zero where the driver has no ES 3 context
+        std::uint32_t es3;
     };
     constexpr std::array<FlagsLayout, 3> flags_layouts {
         FlagsLayout { 0xe24U, 0x0cU, 0x04U, 0x08U, 0U },
@@ -84,7 +80,7 @@ std::optional<std::uint32_t> EaglContextFirstArm32Profile::dispatch_slot(
         std::uint32_t destination { };
         std::uint32_t immediate { };
         if (wide && first == 0xee1dU && (second & 0x0fffU) == 0x0f70U) {
-            tls_register = second >> 12U; // MRC p15, 0, Rt, c13, c0, 3
+            tls_register = second >> 12U;
         } else if (!wide && (first & 0xf800U) == 0x6800U) {
             base = (first >> 3U) & 7U;
             destination = first & 7U;
@@ -97,8 +93,6 @@ std::optional<std::uint32_t> EaglContextFirstArm32Profile::dispatch_slot(
             const auto target = (first >> 3U) & 15U;
             if (passes_context && function_offsets[target])
                 return (*function_offsets[target] - front_dispatch_offset) / 4U;
-            // Leaf wrappers tail-call the driver with BX; their earlier
-            // conditional BX LR handles a missing current context.
             if (target != 14U || (first & 0x80U) != 0U)
                 return std::nullopt;
         }
@@ -124,4 +118,4 @@ std::optional<std::uint32_t> EaglContextFirstArm32Profile::dispatch_slot(
     return std::nullopt;
 }
 
-} // namespace shade
+}

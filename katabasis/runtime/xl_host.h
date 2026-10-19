@@ -76,7 +76,6 @@ struct xl_category_t {
     void *instance_properties;
 };
 
-// Guest class objects in the arm64 layout and the host shadow classes that stand for them (swift_classes.m).
 void xl_shadow_init(void);
 Class xl_class_in(uint64_t guest);
 uint64_t xl_class_out(uintptr_t host);

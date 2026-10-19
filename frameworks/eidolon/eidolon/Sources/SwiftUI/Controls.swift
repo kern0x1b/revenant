@@ -183,14 +183,11 @@ public struct TextEditor: View, PrimitiveView {
 
 final class TextEditorDelegate: NSObject, UITextViewDelegate {
     var changed: (String) -> Void = { _ in }
-    /// What the text view's own selection changed to, for the environment's `textSelection` to read.
     var selectionChanged: (TextSelection) -> Void = { _ in }
     func textViewDidChange(_ textView: UITextView) { changed(textView.text ?? "") }
     func textViewDidChangeSelection(_ textView: UITextView) {
         selectionChanged(TextSelection(nsRange: textView.selectedRange, in: textView.text ?? ""))
     }
-    // .submitScope(.block) on a field of several lines: the return key runs the submit action of the screen instead of
-    // being a line of its own, which is what a UITextView of iOS 6 can be asked for
     var blocksReturn = false
     var submit: (() -> Void)?
     weak var editorView: UITextView?
@@ -200,8 +197,6 @@ final class TextEditorDelegate: NSObject, UITextViewDelegate {
         return false
     }
 
-    // what a blocking .submitScope does to the return key of a field of several lines: it runs the submit action of the
-    // screen instead of being a line of its own. What the text is decides it, so the decision is its own function.
     static func blocked(_ text: String, blocking: Bool) -> Bool { blocking && text == "\n" }
 }
 
@@ -215,8 +210,6 @@ final class TextEditorNode: LayoutNode {
         view.delegate = delegate
         delegate.editorView = view
     }
-    /// The environment's selection, when a `textSelection` is in the environment: what the text view is
-    /// told to show, and what its own selection is published back into.
     var selection: Binding<TextSelection>?
 
     override func update(_ view: any View, _ env: EnvironmentValues) {
@@ -227,7 +220,6 @@ final class TextEditorNode: LayoutNode {
         if textView.text != binding.wrappedValue { textView.text = binding.wrappedValue }
         textView.font = env.scaled(env.fontValue ?? UIFont.systemFont(ofSize: 17))
         textView.textColor = env.foregroundColor ?? .black
-        // iOS 6 carries exactly one selected range, which is what a `TextSelection` reads back
         selection = env.textSelection.flatMap { value in Binding(get: { value }, set: { _ in }) }
         if let value = env.textSelection {
             let range = value.nsRange(in: textView.text ?? "")

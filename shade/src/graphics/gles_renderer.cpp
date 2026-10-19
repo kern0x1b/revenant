@@ -135,16 +135,12 @@ namespace {
         const std::filesystem::path& pipeline_cache,
         const VulkanPresenterConfiguration& presenter)
     {
-        // Register this holder's destructor only after create_renderer()
-        // returns. Vulkan ICDs may register their own process-lifetime teardown
-        // during device creation; the renderer must be destroyed before those
-        // callbacks.
         static std::shared_ptr<GlesRenderer> renderer =
             create_renderer(backend, pipeline_cache, presenter);
         return renderer;
     }
 
-} // namespace
+}
 
 std::shared_ptr<HostSurface> GlesRenderer::create_surface(HostSurfaceKey key,
     HostSurfaceDescriptor descriptor,
@@ -301,4 +297,4 @@ void shutdown_gles_renderer()
         state.renderer->reset();
 }
 
-} // namespace shade
+}

@@ -90,11 +90,11 @@ namespace {
         return result;
     }
 
-} // namespace
+}
 
 std::string read_darwin_build_version(const std::filesystem::path& rootfs)
 {
     return read_system_version(rootfs).build_version;
 }
 
-} // namespace shade
+}

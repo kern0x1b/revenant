@@ -50,7 +50,7 @@ namespace {
 
     constexpr std::uint32_t maximum_baseband_io_traces = 64;
 
-} // namespace
+}
 
 void CompatibilityKernel::dispatch_bsd_descriptor_memory(
     Cpu& cpu, std::uint32_t number)
@@ -95,9 +95,6 @@ void CompatibilityKernel::dispatch_bsd_descriptor_memory(
                 attributes
                     .control_characters[darwin::tty::timeout_deciseconds_index];
             if (timeout == 0) {
-                // Without a read timeout, a disconnected character device
-                // reports the carrier failure instead of suspending a process
-                // forever.
                 bsd_error(cpu, darwin::error::io);
                 return;
             }
@@ -198,7 +195,7 @@ void CompatibilityKernel::dispatch_bsd_descriptor_memory(
             bytes.resize(static_cast<std::size_t>(result));
             file_offsets_[fd] += bytes.size();
         } else if (fd == 0) {
-            bytes.clear(); // terminal input currently presents non-blocking EOF
+            bytes.clear();
         } else {
             bsd_error(cpu, bsd_support::bad_file_descriptor);
             return;
@@ -564,9 +561,6 @@ void CompatibilityKernel::dispatch_bsd_descriptor_memory(
                 if (endpoint && endpoint->transmit_sink_failed())
                     bsd_error(cpu, darwin::error::io);
                 else
-                    // A profile without a device node has no event that can
-                    // make this queue writable.  Report the unavailable
-                    // transport immediately.
                     bsd_error(cpu, darwin::error::no_such_device_or_address);
                 return;
             }
@@ -655,7 +649,7 @@ void CompatibilityKernel::dispatch_bsd_descriptor_memory(
         bsd_success(cpu, static_cast<std::uint32_t>(bytes->size()));
         return;
     }
-    case 41: { // dup
+    case 41: {
         const auto source = registers[0];
         if (reject_guarded_descriptor(cpu, source, DarwinFileGuard::duplicate))
             return;
@@ -668,7 +662,7 @@ void CompatibilityKernel::dispatch_bsd_descriptor_memory(
         }
         const auto destination = allocate_file_descriptor();
         if (!destination) {
-            bsd_error(cpu, 24); // EMFILE
+            bsd_error(cpu, 24);
             return;
         }
         const auto allocated = *destination;
@@ -752,9 +746,6 @@ void CompatibilityKernel::dispatch_bsd_descriptor_memory(
             duplicated_descriptors_.emplace(allocated, original);
         }
         if (const auto baseband = baseband_open_description(source)) {
-            // A dup retains the same open description. Keep a direct descriptor
-            // entry as well so poll/select and later descriptor passing do not
-            // need to interpret a string kind as a transport session.
             baseband_open_descriptions_[allocated] = baseband;
             virtual_descriptors_[allocated] =
                 bsd::baseband_device::descriptor_kind;
@@ -767,10 +758,10 @@ void CompatibilityKernel::dispatch_bsd_descriptor_memory(
         bsd_success(cpu, allocated);
         return;
     }
-    case 42: { // pipe: Darwin returns the two descriptors in retval[0:1]
+    case 42: {
         const auto read_fd = allocate_file_descriptor();
         if (!read_fd) {
-            bsd_error(cpu, 24); // EMFILE
+            bsd_error(cpu, 24);
             return;
         }
         virtual_descriptors_.emplace(*read_fd, "pipe-read");
@@ -811,9 +802,6 @@ void CompatibilityKernel::dispatch_bsd_descriptor_memory(
             bsd_error(cpu, bsd_support::invalid_argument);
             return;
         }
-        // Reclamation and invalidation need a pager policy. Report an ordinary
-        // unsupported operation until that policy exists, rather than claiming
-        // those effects or routing a recognized syscall through nosys/SIGSYS.
         constexpr auto pager_flags = darwin::memory_sync_flag::invalidate |
                                      darwin::memory_sync_flag::kill_pages |
                                      darwin::memory_sync_flag::deactivate;
@@ -836,7 +824,7 @@ void CompatibilityKernel::dispatch_bsd_descriptor_memory(
         }
         return;
     }
-    case 73: // munmap
+    case 73:
         if (registers[1] == 0 ||
             !unmap_memory(cpu, registers[0], registers[1])) {
             bsd_error(cpu, bsd_support::invalid_argument);
@@ -892,8 +880,6 @@ void CompatibilityKernel::dispatch_bsd_descriptor_memory(
             bsd_success(cpu, destination);
             return;
         }
-        // XNU attaches descriptor filters to an fd-table entry. Replacing the
-        // destination closes that entry and detaches every associated knote.
         static_cast<void>(release_file_descriptor(destination));
         if (const auto file = file_descriptors_.find(source);
             file != file_descriptors_.end()) {
@@ -1012,7 +998,7 @@ void CompatibilityKernel::dispatch_bsd_descriptor_memory(
             if ((registers[2] & 1U) == 0U &&
                 reject_guarded_descriptor(cpu, fd, DarwinFileGuard::duplicate))
                 return;
-            descriptor_flags_[fd] = registers[2] & 1U; // FD_CLOEXEC
+            descriptor_flags_[fd] = registers[2] & 1U;
             bsd_success(cpu, 0);
             return;
         case darwin::fcntl_command::get_status_flags:
@@ -1032,26 +1018,13 @@ void CompatibilityKernel::dispatch_bsd_descriptor_memory(
             bsd_success(cpu, 0);
             return;
         case darwin::fcntl_command::get_protection_class:
-            // The host-backed volume is not encrypted and does not expose
-            // Darwin data-protection metadata. Returning the unprotected
-            // class keeps read-only callers, such as NSData's mapped-file
-            // path, on the normal mmap flow.
             bsd_success(cpu, 0);
             return;
         case darwin::fcntl_command::set_read_ahead:
         case darwin::fcntl_command::set_no_cache:
-            // Host page-cache policy is deliberately not projected into guest
-            // semantics. Both commands are advisory and have no visible
-            // file-data effect, so accepting the requested Boolean policy is
-            // sufficient.
             bsd_success(cpu, 0);
             return;
         case darwin::fcntl_command::add_detached_signatures:
-            // F_ADDSIGS lets dyld attach a detached code-signature blob to a
-            // vnode before validating mmap'ed pages. Shade does not model
-            // AMFI/code-signing enforcement, but the kernel ABI still needs to
-            // accept a readable fsignatures_t registration record so dyld can
-            // continue loading images.
             if (registers[2] == 0 ||
                 !memory_.accessible(registers[2], 16, MemoryPermission::Read)) {
                 bsd_error(cpu, bsd_support::bad_address);
@@ -1060,12 +1033,6 @@ void CompatibilityKernel::dispatch_bsd_descriptor_memory(
             }
             return;
         case darwin::fcntl_command::add_file_signatures:
-            // F_ADDFILESIGS is the corresponding path for a signature stored
-            // in the file itself. iOS 4 dyld uses it for the shared cache
-            // before issuing shared_region_map_file(). Code-signing
-            // enforcement is intentionally outside this compatibility layer;
-            // accept the ABI record so the cache can be mapped by the normal
-            // shared-region implementation.
             if (registers[2] == 0 ||
                 !memory_.accessible(registers[2], 16, MemoryPermission::Read)) {
                 bsd_error(cpu, bsd_support::bad_address);
@@ -1119,7 +1086,7 @@ void CompatibilityKernel::dispatch_bsd_descriptor_memory(
             return;
         }
     }
-    case darwin::syscall::memory_protect: { // mprotect
+    case darwin::syscall::memory_protect: {
         const auto address = registers[0];
         const auto size = registers[1];
         const auto protection = registers[2];
@@ -1132,8 +1099,6 @@ void CompatibilityKernel::dispatch_bsd_descriptor_memory(
             return;
         }
         if (size == 0) {
-            // XNU passes a zero-length request through mach_vm_protect,
-            // which returns KERN_SUCCESS without touching the address space.
             bsd_success(cpu, 0);
             return;
         }
@@ -1151,7 +1116,7 @@ void CompatibilityKernel::dispatch_bsd_descriptor_memory(
         bsd_success(cpu, 0);
         return;
     }
-    case darwin::syscall::memory_advise: { // madvise
+    case darwin::syscall::memory_advise: {
         const auto address = registers[0];
         const auto size = registers[1];
         const auto advice = registers[2];
@@ -1163,14 +1128,10 @@ void CompatibilityKernel::dispatch_bsd_descriptor_memory(
             bsd_error(cpu, darwin::error::no_memory);
             return;
         }
-        // XNU's madvise contract is advisory. Keeping resident data is a valid
-        // conservative implementation for every supported behavior, including
-        // MADV_FREE: its contents may be discarded under pressure, but need not
-        // be discarded immediately and the mapping must remain intact.
         bsd_success(cpu, 0);
         return;
     }
-    case 197: { // mmap
+    case 197: {
         auto address = registers[0];
         const auto size = registers[1];
         const auto protection = registers[2];
@@ -1284,10 +1245,6 @@ void CompatibilityKernel::dispatch_bsd_descriptor_memory(
                     return;
                 }
             } else {
-                // MAP_PRIVATE file pages already have a lazy copy-on-write
-                // backing in AddressSpace. Reuse it instead of treating mmap
-                // length as a single read(2) buffer; valid mappings may be much
-                // larger than maximum_io.
                 if (!memory_.map_file(address, mapped_size, permissions,
                         found->second, offset)) {
                     bsd_error(cpu, darwin::error::no_memory);
@@ -1324,7 +1281,7 @@ void CompatibilityKernel::dispatch_bsd_descriptor_memory(
         bsd_success(cpu, address);
         return;
     }
-    case 266: { // shm_open
+    case 266: {
         const auto name = memory_.read_c_string(registers[0], 256);
         if (!name) {
             bsd_error(cpu, bsd_support::bad_address);
@@ -1334,9 +1291,6 @@ void CompatibilityKernel::dispatch_bsd_descriptor_memory(
         if (!object_name.empty() && object_name.front() == '/') {
             object_name.erase(object_name.begin());
         }
-        // Darwin 8's own notifyd uses "apple.shm.notification_center"
-        // without the POSIX-leading slash, so accept both spellings while
-        // still rejecting path traversal and hierarchical names.
         if (object_name.empty() || object_name.find('/') != std::string::npos) {
             bsd_error(cpu, bsd_support::invalid_argument);
             return;
@@ -1356,14 +1310,14 @@ void CompatibilityKernel::dispatch_bsd_descriptor_memory(
                 shared_state_->shared_memory_objects.find(object_name);
             if (existing != shared_state_->shared_memory_objects.end()) {
                 if ((registers[1] & (o_creat | o_excl)) == (o_creat | o_excl)) {
-                    bsd_error(cpu, 17); // EEXIST
+                    bsd_error(cpu, 17);
                     return;
                 }
                 backing = existing->second;
             } else {
                 if (((registers[1] & o_creat) == 0 && !seed_capabilities) ||
                     rootfs_.empty()) {
-                    bsd_error(cpu, 2); // ENOENT
+                    bsd_error(cpu, 2);
                     return;
                 }
                 const auto directory =
@@ -1390,7 +1344,7 @@ void CompatibilityKernel::dispatch_bsd_descriptor_memory(
                             static_cast<std::streamsize>(
                                 shared_state_->graphics_services_capability_memory
                                     .size())))) {
-                    bsd_error(cpu, 5); // EIO
+                    bsd_error(cpu, 5);
                     return;
                 }
                 shared_state_->shared_memory_objects.emplace(
@@ -1409,7 +1363,7 @@ void CompatibilityKernel::dispatch_bsd_descriptor_memory(
         }
         const auto fd = allocate_file_descriptor();
         if (!fd) {
-            bsd_error(cpu, 24); // EMFILE
+            bsd_error(cpu, 24);
             return;
         }
         file_descriptors_[*fd] = backing;
@@ -1422,7 +1376,7 @@ void CompatibilityKernel::dispatch_bsd_descriptor_memory(
         bsd_success(cpu, *fd);
         return;
     }
-    case 267: { // shm_unlink
+    case 267: {
         const auto name = memory_.read_c_string(registers[0], 256);
         if (!name) {
             bsd_error(cpu, bsd_support::bad_address);
@@ -1443,11 +1397,9 @@ void CompatibilityKernel::dispatch_bsd_descriptor_memory(
                 shared_state_->shared_memory_objects.erase(object_name) != 0;
         }
         if (!erased) {
-            bsd_error(cpu, 2); // ENOENT
+            bsd_error(cpu, 2);
             return;
         }
-        // Keep the backing inode until process teardown so descriptors and
-        // mappings opened before unlink remain valid, as POSIX requires.
         output_.write("[vfs] shm_unlink " + object_name + "\n");
         bsd_success(cpu, 0);
         return;
@@ -1459,4 +1411,4 @@ void CompatibilityKernel::dispatch_bsd_descriptor_memory(
     }
 }
 
-} // namespace shade
+}

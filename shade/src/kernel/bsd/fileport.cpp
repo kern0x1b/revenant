@@ -38,9 +38,6 @@ void CompatibilityKernel::dispatch_bsd_fileport(
             bsd_error(cpu, bsd_support::bad_file_descriptor);
             return;
         }
-        // XNU does not allow a kqueue's event registrations to escape through
-        // fileport_makeport. Other descriptor kinds already have a complete
-        // DescriptorTransfer representation and share the existing HLE state.
         if (transfer->virtual_type == "kqueue") {
             bsd_error(cpu, bsd_support::invalid_argument);
             return;
@@ -94,13 +91,11 @@ void CompatibilityKernel::dispatch_bsd_fileport(
     }
     const auto descriptor = import_descriptor(fileport->second);
     if (!descriptor) {
-        bsd_error(cpu, 24); // EMFILE
+        bsd_error(cpu, 24);
         return;
     }
-    // fileport_makefd returns a descriptor with FD_CLOEXEC set. This is
-    // distinct from SCM_RIGHTS, whose import path intentionally clears it.
     descriptor_flags_[*descriptor] = 1U;
     bsd_success(cpu, *descriptor);
 }
 
-} // namespace shade
+}

@@ -13,8 +13,6 @@
 
 namespace shade {
 namespace {
-    // CoreAudio's six-bit sample-fraction field starts at bit seven.
-    // https://developer.apple.com/documentation/coreaudiotypes/klinearpcmformatflagssamplefractionshift
     constexpr std::uint32_t fraction_shift = 7;
     constexpr std::uint32_t fraction_mask = 0x3f;
 
@@ -91,4 +89,4 @@ AudioSamples PcmSampleFormat::decode(
     }, peak);
 }
 
-} // namespace shade
+}

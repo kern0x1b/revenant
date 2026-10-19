@@ -30,7 +30,7 @@ std::uint32_t dispatch_guarded_port_trap(KernelSharedState& state,
                (static_cast<std::uint64_t>(registers[index + 1]) << 32U);
     };
 
-    if (trap == 24U) { // mach_port_construct
+    if (trap == 24U) {
         const auto options = registers[1];
         const auto output = registers[4];
         if (!memory.accessible(options, 16U, MemoryPermission::Read) ||
@@ -61,8 +61,6 @@ std::uint32_t dispatch_guarded_port_trap(KernelSharedState& state,
         if ((flags & temporary_owner) != 0)
             static_cast<void>(
                 state.mach_port_objects.set_temporary_owner(object));
-        // Importance/de-nap receivers use the kernel's existing queued-message
-        // importance accounting; no additional host scheduling is required.
         auto result = darwin::mach::success;
         if ((flags & insert_send) != 0)
             result = insert_port_right_locked(state, task, task, *name, *name,
@@ -84,7 +82,7 @@ std::uint32_t dispatch_guarded_port_trap(KernelSharedState& state,
     if (!port)
         return darwin::mach::invalid_right;
     const auto guard = wide(trap == 25U ? 3U : 2U);
-    if (trap == 41U) { // mach_port_guard
+    if (trap == 41U) {
         if (port->guard || state.mach_port_contexts[entry->object] != 0)
             return darwin::mach::invalid_argument;
         static_cast<void>(state.mach_port_objects.set_guard(
@@ -94,15 +92,13 @@ std::uint32_t dispatch_guarded_port_trap(KernelSharedState& state,
     }
     if ((port->guard && *port->guard != guard) || (trap == 42U && !port->guard))
         return darwin::mach::invalid_argument;
-    if (trap == 42U) { // mach_port_unguard
+    if (trap == 42U) {
         static_cast<void>(
             state.mach_port_objects.set_guard(entry->object, std::nullopt));
         state.mach_port_contexts[entry->object] = 0;
         return darwin::mach::success;
     }
 
-    // Destruct drops the receive right and only the requested send references.
-    // The common right-lifetime path handles queued rights and notifications.
     const auto delta = std::bit_cast<std::int32_t>(registers[2]);
     if (delta > 0)
         return darwin::mach::invalid_value;
@@ -115,4 +111,4 @@ std::uint32_t dispatch_guarded_port_trap(KernelSharedState& state,
     return modify_port_references_locked(state, task, name, Right::Receive, -1);
 }
 
-} // namespace shade
+}

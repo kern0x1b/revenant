@@ -1,26 +1,3 @@
-// Guest class objects that are laid out for the guest runtime, and the host classes that stand for them.
-//
-// The Swift runtime keeps the classes it lays out itself (class metadata) in the arm64 object layout: isa@0, superclass@8,
-// two cache words, a data word with the class_ro_t and the Swift flags @32, then Swift's own fields. Swift reads those
-// fields, and the host libobjc cannot read them: its objc_class is 32-bit and puts the superclass at +4, so a host call
-// that reaches one of these objects faults in libobjc. On a real device the Objective-C runtime and the Swift runtime
-// share one object. Here each guest class gets a SHADOW, an ordinary host class built from the guest's class_ro_t, and
-// the bridge translates a class where it crosses (xl_class_in / xl_class_out), the way xl_object_in / xl_object_out
-// treat a block. The guest object is never written, so what Swift reads from it stays true.
-//
-// A shadow is made when the Swift runtime hands its class over, through the two calls iOS 6 libobjc lacks and this file
-// provides (objc_readClassPair, _objc_realizeClassFromSwift), or, for a class the compiler laid out statically and listed
-// only in __objc_clsrolist (xl_swift_static_classes), the first time a message or a call reaches it -- which is what the
-// real runtime does when it realizes such a class lazily.
-//
-// What a shadow carries: the name (the class_ro_t's, or the Swift runtime's own lazy class namer, registered through
-// objc_setHook_lazyClassNamer, when the ro has none), the superclass (its shadow, or the host class it names), the
-// instance and class methods, and enough instance size for a host allocation. It does not yet carry protocols,
-// properties or ivars: a class that has any is noted in the shadow log, not passed over silently.
-//
-// What a shadow cannot do: give the host an INSTANCE of a guest-layout class. Such an object's isa word is the guest
-// class, so the bridge finds the shadow through the table when a guest message reaches it (xl_class_of); a host
-// message sent to it by host code (CoreFoundation retaining it in an array, say) would still fault in libobjc.
 #include "objc_abi.h"
 #import <Foundation/Foundation.h>
 #import <objc/message.h>
@@ -37,7 +14,6 @@
 #include "xl_bridge.h"
 #include "xl_host.h"
 
-// The arm64 class object, and the parts of its class_ro_t this file reads (objc4's class_ro_t, 64-bit).
 struct xl_guest_class {
     uint64_t isa;
     uint64_t superclass;
@@ -67,17 +43,16 @@ extern const uint32_t xl_swift_listed_classes[];
 
 static volatile int xl_shadows_active;
 static OSSpinLock xl_table_lock = OS_SPINLOCK_INIT;
-static CFMutableDictionaryRef xl_guest_to_host;   // guest class -> shadow
-static CFMutableDictionaryRef xl_host_to_guest;   // shadow -> guest class
-static CFMutableDictionaryRef xl_unbuilt_static;  // static class object -> the class object of the pair (a class maps to its own)
-static CFMutableDictionaryRef xl_shadow_imps;     // host IMP made for a guest method -> guest address
+static CFMutableDictionaryRef xl_guest_to_host;
+static CFMutableDictionaryRef xl_host_to_guest;
+static CFMutableDictionaryRef xl_unbuilt_static;
+static CFMutableDictionaryRef xl_shadow_imps;
 static pthread_mutex_t xl_build_lock;
 static pthread_once_t xl_shadow_once = PTHREAD_ONCE_INIT;
-static uint64_t xl_lazy_namer;                    // guest address of the Swift runtime's lazy class namer, 0 before it registers
+static uint64_t xl_lazy_namer;
 
 static int xl_shadow_logging = -1;
 
-// Whether the shadow log is on (a flag file, like the message trace), read once.
 int xl_shadow_log_enabled(void)
 {
     if (xl_shadow_logging < 0)
@@ -110,8 +85,6 @@ static void xl_shadow_setup(void)
     xl_host_to_guest = CFDictionaryCreateMutable(NULL, 0, NULL, NULL);
     xl_unbuilt_static = CFDictionaryCreateMutable(NULL, 0, NULL, NULL);
     xl_shadow_imps = CFDictionaryCreateMutable(NULL, 0, NULL, NULL);
-    // A static metaclass is asked for on its own (a message to a class reads the class's isa); the pair is built from the
-    // class, which is the listed object whose isa is that metaclass and whose ro is not a metaclass's.
     for (const uint32_t *object = xl_swift_static_classes; *object; object++) {
         const struct xl_guest_class *c = (const struct xl_guest_class *)(uintptr_t)*object;
         const struct xl_guest_ro *ro = (const struct xl_guest_ro *)(uintptr_t)(c->bits & ~7ull);
@@ -145,10 +118,6 @@ static void xl_table_set(CFMutableDictionaryRef table, uintptr_t key, const void
     OSSpinLockUnlock(&xl_table_lock);
 }
 
-// The host method a guest method becomes: a block IMP that calls the guest method with its own self and selector and up to
-// four more word-sized arguments, and answers one word. A guest message never runs it (xl_route finds the guest address by
-// the IMP and jumps there, so a message keeps every argument the guest sends); it is for a message sent by host code, and
-// the four words are all it carries.
 static IMP xl_guest_method_imp(uint64_t guest, SEL selector)
 {
     IMP imp = imp_implementationWithBlock(^uintptr_t(id self_, uintptr_t a, uintptr_t b, uintptr_t c, uintptr_t d) {
@@ -180,8 +149,6 @@ static void xl_add_guest_methods(Class target, uint64_t list, const char *class_
         const char *types;
         uint64_t imp;
         if (relative) {
-            // A small method's name is the offset of a selector reference, which the loader has already filled in with
-            // the host selector (xlgen's startup writes every selref).
             selector = (SEL)(uintptr_t) * (const uint32_t *)(uintptr_t)(entry + *(const int32_t *)(uintptr_t)entry);
             types = (const char *)(uintptr_t)(entry + 4 + *(const int32_t *)(uintptr_t)(entry + 4));
             imp = entry + 8 + *(const int32_t *)(uintptr_t)(entry + 8);
@@ -197,7 +164,6 @@ static void xl_add_guest_methods(Class target, uint64_t list, const char *class_
 
 static Class xl_class_from_guest(uint64_t guest);
 
-// Make the shadow pair of a guest class, or return the one already made. `guest` is the CLASS object of the pair.
 static Class xl_build_shadow(uintptr_t guest)
 {
     pthread_mutex_lock(&xl_build_lock);
@@ -219,15 +185,12 @@ static Class xl_build_shadow(uintptr_t guest)
 
     const char *name = (const char *)(uintptr_t)ro->name;
     if (!name) {
-        // The Swift runtime names a class it builds (a generic class's mangled name) only when asked.
         if (!xl_lazy_namer) {
             char why[128];
             snprintf(why, sizeof why, "xlate: class %p has no name and no lazy class namer is registered", (void *)guest);
             pthread_mutex_unlock(&xl_build_lock);
             xl_unsupported(why);
         }
-        // xl_invoke_n keeps the argument registers of the message that brought us here (xl_invoke leaves its result in x0,
-        // which the message then takes for its receiver).
         uint64_t argument = guest;
         name = (const char *)(uintptr_t)xl_invoke_n(xl_lazy_namer, &argument, 1);
         if (!name) {
@@ -239,10 +202,6 @@ static Class xl_build_shadow(uintptr_t guest)
     }
 
     Class host_super = c->superclass ? xl_class_from_guest(c->superclass) : Nil;
-    // iOS 6 libobjc links a new class into its superclass's subclass list, which a class the loader registered and nothing
-    // has messaged yet does not have (its data word still points at the ro, and the link would write over it). A message
-    // realizes it, as the Swift runtime does for the superclass before it registers a class where the runtime cannot
-    // realize lazily (swift_instantiateObjCClass).
     if (host_super)
         ((id(*)(id, SEL))objc_msgSend)((id)host_super, sel_registerName("class"));
     shadow = objc_allocateClassPair(host_super, name, 0);
@@ -252,7 +211,6 @@ static Class xl_build_shadow(uintptr_t guest)
         pthread_mutex_unlock(&xl_build_lock);
         xl_unsupported(why);
     }
-    // Room for a host allocation of the class: the guest instance is at least this big.
     size_t super_size = host_super ? class_getInstanceSize(host_super) : 0;
     if (ro->instance_size > super_size)
         class_addIvar(shadow, "xl_guest_storage", ro->instance_size - super_size, 3, "?");
@@ -285,8 +243,6 @@ static Class xl_build_shadow(uintptr_t guest)
     return shadow;
 }
 
-// The host class for a guest class value: its shadow (made now if the class is one the compiler laid out statically), or the
-// value itself when it is already a host class.
 static Class xl_class_from_guest(uint64_t guest)
 {
     if (!xl_shadows_active)
@@ -301,8 +257,6 @@ static Class xl_class_from_guest(uint64_t guest)
     return owner == guest ? shadow : object_getClass(shadow);
 }
 
-// The classes the compiler listed in __objc_classlist and that keep the guest's layout are registered at start-up, as the
-// runtime registers a loaded image's classes: a lookup by name finds them from the first message on.
 void xl_shadow_register_listed(void)
 {
     static volatile int registering;
@@ -329,8 +283,6 @@ uint64_t xl_class_out(uintptr_t host)
     return guest ? guest : host;
 }
 
-// The class the host runtime knows for an object: what object_getClass answers for a host object, the shadow for an
-// object whose isa is a guest class.
 Class xl_class_of(id object)
 {
     if (!object)
@@ -340,9 +292,6 @@ Class xl_class_of(id object)
     return xl_class_from_guest(*(const uintptr_t *)(uintptr_t)object);
 }
 
-// A message with no arguments to an object whose isa is a guest class (an instance the guest allocated), answered by the
-// guest's own method: the host runtime cannot read such an object's class, so a host libobjc call that would dispatch on it
-// (objc_retain, objc_release) is made here instead. Returns 0 for any other object, which the caller hands to the host.
 int xl_guest_send(id object, SEL selector, uint64_t *result)
 {
     if (!xl_shadows_active || !object)
@@ -376,7 +325,6 @@ struct __attribute__((packed)) xl_pair_pack {
     uint64_t r;
 };
 
-// objc_readClassPair(cls, info): the Swift runtime hands over a class it has laid out, in place. The result is the class.
 void xl_manual_objc_readClassPair(void *pack)
 {
     struct xl_pair_pack *p = pack;
@@ -385,9 +333,6 @@ void xl_manual_objc_readClassPair(void *pack)
     p->r = p->a0;
 }
 
-// _objc_realizeClassFromSwift(cls, previously): objc4's four cases. A class realized in place (previously == cls) or newly
-// built (previously == nil) is registered; a class built to replace a stub (previously is the stub) is registered and the
-// stub's address answers for it; a nil class, "hereby disavowed", is not supported by libobjc either.
 void xl_manual__objc_realizeClassFromSwift(void *pack)
 {
     struct xl_pair_pack *p = pack;
@@ -411,8 +356,6 @@ struct __attribute__((packed)) xl_hook_pack {
     uint64_t none;
 };
 
-// objc_setHook_lazyClassNamer(hook, &previous): keep the hook, hand back the one it replaces (or the guest function that names
-// nothing).
 void xl_manual_objc_setHook_lazyClassNamer(void *pack)
 {
     struct xl_hook_pack *p = pack;
@@ -422,8 +365,6 @@ void xl_manual_objc_setHook_lazyClassNamer(void *pack)
     xl_lazy_namer = p->new_hook;
 }
 
-// objc_setHook_getImageName(hook, &previous): keep the hook, hand back the one it replaces (or the guest function that asks the
-// host's own class_getImageName). class_getImageName then asks the hook, as libobjc's does: BOOL hook(Class, const char **).
 static uint64_t xl_image_name_hook;
 
 struct __attribute__((packed)) xl_image_name_hook_pack {
@@ -449,7 +390,6 @@ void xl_manual_class_getImageName(void *pack)
 {
     struct xl_image_name_pack *p = pack;
     if (xl_image_name_hook) {
-        // BOOL hook(Class, const char **): the name comes back through a slot the guest can address.
         uint64_t name = 0;
         uint64_t arguments[2] = {p->cls, (uint64_t)(uintptr_t)&name};
         p->r = (xl_invoke_n(xl_image_name_hook, arguments, 2) & 0xff) ? name : 0;
@@ -458,7 +398,6 @@ void xl_manual_class_getImageName(void *pack)
     p->r = xl_widen_pointer((uintptr_t)class_getImageName(xl_class_in(xl_narrow_pointer(p->cls, "class_getImageName", 0))));
 }
 
-// What the hook Swift replaced answers: the host's own class_getImageName.
 void xl_manual_default_class_getImageName(void *pack)
 {
     struct xl_image_name_pack *p = pack;

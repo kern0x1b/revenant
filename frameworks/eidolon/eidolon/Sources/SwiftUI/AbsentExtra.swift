@@ -36,8 +36,6 @@ extension View {
         ignored(self, "digitalCrownAccessory", "the digital crown is a watch, and this release is not one; there is no crown to turn and no accessory to show")
     }
     public func exportableToServices<T>(_ payload: @escaping () -> [T]) -> some View {
-        // the share sheet of the release is a UIActivityViewController, and it takes what is shared as its items: a
-        // string, a URL, an image, a file. Its completion is iOS 8, so nothing can be told back that the share happened.
         _Unsupported.note("exportableToServices", "the sheet of iOS 6 takes what is shared and offers it, but it has no completion, so an app is not told that the share happened — that is iOS 8")
         return onLongPressGesture {
             guard let host = UIApplication.shared.keyWindow?.rootViewController else { return }

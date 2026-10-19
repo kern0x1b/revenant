@@ -1,9 +1,3 @@
-// the environment keys of SDK 26.2 this module carries: the type Apple declares and the default the
-// framework of macOS 27 answers with (.agent-work/host/envdefaults.txt holds the measurement).
-// A key is storage: a value views read and modifiers write, whether or not a view acts on it.
-// Keys with no public default on the host take the value Apple's own bodies show, or the one a
-// person on iOS 6 could not have switched on.
-
 struct _accessibilityDifferentiateWithoutColorKey: EnvironmentKey { static var defaultValue: Bool { false } }
 struct _accessibilityInvertColorsKey: EnvironmentKey { static var defaultValue: Bool { false } }
 struct _accessibilityLargeContentViewerEnabledKey: EnvironmentKey { static var defaultValue: Bool { false } }

@@ -40,8 +40,6 @@ bool CompatibilityKernel::release_file_descriptor(std::uint32_t descriptor)
     apple80211_scan_delivered_.erase(descriptor);
     system_event_next_identifiers_.erase(descriptor);
     route_socket_states_.erase(descriptor);
-    // This may destroy the final listening open description. Its queued
-    // endpoints then close and clients observe the resulting stream state.
     unix_listener_states_.erase(descriptor);
     socket_pair_endpoints_.erase(descriptor);
     kqueues_.erase(descriptor);
@@ -70,4 +68,4 @@ void CompatibilityKernel::release_close_on_exec_descriptors()
     }
 }
 
-} // namespace shade
+}

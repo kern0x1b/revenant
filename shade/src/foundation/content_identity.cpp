@@ -427,7 +427,7 @@ namespace {
         std::uint64_t bit_count_ { };
     };
 
-} // namespace
+}
 
 bool ContentIdentity::empty() const noexcept
 {
@@ -567,4 +567,4 @@ std::optional<ContentIdentity> sha256_file(const std::filesystem::path& path,
     return state.finish();
 }
 
-} // namespace shade
+}

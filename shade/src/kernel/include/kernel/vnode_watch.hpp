@@ -14,9 +14,6 @@
 
 namespace shade {
 
-// Descriptor-bound kqueue state. The existing VFS generation registry also
-// publishes host watcher changes; no host timer or second filesystem watcher
-// is needed to wake a guest waiting on a file or directory.
 class VnodeWatch {
 public:
     VnodeWatch(std::filesystem::path path, GuestFileGenerationRegistry& files);
@@ -33,4 +30,4 @@ private:
     mutable bool detached_ { };
 };
 
-} // namespace shade
+}

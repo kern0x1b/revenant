@@ -45,8 +45,6 @@ struct DyldSharedCache::ImageStore {
 
 struct DyldSharedCache::FileViewStore {
     std::mutex mutex;
-    // A null value records a failed open for this immutable generation too;
-    // callers must not repeatedly retry a member after an atomic failure.
     std::map<std::uint32_t, std::shared_ptr<const ImmutableFileView>> views;
 };
 
@@ -101,9 +99,6 @@ private:
 
 namespace {
 
-    // These offsets mirror the public dyld_cache_header layout. The parser uses
-    // mappingOffset as the header-availability boundary, matching dyld's own
-    // version gating instead of assuming every cache has the newest fields.
     constexpr std::size_t magic_offset = 0;
     constexpr std::size_t magic_size = 16;
     constexpr std::size_t mapping_offset_field = 16;
@@ -527,10 +522,6 @@ namespace {
                 end - (bytes.begin() + static_cast<std::ptrdiff_t>(offset))) };
     }
 
-    // Old shared caches predate the imagesText table. Their image records still
-    // provide the load address, so recover the image's Mach-O segments from the
-    // cache itself. This keeps HLE, catalog and shared-region mapping on one
-    // metadata path without identifying a particular firmware build.
     bool populate_legacy_image_ranges(
         DyldCacheImage& image, std::span<const DyldCacheFile> files)
     {
@@ -585,11 +576,6 @@ namespace {
                 const auto initial_protection =
                     read_span_u32(commands, cursor + 44U);
                 if (file_size != 0U && (initial_protection & 4U) != 0U) {
-                    // In the legacy cache format __TEXT's fileoff is relative
-                    // to the image header, while the later segments use
-                    // absolute cache offsets. Keep this rule tied to the Mach-O
-                    // segment contract rather than to a firmware/build
-                    // identifier.
                     const bool image_relative = *name == "__TEXT";
                     if (image_relative &&
                         add_overflows(
@@ -928,7 +914,7 @@ namespace {
         return offset;
     }
 
-} // namespace
+}
 
 std::shared_ptr<const DyldSharedCache::GenerationArtifactView>
 DyldSharedCache::GenerationArtifactView::open(const std::filesystem::path& path)
@@ -1344,8 +1330,6 @@ DyldSharedCache::load_shared_generation_artifact(
     if (!artifact)
         return { };
 
-    // Artifact loads retain only the typed mmap-backed view; image and file
-    // records are never deserialized into process-local owning vectors.
     DyldSharedCache mapped_result;
     mapped_result.generation_artifact_view_ = artifact;
     mapped_result.generation_identity_ = artifact->generation_identity();
@@ -1542,9 +1526,6 @@ DyldSharedCache::ParseResult DyldSharedCache::parse(
         }
         return stamps;
     };
-    // Keep construction single-flight. The parser only holds this lock while a
-    // generation is absent; once published, all callers retain the same
-    // immutable object and do not copy its metadata.
     std::unique_lock generation_lock { generation_cache_mutex };
     if (const auto cached = generation_cache.find(cache_key);
         cached != generation_cache.end() &&
@@ -1555,11 +1536,6 @@ DyldSharedCache::ParseResult DyldSharedCache::parse(
         }
     }
 
-    // A process-local weak pointer is only the fast path.  Independent
-    // emulator processes acquire the same read-only serialized generation
-    // metadata after validating the current main member's generation and
-    // content identity; the loader then validates every subcache before
-    // publishing the local handle.
     const auto main_generation = read_file_generation(path);
     const auto main_identity = shared_file_identity(path).content_identity;
     if (main_generation && main_identity) {
@@ -1670,9 +1646,6 @@ DyldSharedCache::ParseResult DyldSharedCache::parse(
         result.files_.push_back(subcache->file);
     }
 
-    // Capture every member before publishing the generation. The shared
-    // pointer is retained by the generation, so delayed image/HLE consumers
-    // cannot accidentally reopen a replacement at the same pathname.
     for (auto& file : result.files_) {
         file.immutable_file_view = read_immutable_file_view(file);
         if (!file.immutable_file_view)
@@ -1874,9 +1847,6 @@ DyldSharedCache::immutable_file_view_at(std::size_t index) const
         }
         ++file_view_builds;
     } else if (index < files_.size()) {
-        // A newly built generation captured these views before publication. The
-        // accessor still records their reuse in the same per-member store so
-        // the lifetime and failure behavior match artifact-loaded generations.
         view = files_[index].immutable_file_view;
         ++file_view_hits;
     }
@@ -1970,9 +1940,6 @@ std::shared_ptr<const MachOImage> DyldSharedCache::parse_image(
         ++image_builds;
         return parsed;
     } catch (const std::exception&) {
-        // Do not publish an incomplete image. A later request may retry against
-        // a stable file generation, while existing generations remain
-        // untouched.
         return { };
     }
 }
@@ -2235,4 +2202,4 @@ DyldCacheImageView DyldCacheImageRange::operator[](std::size_t index) const
     return cache_->image_view_at(index);
 }
 
-} // namespace shade
+}

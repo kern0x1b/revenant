@@ -19,8 +19,7 @@ namespace kernel_iokit::environment {
     [[nodiscard]] bool matches_service(
         std::span<const std::byte> matching, const KernelSharedState& state);
 
-    // The caller holds KernelSharedState::mach_mutex.
     [[nodiscard]] std::uint32_t ensure_service_locked(KernelSharedState& state);
 
-} // namespace kernel_iokit::environment
-} // namespace shade
+}
+}

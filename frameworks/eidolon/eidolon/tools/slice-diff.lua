@@ -1,25 +1,11 @@
--- slice-diff.lua: what Apple's SDK 26.2 interface declares for a slice of types that our module does not.
---
---     xmake l slice-diff.lua ours.json TYPE [TYPE...]
---
--- Apple's side is parsed out of the 26.2 .swiftinterface (the only written-down shape of a 17+ declaration; the corpus
--- carries names only). Ours is the digester dump of the module this worktree builds, the same way bridge/api-diff.lua
--- reads it. A declaration counts as missing when our dump has nothing of that name under that type; Apple's declaration
--- is printed with it, so the shape to write is right there.
-
 import("core.base.json")
 local text = import("lib.text", {rootdir = path.join(os.scriptdir(), "..", ".."), anonymous = true})
 
--- the same blocks, keep and skip rules as decls.lua, and the same walk of the interfaces. KEEP here is
---     ^\s*(?:@\w+(?:\([^)]*\))?\s+)*(?:public |internal |static |mutating |nonisolated |final )*
---         (?:func|var|let|init|subscript|typealias|associatedtype|case)\b
--- and the attributes come before the modifiers, never between them.
 local MODIFIERS = {"public ", "internal ", "static ", "mutating ", "nonisolated ", "final "}
 local KEEP_KEYWORDS = {"func", "var", "let", "init", "subscript", "typealias", "associatedtype", "case"}
 local SKIP_PREFIXES = {"get", "set", "_read", "_modify", "return", "{", "}", "#if", "#endif", "@_Concurrency",
     "@_transparent", "@usableFromInline"}
 
--- one attribute at pos: @name, an optional (...) with no ) inside, then spaces; the position after it, or nil
 local function attribute_at(line, pos)
     local _, e = string.find(line, "^@[%w_]+", pos)
     if not e then
@@ -71,7 +57,6 @@ local function skip(line)
     return false
 end
 
--- the blocks of an interface, each {head, body}, as decls.lua reads them
 local function interface_blocks(file)
     local lines = text.split(io.readfile(file), "\n")
     local out = {}
@@ -110,7 +95,6 @@ local function interface_blocks(file)
     return out
 end
 
--- re.search(r'(?:struct|class|enum|protocol|extension)\s+([A-Za-z_][\w.]*)', head): the name, or nil
 local function declared_name(head)
     for at = 1, #head do
         for _, kind in ipairs({"struct", "class", "enum", "protocol", "extension"}) do
@@ -126,7 +110,6 @@ local function declared_name(head)
     return nil
 end
 
--- re.search(r'@available\(iOS ([\d.]+)', head): the version, or ""
 local function available_version(head)
     return string.match(head, "@available%(iOS ([%d%.]+)") or ""
 end
@@ -139,7 +122,6 @@ local function sdk_path()
     return path.join(os.getenv("HOME"), "Git", "projects", "ios", "charon", ".agent-work", "sdk-26.2", "iPhoneOS26.2.sdk")
 end
 
--- [owner, declaration, version] for the types asked for
 local function apple(types)
     local frameworks = path.join(sdk_path(), "System", "Library", "Frameworks")
     local files = {
@@ -171,7 +153,6 @@ local function apple(types)
     return out
 end
 
--- {path: {name...}} as a list of {path = {...}, name = "..."}, for each declaration of ours the digester dump holds
 local function ours_of(file)
     local root = json.decode(io.readfile(file))["ABIRoot"]
     local found = {}
@@ -214,7 +195,6 @@ local function has_member(ours, name, owner)
     return false
 end
 
--- the name a declaration names: `func`, `var`, `let`, `init`, `subscript` or `case`, else a typealias, else nil
 local function declaration_name(decl)
     for at = 1, #decl do
         for _, keyword in ipairs({"func", "var", "let", "init", "subscript", "case"}) do
@@ -253,8 +233,6 @@ function main(...)
         if name == "Self" or name == "get" or name == "set" then
             name = nil
         end
-        -- a member of a nested type lives under a path that ends with the owner, so the path is searched for it, not
-        -- compared with it
         if name ~= nil and not text.startswith(name, "_") and not has_member(ours, name, owner) then
             missing = missing + 1
             print(string.format("%s %s %s", text.ljust(owner, 28), text.ljust(avail, 6), decl))

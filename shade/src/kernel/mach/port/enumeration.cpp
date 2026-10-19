@@ -30,7 +30,7 @@ namespace {
     constexpr std::uint32_t mach_message_success = 0;
     constexpr std::uint32_t mach_receive_invalid_data = 0x10004008U;
 
-} // namespace
+}
 
 bool CompatibilityKernel::dispatch_mach_port_query_message(
     Cpu& cpu, const MachMessageRequest& request)
@@ -65,7 +65,7 @@ bool CompatibilityKernel::dispatch_mach_port_query_message(
     if (result == darwin::mach::success) {
         if (entries.size() >
             std::numeric_limits<std::uint32_t>::max() / sizeof(std::uint32_t)) {
-            result = 3; // KERN_RESOURCE_SHORTAGE
+            result = 3;
         } else {
             array_bytes = static_cast<std::uint32_t>(
                 entries.size() * sizeof(std::uint32_t));
@@ -127,8 +127,6 @@ bool CompatibilityKernel::dispatch_mach_port_query_message(
         }
     } else {
         const auto count = static_cast<std::uint32_t>(entries.size());
-        // MIG complex success replies omit RetCode. Generated metadata places
-        // the two OOL-array counts immediately after NDR at offsets 60 and 64.
         const std::array<std::uint32_t, 17> reply {
             darwin::mach_message::bits_complex |
                 darwin::mig_wire::disposition_move_send_once,
@@ -166,4 +164,4 @@ bool CompatibilityKernel::dispatch_mach_port_query_message(
     return true;
 }
 
-} // namespace shade
+}

@@ -79,7 +79,6 @@ final class GridNode: ContainerNode {
         content = adopt(reconcile(content, grid.gridContent, env))
     }
 
-    // An adaptive item becomes as many tracks as fit in the room it is given; the other items are one track each.
     func tracks(_ available: CGFloat) -> [CGFloat] {
         guard !items.isEmpty else { return [] }
         var fixedTotal: CGFloat = 0

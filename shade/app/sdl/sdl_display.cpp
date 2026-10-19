@@ -42,10 +42,6 @@ namespace shade {
 namespace {
 
 #if defined(SHADE_HAS_SDL2)
-    // sdl2-compat defaults to emulating X11's non-DPI-aware behavior on
-    // Wayland. Opt into logical window coordinates backed by the compositor's
-    // full pixel density. Classic SDL2 and non-Wayland backends safely retain
-    // this unknown/backend-specific hint without changing their behavior.
     constexpr auto sdl_wayland_scale_to_display_hint =
         "SDL_VIDEO_WAYLAND_SCALE_TO_DISPLAY";
 
@@ -66,9 +62,6 @@ namespace {
         int logical_width { };
         int logical_height { };
         SDL_RenderGetLogicalSize(renderer, &logical_width, &logical_height);
-        // Explicit logical coordinates make SDL2 and sdl2-compat transform
-        // mouse events consistently. Keep drawing in output pixels, with our
-        // own aspect-fit viewport, including after a resize or DPI change.
         if (width > 0 && height > 0 &&
             (logical_width != width || logical_height != height) &&
             SDL_RenderSetLogicalSize(renderer, width, height) != 0) {
@@ -80,25 +73,17 @@ namespace {
     }
 #endif
 
-    // Guest owners and firmware surface identifiers are narrower than the host
-    // surface key. Reserve this owner for frames synthesized by the SDL
-    // presenter itself, such as the black panel emitted while display power is
-    // off.
     constexpr auto sdl_presenter_surface_owner =
         std::numeric_limits<std::uint64_t>::max();
     std::atomic<std::uint64_t> next_sdl_presenter_surface { 1 };
     constexpr std::size_t presentation_queue_capacity = 8;
     constexpr std::size_t presentation_queue_lease_capacity =
         presentation_queue_capacity + 1;
-    // Keep one extra surface slot for the repaint copy retained by
-    // last_presented_frame. Frame admission has the eight-slot ordered queue
-    // plus one bounded latest-only overflow slot below; it never grows with a
-    // burst.
     constexpr std::size_t presentation_surface_capacity =
         presentation_queue_lease_capacity;
     constexpr auto presentation_flush_timeout = std::chrono::seconds { 5 };
 
-} // namespace
+}
 
 struct SdlDisplay::Impl {
     struct PresentationSurfaceSlot {
@@ -135,9 +120,6 @@ struct SdlDisplay::Impl {
 
     DisplayGeometry geometry;
     DisplayGeometry guest_geometry;
-    // The SDL toplevel follows the logical UI size. The guest scanout and
-    // texture remain native-sized, allowing a Retina panel to render at 2x
-    // while presenting at its logical half-size.
     DisplayGeometry input_geometry;
     DisplayGeometry host_geometry;
     DisplayOrientation orientation { DisplayOrientation::Portrait };
@@ -146,9 +128,6 @@ struct SdlDisplay::Impl {
     SDL_Renderer* renderer { };
     SDL_Texture* texture { };
     SDL_Window* retired_window { };
-    // SDL's X11 backend and the Vulkan/XCB stack share the host display
-    // connection. Keep the scheduler's event pump and the CPU presenter from
-    // allocating X11 resources concurrently.
     std::recursive_mutex sdl_mutex;
     bool vulkan_library_loaded { };
     bool vulkan_window { };
@@ -169,9 +148,6 @@ struct SdlDisplay::Impl {
 
     [[nodiscard]] static SDL_Renderer* create_renderer(SDL_Window* target)
     {
-        // SDL applies this hint when a texture is created. Linear filtering
-        // removes nearest-neighbour stair stepping while retaining the host
-        // renderer's accelerated path and software fallback.
         SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
         auto* result = SDL_CreateRenderer(target, -1, SDL_RENDERER_ACCELERATED);
         if (result == nullptr)
@@ -207,9 +183,6 @@ struct SdlDisplay::Impl {
     {
         std::lock_guard lock { sdl_mutex };
         if (renderer == nullptr) {
-            // SDL renderers are thread-affine. The CPU presenter calls this
-            // method from its worker, so create the renderer and texture there
-            // rather than in the scheduler thread that owns the SDL event pump.
             if (window == nullptr || vulkan_window)
                 ensure_cpu_window();
             renderer = create_renderer(window);
@@ -239,11 +212,6 @@ struct SdlDisplay::Impl {
         }
     }
 
-    // Wayland configures a toplevel's size asynchronously and does not
-    // generally honor SDL_SetWindowSize after the initial configure. An
-    // orientation change therefore needs a fresh toplevel so its initial
-    // request carries the new aspect ratio. The native presenter is rebound by
-    // the caller while the previous toplevel is still alive.
     bool recreate_wayland_window()
     {
         std::lock_guard lock { sdl_mutex };
@@ -279,10 +247,6 @@ struct SdlDisplay::Impl {
         renderer = replacement_renderer;
         texture = nullptr;
         surface_created = false;
-        // Keep the old toplevel alive until the Vulkan backend has released its
-        // surface. Wayland display queues may still contain protocol work for
-        // the previous surface while the guest orientation transition is
-        // handled.
         retired_window = old_window;
         if (!vulkan_window)
             ensure_cpu_presenter();
@@ -304,26 +268,12 @@ struct SdlDisplay::Impl {
     std::condition_variable presentation_idle;
     std::condition_variable cpu_presentation_available;
     std::condition_variable cpu_presentation_idle;
-    // Preserve ordered submissions until the SDL thread presents them while
-    // the queue has room. If a producer burst outruns event-loop pumping, the
-    // bounded admission policy below replaces the oldest pending frame and
-    // records that loss as display-mailbox coalescing.
     std::deque<DisplayFrame> pending_frames;
-    // Admission must not park the guest execution thread behind a slow window
-    // compositor. When all regular queue slots are occupied, retain one latest
-    // frame behind the ordered queue. Replacing this slot is an explicit,
-    // counted coalescing event; normal 60 Hz operation never uses it.
     std::optional<DisplayFrame> overflow_frame;
-    // Keep native submissions ordered as well. Frames are staged on this
-    // worker before acquire/present; a skipped/failed native attempt moves to
-    // the software fallback queue instead of disappearing.
     std::deque<DisplayFrame> pending_native_frames;
     std::deque<DisplayFrame> native_fallback_frames;
     bool native_fallback_active { };
     std::deque<CpuPresentationFrame> pending_cpu_frames;
-    // SDL windows can lose their compositor back buffer while hidden or
-    // covered. Retain the last host-ready frame so an expose/restore event can
-    // repaint without waiting for the guest to submit another frame.
     std::optional<DisplayFrame> last_presented_frame;
     std::shared_ptr<HostGraphicsDevice> host_graphics;
     std::array<PresentationSurfaceSlot, presentation_surface_capacity>
@@ -744,10 +694,6 @@ struct SdlDisplay::Impl {
         return true;
     }
 
-    // Native staging can allocate/replace a scanout surface and can perform a
-    // CPU rotation when a Guest frame has no host surface. Keep both operations
-    // on the native presenter worker; poll_events() remains an input and queue
-    // pump on the Guest scheduler thread.
     bool prepare_native_frame(DisplayFrame& frame)
     {
         const auto requested_orientation = frame.orientation;
@@ -832,9 +778,6 @@ struct SdlDisplay::Impl {
                 return false;
             }
             if (repainting) {
-                // Repaint requests carry no Guest queue lease. Keep at most one
-                // pending repaint so window expose storms cannot create an
-                // unbounded software-present backlog behind a slow compositor.
                 for (auto iterator = pending_cpu_frames.rbegin();
                     iterator != pending_cpu_frames.rend(); ++iterator) {
                     if (iterator->repainting) {
@@ -890,11 +833,6 @@ struct SdlDisplay::Impl {
                     }
                 }
                 if (presented) {
-                    // The queued frame is no longer needed after a successful
-                    // CPU present. Move it into the repaint cache instead of
-                    // copying its pixel vector while holding frame_mutex; Guest
-                    // admission can then continue independently of this
-                    // bookkeeping.
                     set_last_presented_frame_locked(std::move(pending.frame));
                     presented_frames.fetch_add(1, std::memory_order_release);
                     performance_counters().record_cpu_present_fallback(
@@ -967,9 +905,6 @@ struct SdlDisplay::Impl {
             if (result != HostGraphicsDevice::PresentResult::Skipped)
                 return result;
             performance.record_native_present_skipped();
-            // A busy swapchain retains this frame and its surface lease.
-            // Retry on the presenter worker without blocking input or letting
-            // a later frame overtake it.
             std::unique_lock lock { frame_mutex };
             if (presentation_available.wait_for(lock,
                     std::chrono::milliseconds { 1 }, [this] {
@@ -1027,16 +962,9 @@ struct SdlDisplay::Impl {
                 try {
                     prepared = prepare_native_frame(frame);
                 } catch (...) {
-                    // Native staging failures retain the original frame for the
-                    // ordered SDL fallback below. The existing fallback path
-                    // owns the error boundary and preserves sequence order.
                     prepared = false;
                 }
                 if (prepared) {
-                    // The repaint cache is published only after a host-ready
-                    // surface exists. Its potentially large pixel vector is
-                    // copied on this worker, never on the Guest scheduler
-                    // thread.
                     auto worker_last_presented_frame = frame;
                     lock.lock();
                     set_last_presented_frame_locked(
@@ -1065,10 +993,6 @@ struct SdlDisplay::Impl {
                     }
                 } else {
                     native_fallback_frames.push_back(std::move(frame));
-                    // A failed native frame is an ordering barrier. Present
-                    // every frame already behind it through SDL as well, so a
-                    // newer native frame cannot become visible before the
-                    // failed frame is recovered.
                     while (!pending_native_frames.empty()) {
                         native_fallback_frames.push_back(
                             std::move(pending_native_frames.front()));
@@ -1279,10 +1203,6 @@ void SdlDisplay::set_host_graphics(std::shared_ptr<HostGraphicsDevice> graphics)
 #endif
     {
         std::lock_guard lock { impl_->frame_mutex };
-        // Release frames before dropping the renderer. A deferred readback
-        // keeps a shared host-graphics reference alive; retaining it until Impl
-        // is destroyed would let Vulkan tear down a Wayland surface after SDL
-        // has already destroyed its window.
         impl_->abandon_queued_frames_locked();
         impl_->last_presented_frame.reset();
         impl_->host_graphics = std::move(graphics);
@@ -1326,17 +1246,11 @@ void SdlDisplay::present(DisplayFrame frame)
             ++impl_->queued_frame_count;
             depth = impl_->queued_frame_count;
         } else if (!impl_->pending_frames.empty()) {
-            // Keep the queue ordered but discard the oldest frame that has not
-            // yet crossed into the native presenter. The queue remains bounded
-            // and the newest state wins under an artificial or real producer
-            // burst.
             impl_->pending_frames.pop_front();
             impl_->pending_frames.push_back(std::move(frame));
             coalesced = true;
             depth = impl_->queued_frame_count;
         } else if (impl_->overflow_frame) {
-            // Native work may own every regular slot. Keep only one additional
-            // latest frame until the native sequence reaches it.
             *impl_->overflow_frame = std::move(frame);
             coalesced = true;
             depth = impl_->queued_frame_count;
@@ -1346,10 +1260,6 @@ void SdlDisplay::present(DisplayFrame frame)
             ++impl_->queued_frame_count;
             depth = impl_->queued_frame_count;
         } else {
-            // Every regular and overflow lease is already owned by
-            // native/fallback work. Drop this newest submission explicitly
-            // rather than extending the queue past its bounded budget or making
-            // the Guest wait.
             coalesced = true;
             depth = impl_->queued_frame_count;
         }
@@ -1378,9 +1288,6 @@ bool SdlDisplay::has_pending_presentation()
 void SdlDisplay::flush_presentation()
 {
 #if defined(SHADE_HAS_SDL2)
-    // A native failure is converted to the software path by poll_events(), so a
-    // complete boundary has to alternate the main-thread pump with the native
-    // worker until every stage is empty.
     const auto deadline =
         std::chrono::steady_clock::now() + presentation_flush_timeout;
     while (true) {
@@ -1440,9 +1347,6 @@ std::uint64_t SdlDisplay::presented_frames() const
 bool SdlDisplay::poll_events()
 {
 #if defined(SHADE_HAS_SDL2)
-    // SDL events are latency-sensitive and must be drained before any CPU
-    // fallback upload. Native presentation is handed to an ordered worker queue
-    // and never waits on acquire/present from the guest scheduler thread.
     bool input_running { };
     {
         std::lock_guard lock { impl_->sdl_mutex };
@@ -1507,9 +1411,6 @@ bool SdlDisplay::poll_events()
         native_presentation =
             !native_failed && impl_->host_graphics &&
             impl_->host_graphics->native_presentation_available();
-        // Window/orientation changes are explicit boundaries. The potentially
-        // expensive frame staging itself is still deferred to the native
-        // worker.
         if (native_presentation && !repainting &&
             impl_->orientation != requested_orientation)
             impl_->update_orientation(requested_orientation);
@@ -1540,16 +1441,6 @@ bool SdlDisplay::poll_events()
             bool native_coalesced { };
             {
                 std::lock_guard lock { impl_->frame_mutex };
-                // A redraw-only frame was not admitted through present(), so
-                // account for it before handing it to the native worker.
-                // Otherwise a failed native attempt would later decrement the
-                // count for an uncounted frame when it enters the fallback
-                // path. Repaint requests are not Guest submissions and may
-                // arrive as an expose/focus storm. Share the eight-slot queue
-                // plus one overflow lease with regular frames; when that
-                // bounded budget is occupied, the next repaint is redundant and
-                // is safely coalesced instead of growing the native worker
-                // queue.
                 if (!queued_frame && impl_->queued_frame_count >=
                                          presentation_queue_lease_capacity) {
                     native_coalesced = true;
@@ -1667,4 +1558,4 @@ std::vector<RingerSwitchInput> SdlDisplay::take_ringer_switch_events()
     return impl_->input.take_ringer_switch_events();
 }
 
-} // namespace shade
+}

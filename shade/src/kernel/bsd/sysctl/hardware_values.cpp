@@ -21,4 +21,4 @@ std::optional<std::string_view> hardware_string(
     }
 }
 
-} // namespace shade::darwin::sysctl
+}

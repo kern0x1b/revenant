@@ -104,8 +104,6 @@ namespace shade {
 using namespace runtime_detail;
 namespace {
 
-    // One 64-bit seed from the host's entropy source, for the guest's /dev/random at boot. A failure stops the boot: a fixed
-    // fallback would hand every boot the same keys, which is what this seed exists to prevent.
     std::uint64_t host_random_seed()
     {
         std::uint64_t seed = 0;
@@ -116,8 +114,6 @@ namespace {
         return seed;
     }
 
-    // What the CPU reported, as the ARM exception a kernel sees: nothing for a
-    // stop that is not the guest's fault (an interpreter fallback).
     std::optional<CompatibilityKernel::GuestFault> guest_fault_of(
         const CpuRunResult& result, const Cpu& cpu)
     {
@@ -154,8 +150,6 @@ namespace {
             cpu.registers()[15], result.fault->address,
             has_permission(result.fault->access, MemoryPermission::Write) };
     }
-    // The first process's fatal stop, named by the fault the CPU reported. A
-    // stop with no known fault is named too, so it cannot pass as a clean run.
     runtime_detail::InitialProcessFailure initial_process_failure_of(
         std::uint32_t pid, std::uint32_t pc,
         const std::optional<CompatibilityKernel::GuestFault>& fault)
@@ -177,7 +171,6 @@ namespace {
         }
         return { Failure::Kind::UnclassifiedStop, pid, pc, 0 };
     }
-    // Mixed host-control and debugger sessions use a bounded poll fallback.
     constexpr auto host_event_poll_fallback = std::chrono::milliseconds { 4 };
     struct PreparedGuestSlice {
         XnuScheduledSlice scheduled;
@@ -187,7 +180,7 @@ namespace {
         bool deferred_svc { };
     };
 
-} // namespace
+}
 
 void EmulatorSession::run()
 {
@@ -230,9 +223,6 @@ void EmulatorSession::run()
     const auto guest_command = options.guest_command;
     std::vector<std::string> initial_arguments;
     if (guest_command) {
-        // This is intentionally an argv-level test hook for firmware profiles
-        // that ship a shell but do not ship SpringBoard. It never changes the
-        // normal launchd/SpringBoard boot path.
         initial_arguments = { binary, "-c", *guest_command };
     } else {
         initial_arguments = { binary };
@@ -240,9 +230,6 @@ void EmulatorSession::run()
     if (const auto display_size = options.display_geometry) {
         const auto profile_display = device.screen.panel;
         device.screen.panel = *display_size;
-        // Preserve the explicit Retina split when a native framebuffer size is
-        // overridden. Legacy profiles have one geometry, so their diagnostic
-        // display-size option keeps the historical window/input behavior.
         if (device.screen.user_interface.width == profile_display.width &&
             device.screen.user_interface.height == profile_display.height) {
             device.screen.user_interface = device.screen.panel;
@@ -292,16 +279,11 @@ void EmulatorSession::run()
     if (activation_override && activation_override &&
         activation_hardware_model_policy ==
             ActivationHardwareModelPolicy::DevelopmentBoard) {
-        // The stock daemon has a firmware-supported development-board escape
-        // hatch for a device without a baseband/activation record. Selecting it
-        // only for the explicit activated simulator profile leaves preserve
-        // mode as the authentic retail contract.
         device.identity.hardware_model_override =
             device.identity.activation_hardware_model;
     }
     const auto ticks_option = options.ticks;
     const auto bounded_execution = ticks_option.has_value();
-    // A bounded run names host inodes by sighting order. Every kernel of the run shares this table.
     const std::shared_ptr<hfs::GuestIdTable> guest_ids =
         bounded_execution ? std::make_shared<hfs::GuestIdTable>() : nullptr;
     const auto device_time_policy =
@@ -325,10 +307,6 @@ void EmulatorSession::run()
         jit_profile_startup_work(jit_profile_mode);
     const bool idle_profile_enabled = jit_profile_idle_work(jit_profile_mode);
     const bool profile_background_warming_enabled = idle_profile_enabled;
-    // Adaptive mode learns and reuses the current interactive working set only
-    // on actual demand. Predictive Native imports and Portable persistence are
-    // explicit idle/startup experiments: their host work must not become a
-    // default foreground-launch tenant merely because a profile is present.
     const bool profile_offline_warming_enabled =
         jit_profile_mode == JitProfileMode::Idle;
     const auto startup_profile_blocks = options.startup_profile_blocks;
@@ -490,8 +468,6 @@ void EmulatorSession::run()
         std::uint64_t stability_content_reset_count { };
         std::uint64_t stability_last_observed_content_revision { };
         std::uint64_t stability_last_observed_vsync_pulses { };
-        // Catch-ups to host time inside the window being counted, and the
-        // guest time they moved on that the guest was owed and did not run.
         std::uint64_t stability_window_host_syncs { };
         std::uint64_t stability_window_starved_time { };
     } transition_attribution;
@@ -564,9 +540,6 @@ void EmulatorSession::run()
         baseband_input_path
             ? bsd::baseband_device::load_replay_file(*baseband_input_path)
             : std::vector<std::byte> { };
-    // A replay input is the only fixture that supplies a device-side transport
-    // contract. Without one, retain the common Offline/no-modem policy so a
-    // missing radio cannot block the rest of the system.
     device.baseband.transport = baseband_input_path ? BasebandTransport::Virtual
                                                     : device.baseband.transport;
 
@@ -579,9 +552,6 @@ void EmulatorSession::run()
     };
     auto process =
         loader.load(binary, std::move(initial_arguments), initial_environment);
-    // Dynarmic's global monitor indexes reservations by processor id. Reserve
-    // disjoint ranges for boot-created Guest processes so same-address shared
-    // mappings can invalidate reservations across process boundaries.
     Dynarmic::ExclusiveMonitor shared_exclusive_monitor {
         maximum_shared_monitor_slots
     };
@@ -651,9 +621,6 @@ void EmulatorSession::run()
     std::optional<std::chrono::steady_clock::time_point>
         next_runtime_jit_sample;
     if (runtime_jit_memory && !jit_observer_only) {
-        // Observer-only mode is lifecycle-accounted and takes one final atomic
-        // snapshot. It must not periodically walk every live Runtime just to
-        // produce a diagnostic line whose queue fields are final-state values.
         next_runtime_jit_sample =
             std::chrono::steady_clock::now() + std::chrono::milliseconds { 50 };
     }
@@ -709,10 +676,6 @@ void EmulatorSession::run()
         JitWorkScheduler::recommended_translation_lanes(
             host_resource_budget.worker_count);
     if (host_resource_budget.worker_count != 0U) {
-        // The core policy reserves at least half of a multi-worker pool for
-        // Guest-adjacent services. Host admission accounts concurrent compile
-        // wall time as aggregate worker-time while retaining per-task deadline
-        // protection.
         host_resource_budget.interactive_compile_budget =
             host_resource_budget.duty_period *
             static_cast<std::int64_t>(translation_lanes);
@@ -846,11 +809,6 @@ void EmulatorSession::run()
                 std::chrono::steady_clock::now().time_since_epoch())
                 .count());
     };
-    // A transition is watched until the display content has not changed for
-    // internal_stability_vsync_pulses display periods of guest time; its
-    // internal-stable marker says so. An input's transition is watched from
-    // the first frame submitted after it; a settle's from the frame on screen,
-    // since nothing may be drawn again.
     const auto begin_transition = [&](std::uint64_t started_at,
                                       std::uint64_t on_screen) {
         transition_attribution.active_transition_id =
@@ -1288,9 +1246,6 @@ void EmulatorSession::run()
                 JitPrecompileSource::DemandProfile);
             if (native_remaining || portable_remaining) {
                 output.line("[jit-profile] startup-remaining-cancelled=1");
-                // Startup mode has a synchronous, bounded contract. Any
-                // remainder is an explicit terminal cancellation; it must not
-                // leak into the idle scheduler after the startup window closes.
                 runtime.cpus->quiesce_precompilation();
             }
         };
@@ -1322,8 +1277,6 @@ void EmulatorSession::run()
     initial->kernel = std::make_unique<CompatibilityKernel>(*initial->memory,
         output, rootfs, device, activation_override, lockdown_capabilities,
         darwin_configuration, guest_ids);
-    // The guest's entropy is the host's, once per boot. Only a deterministic run (bounded by --ticks) keeps the fixed seed,
-    // so its output repeats by request and not by accident.
     if (bounded_execution) {
         initial->kernel->seed_random(CompatibilityKernel::kDefaultRandomSeed);
         output.line("[entropy] source=fixed-seed (deterministic run)");
@@ -1435,11 +1388,6 @@ void EmulatorSession::run()
                 kernel->record_foreground_transition_display_submission(
                     frame.owner_process_id, frame.sequence);
                 record_first_transition_submission(frame);
-                // Animation diagnostics must not turn the measured window into
-                // a PNG-writing benchmark. The presenter callback is still the
-                // actual CPU-present boundary for the headless sink; retain
-                // pixels already carried by the frame for in-memory change
-                // detection.
                 const auto diagnostic_window =
                     performance_counters()
                         .frame_content_diagnostics_enabled() &&
@@ -1463,10 +1411,6 @@ void EmulatorSession::run()
                         ? frame.pixels
                         : (frame.read_pixels ? frame.read_pixels()
                                              : std::vector<std::uint32_t> { });
-                // A content-diagnostic window is part of the measured presenter
-                // path. Do not turn it into a per-frame stdout-flush benchmark:
-                // the in-memory content record above already retains the
-                // semantic change evidence needed by the offline analyzer.
                 if (!diagnostic_window) {
                     const auto visible = std::count_if(
                         pixels.begin(), pixels.end(), [](std::uint32_t pixel) {
@@ -1618,8 +1562,6 @@ void EmulatorSession::run()
                         message << " sp=0x" << source.registers()[13]
                                 << " lr=0x" << source.registers()[14]
                                 << " frames=";
-                        // The writer is usually a library routine; the frame
-                        // chain says who called it.
                         const auto stack = source.registers()[13];
                         auto frame = source.registers()[7];
                         for (unsigned depth = 0; depth < 16; ++depth) {
@@ -1795,9 +1737,6 @@ void EmulatorSession::run()
             const auto child_pid = next_pid++;
             auto child = std::make_unique<Runtime>();
             child->jit_work_signal = jit_work_signal;
-            // A child starts without an externally observed interactive role.
-            // Its full slab mapping remains available regardless; later
-            // lifecycle facts change only retention priority.
             const auto child_cache_class = JitCodeCacheClass::Background;
             child->jit_cache_reservation = jit_code_cache_governor.reserve(
                 guest_processor_count, child_cache_class);
@@ -1979,9 +1918,6 @@ void EmulatorSession::run()
                     child_cpu.registers()[13] = loaded.stack_pointer;
                     child_cpu.registers()[15] = loaded.entry_point;
                     child_cpu.set_cpsr(0x10);
-                    // Install the new image's frozen prediction only after the
-                    // old native cache has been cleared. Otherwise the clear
-                    // immediately restarts the same complete plan.
                     apply_jit_runtime_class(*child_runtime,
                         interactive_activation ? JitCodeCacheClass::Foreground
                                                : JitCodeCacheClass::Background);
@@ -2009,9 +1945,6 @@ void EmulatorSession::run()
                                     child_runtime->cpus
                                         ->prepare_primary_execution_resource();
                                 } catch (...) {
-                                    // The first Guest slice retains
-                                    // ensure_jit() as the safe fallback if
-                                    // Host-side preparation fails.
                                 }
                             });
                     }
@@ -2208,9 +2141,6 @@ void EmulatorSession::run()
     std::size_t stopped_cpu = 0;
     CpuRunResult stopped_result { };
     bool hard_stop = false;
-    // Set when the first process dies of a fatal stop or a signal: the run
-    // ends by throwing it, so the boot exits non-zero instead of reporting
-    // success for a process that never reached its main.
     std::optional<runtime_detail::InitialProcessFailure> initial_failure;
     std::unique_ptr<GdbRemoteServer> gdb_server;
     std::optional<GdbResumeRequest> debug_request;
@@ -2283,11 +2213,6 @@ void EmulatorSession::run()
     const auto wait_for_host_activity = [&](std::chrono::nanoseconds delay) {
         if (delay <= std::chrono::nanoseconds::zero())
             return;
-        // A display submission may be the final Guest action before VSync is
-        // disabled.  Do not let the idle wait hide an already queued frame
-        // until an unrelated window event wakes the loop; the next iteration will
-        // drain the mailbox without changing Guest time or presentation
-        // cadence.
         if (display_presenter && display_presenter->has_pending_presentation())
             return;
         const auto waitable_window_session =
@@ -2521,15 +2446,9 @@ void EmulatorSession::run()
     std::uint64_t guest_timer_overshoot_max_nanoseconds { };
     std::optional<std::uint64_t> observed_guest_timer_deadline;
     DeadlineQueue<std::uint32_t, std::uint64_t> guest_deadlines;
-    // The earliest deadline any guest process waits for: its timers, waits
-    // with a timeout and the display's next VSync.
     const auto next_guest_deadline = [&]() {
         for (const auto& runtime : runtimes) {
             const auto process_id = runtime->kernel->process().pid;
-            // An exited Runtime may remain here while asynchronous image
-            // work drains. Its timers no longer have Guest-visible
-            // lifetime, so retire the keyed cache entry immediately rather
-            // than letting a past deadline spin the host loop.
             if (runtime->kernel->process().exited) {
                 guest_deadlines.erase(process_id);
                 continue;
@@ -2570,17 +2489,6 @@ void EmulatorSession::run()
         output.line("[clock] mode=virtual-rtc seed=host-once rate=realtime "
                     "timezone=guest");
     }
-    // A still screen is counted in guest time, and without --ticks guest time
-    // follows the host's whether or not the guest ran. As QEMU's -icount
-    // sleep=on counts virtual time, a catch-up counts what the guest executed
-    // since the previous one and, when it has nothing runnable, the time it
-    // waited up to its earliest deadline; past that deadline a timer or VSync
-    // was due that it did not get to run. The clock stands still while the
-    // guest executes, so both are measured from the previous catch-up: from
-    // there the guest worked for what it executed and slept up to the
-    // deadline, and it had the later of the two, not their sum. The rest
-    // was owed and not given, a starved guest cannot draw in it, and it is
-    // kept out of the window.
     GuestTickClock executed_time_clock { guest_ticks_per_second };
     std::uint64_t executed_ticks_since_catch_up { };
     const auto account_stability_catch_up = [&](std::uint64_t advance) {
@@ -2606,11 +2514,6 @@ void EmulatorSession::run()
         transition_attribution.stability_window_starved_time +=
             advance - attended;
     };
-    // Interactive DeviceMonotonicTime is mapped to host steady time exactly
-    // once. CPU execution accounting never advances this domain; after a slow
-    // translated slice or host-backed syscall, the next synchronization moves
-    // directly to the fixed mapping and services every due device without
-    // rebasing it. Deterministic runs intentionally bypass this path.
     const auto synchronize_device_time_to_host = [&]() {
         if (!realtime_pacer)
             return;
@@ -2727,9 +2630,6 @@ void EmulatorSession::run()
                 (interactive_role ||
                     (!guest_quiet && candidate.guest_runnable) ||
                     (guest_quiet && profile_offline_warming_enabled))) {
-                // Current demand is merged only at a Guest-quiet safe
-                // boundary. While Guest code is runnable, the independent
-                // executor consumes only the frozen prior-image queue.
                 if (guest_quiet && interactive_role)
                     runtime->cpus->refresh_translation_profile();
                 if (interactive_role || !candidate.guest_runnable) {
@@ -2841,9 +2741,6 @@ void EmulatorSession::run()
         if (++interaction_generation == 0U)
             ++interaction_generation;
         jit_work_signal->notify_work();
-        // Native prediction shares the demand slab. Tokens are checked between
-        // descriptors, so new interaction stops a live micro-batch at its next
-        // safe publication boundary.
         for (const auto& runtime : runtimes) {
             for (const auto& task : runtime->precompile_tasks) {
                 if (task.target == JitPrecompileTarget::NativeCode)
@@ -2916,8 +2813,6 @@ void EmulatorSession::run()
                     break;
                 case LiveControlCommandKind::Gesture:
                     note_interactive_host_activity();
-                    // Display power does not prove that the firmware is awake.
-                    // Keep unlock's physical HOME and swipe sequence together.
                     if (command.wake_display) {
                         initial_runtime->kernel->enqueue_system_button(
                             SystemButtonInput {
@@ -2930,10 +2825,6 @@ void EmulatorSession::run()
                     }
                     pending_touch_input_completion = "gesture";
                     live_touch_scheduler.schedule(command.gesture);
-                    // Preserve control command order. In particular, "tap"
-                    // followed by "lock" begins the touch before the button
-                    // barrier even though the remainder of the gesture is paced
-                    // over later host iterations.
                     for (const auto& input : live_touch_scheduler.poll()) {
                         initial_runtime->kernel->enqueue_touch_input(input);
                     }
@@ -3073,11 +2964,6 @@ void EmulatorSession::run()
                                 scheduler.set_dispatch_diagnostics(true);
                             }
                             display_performance_window = command.message;
-                            // A formal no-content performance window must not
-                            // fall back to the headless presenter's per-frame
-                            // PNG writes. The first frame was already captured
-                            // before the animation window, and explicit
-                            // snapshots use their own presenter below.
                             if (frame_file_presenter &&
                                 command.message == "animation")
                                 frame_file_presenter->set_enabled(false);
@@ -3220,11 +3106,6 @@ void EmulatorSession::run()
                     runtime->kernel->process().exited) {
                     continue;
                 }
-                // Keep the Mach receiver and firmware NotifyFunc continuation
-                // as distinct dependencies. After receive copyout, the former
-                // remains the dependency processor until NotifyFunc advances
-                // its watermark; storing it as the callback would discard the
-                // last processor observed at the real callback boundary.
                 if (const auto processor =
                         runtime->kernel->display_vsync_dependency_processor();
                     processor) {
@@ -3233,9 +3114,6 @@ void EmulatorSession::run()
                     if (!display_urgent_receiver_thread ||
                         *display_urgent_receiver_thread != receiver_thread) {
                         display_urgent_receiver_thread = receiver_thread;
-                        // Keep the receive itself preferred until the queued
-                        // message has been materialized. The callback lease
-                        // starts after delivery.
                         display_urgent_lease_deadline =
                             std::chrono::steady_clock::now() +
                             std::chrono::milliseconds { 50 };
@@ -3263,16 +3141,7 @@ void EmulatorSession::run()
         resolve_display_urgent_threads();
         synchronize_device_time_to_host();
         synchronize_scheduler_time();
-        // Host synchronization can deliver a VSync notification without guest
-        // execution consuming a slice. Re-resolve here so the already-pending
-        // receive gets the same bounded callback lease in this iteration.
         resolve_display_urgent_threads();
-        // Materialize a queued VSync receive before realtime pacing. If guest
-        // execution is slightly ahead of the fixed host mapping, sleeping first
-        // hides the already-due display callback and turns a small pacing lead
-        // into a full submission interval. Delivery does not advance guest
-        // time; the urgent display thread below is the only exception that may
-        // execute while the guest is ahead.
         for (auto& runtime : runtimes) {
             const auto display_vsync_receiver =
                 display_urgent_process && runtime->kernel->process().pid ==
@@ -3306,11 +3175,6 @@ void EmulatorSession::run()
                             runtime->kernel->process().pid,
                             static_cast<std::uint32_t>(*callback_processor)
                         };
-                        // The callback can be a continuation of a different
-                        // thread than the one that consumed the Mach receive.
-                        // If the callback thread is still waiting, schedule
-                        // this exact receiver once instead of guessing with
-                        // same-process thread age.
                         display_urgent_receiver_thread = thread;
                         display_urgent_lease_deadline =
                             std::chrono::steady_clock::now() +
@@ -3319,19 +3183,8 @@ void EmulatorSession::run()
                     const auto delivered_input =
                         runtime->kernel->take_last_delivered_graphics_input(
                             processor);
-                    // Every delivered event wakes its blocked guest receiver.
-                    // Input attribution is a separate diagnostic concern;
-                    // keeping the wake inside that conditional left pure
-                    // Mach/VSync receivers Waiting.
                     const auto made_runnable = scheduler.make_runnable(thread);
                     if (made_runnable && delivered_input) {
-                        // A just-delivered input event is a generic interactive
-                        // wakeup, not a process-specific priority. Let its
-                        // receiver run once before ordinary runnable
-                        // continuations consume another slice. The preference
-                        // is scoped to this host-loop iteration and does not
-                        // alter Guest priority, quantum, wait/wake state, or
-                        // clocks.
                         input_preferred_thread = thread;
                         performance_counters().record_diagnostic_input_runnable(
                             *delivered_input, thread.process, thread.thread);
@@ -3349,10 +3202,6 @@ void EmulatorSession::run()
                         return info->state == XnuThreadState::Runnable;
                     return false;
                 };
-                // A waiting callback can have a runnable receive dependency. Do
-                // not let realtime pacing sleep through that handoff; the
-                // receiver must execute before the callback can become
-                // runnable.
                 return is_runnable(display_urgent_thread) ||
                        is_runnable(display_urgent_receiver_thread);
             }();
@@ -3367,18 +3216,9 @@ void EmulatorSession::run()
                 if (sleep_delay > std::chrono::nanoseconds::zero()) {
                     wait_for_host_activity(sleep_delay);
                 }
-                // A due host control should wake the polling loop, not make a
-                // guest that is still ahead appear eligible to execute.
                 continue;
             }
         }
-        // XNU keeps a compact zombie process record until its parent waits, but
-        // the dead task's translated host code has no guest-visible lifetime.
-        // Give the compositor a short, generic grace interval before background
-        // reclamation: destroying a large JIT immediately after Home otherwise
-        // competes with the exit animation for host CPU. The FIFO reaper
-        // destroys the pool before any later retirement of the owning Runtime,
-        // preserving the AddressSpace and exclusive-monitor lifetimes.
         constexpr auto execution_reclaim_grace =
             std::chrono::milliseconds { 1500 };
         const auto activation_prepare_lead =
@@ -3522,10 +3362,6 @@ void EmulatorSession::run()
         }();
         const auto observed_inflight_callback =
             [&]() -> std::optional<std::pair<XnuThreadId, std::uint64_t>> {
-            // A callback can become in-flight only after the queued
-            // notification established one of these local dependencies. Avoid
-            // another pair of kernel/Mach locks on every idle host-loop
-            // iteration.
             if (!display_urgent_process ||
                 (!display_urgent_thread && !display_urgent_receiver_thread))
                 return std::nullopt;
@@ -3558,9 +3394,6 @@ void EmulatorSession::run()
                 observed_inflight_callback->first;
             display_inflight_callback_sequence =
                 observed_inflight_callback->second;
-            // SwapEnd normally retires this ownership within one display
-            // period. Keep a bounded safety lease so a firmware callback that
-            // elects not to submit cannot retain host preference indefinitely.
             display_inflight_callback_deadline =
                 std::chrono::steady_clock::now() +
                 std::chrono::milliseconds { 100 };
@@ -3656,14 +3489,6 @@ void EmulatorSession::run()
         if (dispatch.explicit_handoff_stale)
             scheduler_handoff_thread.reset();
         const auto preferred_thread = dispatch.preferred_thread;
-        // Keep the scanout owner identity across scheduler iterations.  The
-        // realtime pacer can take the `guest ahead` path below without
-        // executing a guest slice; clearing this identity here would then make
-        // the next host-synchronized VSync wake an ordinary runnable thread
-        // instead of allowing resolve_display_urgent_threads() to select its
-        // receiver. Ownership is refreshed after guest execution and stale
-        // identities are harmless because resolution still requires a live
-        // matching runtime and a pending VSync receive.
         std::vector<XnuScheduledSlice> scheduled_batch;
         scheduled_batch.reserve(guest_processor_count);
         auto reservable_ticks = remaining_ticks;
@@ -3680,10 +3505,6 @@ void EmulatorSession::run()
                 }
                 if (display_yielded_thread &&
                     *display_yielded_thread != scheduled->thread) {
-                    // One different runnable dependency has now received the
-                    // processor; the Guest yield has been honored and the
-                    // callback source may be considered again on the following
-                    // scheduler iteration.
                     display_yielded_thread.reset();
                 }
                 performance_counters().record_diagnostic_input_execute(
@@ -3701,9 +3522,6 @@ void EmulatorSession::run()
                         scheduled->thread.process, scheduled->thread.thread,
                         scheduled->runnable_generation,
                         scheduled->front_continuation, nanoseconds);
-                    // Transition-localization probe. It records only severe
-                    // runnable starvation while CPU source diagnostics are
-                    // explicitly active.
                     if (nanoseconds >= 50'000'000U) {
                         const auto info = scheduler.info(scheduled->thread);
                         const auto active_process =
@@ -3751,8 +3569,6 @@ void EmulatorSession::run()
                     break;
                 }
             }
-            // A debugger-selected thread is the only thread allowed to make
-            // progress for this resume request.
             if (preferred_thread)
                 break;
         }
@@ -3829,8 +3645,6 @@ void EmulatorSession::run()
                 static_cast<std::size_t>(scheduled_value.thread.thread);
             auto& cpu = selected_runtime->cpus->cpu(index);
             cpu.clear_halt();
-            // Signals that became deliverable while this thread was away run
-            // their handlers now, as on XNU's way back to user mode.
             selected_runtime->kernel->deliver_pending_signals(cpu);
             if (selected_runtime->kernel->process().exited)
                 continue;
@@ -3866,8 +3680,6 @@ void EmulatorSession::run()
                     slice,
                     host_slice_budget,
                     debug_request && debug_request->kind == GdbResumeKind::Step,
-                    // Host slice deadlines and the adaptive native block budget
-                    // are host-timed, so a bounded run keeps them out of its ticks.
                     !bounded_execution,
                 },
                 false,
@@ -3894,10 +3706,6 @@ void EmulatorSession::run()
             last_serial_thread !=
                 std::optional<XnuThreadId> {
                     prepared_slices.front().scheduled.thread }) {
-            // A local ARM exclusive reservation belongs to the physical
-            // processor, not to the saved register context. Clear it only at a
-            // real serialized thread switch; repeated slices of the same thread
-            // retain the ordinary Dynarmic fast path.
             prepared_slices.front().execution.cpu->clear_exclusive_state(
                 prepared_slices.front().scheduled.processor);
             last_serial_thread = prepared_slices.front().scheduled.thread;
@@ -3911,9 +3719,6 @@ void EmulatorSession::run()
         } else {
             for (auto& prepared : prepared_slices) {
                 if (scheduler.contains(prepared.scheduled.thread)) {
-                    // Background compilation has its own executor/memory
-                    // lock order. Batch scalar accesses only when no such
-                    // compiler can compete with this serialized guest slice.
                     std::optional<AddressSpace::ExclusiveAccess> access;
                     if (!profile_precompile_enabled)
                         access.emplace(*prepared.runtime->memory);
@@ -3922,11 +3727,6 @@ void EmulatorSession::run()
             }
         }
 
-        // Guest dyld can publish its fixed shared-cache mappings from an SVC.
-        // Observe that publication only after every Cpu::run has returned: the
-        // profile queue has its own lock, while executing JIT callbacks must
-        // remain free of cross-executor lock acquisition. Repeated slices for
-        // one process collapse through the monotonic generation comparison.
         for (auto& prepared : prepared_slices) {
             auto& runtime = *prepared.runtime;
             const auto generation =
@@ -3984,10 +3784,6 @@ void EmulatorSession::run()
                 scheduled->thread, result.ticks_consumed, result.svc_calls);
             if (prepared.deferred_svc && result.svc) {
                 runtime.kernel->dispatch(cpu, *result.svc);
-                // UserDefined2 is shared by deferred SVC and host cooperation.
-                // The explicit host-only marker remains attached to the result;
-                // only the reason explicitly requested by the serial kernel
-                // dispatch represents the guest thread's scheduler state here.
                 result.reason = cpu.consume_requested_halt_reason();
             }
             if (const auto handoff =
@@ -4130,8 +3926,6 @@ void EmulatorSession::run()
                                        : gdb_signal::illegal_instruction;
                 } else if (runtime.kernel->process().pid !=
                            initial_runtime->kernel->process().pid) {
-                    // The fault becomes the signal a device raises for it; the
-                    // thread goes on in its handler or the process dies of it.
                     const auto fault = guest_fault_of(result, cpu);
                     const auto fatal_signal = fault
                         ? runtime.kernel->deliver_fault_signal(cpu, *fault)
@@ -4153,10 +3947,6 @@ void EmulatorSession::run()
                 }
             } else if (Dynarmic::Has(result.reason,
                            Dynarmic::HaltReason::CacheInvalidation)) {
-                // Dynarmic may return after completing a shared code-cache
-                // invalidation at a safe host boundary. This is not a guest
-                // wait or scheduler state transition; resume the same runnable
-                // slice.
                 completion = XnuSliceCompletion::Continue;
             } else if (Dynarmic::Has(
                            result.reason, Dynarmic::HaltReason::UserDefined1)) {
@@ -4195,23 +3985,11 @@ void EmulatorSession::run()
                 }
                 completion = XnuSliceCompletion::Yield;
             } else if (result.host_yielded) {
-                // Host cooperation is not a Guest AST or a guest scheduler
-                // yield. Preserve the current quantum and priority while
-                // releasing only the emulator's queue-head continuation so an
-                // equal-priority peer can run after a wall-time-expensive
-                // translation or immediate SVC.
                 completion = XnuSliceCompletion::HostCooperate;
             } else if (Dynarmic::Has(
                            result.reason, Dynarmic::HaltReason::UserDefined2)) {
-                // XNU AST preemption retains the current quantum. The
-                // scheduler requeues this thread at the head of its
-                // priority, while a higher priority still wins selection.
                 completion = XnuSliceCompletion::Continue;
             } else if (result.ticks_consumed == 0 && !debug_stop) {
-                // A runnable CPU returning without executing an instruction
-                // and without a classified wait/exit/fault would otherwise
-                // make the unbounded scheduler spin forever. This is an
-                // internal emulation failure, not a normal stop condition.
                 std::ostringstream error;
                 error << "scheduler made no progress for pid="
                       << runtime.kernel->process().pid << " cpu=" << index
@@ -4229,12 +4007,6 @@ void EmulatorSession::run()
                     (display_inflight_callback_thread &&
                         *display_inflight_callback_thread ==
                             scheduled->thread))) {
-                // thread_switch is an explicit Guest request for another
-                // runnable dependency to make progress. Suppress this source
-                // for one host selection instead of either immediately
-                // reselecting it (which can spin) or discarding all callback
-                // ownership (which can starve the pending VSync behind
-                // unrelated cold-start work).
                 display_yielded_thread = scheduled->thread;
             }
             if (!scheduler_completed) {
@@ -4289,10 +4061,6 @@ void EmulatorSession::run()
         if (realtime_pacer)
             executed_ticks_since_catch_up += scheduler_round_ticks;
         if (device_time_policy == DeviceTimePolicy::DeterministicExecution) {
-            // Bounded runs derive DeterministicTime from executed guest ticks.
-            // CPU usage and quantum accounting already happened in
-            // complete_slice(); this advances only their deterministic
-            // scheduler/device timeline.
             scheduler.advance_time(scheduler_round_ticks);
             if (scheduler_round_ticks != 0) {
                 initial_runtime->kernel->advance_time_by(
@@ -4310,11 +4078,6 @@ void EmulatorSession::run()
             }
         }
         if (scheduler_round_ticks != 0) {
-            // IOMobileFramebuffer scans its reserved CoreSurface directly;
-            // firmware does not unlock or swap that front buffer. Cache the
-            // publishing task after the first lookup; imported task-local
-            // mappings retain the producer provenance and cannot steal
-            // ownership.
             if (display_scanout_owner == nullptr ||
                 display_scanout_owner->kernel->process().exited ||
                 !display_scanout_owner->kernel->owns_display_scanout()) {
@@ -4337,12 +4100,6 @@ void EmulatorSession::run()
         }
         refresh_jit_runtime_classes();
         if (display_scanout_owner != nullptr) {
-            // A realtime host-sync step at the top of the loop can advance the
-            // device clock and enqueue a VSync message without passing through
-            // the guest-time advance above. Keep the scanout owner marked for
-            // the next polling iteration in both cases;
-            // resolve_display_urgent_threads() still selects a thread only when
-            // it has a pending VSync receive.
             display_urgent_process.reset();
             std::optional<std::uint64_t> earliest_vsync;
             for (auto& runtime : runtimes) {
@@ -4428,8 +4185,6 @@ void EmulatorSession::run()
                 performance_counters().jit_block_compile_p95_nanoseconds();
             observation.block_compile_p99_nanoseconds =
                 performance_counters().jit_block_compile_p99_nanoseconds();
-            // Guest-busy admission is intentionally role-only. Generic
-            // prediction and portable persistence remain idle-bound.
             schedule_jit_profile_work(
                 observation, host_compile_deadline, false);
         }
@@ -4459,9 +4214,6 @@ void EmulatorSession::run()
                 const auto reclamation_needed =
                     memory_pressured || cache_budget_exceeded;
                 if (reclamation_needed && !pressure_reclamation_applied) {
-                    // Pressure handling is ordered: cancel optional compile
-                    // work first, then stop artifact writeback, then reclaim
-                    // unreferenced artifacts.
                     for (auto& runtime : runtimes) {
                         bool active_precompile { };
                         for (const auto& task : runtime->precompile_tasks) {
@@ -4493,10 +4245,6 @@ void EmulatorSession::run()
                     pressure_reclamation_applied = true;
                 }
                 if (reclamation_needed) {
-                    // Native mappings stay intact. At a global Guest-idle safe
-                    // point, discard only an ordinary runtime whose measured
-                    // live code exceeds its core-owned retention target. This
-                    // is intentionally after optional work cancellation.
                     std::uint64_t native_reclaimed { };
                     std::size_t native_runtimes { };
                     for (auto& runtime : runtimes) {
@@ -4563,10 +4311,6 @@ void EmulatorSession::run()
                 }
                 continue;
             }
-            // Sample live execution pools at most 20 Hz. Lifecycle transitions
-            // and final retirement take immediate snapshots so short-lived
-            // runtimes are still represented without turning the idle loop into
-            // a queue probe.
             observe_runtime_jit_memory_if_due();
             const auto next_deadline = next_guest_deadline();
             const auto next_host_deadline = next_host_control_deadline();
@@ -4584,10 +4328,6 @@ void EmulatorSession::run()
                     *next_host_deadline < *host_compile_deadline)) {
                 host_compile_deadline = *next_host_deadline;
             }
-            // Host maintenance remains deadline-aware even when profile warming
-            // is disabled. The profile branch may submit optional compile work,
-            // but it must not own publication of the deadline used by the
-            // controller.
             host_resources.set_next_deadline(host_compile_deadline);
             const auto schedule_artifact_compaction = [&]() {
                 const auto now = std::chrono::steady_clock::now();
@@ -4774,7 +4514,6 @@ void EmulatorSession::run()
                 schedule_jit_profile_work(
                     observation, host_compile_deadline, true);
             }
-            // Artifact maintenance is independent of profile warming.
             schedule_artifact_compaction();
             if (next_deadline) {
                 if (realtime_pacer) {
@@ -4813,9 +4552,6 @@ void EmulatorSession::run()
                         if (sleep_delay > std::chrono::nanoseconds::zero()) {
                             wait_for_host_activity(sleep_delay);
                         }
-                        // Keep guest-time advancement gated by the raw pacing
-                        // result. A clipped host sleep only makes input polling
-                        // responsive.
                         continue;
                     }
                     const auto current_time =
@@ -4838,11 +4574,6 @@ void EmulatorSession::run()
                 std::chrono::seconds { 2 };
             if (bounded_execution && touch_replay &&
                 !touch_replay->settled(touch_replay_quiet_period)) {
-                // A finite headless run must not terminate during a guest idle
-                // window while host-time UI automation still has events
-                // scheduled or the guest is draining the final event. Keep the
-                // same low-overhead idle behavior as the unbounded interactive
-                // loop.
                 auto replay_deadline = touch_replay->next_deadline();
                 if (!replay_deadline) {
                     replay_deadline = touch_replay->settled_deadline(
@@ -4861,11 +4592,6 @@ void EmulatorSession::run()
             }
             if (bounded_execution)
                 break;
-            // An interactive emulator remains alive while every guest thread
-            // is blocked: wait for the next automation deadline or control
-            // input. Standalone window sessions block on host events; GDB
-            // and mixed control sessions retain the bounded compatibility
-            // fallback.
             auto delay = std::chrono::nanoseconds::max();
             if (const auto deadline = next_host_control_deadline()) {
                 const auto now = std::chrono::steady_clock::now();
@@ -4915,8 +4641,6 @@ void EmulatorSession::run()
         " stability-last-content=" +
         std::to_string(
             transition_attribution.stability_last_observed_content_revision));
-    // The first process dying of a signal is a failure too. Read here, while
-    // its runtime is still in the list.
     if (!initial_failure &&
         initial_runtime->kernel->process().termination_signal != 0) {
         initial_failure = runtime_detail::InitialProcessFailure {
@@ -4941,9 +4665,6 @@ void EmulatorSession::run()
     PerformanceSnapshot stopped_guest;
     FilePageCacheStats file_cache_stats;
     std::uint64_t file_page_cache_bytes { };
-    // Guest and display pacing have stopped, so the last interactive deadline
-    // is no longer meaningful. Let already-admitted bounded host work drain
-    // instead of leaving it permanently ineligible behind a stale deadline.
     host_resources.set_next_deadline(std::nullopt);
     host_resources.wait_idle();
     catalog_maintenance.poll(*initial_runtime->kernel, true, false);
@@ -5277,10 +4998,6 @@ void EmulatorSession::run()
         concurrent_live_current_at_stop =
             runtime_jit_memory->concurrent_live_current;
     }
-    // A run that ends while a guest thread is still waiting for a mach reply
-    // names what it waited on. A request the kernel never answers looks, from
-    // the guest, exactly like one a guest server answers slowly, and only the
-    // wait itself distinguishes them.
     constexpr std::uint64_t stalled_receive_guest_nanoseconds =
         10ULL * VirtualClock::nanoseconds_per_second;
     for (auto& runtime : runtimes) {
@@ -5295,10 +5012,6 @@ void EmulatorSession::run()
     runtimes.clear();
     runtime_reaper.finish();
     if (activation != LockdownActivation::Preserve) {
-        // Native lockdownd may publish its runtime decision back into data_ark
-        // during boot. Reapply the explicit simulator profile only after every
-        // Guest runtime has been retired, so the requested state persists for
-        // the next launch without racing a live daemon.
         const auto shutdown_activation_result =
             apply_lockdown_state(rootfs, activation, lockdown_capabilities);
         output.line(
@@ -5307,9 +5020,6 @@ void EmulatorSession::run()
             " changed=" + std::to_string(shutdown_activation_result.changed));
     }
     if (report_performance) {
-        // Make the reported disk footprint include artifacts generated during
-        // the run. The store still performs the same atomic save again at
-        // destruction.
         static_cast<void>(jit_artifacts->save());
         if (profile_saving_enabled && translation_profiles) {
             translation_profiles->save();
@@ -5867,8 +5577,6 @@ void EmulatorSession::run()
             " touched-pages=" + std::to_string(write_stats.touched_pages) +
             " copy-on-write-detaches=" +
             std::to_string(write_stats.copy_on_write_detaches));
-        // Preserve stopped-guest live/current values, then include Runtime
-        // destructor latency measured by the reaper in the final snapshot.
         auto final_snapshot = performance_counters().snapshot();
         final_snapshot.jit_live_instances = stopped_guest.jit_live_instances;
         final_snapshot.jit_code_cache_bytes =
@@ -5886,8 +5594,6 @@ void EmulatorSession::run()
         final_snapshot.jit_cache_slots = stopped_guest.jit_cache_slots;
         output.line(format_performance_summary(final_snapshot));
         if (performance_counters().block_profile_enabled()) {
-            // The full table goes beside the run's root filesystem, where the
-            // run keeps its other files.
             const auto& block_profile = performance_counters().block_profile();
             const auto directory = options.rootfs.parent_path() / "perf";
             const auto path = directory / "block-profile.tsv";
@@ -5978,4 +5684,4 @@ void EmulatorSession::run()
             runtime_detail::initial_process_failure_message(*initial_failure) };
 }
 
-} // namespace shade
+}

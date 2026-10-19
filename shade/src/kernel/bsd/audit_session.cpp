@@ -47,15 +47,13 @@ namespace {
         return name;
     }
 
-} // namespace
+}
 
 void CompatibilityKernel::dispatch_bsd_audit_session(
     Cpu& cpu, std::uint32_t number)
 {
     auto& registers = cpu.registers();
     if (number == darwin::syscall::get_audit_address) {
-        // ARM32 auditinfo_addr: auid, mask[2], terminal port/type/address[4],
-        // session ID, then the naturally aligned 64-bit session flags.
         std::array<std::byte, 48U> audit_info { };
         mach_support::write_little_word(
             audit_info, 36U, process_.audit_session_id);
@@ -131,4 +129,4 @@ void CompatibilityKernel::dispatch_bsd_audit_session(
     bsd_success(cpu, 0U);
 }
 
-} // namespace shade
+}

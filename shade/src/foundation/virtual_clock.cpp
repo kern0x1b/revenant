@@ -30,7 +30,7 @@ namespace {
         return -static_cast<std::int64_t>(magnitude);
     }
 
-} // namespace
+}
 
 VirtualClock::VirtualClock(std::uint64_t initial_time)
     : now_ { initial_time }
@@ -93,4 +93,4 @@ void VirtualClock::advance_to(std::uint64_t deadline)
                                      std::memory_order_relaxed)) { }
 }
 
-} // namespace shade
+}

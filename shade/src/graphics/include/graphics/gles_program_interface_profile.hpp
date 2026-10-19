@@ -13,17 +13,11 @@
 
 namespace shade {
 
-// Conventional compositor shaders expose either a single color varying or
-// indexed color varyings and fragment outputs. Select from shader declarations,
-// independently of the process, device or firmware that supplied the program.
 struct GlesProgramInterfaceProfile {
     std::string_view color_attribute { "vertex_color" };
     std::string_view color_varying { "color" };
     std::string_view fragment_output { "gl_FragColor" };
 
-    // Compositor shaders spell their inputs by these names. A program that
-    // uses them is run by the renderer's fixed-function adapter, not by the
-    // GLSL interpreter.
     [[nodiscard]] static bool recognizes(std::string_view source)
     {
         constexpr std::array names { std::string_view { "vertex_position" },
@@ -52,4 +46,4 @@ struct GlesProgramInterfaceProfile {
     }
 };
 
-} // namespace shade
+}

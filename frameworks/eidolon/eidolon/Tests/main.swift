@@ -27,8 +27,6 @@ func equal<T: Equatable>(_ got: T, _ want: T, _ what: String) {
     check(got == want, what, "got \(got), want \(want)")
 }
 
-// leaf views only, in the coordinates of the host view: that is what a person sees
-/// The text of every label under a view, top to bottom.
 func labels(of view: UIView) -> [String] {
     var found: [(CGFloat, String)] = []
     var stack: [UIView] = [view]
@@ -41,7 +39,6 @@ func labels(of view: UIView) -> [String] {
     return found.sorted { $0.0 < $1.0 }.map { $0.1 }
 }
 
-/// Where each text sits on screen, so the order a table shows can be read off it.
 func positions(of view: UIView) -> [String: CGFloat] {
     var seen: [String: CGFloat] = [:]
     var stack: [UIView] = [view]
@@ -80,7 +77,6 @@ final class Store: ObservableObject {
     @Published var width: CGFloat = 40
 }
 
-// 1. stack layout: fixed children, spacer takes the rest, spacing between children
 struct StackCase: View {
     var body: some View {
         HStack(spacing: 10) {
@@ -102,7 +98,6 @@ if stackFrames.count == 2 {
     equal(stackFrames[1].origin.x, 170, "the spacer pushed the last child to the trailing edge")
 }
 
-// 2. padding shrinks the proposal
 struct PaddingCase: View {
     var body: some View { Color.green.padding(8) }
 }
@@ -112,7 +107,6 @@ equal(inner.size.width, 84, "padding takes 8 points off each side")
 equal(inner.origin.x, 8, "padded content starts after the inset")
 equal(inner.size.height, 44, "padding takes 8 points off the top and the bottom")
 
-// 3. @State drives an update through a button action
 struct Counter: View {
     @State var value = 0
     var body: some View {
@@ -130,7 +124,6 @@ let after = frames(counter).first { $0.size.height == 5 }?.size.width ?? -1
 equal(before, 10, "state starts at zero")
 equal(after, 20, "writing the state moved the view")
 
-// 4. ObservableObject: insertion, removal and reordering of ForEach children
 struct Rows: View {
     @ObservedObject var store: Store
     var body: some View {
@@ -160,7 +153,6 @@ rows.flush()
 equal(frames(rows).filter { $0.size.height == 4 }.count, 0, "rows are gone")
 check(!frames(rows).contains { $0.size.height == 7 }, "the conditional view is gone")
 
-// 5. a view type change rebuilds the node
 struct Either: View {
     @ObservedObject var store: Store
     var body: some View {
@@ -180,7 +172,6 @@ either.flush()
 check(frames(either).contains { $0.size.width == 11 }, "the then branch replaced it")
 check(!frames(either).contains { $0.size.width == 22 }, "the else branch is gone")
 
-// 6. environment object reaches a nested view
 final class Theme: ObservableObject {
     @Published var thick = false
 }
@@ -199,7 +190,6 @@ theme.thick = true
 env.flush()
 check(frames(env).contains { $0.size.height == 20 }, "changing the environment object updated the nested view")
 
-// 7. list rows: count and height follow the data
 struct ListCase: View {
     @ObservedObject var store: Store
     var body: some View {
@@ -219,7 +209,6 @@ store.items = [1, 2, 3]
 list.flush()
 equal(list.rowCount, 3, "the list picked up the new item")
 
-// 8. only the changed subtree evaluates its body again
 struct Inner: View {
     @ObservedObject var store: Store
     var body: some View { Color.red.frame(width: store.width, height: 4) }
@@ -235,7 +224,6 @@ outer.flush()
 equal(outer.bodyEvaluations, firstCount + 1, "one body ran again")
 check(frames(outer).contains { $0.size.width == 70 }, "the changed subtree laid out again")
 
-// 9. ZStack: children overlap, size is the largest, alignment places them
 struct ZCase: View {
     var body: some View {
         ZStack(alignment: .topLeading) {
@@ -253,7 +241,6 @@ if zframes.count == 2 {
     equal(zframes[1].size.width, 10, "the smaller child keeps its size")
 }
 
-// 10. ScrollView: content is laid out at its natural height and the content size follows it
 struct ScrollCase: View {
     @ObservedObject var store: Store
     var body: some View {
@@ -273,7 +260,6 @@ store.items = [1]
 scroll.flush()
 equal(scroll.scrollContentHeight, 100, "a shorter content still fills the viewport")
 
-// 11. ForEach keeps a row's state when the data is reordered: identity follows the id, not the position
 final class Counted: ObservableObject {
     @Published var ids = [1, 2, 3]
 }
@@ -308,7 +294,6 @@ counted.ids = [3, 1, 2, 4]
 identity.flush()
 equal(builtRows, [4], "only the new row built its body")
 
-// 12. sections group the rows of a list and carry their titles
 struct SectionCase: View {
     @ObservedObject var store: Store
     var body: some View {
@@ -332,7 +317,6 @@ store.items = [1, 2, 3]
 sectioned.flush()
 equal(sectioned.rowCounts, [1, 3], "a new item joined its own section")
 
-// 13. shapes draw through CAShapeLayer and take the proposed size
 struct ShapeCase: View {
     var body: some View {
         VStack(spacing: 0) {
@@ -350,7 +334,6 @@ if shapeFrames.count == 3 {
     equal(shapeFrames[2].size.width, 100, "a shape without a width takes the proposal")
 }
 
-// 14. padding by edges only touches the named sides
 struct EdgeCase: View {
     var body: some View { Color.red.padding(.horizontal, 10) }
 }
@@ -361,7 +344,6 @@ if let inner = frames(edges).last {
     equal(inner.size.height, 50, "vertical sides untouched")
 }
 
-// 15. effects: offset moves without changing the measured size, hidden hides
 struct EffectCase: View {
     var body: some View {
         VStack(spacing: 0) {
@@ -378,7 +360,6 @@ if effectFrames.count == 2 {
     check(effects.isHidden(1), "hidden view is hidden")
 }
 
-// 16. onChange fires once per distinct value
 var changes: [Int] = []
 struct ChangeCase: View {
     @ObservedObject var store: Store
@@ -397,7 +378,6 @@ store.count = 9
 changeProbe.flush()
 equal(changes, [4, 9], "only distinct values fire")
 
-// 17. modifiers that iOS 6 cannot express must announce themselves, not stay silent
 struct IgnoredCase: View {
     var body: some View { Color.red.frame(width: 10, height: 10).blendMode(.multiply).defersSystemGestures(on: .bottom) }
 }
@@ -406,7 +386,6 @@ check(_Unsupported.used.contains("blendMode"), "blendMode reported itself as ign
 check(_Unsupported.used.contains("defersSystemGestures"), "defersSystemGestures reported itself as ignored")
 equal(frames(ignoredProbe).count, 1, "the view still draws")
 
-// 19. preferences travel up to the observer
 struct WidthKey: PreferenceKey {
     static var defaultValue: CGFloat { 0 }
     static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) { value = max(value, nextValue()) }
@@ -428,7 +407,6 @@ store.width = 40
 preferences.flush()
 equal(seenWidths, [12, 40], "the changed value reached the observer")
 
-// 20. the focus state keeps its value through rebuilds
 struct FocusCase: View {
     @FocusState var focused: Bool
     @ObservedObject var store: Store
@@ -445,7 +423,6 @@ actions.removeLast()()
 focus.flush()
 check(true, "focus state survived a rebuild")
 
-// 21. UIViewRepresentable puts a real UIKit view into the tree and updates it
 final class Box: UIView {
     var level = 0
 }
@@ -481,7 +458,6 @@ store.count = 8
 representable.flush()
 equal(firstBox(representable)?.level ?? -1, 8, "update reached the same UIKit view")
 
-// 22. ViewThatFits picks the first candidate that fits
 struct FitsCase: View {
     var body: some View {
         ViewThatFits {
@@ -493,7 +469,6 @@ struct FitsCase: View {
 let fits = _Probe(FitsCase(), width: 100, height: 100)
 equal(frames(fits).first?.size.width ?? 0, 60, "the wide candidate was skipped")
 
-// 23. a custom Layout gets the subviews and places them itself
 struct DiagonalLayout: Layout {
     func sizeThatFits(proposal: ProposedViewSize, subviews: LayoutSubviews, cache: inout Void) -> CGSize {
         CGSize(width: proposal.width ?? 100, height: proposal.height ?? 100)
@@ -522,7 +497,6 @@ if placed.count == 3 {
     equal(placed[2].origin, CGPoint(x: 40, y: 20), "the third subview landed where the layout put it")
 }
 
-// 24. a transition puts the view in and takes it out; without animation it is immediate
 struct TransitionCase: View {
     @ObservedObject var store: Store
     var body: some View {
@@ -544,7 +518,6 @@ withAnimation(.linear(duration: 0.2)) { store.show = false }
 transitions.flush()
 check(boxes(transitions) == 1, "removal with animation keeps the view on screen while it fades")
 
-// 25. labelStyle chooses what a Label shows; a custom style receives title and icon
 struct StackedLabelStyle: LabelStyle {
     func makeBody(configuration: Configuration) -> some View {
         VStack(spacing: 0) { configuration.icon; configuration.title }
@@ -569,7 +542,6 @@ if let icon = stacked.first(where: { $0.size.width == 6 }), let title = stacked.
     check(false, "a custom style shows both parts", "\(stacked)")
 }
 
-// 26. progressViewStyle replaces the indicator and gets the fraction
 struct BarStyle: ProgressViewStyle {
     func makeBody(configuration: Configuration) -> some View {
         Color.green.frame(width: CGFloat((configuration.fractionCompleted ?? 0) * 80), height: 4)
@@ -581,7 +553,6 @@ let linear = frames(_Probe(ProgressView(value: 0.5).progressViewStyle(LinearProg
 let plain = frames(_Probe(ProgressView(value: 0.5), width: 100, height: 100))
 equal(linear, plain, "a built-in style draws the same native bar as no style")
 
-// 27. row traits: deleteDisabled and moveDisabled per row, swipeActions replace the delete button
 struct EditCase: View {
     @ObservedObject var store: Store
     var body: some View {
@@ -635,7 +606,6 @@ equal(shuffled, [0, 4, 1, 2, 3], "move(fromOffsets:) backwards")
 shuffled.remove(atOffsets: IndexSet([0, 2]))
 equal(shuffled, [4, 2, 3], "remove(atOffsets:)")
 
-// 28. alignmentGuide shifts a child against the stack's guide; custom AlignmentID lines children up
 let guided = _Probe(VStack(alignment: .leading, spacing: 0) {
     Color.red.frame(width: 40, height: 10)
     Color.blue.frame(width: 20, height: 10).alignmentGuide(.leading) { d in d[.leading] - 15 }
@@ -657,7 +627,6 @@ if let red = custom2.first(where: { $0.size.width == 40 }), let blue = custom2.f
     equal(blue.origin.x, red.origin.x + 40, "a custom alignment put the blue leading edge on the red trailing edge")
 } else { check(false, "both custom-aligned children are laid out", "\(custom2)") }
 
-// 29. GeometryProxy.frame(in:) answers in the named space, not only locally
 var seenProxy: GeometryProxy?
 let spaced = _Probe(VStack(spacing: 0) {
     Color.red.frame(width: 50, height: 30)
@@ -678,14 +647,12 @@ if let proxy = seenProxy {
     check(false, "the geometry reader ran")
 }
 
-// 30. contentShape limits where a gesture is accepted
 let round = _Probe(Color.red.frame(width: 100, height: 100).contentShape(Circle()).onTapGesture {}, width: 100, height: 100)
 check(round.gestureAccepts(CGPoint(x: 50, y: 50)), "the centre of a circular hit shape takes the tap")
 check(!round.gestureAccepts(CGPoint(x: 3, y: 3)), "the corner outside the circle does not")
 let square = _Probe(Color.red.frame(width: 100, height: 100).onTapGesture {}, width: 100, height: 100)
 check(square.gestureAccepts(CGPoint(x: 3, y: 3)), "without contentShape the whole frame takes the tap")
 
-// 31. disclosureGroupStyle and menuStyle hand their parts to a custom style
 struct SideBySide: DisclosureGroupStyle {
     func makeBody(configuration: Configuration) -> some View {
         HStack(spacing: 0) {
@@ -709,7 +676,6 @@ struct Swatch: MenuStyle {
 let menued = frames(_Probe(Menu { Color.red } label: { Color.red }.menuStyle(Swatch()), width: 100, height: 100))
 check(menued.contains { $0.size == CGSize(width: 17, height: 17) }, "the custom menu style replaced the menu button", "\(menued)")
 
-// 32. @Namespace gives each view its own id; matchedGeometryEffect animates the new view from the old frame
 var namespaces: [Namespace.ID] = []
 struct NamespaceCase: View {
     @Namespace var ns
@@ -781,7 +747,6 @@ let plainStarts = boxLayers(unmatched).compactMap { layer -> CGPoint? in
 }
 check(!plainStarts.contains { abs($0.y - 10.5) < 1 }, "without the effect the new view does not start from the old place", "\(plainStarts)")
 
-// 33. a custom DynamicProperty keeps its nested @State and gets update() before body
 var dynamicUpdates = 0
 var bump: () -> Void = {}
 @propertyWrapper struct NestedCounter: DynamicProperty {
@@ -806,7 +771,6 @@ nested.flush()
 check(frames(nested).contains { $0.size.width == 15 }, "changing the nested state re-rendered the view", "\(frames(nested))")
 check(dynamicUpdates >= 2, "update() ran before each body", "\(dynamicUpdates)")
 
-// 34. HStackLayout / VStackLayout / ZStackLayout through AnyLayout
 func laidOut(_ layout: AnyLayout) -> [CGRect] {
     frames(_Probe(layout {
         Color.red.frame(width: 20, height: 10)
@@ -828,7 +792,6 @@ if piled.count == 2 {
     equal(piled[0].origin, piled[1].origin, "ZStackLayout top-leading puts both at the same corner")
 } else { check(false, "ZStackLayout laid out both views", "\(piled)") }
 
-// 35. style families: group box, labeled content, control group, gauge, form
 struct BarGauge: GaugeStyle {
     func makeBody(configuration: Configuration) -> some View {
         Color.green.frame(width: CGFloat(configuration.value * 100), height: 6)
@@ -873,7 +836,6 @@ let formed = _Probe(Form { Color.red.frame(width: 19, height: 19) }.formStyle(Pl
 equal(formed.rowCount, 0, "a custom form style replaces the grouped table")
 check(frames(formed).contains { $0.size.width == 19 }, "and still shows the content")
 
-// 36. inset shapes, asymmetric transitions
 equal(Rectangle().inset(by: 5).path(in: CGRect(x: 0, y: 0, width: 100, height: 60)).boundingRect, CGRect(x: 5, y: 5, width: 90, height: 50), "Rectangle.inset shrinks the path")
 equal(Circle().inset(by: 10).path(in: CGRect(x: 0, y: 0, width: 100, height: 100)).boundingRect, CGRect(x: 10, y: 10, width: 80, height: 80), "Circle.inset shrinks the circle")
 struct AsymmetricCase: View {
@@ -925,7 +887,6 @@ if let leaving {
 } else { check(false, "a pushed view stays on screen while it leaves") }
 
 
-// 37. onOpenURL, badge, scrollContentBackground, redaction
 var opened: [URL] = []
 let urlProbe = _Probe(Color.red.frame(width: 5, height: 5).onOpenURL { opened.append($0) }, width: 50, height: 50)
 _ = frames(urlProbe)
@@ -960,7 +921,6 @@ let shown = imageViews(hiddenImage)
 check(shown.filter { $0.image == nil }.count == 1 && shown.filter { $0.image != nil }.count == 1, "redacted hides the image, unredacted keeps its own", "\(shown.map { $0.image != nil })")
 check(shown.contains { $0.image == nil && $0.bounds.size == CGSize(width: 12, height: 12) }, "the placeholder keeps the image size")
 
-// 38. TabView with the page style pages through its children
 struct PagedCase: View {
     @ObservedObject var store: Store
     var body: some View {
@@ -987,7 +947,6 @@ if let scroller = pager(paged) {
     equal(scroller.contentOffset.x, 200, "selecting the third tag scrolls to the third page")
 } else { check(false, "the page style made a paging scroll view") }
 
-// 39. anchor preferences resolve in an overlay's geometry; transformPreference rewrites the subtree's value
 struct BoundsKey: PreferenceKey {
     static var defaultValue: Anchor<CGRect>? = nil
     static func reduce(value: inout Anchor<CGRect>?, nextValue: () -> Anchor<CGRect>?) { value = value ?? nextValue() }
@@ -1027,7 +986,6 @@ _ = frames(_Probe(VStack {
 .onPreferenceChange(SumKey.self) { summed.append($0) }, width: 50, height: 50))
 equal(summed.last, 70, "transformPreference saw the reduced 7 and made it 70")
 
-// 40. a view inside frame and overlay still gets onDisappear when its branch goes away
 var disappeared = 0
 struct NestedDisappearCase: View {
     @ObservedObject var store: Store
@@ -1064,7 +1022,6 @@ store.items = [1, 3]
 forEachGone.flush()
 equal(rowsGone, 1, "removing an item from ForEach fires its onDisappear")
 
-// 41. Grid lines columns up across rows; cells span and align
 let gridFrames = frames(_Probe(Grid(horizontalSpacing: 8, verticalSpacing: 4) {
     GridRow {
         Color.red.frame(width: 30, height: 10)
@@ -1092,7 +1049,6 @@ if let red = leadingGrid.first(where: { $0.size.width == 30 }), let green = lead
     equal(green.origin.x, red.origin.x, "gridColumnAlignment(.leading) aligns the column to its leading edge")
 } else { check(false, "the leading grid laid out", "\(leadingGrid)") }
 
-// 42. ScrollViewReader.scrollTo finds the id and scrolls to it
 var scrollProxy: ScrollViewProxy?
 struct ScrollToCase: View {
     var body: some View {
@@ -1120,7 +1076,6 @@ if let proxy = scrollProxy, let scroller = firstScroller(scrolling.hostView) {
     equal(scroller.contentOffset.y, 800, "scrollTo(19, anchor: .bottom) stops at the end of the content")
 } else { check(false, "the scroll reader handed out a proxy and made a scroll view", "proxy \(scrollProxy != nil) scroller \(firstScroller(scrolling.hostView) != nil)") }
 
-// 43. frame alignment on both axes, fixedSize per axis, anchored effects, format specifiers
 let topLeading = frames(_Probe(Color.red.frame(width: 10, height: 10).frame(width: 60, height: 40, alignment: .bottomTrailing), width: 60, height: 40))
 equal(topLeading.first { $0.size.width == 10 }?.origin ?? .zero, CGPoint(x: 50, y: 30), "frame(alignment: .bottomTrailing) puts the child in the corner")
 let tall = _Probe(VStack { Color.red.frame(minWidth: 5, maxWidth: .infinity, minHeight: 5, maxHeight: .infinity).fixedSize(horizontal: false, vertical: true) }, width: 80, height: 80)
@@ -1143,7 +1098,6 @@ check(abs(spin.tx - (-30)) < 0.01 && abs(spin.ty - 10) < 0.01, "rotating about t
 equal(_Probe.text("pi is \(3.14159, specifier: "%.2f")"), "pi is 3.14", "a specifier formats the number")
 equal(_Probe.text("count \(42)"), "count 42", "an integer interpolates plainly")
 
-// 45. stroke style reaches the shape layer; stroke is centred on the path, strokeBorder stays inside
 func shapeLayers(_ probe: _Probe) -> [CAShapeLayer] {
     var found: [CAShapeLayer] = []
     func walk(_ v: UIView) { if let s = v.layer as? CAShapeLayer { found.append(s) }; v.subviews.forEach(walk) }
@@ -1162,7 +1116,6 @@ let bordered = _Probe(Rectangle().strokeBorder(Color.red, lineWidth: 4).frame(wi
 _ = frames(bordered)
 equal(shapeLayers(bordered).first?.path?.boundingBoxOfPath, CGRect(x: 2, y: 2, width: 36, height: 16), "strokeBorder insets the path by half the line")
 
-// 46. long press honours its distance
 let pressProbe = _Probe(Color.red.frame(width: 30, height: 30).onLongPressGesture(minimumDuration: 1, maximumDistance: 25, perform: {}), width: 100, height: 100)
 _ = frames(pressProbe)
 var pressRecognizer: UILongPressGestureRecognizer?
@@ -1171,7 +1124,6 @@ findPress(pressProbe.hostView)
 equal(pressRecognizer?.allowableMovement, 25, "maximumDistance became the allowable movement")
 equal(pressRecognizer?.minimumPressDuration, 1, "minimumDuration reached the recognizer")
 
-// 47. layoutValue reaches a custom Layout through its subviews
 struct Rank: LayoutValueKey { static let defaultValue = 0 }
 struct RankedRow: Layout {
     func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout Void) -> CGSize { CGSize(width: 100, height: 10) }
@@ -1189,7 +1141,6 @@ if ranked.count == 2 {
     equal(ranked[1].origin.x - ranked[0].origin.x, 60, "the layout read the rank of the first view and the default of the second")
 } else { check(false, "the ranked layout placed both views", "\(ranked)") }
 
-// 48. a gradient fill really paints the shape (not its first colour)
 func pixel(_ probe: _Probe, _ at: CGPoint, size: CGSize) -> (CGFloat, CGFloat, CGFloat) {
     UIGraphicsBeginImageContextWithOptions(size, true, 1)
     let context = UIGraphicsGetCurrentContext()!
@@ -1216,7 +1167,6 @@ let middle = pixel(radial, CGPoint(x: 20, y: 20), size: CGSize(width: 40, height
 let edge = pixel(radial, CGPoint(x: 1, y: 20), size: CGSize(width: 40, height: 40))
 check(middle.0 > 0.8 && edge.0 < 0.2, "a radial gradient is light in the middle and dark at the edge", "\(middle) \(edge)")
 
-// 49. @State inside a ViewModifier keeps its value; EnvironmentalModifier resolves against the environment
 var widen: () -> Void = {}
 struct Widening: ViewModifier {
     @State var wide = false
@@ -1243,7 +1193,6 @@ struct FixedSide: ViewModifier {
 let resolved = frames(_Probe(Color.red.modifier(Sized()).environment(\.side, 33), width: 100, height: 100))
 check(resolved.contains { $0.size == CGSize(width: 33, height: 33) }, "the environmental modifier read the environment", "\(resolved)")
 
-// 50. OutlineGroup walks a tree: collapsed groups show their parents, expanded ones their children
 struct TreeNode: Identifiable {
     let id: Int
     var children: [TreeNode]?
@@ -1262,7 +1211,6 @@ if let parent = outlined.first(where: { $0.size.width == 11 }), let grandchild =
     check(grandchild.origin.y > parent.origin.y, "children come under their parent")
 }
 
-// 51. List(selection:) sets the binding from the row's id or tag
 final class Picked: ObservableObject { @Published var one: Int? = nil; @Published var many: Set<Int> = [] }
 let picked = Picked()
 struct SelectionCase: View {
@@ -1291,7 +1239,6 @@ _ = frames(many)
 many.selectRow(0); many.selectRow(2); many.selectRow(0)
 equal(picked.many, [3], "a set selection toggles rows")
 
-// 52. Table on iPhone lists its rows with the first column
 struct Fruit: Identifiable { let id: Int }
 let tabled = _Probe(Table([Fruit(id: 12), Fruit(id: 30)]) {
     TableColumn("Size") { (fruit: Fruit) in Color.red.frame(height: CGFloat(fruit.id)) }
@@ -1301,7 +1248,6 @@ _ = frames(tabled)
 equal(tabled.rowCount, 2, "a row per element")
 check(tabled.rowHeight(1) > tabled.rowHeight(0) && tabled.rowHeight(1) < 90, "rows follow the first column only", "\(tabled.rowHeight(0)) \(tabled.rowHeight(1))")
 
-// 53. a changed custom environment value reaches an unchanged child
 struct ReadsSide: View {
     @Environment(\.side) var side
     var body: some View { Color.red.frame(width: side, height: 4) }
@@ -1317,7 +1263,6 @@ store.width = 37
 envProbe.flush()
 check(frames(envProbe).contains { $0.size.width == 37 }, "the child saw the new value", "\(frames(envProbe))")
 
-// 54. openURL takes a custom handler (TimelineView ticking is checked in the app scenario: timers do not fire in a console process here)
 var handledURL: URL?
 var openAction: OpenURLAction?
 struct OpensURL: View {
@@ -1333,7 +1278,6 @@ openAction?(URL(string: "app://inside")!) { accepted = $0 }
 equal(handledURL?.absoluteString, "app://inside", "the custom openURL handler received the URL")
 equal(accepted, true, "and reported it handled")
 
-// 55. Canvas: inverse clip keeps the outside, gradient shading paints
 let canvasProbe = _Probe(Canvas { context, size in
     let whole = Path(CGRect(x: 0, y: 0, width: size.width, height: size.height))
     context.fill(whole, with: .color(.red))
@@ -1346,7 +1290,6 @@ let rightSide = pixel(canvasProbe, CGPoint(x: 35, y: 20), size: CGSize(width: 40
 check(leftSide.0 > 0.7 && leftSide.2 < 0.3, "the inverse clip protected the left half", "\(leftSide)")
 check(rightSide.2 > 0.7 && rightSide.0 < 0.3, "the gradient shading painted the right half", "\(rightSide)")
 
-// 56. ForEach over a binding hands out element bindings; editActions delete through the binding
 struct Chore: Identifiable { let id: Int; var width: CGFloat }
 final class Chores: ObservableObject { @Published var list = [Chore(id: 1, width: 10), Chore(id: 2, width: 20), Chore(id: 3, width: 30)] }
 let chores = Chores()
@@ -1372,7 +1315,6 @@ equal(chores.list.map { Int($0.width) }, [10, 44, 30], "the element binding wrot
 choreProbe.commitDelete(0)
 equal(chores.list.map { $0.id }, [2, 3], "deleting a row removed the element through the binding")
 
-// 57. a drop ShadowStyle becomes the shape layer's shadow
 let shadowed = _Probe(Circle().fill(Color.red.shadow(.drop(radius: 6, x: 2, y: 3))).frame(width: 30, height: 30), width: 60, height: 60)
 _ = frames(shadowed)
 if let layer = shapeLayers(shadowed).first {
@@ -1381,7 +1323,6 @@ if let layer = shapeLayers(shadowed).first {
     equal(layer.shadowOpacity, 1, "and it is visible")
 } else { check(false, "the shadowed circle made a shape layer") }
 
-// 58. a month-sized grid lays out in reasonable time
 let gridStart = Date()
 let monthGrid = _Probe(Grid(horizontalSpacing: 4, verticalSpacing: 4) {
     ForEach(0..<6, id: \.self) { _ in
@@ -1397,7 +1338,6 @@ let gridSeconds = Date().timeIntervalSince(gridStart)
 check(gridSeconds < 3, "a 7x6 grid builds and lays out quickly", "\(gridSeconds) s")
 print("grid 7x6 took \(gridSeconds)")
 
-// 59. @FetchRequest follows a Core Data context: rows appear as objects are inserted and saved
 let noteEntity = NSEntityDescription()
 noteEntity.name = "Note"
 noteEntity.managedObjectClassName = "NSManagedObject"
@@ -1442,7 +1382,6 @@ try? noteContext.save()
 notesProbe.flush()
 equal(frames(notesProbe).map { Int($0.size.width) }, [10, 20, 30], "saving a new note re-rendered the fetch")
 
-// 60. ShapeStyle backgrounds, background(in:) with backgroundStyle, containerShape for ContainerRelativeShape
 let inShape = _Probe(Color.clear.frame(width: 40, height: 20).background(Color.blue, in: Capsule()), width: 100, height: 100)
 _ = frames(inShape)
 check(shapeLayers(inShape).contains { ($0.path?.boundingBoxOfPath.size ?? .zero) == CGSize(width: 40, height: 20) }, "background(_:in:) drew the capsule behind the view")
@@ -1455,7 +1394,6 @@ _ = frames(relative)
 let relativePath = shapeLayers(relative).first?.path
 check(relativePath.map { !$0.contains(CGPoint(x: 2, y: 2)) && $0.contains(CGPoint(x: 25, y: 25)) } ?? false, "ContainerRelativeShape took the container's circle")
 
-// branch identity: the two arms of an if/else are different views even when their types match
 final class Flag: ObservableObject { @Published var on = true }
 struct BranchCounter: View {
     let base: CGFloat
@@ -1485,7 +1423,6 @@ flag.on = true
 branches.flush()
 equal(frames(branches).first { $0.size.height == 3 }?.size.width ?? -1, 10, "coming back to the true arm starts it afresh")
 
-// writing a state its own value does not evaluate the body again
 var sameValueBodies = 0
 struct SameValue: View {
     @State var value = 5
@@ -1501,7 +1438,6 @@ actions.removeLast()()
 sameValue.flush()
 equal(sameValueBodies, bodiesBefore, "the same value leaves the body alone")
 
-// accessibility: sort priority, synthesized children, representation and focus
 func viewsOf<T: UIView>(_ root: UIView, _ type: T.Type) -> [T] {
     var found: [T] = []
     func walk(_ view: UIView) { if let match = view as? T { found.append(match) }; view.subviews.forEach(walk) }
@@ -1571,7 +1507,6 @@ focusTarget?.accessibilityElementDidLoseFocus()
 focusProbe.flush()
 equal(focusReadings.last ?? true, false, "losing focus clears it")
 
-// cached sizes: a change deep inside nested stacks and modifiers still reaches the layout
 final class DeepTick: ObservableObject { @Published var width: CGFloat = 10 }
 struct DeepLeafNest: View {
     let depth: Int
@@ -1599,7 +1534,6 @@ equal(frames(deepProbe).first { $0.size.height == 6 }?.size.width ?? -1, 37, "a 
 let widthAfter = frames(deepProbe).filter { $0.size.height == 1 }.map { $0.size.width }.max() ?? -1
 check(widthAfter >= 37, "the ancestors grew with the leaf", "widest rule \(widthAfter)")
 
-// a change beneath .padding() and .frame() reaches the wrapper's own cached size: the padded box grows with its content
 final class GrowingWidth: ObservableObject { @Published var width: CGFloat = 20 }
 struct PaddedLeaf: View {
     @ObservedObject var model: GrowingWidth
@@ -1621,10 +1555,8 @@ growing.width = 90
 paddedProbe.flush()
 equal(paddedBox(paddedProbe), 100, "the padded box grows when the content beneath it changes")
 
-// gestures: typed events instead of guessing by closure type
 func gestureWidth(_ probe: _Probe, height: CGFloat) -> CGFloat { frames(probe).first { $0.size.height == height }?.size.width ?? -1 }
 
-// .updating writes the @GestureState while the gesture runs and puts it back afterwards
 struct UpdatingCase: View {
     @GestureState private var pulled = CGSize.zero
     var body: some View {
@@ -1641,7 +1573,6 @@ updating.send(.drag(CGSize(width: 30, height: 0), ended: true))
 updating.flush()
 equal(gestureWidth(updating, height: 21), 10, "the gesture state went back when the drag ended")
 
-// map changes the value that onChanged and onEnded see
 var mapped: [CGFloat] = []
 var mappedEnd: CGFloat?
 let mapProbe = _Probe(Color.red.frame(width: 20, height: 22).gesture(
@@ -1651,7 +1582,6 @@ mapProbe.send(.drag(CGSize(width: 25, height: 0), ended: true))
 equal(mapped, [15], "onChanged got the mapped value")
 equal(mappedEnd ?? -1, 25, "onEnded got the mapped value")
 
-// the drag waits for its minimum distance, and a shorter one is not a drag at all
 var dragEnds = 0
 let minProbe = _Probe(Color.red.frame(width: 20, height: 23).gesture(DragGesture(minimumDistance: 10).onEnded { _ in dragEnds += 1 }), width: 100, height: 50)
 minProbe.send(.drag(CGSize(width: 4, height: 0), ended: false))
@@ -1666,7 +1596,6 @@ zeroProbe.send(.drag(CGSize(width: 1, height: 0), ended: false))
 zeroProbe.send(.drag(CGSize(width: 1, height: 0), ended: true))
 equal(zeroEnds, 1, "with no minimum distance any drag ends")
 
-// a sequence runs its second gesture only after the first one has completed
 var sequenceEnds: [String] = []
 let sequenceProbe = _Probe(Color.red.frame(width: 20, height: 25).gesture(
     LongPressGesture().sequenced(before: DragGesture()).onEnded { value in
@@ -1684,7 +1613,6 @@ sequenceProbe.send(.drag(CGSize(width: 30, height: 0), ended: false))
 sequenceProbe.send(.drag(CGSize(width: 30, height: 0), ended: true))
 equal(sequenceEnds, ["second true drag"], "after the long press the drag ended the sequence with both values")
 
-// exclusive: whoever starts first keeps the gesture
 var exclusive: [String] = []
 let exclusiveProbe = _Probe(Color.red.frame(width: 20, height: 26).gesture(
     DragGesture().exclusively(before: TapGesture()).onEnded { value in
@@ -1697,7 +1625,6 @@ equal(exclusive, ["drag"], "the tap did not end an exclusive gesture whose drag 
 exclusiveProbe.send(.tap(CGPoint(x: 5, y: 5)))
 equal(exclusive, ["drag", "tap"], "the tap ends it once the drag is over")
 
-// simultaneous: both values arrive as their gestures move
 var simultaneous: [String] = []
 let simultaneousProbe = _Probe(Color.red.frame(width: 20, height: 27).gesture(
     RotationGesture().simultaneously(with: MagnificationGesture()).onChanged { value in
@@ -1707,7 +1634,6 @@ simultaneousProbe.send(.pinch(1.5, ended: false))
 simultaneousProbe.send(.rotate(0.5, ended: false))
 equal(simultaneous, ["- m", "r m"], "each gesture's value showed up as it began")
 
-// the finger going down and up is pressing, whatever comes of the long press
 var pressing: [Bool] = []
 var performed = 0
 let pressingProbe = _Probe(Color.red.frame(width: 20, height: 28).onLongPressGesture(minimumDuration: 1, pressing: { pressing.append($0) }, perform: { performed += 1 }), width: 100, height: 50)
@@ -1721,11 +1647,9 @@ pressingProbe.send(.pressUp)
 equal(performed, 1, "a press that lasted long enough performed once")
 equal(pressing, [true, false, true, false], "pressing ended when the long press completed")
 
-// including: without .gesture the gesture is not attached at all
 equal(_Probe(Color.red.frame(width: 20, height: 29).gesture(TapGesture().onEnded {}, including: .subviews), width: 100, height: 50).gestureCount, 0, "a mask without .gesture attaches nothing")
 equal(_Probe(Color.red.frame(width: 20, height: 29).gesture(TapGesture().onEnded {}, including: .all), width: 100, height: 50).gestureCount, 1, "the full mask attaches the gesture")
 
-// a gesture written as a composition of its own
 struct FlickGesture: Gesture {
     var body: some Gesture { DragGesture(minimumDistance: 20) }
 }
@@ -1738,13 +1662,11 @@ flickProbe.send(.drag(CGSize(width: 40, height: 0), ended: false))
 flickProbe.send(.drag(CGSize(width: 40, height: 0), ended: true))
 equal(flicks, 1, "and runs its content past it")
 
-// AnyGesture keeps the value
 var erased = 0
 let erasedProbe = _Probe(Color.red.frame(width: 20, height: 31).gesture(AnyGesture(TapGesture().map { 7 }).onEnded { erased = $0 }), width: 100, height: 50)
 erasedProbe.send(.tap(CGPoint(x: 3, y: 3)))
 equal(erased, 7, "AnyGesture passes the mapped value through")
 
-// paths: element walking, lines and rects, stroking and trimming
 var walked: [String] = []
 Path { path in
     path.addLines([CGPoint(x: 0, y: 0), CGPoint(x: 10, y: 0), CGPoint(x: 10, y: 10)])
@@ -1775,7 +1697,6 @@ var arc = Path()
 arc.addRelativeArc(center: CGPoint(x: 50, y: 50), radius: 50, startAngle: .degrees(0), delta: .degrees(180))
 equal(arc.boundingRect.size.width.rounded(), 100, "a relative arc of half a turn spans the diameter")
 
-// trim and size on shapes
 let trimmed = _Probe(Circle().trim(from: 0, to: 0.5).stroke(Color.red, lineWidth: 2).frame(width: 100, height: 100), width: 100, height: 100)
 _ = frames(trimmed)
 let trimmedBox = shapeLayers(trimmed).first?.path?.boundingBoxOfPath ?? .zero
@@ -1784,11 +1705,9 @@ let sized = _Probe(Circle().size(width: 30, height: 30).fill(Color.red).frame(wi
 _ = frames(sized)
 equal(shapeLayers(sized).first?.path?.boundingBoxOfPath, CGRect(x: 0, y: 0, width: 30, height: 30), "size gives the shape a fixed size at the origin")
 
-// a Circle asks for the smaller side of what it is offered
 let roundFit = frames(_Probe(HStack { Circle().fill(Color.red).frame(height: 40) }, width: 200, height: 100))
 equal(roundFit.first?.size.width ?? -1, 40, "a circle offered a wide strip takes the height")
 
-// animatable shapes move between two values while an animation runs
 struct GrowingBar: Shape {
     var progress: Double
     var animatableData: Double {
@@ -1824,7 +1743,6 @@ unanimated()
 growing2.flush()
 equal(barWidth(growing2), 20, "a change outside withAnimation shows at once")
 
-// a geometry effect with animatable data moves through its values
 struct SlideEffect: GeometryEffect {
     var distance: CGFloat
     var animatableData: CGFloat {
@@ -1857,7 +1775,6 @@ equal(slid(sliding).rounded(), 20, "halfway through, the effect has moved half t
 _Probe.advanceAnimations(to: 2.5)
 equal(slid(sliding), 40, "and all of it at the end")
 
-// a view under a transform keeps its own size when it is laid out again
 struct RotatedCase: View {
     @State private var extra: CGFloat = 5
     var body: some View {
@@ -1880,7 +1797,6 @@ func turnedSize(_ probe: _Probe) -> CGSize {
 }
 equal(turnedSize(rotated), CGSize(width: 40, height: 20), "a rotated view is still 40 by 20 after a second layout")
 
-// ProjectionTransform arithmetic
 let move = ProjectionTransform(CGAffineTransform(translationX: 10, y: 5))
 let grow = ProjectionTransform(CGAffineTransform(scaleX: 2, y: 3))
 let both = move.concatenating(grow)
@@ -1888,11 +1804,9 @@ equal([both.m31, both.m32], [20, 15], "concatenating applies the first transform
 equal(both.inverted().concatenating(both), ProjectionTransform(), "a transform times its inverse is the identity")
 check(move.isAffine && !move.isIdentity && ProjectionTransform().isIdentity, "affine and identity are told apart")
 
-// List(range) builds rows from a range
 let rangeList = _Probe(List(0..<3) { Color.red.frame(height: 20).tag($0) }, width: 200, height: 200)
 equal(rangeList.rowCount, 3, "a list made from a range has a row for each number")
 
-// Layout protocol: the cache lives between passes, updateCache is told of changes, explicitAlignment is heard
 final class CacheLog { var made = 0; var updated = 0 }
 let cacheLog = CacheLog()
 struct CachedRow: Layout {
@@ -1982,12 +1896,10 @@ _Probe.advanceAnimations(to: 1.5)
 spreading.flush()
 equal(secondX(spreading), 50, "and all of it at the end")
 
-// combining explicit alignment values
 enum CenterOfThree: AlignmentID { static func defaultValue(in context: ViewDimensions) -> CGFloat { 0 } }
 equal(HorizontalAlignment(CenterOfThree.self).combineExplicit([10, nil, 20, 30]), 20, "explicit values are averaged, the missing ones left out")
 equal(VerticalAlignment.top.combineExplicit([nil, nil]) == nil, true, "with no explicit value there is none to report")
 
-// a ViewModifier that is Animatable has its body evaluated with data between the old and the new
 struct WidthModifier: ViewModifier, Animatable {
     var width: CGFloat
     var animatableData: CGFloat {
@@ -2016,7 +1928,6 @@ _Probe.advanceAnimations(to: 1.5)
 widening.flush()
 equal(redWidth(widening), 90, "and with all of it at the end")
 
-// dialogs: every overload of alert and confirmationDialog ends in the same buttons, roles and order
 _Probe.captureDialogs(true)
 var dialogLog: [String] = []
 struct DialogCase: View {
@@ -2126,12 +2037,10 @@ _Probe.pressDialogButton(1)
 dialogProbe.flush()
 _Probe.captureDialogs(false)
 
-// lineLimit(_:reservesSpace:) needs fonts, so it is pinned by a rendered scenario; the rest is checked here
 let reserve = _Probe(Color.red.frame(width: 30, height: 20).mask(alignment: .leading) { Color.black.frame(width: 10, height: 20) }, width: 100, height: 50)
 check(!frames(reserve).isEmpty, "a view masked by a view is still laid out")
 equal(frames(reserve).first?.size ?? .zero, CGSize(width: 30, height: 20), "and keeps its size")
 
-// text and list environment keys read back what was set, and the defaults match Apple's
 var seenEnvironment: [String] = []
 struct EnvironmentReader: View {
     @Environment(\.lineSpacing) var spacing
@@ -2154,7 +2063,6 @@ _ = _Probe(EnvironmentReader().environment(\.lineSpacing, 4).environment(\.minim
     width: 50, height: 50)
 equal(seenEnvironment, ["4.0", "0.5", "middle", "Optional(2)", "true", "60.0", "false", "false"], "environment values read back what was set")
 
-// Path is a value and a Shape; Color is Hashable
 func pathElements(_ path: Path) -> Int { var n = 0; path.forEach { _ in n += 1 }; return n }
 var pathA = Path()
 pathA.move(to: .zero)
@@ -2173,7 +2081,6 @@ check(!frames(pathProbe).isEmpty, "a path is a view")
 equal(Set([Color.red, Color.red, Color.blue]).count, 2, "colors that look the same are one in a set")
 check(Color(UIColor(red: 1.0, green: 0.231, blue: 0.188, alpha: 1)) == Color.red, "a color made from a UIColor is that color")
 
-// an aspect ratio with only the width proposed, and an adaptive grid column that becomes as many tracks as fit
 let ratioProbe = _Probe(VStack { Color.red.aspectRatio(2, contentMode: .fit) }, width: 100, height: 200)
 equal(frames(ratioProbe).first?.size ?? .zero, CGSize(width: 100, height: 50), "a view of aspect ratio 2 in a stack is twice as wide as high")
 struct AdaptiveCase: View {
@@ -2192,7 +2099,6 @@ equal(tileFrames.first?.size ?? .zero, CGSize(width: 45, height: 45), "each as w
 final class TaskStore0: ObservableObject { @Published var n = 0 }
 let taskStore0 = TaskStore0()
 struct TaskLikeCase: View { @ObservedObject var store: TaskStore0; @State var local = 1; var body: some View { Color.red.frame(width: 5, height: 5) } }
-// @Observable models: a view that reads one is re-rendered when what it read changes, and only then
 @Observable final class TallyModel { var count = 0; var other = 0 }
 struct ObservedCase: View {
     let tally: TallyModel
@@ -2220,7 +2126,6 @@ let bindable = Bindable(wrappedValue: tally)
 bindable.count.wrappedValue = 3
 equal(tally.count, 3, "a Bindable makes a binding to a property of the model")
 
-// the Mirror fallback of the field reflection agrees with the runtime's own on real views
 check(_Probe.mirrorReflectionAgrees(Counter()), "the fallback finds the fields of a stateful view where the runtime does")
 check(_Probe.mirrorReflectionAgrees(ObservedCase(tally: tally)), "and of a view with a model")
 check(_Probe.mirrorReflectionAgrees(EnvironmentReader()), "and of one that reads the environment")
@@ -2232,15 +2137,12 @@ mirrored.flush()
 check(!frames(mirrored).isEmpty, "a stateful view still renders with the fallback on")
 _Probe.useMirrorReflection(mirrorAll)
 
-// a toolbar on a scroll view leaves the content in place
 let toolbarScroll = _Probe(ScrollView { Color.red.frame(height: 50) }.toolbar { ToolbarItem(placement: .navigationBarTrailing) { Button("Go") { } } }, width: 100, height: 200)
 equal(frames(toolbarScroll).count, 1, "a scroll view with a toolbar still shows its content")
 
-// a Spacer does not shrink what its neighbours are offered: content up to 66 wide beside a Spacer gets its 66
 let besideSpacer = _Probe(HStack { Color.red.frame(maxWidth: 66, maxHeight: 10); Spacer(); Color.blue.frame(width: 22, height: 10) }, width: 152, height: 40)
 equal(frames(besideSpacer).first?.width ?? 0, 66, "a view beside a spacer gets its full width when there is room")
 
-// a binding to a collection is a collection of bindings
 var boundNumbers = [1, 2, 3]
 let boundCollection = Binding(get: { boundNumbers }, set: { boundNumbers = $0 })
 boundCollection[1].wrappedValue = 20
@@ -2248,7 +2150,6 @@ equal(boundNumbers, [1, 20, 3], "an element of a bound collection is a binding t
 equal(boundCollection.filter { $0.wrappedValue > 1 }.count, 2, "a bound collection can be filtered like a collection")
 equal(boundCollection.count, 3, "and counted")
 
-// a list keeps its rows when the data around them changes: inserted, removed and moved rows come out right
 struct DiffCase: View {
     @ObservedObject var store: Store
     var body: some View {
@@ -2284,9 +2185,6 @@ diffProbe.flush()
 equal(rowWidths(diffProbe), [7, 8], "and can be filled again")
 UIView.setAnimationsEnabled(true)
 
-// swipe actions: handed to the table's delegate as UIKit's own contextual actions when the backports provide them. The
-// program carries libUIKitBackports, which defines UIContextualAction and UISwipeActionsConfiguration, so these are its
-// classes; a program that defined them too would have two implementations of one class in one process.
 var bridgeSwiped: [String] = []
 struct BridgeSwipeCase: View {
     var body: some View {
@@ -2317,7 +2215,6 @@ if let leading = bridgeProbe.swipeConfiguration(row: 1, leading: true) as? UISwi
 } else { check(false, "the table answers a leading swipe with a configuration") }
 check(bridgeProbe.swipeConfiguration(row: 2, leading: false) == nil, "a row without swipe actions gets none")
 
-// .disabled dims what it covers and stops touches; .allowsHitTesting stops touches only
 func alphas(_ probe: _Probe) -> [CGFloat] {
     var found: [CGFloat] = []
     func walk(_ v: UIView) { found.append(v.alpha); v.subviews.forEach(walk) }
@@ -2328,7 +2225,6 @@ check(alphas(_Probe(Color.red.frame(width: 20, height: 20).disabled(true), width
 check(!alphas(_Probe(Color.red.frame(width: 20, height: 20).allowsHitTesting(false), width: 50, height: 50)).contains { abs($0 - 0.4) < 0.01 }, "a view that ignores touches is not")
 check(!alphas(_Probe(Color.red.frame(width: 20, height: 20).disabled(false), width: 50, height: 50)).contains { abs($0 - 0.4) < 0.01 }, "and one that is enabled is not")
 
-// alignments and enums that apps name
 let cornerProbe = _Probe(ZStack(alignment: .topTrailing) { Color.red.frame(width: 50, height: 50); Color.blue.frame(width: 10, height: 10) }, width: 50, height: 50)
 check(frames(cornerProbe).contains { $0.origin == CGPoint(x: 40, y: 0) && $0.size == CGSize(width: 10, height: 10) }, "topTrailing puts a view in the top right corner")
 let cornerProbe2 = _Probe(ZStack(alignment: .bottomLeading) { Color.red.frame(width: 50, height: 50); Color.blue.frame(width: 10, height: 10) }, width: 50, height: 50)
@@ -2336,7 +2232,6 @@ check(frames(cornerProbe2).contains { $0.origin == CGPoint(x: 0, y: 40) && $0.si
 equal(Axis.allCases.count, 2, "Axis lists its cases")
 equal(Axis(rawValue: 1) ?? .horizontal, .vertical, "and is made from its raw value")
 
-// Layout protocol: the direction of the environment, and the container values a subview carries
 struct DirectionProbe: Layout {
     static var seen: LayoutDirection = .leftToRight
     func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout Void) -> CGSize {
@@ -2350,7 +2245,6 @@ equal(DirectionProbe.seen, LayoutDirection.leftToRight, "a custom layout is told
 _ = frames(_Probe(DirectionProbe() { Color.red }.environment(\.layoutDirection, .rightToLeft), width: 50, height: 50))
 equal(DirectionProbe.seen, LayoutDirection.rightToLeft, "and it follows the environment when that is right to left")
 
-// ScrollPosition is a value: scrollTo replaces what the position pointed at
 var byPoint = ScrollPosition(id: 3)
 byPoint.scrollTo(point: UnitPoint(x: 0.5, y: 0.5))
 check(byPoint != ScrollPosition(id: 3), "scrollTo(point:) replaces what the position pointed at")
@@ -2362,7 +2256,6 @@ equal(byID.anchor, UnitPoint.bottom, "with the anchor it was given")
 equal(byID[Edge.self], nil, "the id subscript answers only for the type it was made with")
 equal(byID[Edge.self], nil, "and a position that was never set is equal to another like it")
 
-// ScrollView: scrollPosition moves the scroller, and what the user does comes back through the binding
 final class PositionStore: ObservableObject { @Published var position = ScrollPosition() }
 struct PositionCase: View {
     @ObservedObject var store: PositionStore
@@ -2394,7 +2287,6 @@ if let scroller = firstScroller(positioned.hostView) {
     equal(scroller.contentOffset.y, 200, "scrollTo(edge: .bottom) rests at the end of the content")
 } else { check(false, "the scroll view with a position made a scroller") }
 
-// A sorted table shows the rows in the order its binding names: the app sorts, the table shows.
 struct SortRow: Identifiable, Comparable {
     let id: Int
     let name: String
@@ -2434,7 +2326,6 @@ func sortedTableShowsTheOrderTheBindingNames() {
 final class SortOrderBox { var order: [KeyPathComparator<SortRow>]
     init(order: [KeyPathComparator<SortRow>]) { self.order = order } }
 
-// The header of a sorted table: its titles, the tap that writes the order, and the arrow that turns.
 func buttonTitled(_ title: String, in view: UIView) -> UIButton? {
     var found: UIButton?
     var stack: [UIView] = [view]
@@ -2483,8 +2374,6 @@ func tableHeaderTapsWriteTheOrderAndTurnTheArrow() {
     check(turned == nil || abs(abs(turned!) - .pi) < 0.01, "and the arrow turns with it")
 }
 
-// Springs and timing curves: the numbers Apple's own framework answers with, measured on macOS 27
-// (.agent-work/host/spring.out in the band that wrote them; the values are the same to nine decimals).
 func closeTo(_ got: Double, _ want: Double, _ what: String, _ tolerance: Double = 1e-6) {
     check(abs(got - want) <= tolerance, what, "got \(got), want \(want)")
 }
@@ -2514,10 +2403,6 @@ closeTo(plainSpring.velocity(target: 1.0, time: 0.1), 4.494373762, "its velocity
 closeTo(plainSpring.velocity(target: 1.0, time: 0), 0, "and none at the start")
 closeTo(plainSpring.force(target: 1.0, position: 0.5, velocity: 0), 78.956835209, "the force that pulls a spring back")
 closeTo(plainSpring.settlingDuration(target: 1.0, initialVelocity: 0, epsilon: 0.001), 0.8, "and when it has settled")
-// Apple's settling of a spring that oscillates is the moment the envelope of its swing is under epsilon, by the distance and what the
-// speed adds to the decay, not the last moment it is outside the band; one that does not is settled a tenth of a second after the last
-// tenth at which it is epsilon or more from the target (`host/springcmp.swift` compares 3598 settlings and responses with Apple's;
-// these were measured on macOS 27, `.agent-work/runs/43-c4/pin.swift`)
 let swingingSpring = Spring(duration: 0.5, bounce: 0.3)
 closeTo(swingingSpring.settlingDuration, 1.0447130905, "a spring that bounces is settled when the envelope of its swing is a thousandth, not at the last crossing (0.8187 s)")
 closeTo(swingingSpring.settlingDuration(target: 1.0, initialVelocity: 3, epsilon: 0.001), 1.0031487275, "a speed toward the target settles it sooner")
@@ -2534,8 +2419,6 @@ check(Spring(response: 0.5, dampingRatio: 0).settlingDuration.isInfinite, "a spr
 closeTo(Spring(settlingDuration: 1.0, dampingRatio: 0.5, epsilon: 0.001).response, 0.4940815892, "the response of a spring that settles in a second is its own closed form", 1e-4)
 closeTo(Spring(settlingDuration: 1.0, dampingRatio: 1.0, epsilon: 0.001).response, 0.6804834770, "a critical one", 1e-4)
 closeTo(Spring(settlingDuration: 1.0, dampingRatio: 2.0, epsilon: 0.001).dampingRatio, 1, "and one past it is held as the critical", 1e-12)
-// Apple's looks at the first 1013 tenths of a second, to 101.2 s, and answers nothing for a spring that is still out at the last of them
-// (`.agent-work/runs/54-hor/d.swift` bisects the response at which it starts to; the numbers are Apple's)
 closeTo(Spring(response: 60.0, dampingRatio: 1.0).settlingDuration(target: 1.0, initialVelocity: 0, epsilon: 0.001), 88.2, "a spring that settles in a minute and a half is settled then", 1e-9)
 closeTo(Spring(response: 68.8, dampingRatio: 1.0).settlingDuration(target: 1.0, initialVelocity: 0, epsilon: 0.001), 101.2, "and one whose last tenth out is the 1011th, at 101.2 s", 1e-9)
 closeTo(Spring(response: 68.9, dampingRatio: 1.0).settlingDuration(target: 1.0, initialVelocity: 0, epsilon: 0.001), 0, "but one still out at the 1012th is answered with nothing", 1e-9)
@@ -2565,8 +2448,6 @@ var steppedValue = Double(0), steppedSpeed = Double(0)
 for _ in 0..<6 { Spring(duration: 0.5).update(value: &steppedValue, velocity: &steppedSpeed, target: 1, deltaTime: 1.0 / 60) }
 closeTo(steppedValue, plainSpring.value(target: 1.0, time: 0.1), "six frames of a spring are where its curve says")
 closeTo(steppedSpeed, plainSpring.velocity(target: 1.0, time: 0.1), "and carry its velocity")
-// a spring that starts with a speed, which is positive toward larger values: Apple's framework on macOS 27,
-// `.agent-work/runs/4-oracle/spring2.swift`
 let underSpring = Spring(duration: 0.5, bounce: 0.3)
 closeTo(plainSpring.value(target: 1.0, initialVelocity: 2.0, time: 0.1), 0.414661465, "a speed toward the target carries a critical spring further")
 closeTo(plainSpring.velocity(target: 1.0, initialVelocity: 2.0, time: 0.1), 4.348291049, "and is spent in its velocity")
@@ -2587,8 +2468,6 @@ closeTo(restartedSpeed, 4.369427366, "does the same")
 let cornerToCorner = CGPoint(x: 0.2, y: 0.4)
 closeTo(plainSpring.value(fromValue: cornerToCorner, toValue: CGPoint(x: 1, y: 1), initialVelocity: .zero, time: 0.3).x, 0.912027151, "a spring from a value it did not start at")
 closeTo(plainSpring.velocity(fromValue: cornerToCorner, toValue: CGPoint(x: 1, y: 1), initialVelocity: .zero, time: 0.3).x, 0.873734220, "and its velocity there", 1e-5)
-// an over-damped spring's velocity is, in Apple's framework, its own slope plus the distance still to go
-// (`host/springcmp.swift` compares the port's Spring with Apple's on macOS 27; these are Apple's numbers)
 closeTo(lazySpring.velocity(target: 1.0, time: 0.1), 2.8673339704995, "an over-damped spring's velocity is its slope and the distance besides")
 closeTo(lazySpring.velocity(target: 1.0, initialVelocity: 2.0, time: 0.5), 1.7293350704213515, "and with a speed it started at")
 let lazyPair = lazySpring.velocity(target: AnimatablePair(2.5, -1.5), initialVelocity: AnimatablePair(2.0, -1.0), time: 0.1)
@@ -2616,8 +2495,6 @@ check(Animation.interactiveSpring == Animation.spring(duration: 0.15, bounce: 0.
 check(Animation.interactiveSpring != Animation.spring(duration: 0.15, bounce: 0.15), "and not the plain spring of those two numbers, which blends for nothing")
 check(Animation.smooth != Animation.bouncy, "two springs of the same length are told apart by their bounce")
 check(Animation.spring(duration: 0.5).delay(0.2) != Animation.spring(duration: 0.5), "a delay makes another animation")
-// an animation holds the calls made on it, not the time they come to (Apple's `==` and `hashValue` of the same animations,
-// `.agent-work/runs/55-r5a`: every sequence of up to three calls from five, paired)
 check(Animation.linear.speed(1) != Animation.linear, "a speed of one is another animation than none")
 check(Animation.linear.delay(0) != Animation.linear, "and a delay of nothing")
 check(Animation.linear.delay(1).delay(1) != Animation.linear.delay(2), "two delays that add to one are not that one")
@@ -2629,8 +2506,6 @@ check(Animation.linear.speed(2).delay(1).hashValue == Animation.linear.speed(2).
 check(Animation.spring().speed(2).delay(1) == Animation.spring().speed(2).delay(1) && Animation.spring().speed(2) != Animation.spring().speed(3), "on a spring too")
 check(Animation.timingCurve(.circularEaseIn, duration: 2) != Animation.linear(duration: 2), "and so does a timing curve")
 check(Animation.timingCurve(0.42, 0, 1, 1, duration: 1) == Animation.timingCurve(.easeIn, duration: 1), "the four points of a timingCurve are the control points of the Bezier")
-// the two ways of naming a spring are one spring in Apple's framework, which compares what it stores of it
-// (`host/springcmp.swift` compares 791 pairs of springs with the port's; the animations below were measured on macOS 27)
 check(Animation.spring(response: 0.5, dampingFraction: 0.7) == Animation.spring(duration: 0.5, bounce: 0.3), "a spring of a response and a damping fraction is the spring of a duration and a bounce")
 check(Animation.spring(response: 0.5, dampingFraction: 0.7).hashValue == Animation.spring(duration: 0.5, bounce: 0.3).hashValue, "and hashes as it does")
 check(Animation.spring(response: 0.5, dampingFraction: 1) == Animation.spring(duration: 0.5, bounce: 0), "a fraction of one is no bounce")
@@ -2643,8 +2518,6 @@ check(Spring(response: 0.5, dampingRatio: 0.7) == Spring(duration: 0.5, bounce: 
 check(Spring(response: 0.5, dampingRatio: 0.7).hashValue == Spring(duration: 0.5, bounce: 0.3).hashValue, "and hash alike")
 check(Spring(mass: 1, stiffness: 157.91367041742973, damping: 25.132741228718345) == Spring(duration: 0.5, bounce: 0), "a spring of a mass, a stiffness and a damping is that of its response and ratio")
 check(Spring(mass: 2, stiffness: 100, damping: 10) != Spring(mass: 1, stiffness: 50, damping: 5), "unless the mass differs, which Apple's tells apart")
-// an animation made of a spring value holds the response and fraction it takes back out of the spring, which are not always
-// the pair the spring was made of (`host/springcmp.swift` compares 46980 pairs of animations with Apple's; these were measured on macOS 27)
 let pairedSpring = Spring(response: 0.5, dampingRatio: 0.7)
 check(Animation.spring(pairedSpring) != Animation.spring(response: 0.5, dampingFraction: 0.7), "an animation of a spring is not the animation of the pair of numbers it was made of when they come back a bit apart")
 check(Animation.spring(pairedSpring) != Animation.spring(duration: 0.5, bounce: 0.3), "nor that of the duration and bounce of it")
@@ -2660,9 +2533,6 @@ check(Animation.spring(Spring(response: 0.1, dampingRatio: 0.5), blendDuration: 
 check(Animation.smooth == Animation.spring(Spring.smooth), "the smooth animation is that of the smooth spring")
 check(Animation.snappy == Animation.spring(Spring.snappy), "and the snappy one")
 check(Animation.bouncy != Animation.spring(Spring.bouncy), "while the bouncy one is a bit apart from its spring's")
-// an interpolating spring is another kind of animation than a fluid one, holding the mass, stiffness and damping its spring
-// comes back as (macOS 27, `.agent-work/runs/17-isp/`: d.swift for the equalities, i.swift for the values; `host/springcmp.swift`
-// compares 79524 pairs of them and 282 sets of held numbers)
 let interpolatedSpring = Spring(response: 0.5, dampingRatio: 0.7)
 check(Animation.interpolatingSpring(interpolatedSpring) != Animation.spring(interpolatedSpring), "an interpolating spring is not the fluid animation of its spring")
 check(Animation.interpolatingSpring(Spring(response: 0.1, dampingRatio: 0.5)) != Animation.spring(Spring(response: 0.1, dampingRatio: 0.5)), "nor of a spring whose numbers come back as they went in")
@@ -2685,8 +2555,6 @@ struct InterpolatingBarCase: View {
         GrowingBar(progress: progress).fill(Color.red).frame(width: 100, height: 10)
     }
 }
-/// How wide a bar of 100 that an animation grows is a number of seconds after it began; a bar that is to go `distance` times
-/// its width.
 func interpolatingBarWidth(_ animation: Animation, at time: Double, distance: Double = 1) -> Double {
     interpolatingBarAnimation = animation
     interpolatingBarDistance = distance
@@ -2698,7 +2566,6 @@ func interpolatingBarWidth(_ animation: Animation, at time: Double, distance: Do
     _Probe.advanceAnimations(to: time)
     return Double(shapeLayers(probe).first?.path?.boundingBoxOfPath.size.width ?? -1)
 }
-// a bar told to go somewhere else while it is on its way: the first animation begun at 0 to the whole width, the second at a moment of it to a place
 var retargetFirst = Animation.linear
 var retargetSecond: Animation? = .linear
 var retargetPlace = 3.0
@@ -2710,8 +2577,6 @@ struct RetargetBarCase: View {
         GrowingBar(progress: progress).fill(Color.red).frame(width: 100, height: 10)
     }
 }
-/// How wide the bar of 100 is (a negative width for a value below nothing) at moments after the first animation began, when the second was
-/// begun at `moment`, read in turn: the moments go forward.
 func retargetedBarWidths(_ first: Animation, _ second: Animation?, at moment: Double, to place: Double, times: [Double], read: (Double, Double) -> Void) {
     retargetFirst = first
     retargetSecond = second
@@ -2731,9 +2596,6 @@ func retargetedBarWidths(_ first: Animation, _ second: Animation?, at moment: Do
         read(time, Double(box.minX + box.maxX))
     }
 }
-/// Apple's widths of the bar (`host/retargetcmp.swift pins`: the last frame drawn by each moment, in a hosted view, so a millisecond or two
-/// behind it, which is a width or more where the bar moves fastest), as the engine's is at one of the moments within three thousandths of a
-/// second of each, the nearest to Apple's.
 func retargetBar(_ first: Animation, _ second: Animation?, at moment: Double, to place: Double, _ widths: [(Double, Double)], _ what: String, tolerance: Double = 0.5) {
     for (time, width) in widths {
         var nearest = Double.infinity
@@ -2748,9 +2610,6 @@ closeTo(interpolatingBarWidth(.interpolatingSpring(mass: 1, stiffness: 100, damp
 closeTo(interpolatingBarWidth(.interpolatingSpring(mass: 1, stiffness: 100, damping: 50), at: 0.1), 26.4241, "one whose damping is past the critical moves as the critical one, as Apple's does", 0.01)
 closeTo(interpolatingBarWidth(.interpolatingSpring(mass: 1, stiffness: 100, damping: 50), at: 0.2), 59.3994, "and keeps to it", 0.01)
 closeTo(interpolatingBarWidth(.interpolatingSpring(Spring(response: 0.5, dampingRatio: 1.5)), at: 0.1), 35.7740, "so does the interpolating spring of an over-damped one", 0.01)
-// the fluid spring is a staircase of steps of a three-hundredth of a second, and is over at the step whose state is near the
-// target and at rest, which depends on how far it has to go (Apple's numbers, `.agent-work/runs/35-c1/gen.swift`: the answers of
-// Animation.spring for a distance of 1, 10 and 100, asked step by step, the middle of step k being (k + 0.5) / 300)
 let fluidSteps = Animation.spring(response: 0.5, dampingFraction: 0.825)
 closeTo(interpolatingBarWidth(fluidSteps, at: 29.5 / 300), 39.0798008, "a fluid spring is where its step began, not where the exact solution is", 1e-3)
 closeTo(interpolatingBarWidth(fluidSteps, at: 99.5 / 300), 98.6387221, "a third of a second in", 1e-3)
@@ -2763,26 +2622,18 @@ closeTo(interpolatingBarWidth(fluidSteps, at: 293.5 / 300, distance: 100), 10000
 let fluidInteractive = Animation.spring(response: 0.15, dampingFraction: 0.86)
 closeTo(interpolatingBarWidth(fluidInteractive, at: 58.5 / 300), 100.0539916, "a short spring is over by the end of its step 58", 1e-3)
 closeTo(interpolatingBarWidth(fluidInteractive, at: 59.5 / 300), 100, "and not after it", 1e-3)
-// a spring that is hardly damped goes on answering for hours, and the end is the step Apple's answers nothing at, however far on it is
-// (`.agent-work/runs/54-hor/pins2.swift`: response 0.5, fraction 0.0001, a distance of 1, step 1275690 is the first it answers nothing at)
 let fluidLong = Animation.spring(response: 0.5, dampingFraction: 0.0001)
 closeTo(interpolatingBarWidth(fluidLong, at: 1275689.5 / 300), 99.9589158, "a spring that rests after seventy minutes is still moving at the last step before", 1e-3)
 closeTo(interpolatingBarWidth(fluidLong, at: 1275690.5 / 300), 100, "and over after it, there being no hour after which it is taken to never rest", 1e-3)
-// a critical interpolating spring that is not inside a thousandth at any of the first 1012 tenths of a second is over at once (mass 1, damping the critical one;
-// Apple's answers 0.1018467 at half a second for stiffness 0.0084, and nothing at all for 0.0083, whose first tenth inside would be after 101.2 s)
 closeTo(interpolatingBarWidth(.interpolatingSpring(mass: 1, stiffness: 0.0084, damping: 2 * 0.0084.squareRoot()), at: 0.5), 0.1018467, "a critical spring that settles within 101.2 s is moving", 1e-5)
 closeTo(interpolatingBarWidth(.interpolatingSpring(mass: 1, stiffness: 0.0083, damping: 2 * 0.0083.squareRoot()), at: 0.5), 100, "and one that does not is over before it starts", 1e-5)
 closeTo(interpolatingBarWidth(.bouncy, at: 227.5 / 300), 99.8581835, "the bouncy animation rests at step 228", 1e-3)
 closeTo(interpolatingBarWidth(.bouncy, at: 228.5 / 300), 100, "and no later", 1e-3)
-// the blend of a spring moves nothing in time: a spring that blends for a quarter of a second starts at once, and a delay
-// given after it is the delay (`host/springcmp.swift` asks Apple's for the answers of 15 blended springs against none)
 let plainBarWidth = interpolatingBarWidth(.spring(response: 0.5, dampingFraction: 0.825), at: 0.1)
 check(plainBarWidth > 10, "a spring has moved the bar a tenth of a second in")
 closeTo(interpolatingBarWidth(.spring(response: 0.5, dampingFraction: 0.825, blendDuration: 0.25), at: 0.1), plainBarWidth, "and one that blends for a quarter of a second has moved it as far", 1e-6)
 closeTo(interpolatingBarWidth(.interactiveSpring(), at: 0.1), interpolatingBarWidth(.interactiveSpring(blendDuration: 0), at: 0.1), "so has the interactive spring, whose blend is that long", 1e-6)
 closeTo(interpolatingBarWidth(.spring(response: 0.5, dampingFraction: 0.825, blendDuration: 0.25).delay(0.05), at: 0.1), interpolatingBarWidth(.spring(response: 0.5, dampingFraction: 0.825).delay(0.05), at: 0.1), "and a delay after the blend is only the delay", 1e-6)
-// an interpolating spring answers until the moment Core Animation's settling duration gives for it, whatever its natural period and
-// whatever the distance, and then it is at the target (Apple's numbers, `.agent-work/runs/37-c2/gen2.swift`)
 closeTo(interpolatingBarWidth(.interpolatingSpring(mass: 1, stiffness: 100, damping: 10), at: 1.4), 99.94009635, "an oscillating interpolating spring is still moving at 1.4 s, long after its period of 0.63 s", 1e-3)
 closeTo(interpolatingBarWidth(.interpolatingSpring(mass: 1, stiffness: 100, damping: 10), at: 1.49), 100, "and is over by 1.49 s, where the envelope of its swing is a thousandth of the distance (1.4727 s)", 1e-3)
 closeTo(interpolatingBarWidth(.interpolatingSpring(mass: 1, stiffness: 100, damping: 10), at: 1.4, distance: 10), 999.4009635, "ten times the way, the same time", 0.01)
@@ -2794,9 +2645,6 @@ closeTo(interpolatingBarWidth(.interpolatingSpring(mass: 1, stiffness: 100, damp
 closeTo(interpolatingBarWidth(.interpolatingSpring(mass: 1, stiffness: 100, damping: 10, initialVelocity: -2), at: 1.5), 99.93119673, "and later for one away from it (1.5000274 s)", 1e-3)
 closeTo(interpolatingBarWidth(.interpolatingSpring(Spring(response: 0.5, dampingRatio: 0.7)), at: 0.6), 100.07367005, "the interpolating spring of a spring of half a second is still moving at 0.6 s", 1e-3)
 closeTo(interpolatingBarWidth(.interpolatingSpring(Spring(response: 0.5, dampingRatio: 0.7)), at: 1.0), 100, "and over at 1 s (0.863 s)", 1e-3)
-// `.speed` and `.delay` put an animation in time as `rate * (t - delay)`: a speed after a delay scales the delay, a delay after a speed does
-// not, two delays add, and the animation ends and is logically complete in the time that gives (`host/springcmp.swift` asks Apple's
-// for 113009 answers of 10 springs retimed in up to 23 ways; the numbers here are its answers at the middle of a step of the animation's own time)
 let retimedFluid = Animation.spring(response: 0.5, dampingFraction: 0.825)
 closeTo(interpolatingBarWidth(retimedFluid.speed(2), at: 99.5 / 600), 98.6387221, "a spring at twice the speed is where it is at twice the time", 1e-3)
 closeTo(interpolatingBarWidth(retimedFluid.speed(2), at: 157.5 / 600), 100.5769034, "and is over at half the time: still on its way", 1e-3)
@@ -2811,10 +2659,6 @@ closeTo(interpolatingBarWidth(retimedInterpolating.speed(2), at: 0.35), 97.43589
 closeTo(interpolatingBarWidth(retimedInterpolating.speed(2), at: 0.73), 99.9296259, "is still moving at the half of the 1.4727 s it takes", 1e-3)
 closeTo(interpolatingBarWidth(retimedInterpolating.speed(2), at: 0.74), 100, "and is over at it", 1e-3)
 closeTo(interpolatingBarWidth(retimedInterpolating.delay(1).speed(2), at: 0.85), 97.4358962, "a delay before the speed is halved for it as well", 1e-3)
-// repeatCount and repeatForever with speed and delay, in the order they are called: the calls before it are in every pass, the ones after it around
-// the passes as a whole, a pass played back to front is one minus where the pass is, and the value goes to where it was going when it is over
-// (Apple's numbers, `.agent-work/runs/54-hor/pins3.swift`: queried every twentieth of a second, a billionth after it, so that a pass starts
-// where the last one ended; `.agent-work/runs/58-host/h7.swift` for where it ends up)
 let repeatedLinear = Animation.linear(duration: 1)
 let delayedBack = repeatedLinear.delay(0.5).repeatCount(2, autoreverses: true)
 closeTo(interpolatingBarWidth(delayedBack, at: 0.25), 0, "a delay before a repeat is a delay before the first pass", 0.01)
@@ -2842,15 +2686,6 @@ closeTo(interpolatingBarWidth(repeatedLinear.repeatCount(3, autoreverses: true).
 let fluidTwice = Animation.spring(response: 0.5, dampingFraction: 0.825).repeatCount(2, autoreverses: false)
 closeTo(interpolatingBarWidth(fluidTwice, at: 1.07), 100, "two passes of a spring are over after twice the first, 1.06 s (Apple's answers nothing from there)", 0.01)
 check(abs(interpolatingBarWidth(fluidTwice, at: 1.04) - 100) > 0.01, "and not before it")
-// a value told to go somewhere else while it is on its way (Apple's numbers: `host/retargetcmp.swift pins`, a Shape in an NSHostingView that records
-// the data it is drawn with, the first animation begun at 0 to 1 and the second at the moment given to the place given; the numbers are the widths of the bar
-// of 100 at moments after: `host/retargetcmp.swift` compares 161 such scenarios with the port's `Passage`, which these pin through the engine).
-// An animation of a curve or an interpolating spring takes over without a break: where the first one is, plus the way left to the place by its own progress.
-// A fluid spring starts from where the value is, and with the speed it is going at if the first is a fluid spring as well, in the first's own seconds.
-// No animation leaves the first going to its end, the place moving it by how far it is from where it went. A place it is going to changes nothing.
-// The width is that of the nearest moment of those within three thousandths of a second of each, to half a width of the 100: Apple's frames are
-// drawn a millisecond or two after the moment they are for; where the first animation is delayed the numbers come out another millisecond or two
-// from the engine's (not told from that by the probe), which for the spring going at 900 widths a second is the 1.5 it is given.
 retargetBar(.linear(duration: 1), .linear(duration: 1), at: 0.3010, to: 3.0, [(0.40, 65.613), (0.60, 131.665), (0.90, 215.733), (1.30, 299.801), (2.30, 300.000)], "linear told to go to 3.0 by linear")
 retargetBar(.easeInOut(duration: 1), .easeIn(duration: 0.6), at: 0.3006, to: 0.0, [(0.40, 31.515), (0.60, 45.656), (0.90, 0.159), (1.30, 0.000), (2.30, 0.000)], "easeInOut told to go to 0.0 by easeIn")
 retargetBar(.easeOut(duration: 1.4), .interpolatingSpring(mass: 1.0, stiffness: 100.0, damping: 8.0), at: 0.3005, to: 3.0, [(0.40, 134.408), (0.60, 354.516), (0.90, 292.179), (1.30, 303.139), (2.30, 300.000)], "easeOut told to go to 3.0 by interpolating")
@@ -2897,7 +2732,6 @@ check(!logicallyCompleted(retimedFluid.logicallyComplete(after: 0.2).delay(1), b
 check(!logicallyCompleted(retimedFluid.logicallyComplete(after: 0.2).speed(2), by: 0.09) && logicallyCompleted(retimedFluid.logicallyComplete(after: 0.2).speed(2), by: 0.11), "as does a speed")
 check(!logicallyCompleted(retimedFluid.speed(0), by: 100), "an animation sped up by nothing never gets anywhere")
 closeTo(interpolatingBarWidth(retimedFluid.speed(0), at: 100), 0, "and is where it began", 1e-3)
-// and it starts with the speed it is given, in distances per second (the same host runs, with `initialVelocity:` of 3 and -2)
 check(Animation.interpolatingSpring(interpolatedSpring, initialVelocity: 2) != Animation.interpolatingSpring(interpolatedSpring, initialVelocity: 1), "interpolating springs of another initial velocity are another animation")
 check(Animation.interpolatingSpring(interpolatedSpring, initialVelocity: 2) != Animation.interpolatingSpring(interpolatedSpring), "than one that starts at rest too")
 check(Animation.interpolatingSpring(interpolatedSpring, initialVelocity: 2) == Animation.interpolatingSpring(Spring(response: 0.5, dampingRatio: 0.7), initialVelocity: 2), "and the same velocity is the same animation")
@@ -2908,8 +2742,6 @@ closeTo(interpolatingBarWidth(.interpolatingSpring(mass: 1, stiffness: 100, damp
 closeTo(interpolatingBarWidth(.interpolatingSpring(mass: 1, stiffness: 100, damping: 10, initialVelocity: -2), at: 0.1), 23.3598, "a negative one holds it back", 0.01)
 closeTo(interpolatingBarWidth(.interpolatingSpring(Spring(response: 0.5, dampingRatio: 0.7), initialVelocity: 3), at: 0.1), 53.1733, "as it does for the interpolating spring of a spring", 0.01)
 
-// keyframes, phases and a custom animation: the track is the one that is written, and the views
-// follow it frame by frame
 let keyframeTrack = KeyframeTrack {
     LinearKeyframe(0.2, duration: 0.5)
     LinearKeyframe(0.8, duration: 0.5)
@@ -2960,8 +2792,6 @@ check(customAnimation.shouldMerge(previous: .linear(), value: 0.0, time: 0, cont
 equal(AnimationCompletionCriteria.logicallyComplete, .logicallyComplete, "the two completion criteria are values")
 check(AnimationCompletionCriteria.logicallyComplete != .removed, "and are told apart")
 
-// a custom animation under .speed and .delay is asked for the time they make of the one it is given, answers no velocity and does not merge;
-// the numbers are what Apple's animation asked a recording one for (macOS 27, host/springcmp.swift and .agent-work/runs/54-hor/cu2.swift)
 var timesAsked: [Double] = []
 struct Recorder: CustomAnimation {
     func animate<V: VectorArithmetic>(value: V, time: Double, context: inout AnimationContext<V>) -> V? { timesAsked.append(time); return value }
@@ -3046,9 +2876,6 @@ completionProbe.flush()
 check(completed == 0, "a transaction's completion does not run before the animation is over")
 _Probe.advanceAnimations(to: 0.6)
 check(completed > 0, "and does when it is")
-// a transaction whose body changes nothing that renders has no animation to wait for: Apple's runs its completions
-// on the next turn after the body (macOS 27, `.agent-work/runs/4-tx/`: not inside the body, and not after a 0.5 s animation
-// either, 13 ms), once, in the order they were added, and also when the body throws
 var idleOrder: [String] = []
 var idleTransaction = Transaction(animation: .linear(duration: 0.5))
 idleTransaction.addAnimationCompletion { idleOrder.append("logically") }
@@ -3059,8 +2886,6 @@ _flushTransactions()
 equal(idleOrder, ["body", "logically", "removed"], "it runs on the next turn, in the order they were added")
 _flushTransactions()
 equal(idleOrder.count, 3, "and once")
-// a completion runs once, whatever number of times the transaction that holds it is used (macOS 27, `.agent-work/runs/7-dup/t.swift`:
-// the same value twice, a copy of it, again after a turn, nested in itself)
 var reusedRuns: [String] = []
 var reusedTransaction = Transaction()
 reusedTransaction.addAnimationCompletion { reusedRuns.append("logically") }
@@ -3074,9 +2899,6 @@ equal(reusedRuns.sorted(), ["logically", "removed"], "a transaction used for sev
 withTransaction(reusedTransaction) {}
 _flushTransactions()
 equal(reusedRuns.count, 2, "and does not run them again in a later turn")
-// when the completions run, and in what order (macOS 27, `.agent-work/runs/7-dup/`: h.swift, k.swift, m.swift): a transaction
-// still held at the next turn runs them in the order they were added, nested uses and a transaction never used included;
-// one let go before it, as its last holder goes, runs them at once, the logical ones newest first, then the removed ones
 var turnOrder: [String] = []
 var turnHeld = Transaction()
 turnHeld.addAnimationCompletion(criteria: .removed) { turnOrder.append("R1") }
@@ -3116,8 +2938,6 @@ do {
 equal(sharedRuns, 0, "a copy of a transaction shares its completions: letting one copy go runs nothing while another is held")
 _flushTransactions()
 equal(sharedRuns, 11, "and the closure added through the copy is the original's too")
-// a copy made before any completion was added shares nothing with the transaction a completion is added to afterwards
-// (macOS 27, `.agent-work/runs/26-copy/c.swift`, built with and without -O: probes A to E)
 var copyLog: [String] = []
 var copyKept: Transaction?
 func copiedBeforeAdding() {
@@ -3154,9 +2974,6 @@ Binding(get: { boundValue }, set: { boundValue = $0 }).transaction(bindingTransa
 _flushTransactions()
 equal(boundRuns, 1, "and so does the transaction of a binding whose write changes no view")
 
-// environment values that have something to correspond to on iOS 6, and the anchors of a preference
-/// What a view read out of the environment, recorded by the view itself: a check that asks the tree
-/// instead cannot tell the environment's answer from a background the engine drew.
 struct TintReader: View {
     @Environment(\.tintColor) var tint
     @Environment(\.symbolRenderingMode) var symbols
@@ -3174,8 +2991,6 @@ TintReader.read = []
 _ = frames(_Probe(TintReader().accentColor(.blue), width: 10, height: 10))
 check(TintReader.read.first == .some(.blue), "and an accent colour is the tint colour the view reads")
 
-// an anchor of a whole array and of an optional value: the two ways a preference value collects
-// more than one anchor
 let corners = Anchor<[CGRect]>.Source([Anchor<CGRect>.Source.bounds, Anchor<CGRect>.Source.rect(CGRect(x: 0, y: 0, width: 10, height: 10))])
 let single = Anchor<CGRect>.Source.bounds
 let maybe = Anchor<CGRect?>.Source(single)
@@ -3185,7 +3000,6 @@ equal(corners.measuring(CGRect(x: 2, y: 3, width: 20, height: 40))[0], CGRect(x:
 equal(maybe.measuring(CGRect(x: 2, y: 3, width: 20, height: 40)), CGRect(x: 2, y: 3, width: 20, height: 40), "an anchor of an optional measures what is there")
 equal(nothing.measuring(CGRect(x: 2, y: 3, width: 20, height: 40)), nil, "and an anchor of nothing measures nothing")
 
-// the scroll indicator and bounce values of the environment, read where the scroller is set up
 struct ScrolledBars: View {
     var body: some View {
         ScrollView { Color.red.frame(width: 10, height: 400) }
@@ -3208,13 +3022,9 @@ if let scroller = scrollerOf(scrolled) {
 let plainScroller = scrollerOf(_Probe(ScrollView { Color.red }.scrollIndicators(.hidden), width: 50, height: 50))
 check(plainScroller?.showsVerticalScrollIndicator == false, "and the view's own flag still decides when the environment says nothing")
 
-// SymbolVariants: the flags, their combinations and the name a variant gives a symbol - the whole
-// type is OpenSwiftUI's, and this checks it says what its own documentation says.
 check(SymbolVariants.none == SymbolVariants.none, "the empty variant is one value")
 check(SymbolVariants.fill != SymbolVariants.none, "and the filled one is not the empty one")
 check(SymbolVariants.fill.contains(.fill), "a filled variant contains fill")
-// `contains` is a subset test, and the empty variant is a subset of every one of them, so a filled
-// variant does contain the empty one - that is what the flags are, not a defect in the vendored code
 check(SymbolVariants.fill.contains(.none), "and contains the empty one, as an empty set is a subset of any")
 check(!SymbolVariants.none.contains(.fill), "where the empty one does not contain a filled")
 check(SymbolVariants.circle.contains(.circle), "and a circle variant contains circle")
@@ -3224,20 +3034,14 @@ check(SymbolVariants.fill.circle.contains(.fill) && SymbolVariants.fill.circle.c
 check(SymbolVariants.fill != SymbolVariants.circle, "and the two are told apart")
 check(SymbolVariants.fill.square == SymbolVariants.square.fill, "the two orders of the flags agree")
 
-// The label of a press case is a colour, not a word: the cases are about what a style draws, and a Text label
-// builds a UIFont, which traps the headless test process on a device (EidolonTests aborts there), so nothing after
-// these cases was running.
 struct PlainPressCase: View {
     var body: some View { Button(action: {}) { Color.red.frame(width: 20, height: 10).padding(4) }.buttonStyle(.plain) }
 }
 struct BorderedPressCase: View {
     var body: some View { Button(action: {}) { Color.red.frame(width: 20, height: 10).padding(4) }.buttonStyle(.borderedProminent) }
 }
-// The press, measured: a style that takes it as an argument changes what it draws when the button goes
-// down, and a style written the Apple way is built through the same path and still compiles.
 public struct PressProbeStyle: PrimitiveButtonStyle {
     public init() {}
-    /// Apple's spelling, without the press: what an app writes, and it compiles.
     public func makeBody(configuration: PrimitiveButtonStyleConfiguration) -> some View {
         configuration.label
     }
@@ -3259,7 +3063,6 @@ struct AppleStyleCase: View {
     }
 }
 
-/// The rectangles a probe's tree is drawn with, in order: the style's own output, read back.
 func opacitiesOf(_ probe: _Probe) -> [CGFloat] {
     var found: [CGFloat] = []
     func walk(_ v: UIView) { found.append(v.alpha); v.subviews.forEach(walk) }
@@ -3276,8 +3079,6 @@ func downButton(_ probe: _Probe) -> UIButton? {
     return first(probe.hostView)
 }
 
-/// What UIControl.sendActions(for:) does, without the application it sends through: this process has none
-/// (UIApplication.shared is nil, measured), so a control sends nothing, and its registered actions are performed here.
 func deliver(_ event: UIControl.Event, to control: UIControl) {
     for target in control.allTargets {
         for name in control.actions(forTarget: target, forControlEvent: event) ?? [] {
@@ -3290,7 +3091,6 @@ let pressed = _Probe(PressProbeCase(), width: 120, height: 40)
 _ = frames(pressed)
 let pressedUp = opacitiesOf(pressed)
 if let pressButton = downButton(pressed) {
-    // a finger sets the highlight and then sends touchDown; the style follows the event, not the property
     pressButton.isHighlighted = true
     deliver(.touchDown, to: pressButton)
     pressed.flush()
@@ -3303,7 +3103,6 @@ if let pressButton = downButton(pressed) {
     check(opacitiesOf(pressed) == pressedUp, "and goes back to what it drew before")
 } else { check(false, "the probe's plain button has a UIButton in it") }
 
-// a custom style written the Apple way: no press parameter, and it is built all the same
 let appleStyle = _Probe(AppleStyleCase(), width: 120, height: 40)
 let appleFrames = frames(appleStyle)
 check(!appleFrames.isEmpty, "a custom PrimitiveButtonStyle written the Apple way draws its label")
@@ -3314,8 +3113,6 @@ if let custom = downButton(appleStyle) {
     check(!frames(appleStyle).isEmpty, "and keeps drawing it while the button is down")
 }
 
-// a primitive style's `configuration.trigger()` performs the button's action, and its role is the button's: the
-// configuration is built by the node, and an empty action there made a style that triggers the button inert
 var triggerStyleFired = 0
 var triggerStyleRole: ButtonRole?
 var triggerStyleTrigger: (() -> Void)?
@@ -3342,9 +3139,6 @@ check(triggerStyleFired == 1, "configuration.trigger() performs the button's act
 triggerStyleTrigger?()
 check(triggerStyleFired == 2, "and performs it again each time")
 
-// a tap on a button drawn by a style of the port performs the button's action once; the style does not draw a trigger of its
-// own, so the node takes the tap, and since the built-in styles became primitive (dc5e760) it took it to an empty action. A style
-// of an app owns its trigger, so the same tap on a button it styles performs nothing
 var tapStyleFired = 0
 struct TapStyleCase<S: PrimitiveButtonStyle>: View {
     let style: S
@@ -3367,7 +3161,6 @@ check(tapStyleCount(BorderedProminentButtonStyle()) == 1, "and on a .borderedPro
 check(tapStyleCount(BorderlessButtonStyle()) == 1, "and on a .borderless one")
 check(tapStyleCount(TriggerStyle()) == 0, "a tap on a button of a style that owns its trigger does not perform the action behind its back")
 
-// a selection in a string: one range, several, or a caret, in Apple's shape
 let selectedText = "hello world"
 let whole = selectedText.startIndex..<selectedText.index(selectedText.startIndex, offsetBy: 5)
 let one = TextSelection(range: whole)
@@ -3387,9 +3180,6 @@ check(multi.indices != one.indices, "a set of ranges is not one range, in the na
 if case .multiSelection = multi.indices {} else { check(false, "and it is the multiSelection of those two names") }
 if case .selection = one.indices {} else { check(false, "and one range is the selection of the same enum") }
 
-// Tab values: a tab bar over tab content shows a tab per element, and a selection carries the value.
-// WRITTEN, NOT RUN: the engine tests need the emulator, and `xmake emulate` is not in this tree yet
-// (emulate-launch, 7e035ac0). Compile-checked only, like every test here until then.
 struct TabValueCase: Identifiable, Hashable { var id: String { folder }; let folder: String; let unread: Int }
 
 struct TabValueCaseView: View {
@@ -3433,10 +3223,6 @@ func aTabBarsSelectionCarriesTheTabValue() {
     equal(items.map { $0.tag }, [0, 1], "and the release's own tag is the tab's position")
 }
 
-// A table draws the columns the app left visible, in the order the app gave, with the column's own
-// alignment. WRITTEN, NOT RUN: the engine tests need the emulator and `xmake emulate` is not in this
-// tree yet (emulate-launch, 7e035ac0). The typecheck pair cannot show this red: it checks that the
-// declaration compiles, not that the body reads it, which is what this test is for.
 struct TwoColumnCase: Identifiable, Hashable { var id: Int; let title: String }
 
 struct TwoColumnTableCase: View {
@@ -3458,7 +3244,6 @@ func aTableDrawsTheColumnsTheAppLeftVisible() {
     var customization = TableColumnCustomization<TwoColumnCase>()
     customization.order = [rows[1].id, rows[0].id]
     customization.visibility = [rows[0].id: false, rows[1].id: true]
-    // a hidden column must lose its title and its sort key too: the header is built from the same list
     var order = [KeyPathComparator(\TwoColumnCase.title)]
     let sorted = _Probe(SortedTwoColumnTableCase(rows: rows, customization: customization,
                                                 sortOrder: Binding(get: { order }, set: { order = $0 })),
@@ -3501,8 +3286,6 @@ func colors(of view: UIView) -> [UIColor] {
     return found
 }
 
-// The builders and the plumbing under them: a conditional column, a conditional row, and the rows a
-// table collects. WRITTEN, NOT RUN until the emulator lands (emulate-launch, 7e035ac0).
 struct BuilderRow: Identifiable { let id: Int }
 
 struct BuilderColumnCase: View {
@@ -3527,7 +3310,6 @@ struct BuilderColumnCase: View {
 
 func theBuildersTakeAConditionalColumnAndRow() {
     let rows = [BuilderRow(id: 0), BuilderRow(id: 1), BuilderRow(id: 2)]
-    // buildEither is the builder's conditional form, and the result is column content either way
     let holder = BuilderShow()
     let probe = _Probe(BuilderColumnCase(rows: rows, showWide: Binding(get: { holder.show }, set: { holder.show = $0 })),
                       width: 320, height: 480)
@@ -3539,8 +3321,6 @@ func theBuildersTakeAConditionalColumnAndRow() {
 
 final class BuilderShow { var show = true; init() {} }
 
-// A tab with its value written in it: one tab, named by that value, and a bar that shows it.
-// WRITTEN, NOT RUN until the emulator lands (emulate-launch, 7e035ac0).
 struct ValueTabCase: View {
     @Binding var selected: Int?
     var body: some View {
@@ -3552,11 +3332,8 @@ struct ValueTabCase: View {
 }
 
 func aTabIsOneTabNamedByItsValue() {
-    // a tab is one tab named by the value written in it: what a caller can see is the bar item it
-    // becomes, so that is what is asked for -- the rows behind it are the port's own
     let probe = _Probe(ValueTabCase(selected: Binding(get: { 1 }, set: { _ in })), width: 320, height: 480)
     _ = frames(probe)
-    // the bar's own items are where a tab bar keeps its titles, not labels in the view tree
     var bar: UITabBar?
     var stack: [UIView] = [probe.hostView]
     while let current = stack.popLast() {
@@ -3566,9 +3343,6 @@ func aTabIsOneTabNamedByItsValue() {
     equal(bar?.items?.map { $0.title } ?? [], ["Inbox", "Sent"], "and a bar over tabs shows a bar item per tab")
 }
 
-// A custom view that only stands for a group is that group, so a container that reads its children
-// takes the group's -- the case SwiftUI's own `ForEach(subviews:)` reaches through a body.
-// WRITTEN, NOT RUN until the emulator lands (emulate-launch, 7e035ac0 / stack 14).
 struct StandingForAGroup: View {
     var body: some View {
         Group {
@@ -3579,7 +3353,6 @@ struct StandingForAGroup: View {
 }
 
 func aViewThatStandsForAGroupIsThatGroup() {
-    // read the way an app does: through Group(subviews:), whose transform is handed the children
     var standing = 0
     _ = Group(subviews: StandingForAGroup()) { children in
         standing = children.count
@@ -3594,7 +3367,6 @@ func aViewThatStandsForAGroupIsThatGroup() {
     equal(primitive, 1, "and a primitive is its own content: one child, itself")
 }
 
-// RasterizationOptions: Apple's shape from the SDK of 16.4, and what reaches a layer of iOS 6
 var raster = _RendererConfiguration.RasterizationOptions()
 check(raster.colorMode == .nonLinear, "a layer is rasterised with the non-linear colour mode by default")
 check(!raster.rendersAsynchronously, "and drawn on the main thread by default")
@@ -3607,8 +3379,6 @@ raster.isOpaque = true
 raster.prefersDisplayCompositing = true
 raster.maxDrawableCount = 1
 check(raster.isOpaque && raster.prefersDisplayCompositing && raster.maxDrawableCount == 1, "and the three of them are the port's to set")
-// and the options reach a real layer, through the one view that rasterises: `drawingGroup`
-// the layer the red square is drawn into: the view that holds the leaf of that size
 func layerOf(_ probe: _Probe, size: CGSize) -> CALayer? {
     var found: CALayer?
     func walk(_ v: UIView) { if v.subviews.isEmpty, v.bounds.size == size { found = found ?? v.superview?.layer }; v.subviews.forEach(walk) }
@@ -3626,7 +3396,6 @@ let drawnOpaque = _Probe(Color.red.frame(width: 40, height: 40).drawingGroup(opa
 _ = frames(drawnOpaque)
 check(layerOf(drawnOpaque, size: CGSize(width: 40, height: 40))?.isOpaque == true, "and opaque when the call says so")
 
-// A document: a real file, opened through the group and read back.
 final class NoteDocument: FileDocument {
     static var readableContentTypes: [String] { ["public.text", "public.data"] }
     static var writableContentTypes: [String] { ["public.text"] }
@@ -3658,7 +3427,6 @@ let written = try? NoteDocument(text: "the second line\n").fileWrapper(
     configuration: FileDocumentWriteConfiguration<NoteDocument>(contentType: "public.text"))
 equal(written?.regularFileContents, Data("the second line\n".utf8), "and a document writes the bytes it is asked for")
 
-// a document that is a package writes over the file it was read from: Apple's `existingFile` is what it is handed
 final class PackageNote: FileDocument {
     static var readableContentTypes: [String] { ["public.folder"] }
     static var writableContentTypes: [String] { ["public.folder"] }
@@ -3689,7 +3457,6 @@ let freshPackage = try? PackageNote(text: "new").fileWrapper(
 equal(freshPackage?.fileWrappers?.keys.sorted(), ["text.txt"], "and one that has no file yet is a package of its own part")
 equal(FileDocumentWriteConfiguration<PackageNote>(contentType: "public.folder").existingFile == nil, true, "which a configuration says by holding none")
 
-// A window: one scene over the one UIWindow of iOS 6, and the action that opens it.
 let windowScene = Window("Notes", id: "notes") { Text(verbatim: "the window's content") }
 equal(windowScene.id, "notes", "a window scene knows the id it is known by")
 let stringKeyScene = Window(LocalizedStringKey("rawValue"), id: "by-key") { Text(verbatim: "x") }
@@ -3707,8 +3474,6 @@ let openValue = OpenWindowAction().openWindow
 check(openValue is OpenWindowAction, "the action reads itself as the openWindow of a window scene")
 OpenWindowAction.currentWindowID = nil
 
-// A widget: a configuration, a bundle, and the builder that collects the bundle's members. iOS 6.1.3
-// has no widget host, so nothing here is ever shown - as in an app with no widget extension.
 struct ClockConfiguration: WidgetConfiguration {
     var body: some WidgetConfiguration { EmptyWidgetConfiguration() }
 }
@@ -3739,7 +3504,6 @@ print("\(checks - failures)/\(checks) checks passed")
 if !_Unsupported.used.isEmpty {
     print("ignored on this platform: \(_Unsupported.used.joined(separator: ", "))")
 }
-// a size category: the text of a subtree is drawn at the size the category means, and both spellings read back
 var seenCategory = ""
 var seenTypeSize = ""
 struct CategoryReader: View {
@@ -3766,14 +3530,12 @@ check(abs(_Probe.textSize(17, .xxxLarge, DynamicTypeSize.xSmall...DynamicTypeSiz
 check(abs(_Probe.textSize(17, .xSmall, DynamicTypeSize.xSmall...DynamicTypeSize.xLarge) - 13.94) < 0.001, "while it may go below the range's lower end")
 check(_Unsupported.used.contains("dynamicTypeSize(range)"), "a range says in the log that it limits the size alone")
 
-// a row's separator: the table draws its own, unless the row hides it or gives it a colour of its own
 struct SeparatorCase: View {
     var body: some View {
         List {
             Color.red.frame(height: 10)
             Color.blue.frame(height: 10).listRowSeparator(.hidden)
             Color.green.frame(height: 10).listRowSeparatorTint(.orange)
-            // a row whose own colour is not the cell's, so a line of the default colour cannot pass for the row's
             Color(red: 0.1, green: 0.2, blue: 0.3).frame(height: 10).listRowBackground(Color(red: 0.4, green: 0.5, blue: 0.6))
         }
     }
@@ -3794,9 +3556,6 @@ check(apiCellColour.map { $0.isEqual(apiRowColour) } ?? false, "a row background
       String(describing: apiCellColour))
 check(!(apiCellColour?.isEqual(UIColor.white) ?? false), "and not the colour a cell has by default", String(describing: apiCellColour))
 
-// The colour filters, read as a pixel of the picture the filter produced, as "r, g, b, a" - and nothing at all when the
-// view has no picture. The primaries are spelled out: the system colours of SwiftUI are not the primaries, and the numbers
-// below are what Core Image of this release answers for them.
 func apiRed() -> some View { Color(red: 1, green: 0, blue: 0).frame(width: 20, height: 20) }
 func apiBlue() -> Color { Color(red: 0, green: 0, blue: 1) }
 func apiBlueBlock() -> some View { apiBlue().frame(width: 20, height: 20) }
@@ -3826,13 +3585,10 @@ equal(apiPixel(apiRed().hueRotation(.degrees(360))), apiPixel(apiRed().grayscale
 equal(apiPixel(apiRed().luminanceToAlpha()), "54, 0, 0, 54", "luminanceToAlpha puts the luminance of a colour into its alpha")
 check(apiPixel(Color(red: 1, green: 1, blue: 1).frame(width: 20, height: 20).luminanceToAlpha()) == "255, 255, 255, 255", "and white is opaque")
 
-// a blur is a picture of the view, no bigger than the view, with the colours on either side of a line mixed
 let apiBlurred = _Probe(HStack(spacing: 0) { Color(red: 1, green: 0, blue: 0); Color(red: 0, green: 0, blue: 1) }
     .frame(width: 40, height: 20).blur(radius: 6), width: 60, height: 60)
 apiBlurred.flush()
 equal(apiBlurred.filteredPicture(0)?.size, CGSize(width: 40, height: 20), "a blurred view is a picture of its own size, blur margin and all")
-// The picture is drawn at the scale of the screen (2 on an iPhone 4), so a point of the view is that many pixels of it: the
-// middle and the edge are read where the view's own points are, by the scale the picture has.
 let apiBlurScale = apiBlurred.filteredPicture(0)?.scale ?? 0
 print("[probe] the blurred picture has scale \(apiBlurScale), the screen \(UIScreen.main.scale)")
 equal(apiBlurScale, UIScreen.main.scale, "the picture of a filtered view is drawn at the scale of the screen")
@@ -3843,7 +3599,6 @@ let apiBlurEdge = apiBlurred.filteredPixel(0, at: CGPoint(x: 1 * apiBlurScale, y
 check(apiBlurEdge.map { $0.r > 100 && $0.b < 20 } ?? false, "while the edge of it is the colour that was there, fading out", String(describing: apiBlurEdge))
 check(apiPixel(apiRed().blur(radius: 0)) == nil, "a blur of no radius changes nothing and is not drawn")
 
-// a filter that changes nothing is not drawn, and the picture takes no touches
 check(apiPixel(apiRed()) == nil, "a view without a filter has no picture of its own")
 let apiUnder = _Probe(apiRed().grayscale(1), width: 60, height: 60)
 check(apiUnder.hitViewName(at: CGPoint(x: 30, y: 30)) != nil, "a touch under a filtered view still reaches the content",
@@ -3858,7 +3613,6 @@ check((CIContext.self as AnyObject).responds(to: NSSelectorFromString("contextWi
 print("[probe] CIContext spellings: " + _Probe.coreImageContextSpellings())
 print("[probe] Core Image filters: " + _Probe.coreImageFilters().joined(separator: " "))
 
-// What this release has, measured on the device the tests run on: the classes and selectors the "absent" reasons name.
 print("[probe] classes: \(_Probe.releaseClasses(["UIAccessibilityCustomAction", "UITextContentType", "UIKeyCommand", "NSItemProvider", "AVSpeechSynthesizer", "UIPointerInteraction", "UIDragInteraction", "UIDropInteraction", "UIDocumentPickerViewController", "UIContextualInteraction", "UIPreviewInteraction", "UIAccessibilityShortcut", "UIActivityViewController", "UIMenuController", "UIPasteboard", "UIDocumentInteractionController", "UIAlertView", "UICollectionView"]))")
 print("[probe] UIAccessibilityElement answers: \(_Probe.releaseAnswers(["accessibilityCustomContent", "accessibilityLabeledBy", "accessibilityLinkedGroup", "accessibilityChartDescriptor", "accessibilityFrameInContainerSpace", "accessibilityElementsHidden"], on: "UIAccessibilityElement"))")
 print("[probe] UIView answers: \(_Probe.releaseAnswers(["isAccessibilityIgnoresInvertColors", "isAccessibilityRespondsToUserInteraction", "accessibilityElementsHidden", "userInterfaceLayoutDirection", "semanticContentAttribute", "accessibilityElements"], on: "UIView"))")
@@ -3867,8 +3621,6 @@ print("[probe] UITextInputTraits answers: \(_Probe.releaseAnswers(["textContentT
 print("[probe] UIWindow answers: \(_Probe.releaseAnswers(["rootViewController", "preferredStatusBarStyle", "traitCollection"], on: "UIWindow"))")
 print("[probe] UITextView answers: \(_Probe.releaseAnswers(["isSelectable", "isEditable", "textInRange", "typingAttributes"], on: "UITextView"))")
 
-// A view that can be copied or cut: a long press offers the release's own sheet, and the payload is what lands on the
-// pasteboard. A sheet needs a window, so what is checked here is the menu the engine put up and what its item does.
 struct CopyableCase: View {
     var body: some View { Color.red.frame(width: 40, height: 20).copyable(["alpha", "beta"]) }
 }
@@ -3878,7 +3630,6 @@ check(_Probe.shownMenu == ["Copy"], "a view that can be copied offers Copy on a 
 _Probe.pressMenuItem(0)
 equal(_Probe.copiedText(["alpha", "beta"]), "alpha\nbeta", "and what is copied is the payload, one item per line")
 equal(copyableProbe.gestureCount, 1, "and the long press is the one gesture it added")
-// what a process of this session can read of the pasteboard decides whether the copy itself can be checked here
 UIPasteboard.general.string = "written by the tests"
 if UIPasteboard.general.string == "written by the tests" {
     _Probe.pressMenuItem(0)
@@ -3898,16 +3649,12 @@ check(_Probe.shownMenu == ["Cut"], "a view that can be cut offers Cut", String(d
 _Probe.pressMenuItem(0)
 check(UIPasteboard.general.items.isEmpty, "and what is cut goes off the pasteboard", String(describing: UIPasteboard.general.items))
 
-// .submitScope(.block) on a field of several lines: the return key runs the submit action instead of a line
 struct SubmitScopeCase: View {
     let scope: Bool
     init(_ scope: Bool = true) { self.scope = scope }
     var body: some View { Color.red.frame(width: 10, height: 10).submitScope(scope) }
 }
 
-// What a view inside a .submitScope sees of it is what the environment holds under the scope, and the key is
-// internal state (Apple declares no such environment value, and the invented gate counts a public name it cannot
-// find): a test asks the node, and the decision a blocking scope makes is put with that scope in hand.
 check(_Probe.submitScopeSet(SubmitScopeCase()), "a blocking scope reaches the views inside it")
 check(!_Probe.submitScopeSet(SubmitScopeCase(false)), "and .submitScope(false) is the other way round")
 check(_Probe.returnKeyBlocked("\n", blocking: true), "a blocking scope does not let the return key add a line of its own")
@@ -3916,8 +3663,6 @@ check(!_Probe.returnKeyBlocked("\n", blocking: false), "without the scope the re
 check(!_Probe.submitScopeSet(Color.red.frame(width: 10, height: 10)),
       "and a screen that names no scope has nothing to block")
 
-// .presentationBackground paints the screen a sheet presents: the white the release gives it takes the colour of the
-// style, and a style that is not one colour paints nothing
 struct PresentedCase: View {
     @State var shown = true
     var body: some View {
@@ -3939,7 +3684,6 @@ struct PlainPresentedCase: View {
 check(_Probe(PlainPresentedCase(), width: 60, height: 60).presentedBackground?.isEqual(UIColor.white) ?? false,
       "and a screen that asks for nothing keeps the white of the release")
 
-// .exportableToServices: a long press puts up the share sheet of the release with what the payload holds
 struct ExportCase: View {
     var body: some View {
         Color.red.frame(width: 40, height: 20).exportableToServices { ["a string", URL(string: "demo://item/1")!] }
@@ -3952,9 +3696,6 @@ equal(_Probe.sharedItems(["a string", "demo://item/1"]), ["a string", "demo://it
 equal(_Probe.sharedItems([42]), ["42"], "and an item of a type the release cannot share is offered as its own description")
 check(_Unsupported.used.contains("exportableToServices"), "and it says that the sheet of iOS 6 has no completion")
 
-// The blend modes of SwiftUI, measured: of the filters they name, this release has three, and a layer rendered with one
-// of them comes out the colour of the layer - which is why .blendMode is declared absent rather than attached to a filter
-// that does nothing.
 let apiBlendNames = ["CIMultiplyCompositing", "CIScreenCompositing", "CIOverlayCompositing", "CIDarkenCompositing",
                      "CILightenCompositing", "CIColorDodgeCompositing", "CIColorBurnCompositing", "CISoftLightCompositing",
                      "CIHardLightCompositing", "CIDifferenceCompositing", "CIExclusionCompositing", "CIHueCompositing",
@@ -3967,13 +3708,6 @@ equal(apiBlends.filter { !$0.hasSuffix("absent") },
 check(apiBlends.filter { !$0.hasSuffix("absent") }.allSatisfy { $0.hasSuffix("255,0,0") },
       "a red layer over black stays red under every one of them, so the layer is not composited with the filter")
 
-// The attributes of a SwiftUI text: what each one names, and which key of this release's attributed string the engine
-// writes it under. That mapping is the observable part of the family and every attribute has a case for it.
-//
-// What cannot be observed here is the value on the string the *screen* drew, because reading it means resolving a text
-// and resolving a text creates a UIFont - and a font traps the headless test process on a device (measured: EidolonTests
-// aborts with Trace/BPT trap the first time a font is created, with or without a screen). So the keys are checked here
-// and the values are left to the snapshot scenarios, which draw on a screen where a font is a font and not a trap.
 let apiNSFont = AttributeScopes.SwiftUIAttributes.key(of: AttributeScopes.SwiftUIAttributes.FontAttribute.name)
 let apiNSColor = AttributeScopes.SwiftUIAttributes.key(of: AttributeScopes.SwiftUIAttributes.ForegroundColorAttribute.name)
 let apiNSBackground = AttributeScopes.SwiftUIAttributes.key(of: AttributeScopes.SwiftUIAttributes.BackgroundColorAttribute.name)
@@ -3990,13 +3724,10 @@ check(apiNSStrike == .strikethroughStyle, "the strikethrough attribute on the re
 check(apiNSUnderline == .underlineStyle, "the underline attribute on the release's underline key", String(describing: apiNSUnderline))
 check(apiNSKern == .kern, "the kerning attribute on the release's kerning key", String(describing: apiNSKern))
 
-// tracking is letter spacing and this release's attributed string has kerning and no tracking key, so the value lands on
-// the key that is the same measurement per character, and the engine says which one it is rather than guessing
 check(apiNSTracking == nil, "the tracking attribute has no key of this release, so nothing is written under one", String(describing: apiNSTracking))
 check(apiNSBaseline == nil, "and the baseline offset attribute has no key of this release to land on", String(describing: apiNSBaseline))
 check(AttributeScopes.SwiftUIAttributes.key(of: "NSNothing") == nil, "a name the release has no key for is the one that reads nothing")
 
-// the names are Apple's own, read out of the 26.2 interface
 equal(AttributeScopes.SwiftUIAttributes.FontAttribute.name, "NSFont", "the font attribute is named as Foundation names it")
 equal(AttributeScopes.SwiftUIAttributes.ForegroundColorAttribute.name, "NSColor", "and the foreground colour one")
 equal(AttributeScopes.SwiftUIAttributes.BackgroundColorAttribute.name, "NSBackgroundColor", "and the background colour one")
@@ -4006,9 +3737,6 @@ equal(AttributeScopes.SwiftUIAttributes.KerningAttribute.name, "NSKern", "and th
 equal(AttributeScopes.SwiftUIAttributes.TrackingAttribute.name, "NSTracking", "and the tracking one")
 equal(AttributeScopes.SwiftUIAttributes.BaselineOffsetAttribute.name, "NSBaselineOffset", "and the baseline offset one")
 
-// the value types are the port's own, as they are in Apple's: the font, the colour, the line style, a number
-// the value types are the port's own, as they are in Apple's: the font, the colour, the line style, a number - read by
-// name, because a typealias to a nominal type is not compared with ==
 func apiValueName(_ type: Any.Type) -> String { "\(type)".components(separatedBy: ".").last ?? "\(type)" }
 equal(apiValueName(AttributeScopes.SwiftUIAttributes.FontAttribute.Value.self), "Font", "the font attribute carries a Font")
 equal(apiValueName(AttributeScopes.SwiftUIAttributes.ForegroundColorAttribute.Value.self), "Color", "and the foreground colour one a Color")
@@ -4021,4 +3749,3 @@ equal(apiValueName(AttributeScopes.SwiftUIAttributes.BaselineOffsetAttribute.Val
 
 print("\(checks - failures)/\(checks) checks passed")
 exit(failures == 0 ? 0 : 1)
-

@@ -47,8 +47,6 @@ class LayoutNode: Node {
     func layoutContents(_ size: CGSize) {}
     final func place(_ frame: CGRect) {
         let rounded = CGRect(x: round(frame.origin.x), y: round(frame.origin.y), width: round(frame.size.width), height: round(frame.size.height))
-        // Size and centre, not `frame`: for a view with a transform the frame is the box of the transformed view, and
-        // UIKit says setting it is undefined.
         let centre = CGPoint(x: rounded.midX, y: rounded.midY)
         let unmoved = uiView.bounds.size == rounded.size && uiView.center == centre
         if unmoved && !needsLayout { return }
@@ -134,8 +132,6 @@ final class StackNode: ContainerNode {
             }
             return flex[left] < flex[right]
         }
-        // Views that can take any room (spacers, frames of infinite width) come last and share what the others leave;
-        // they do not dilute the share the others are offered, so a Text beside a Spacer gets its full width.
         let greedy = flex.map { $0 > 1e7 }
         var finiteLeft = greedy.filter { !$0 }.count
         var greedyLeft = greedy.count - finiteLeft
@@ -425,8 +421,6 @@ extension ScrollView: ScrollViewLike {
     var scrollContent: any View { content }
 }
 
-// The environment says whether an indicator is drawn; the view's own flag says so when the
-// environment has nothing to say, and an axis the scroll view does not have draws nothing at all.
 private func shown(_ visibility: Visibility, _ flag: Bool, _ axis: Axis.Set, _ axes: Axis.Set) -> Bool {
     guard axes.contains(axis) else { return false }
     switch visibility {
@@ -528,7 +522,6 @@ final class ScrollNode: ContainerNode {
         }
     }
 
-    // The resting offset of every target the content marks with `scrollTargetLayout`, in this scroller's coordinates.
     private func collectTargets() {
         var found: [ScrollTarget] = []
         for kid in children { walkTargets(kid, into: &found) }
@@ -550,7 +543,6 @@ final class ScrollNode: ContainerNode {
         for child in node.childNodes { walkTargets(child, into: &found) }
     }
 
-    /// The geometry and the phase as SwiftUI reports them: from the scroller itself, whenever either moved.
     private func reportGeometry() {
         guard var stored = observers else { return }
         let view = scrollView
@@ -604,7 +596,6 @@ final class ScrollNode: ContainerNode {
         move(to: offset)
     }
 
-    // A scroll the app asked for is not the user's own scrolling, so the delegate must not report it back.
     private func move(to offset: CGPoint) {
         let animated = Updates.pendingAnimation != nil
         applying = true
@@ -613,7 +604,6 @@ final class ScrollNode: ContainerNode {
         applying = false
     }
 
-    // What the user did to the scroller itself goes back into the binding, as SwiftUI reports it.
     func userScrolled(to offset: CGPoint) {
         guard !applying, animatingTo == nil, let request else { return }
         var position = request.binding.wrappedValue

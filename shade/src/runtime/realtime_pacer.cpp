@@ -36,8 +36,6 @@ std::uint64_t RealtimePacer::host_duration_for(
 
 DeviceMonotonicTime RealtimePacer::allowed_device_monotonic_time() const
 {
-    // iPhone OS 1.0's mach_timebase_info is exposed as 1:1, so one Mach
-    // absolute-time unit is one nanosecond in the compatibility kernel.
     const auto elapsed =
         std::max(std::chrono::steady_clock::now() - initial_host_time_,
             std::chrono::steady_clock::duration::zero());
@@ -97,4 +95,4 @@ std::chrono::nanoseconds RealtimePacer::limit_delay(
         delay, std::max(until_host_deadline, std::chrono::nanoseconds::zero()));
 }
 
-} // namespace shade
+}

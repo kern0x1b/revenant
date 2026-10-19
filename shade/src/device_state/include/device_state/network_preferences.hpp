@@ -38,14 +38,8 @@ struct NetworkPreferencesAirport {
     NetworkPreferencesIpv4 ipv4;
 };
 
-// Ensures that the simulated device's writable SystemConfiguration state has
-// a current network set. When an interface is available, also installs its
-// standard AirPort service and supplies missing legacy Wi-Fi capability
-// defaults. This is a one-shot compatibility migration for root filesystems
-// whose /var state predates the virtual network; normal guest
-// SystemConfiguration code owns the files after boot.
 [[nodiscard]] NetworkPreferencesResult ensure_network_preferences(
     const std::filesystem::path& rootfs,
     std::optional<NetworkPreferencesAirport> airport = std::nullopt);
 
-} // namespace shade
+}

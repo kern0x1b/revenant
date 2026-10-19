@@ -65,8 +65,6 @@ struct MachDylib {
     std::string path;
     std::uint32_t command { };
     bool prebound { };
-    // LC_PREBOUND_DYLIB has no version fields. Keep absence distinct from a
-    // dylib command whose explicitly encoded version is zero.
     std::optional<MachDylibVersion> version;
 };
 
@@ -79,7 +77,6 @@ struct MachSymbol {
 
     [[nodiscard]] bool thumb_definition() const
     {
-        // Mach-O ARM N_ARM_THUMB_DEF in nlist::n_desc.
         return (description & 0x0008U) != 0;
     }
 };
@@ -97,10 +94,6 @@ public:
         ArmArchitectureVersion architecture = ArmArchitectureVersion::Armv6K,
         std::optional<ContentIdentity> known_identity = std::nullopt,
         ImmutableSnapshotKind snapshot_kind = ImmutableSnapshotKind::RuntimeHot,
-        // A dyld shared-cache image keeps its Mach-O header and linkedit
-        // offsets in the cache container. Standalone images use the default
-        // zero offset; cache callers provide the file offset of the image
-        // header while retaining the container's absolute file offsets.
         std::optional<std::uint64_t> image_header_offset = std::nullopt,
         std::shared_ptr<const std::vector<std::byte>> immutable_snapshot = { },
         std::optional<GuestFileGeneration> known_generation = std::nullopt,
@@ -146,10 +139,6 @@ public:
         return symbol_file_locations_;
     }
     [[nodiscard]] const std::vector<MachStub>& stubs() const { return stubs_; }
-    // Linkers emit a compact, content-addressed function boundary table for
-    // stripped images. The parser keeps only bounded, image-local starts so
-    // callers can seed cold translation without treating every text byte as
-    // an entry point.
     [[nodiscard]] const std::vector<std::uint32_t>& function_starts() const
     {
         return function_starts_;
@@ -177,9 +166,6 @@ public:
         std::uint32_t address) const;
     [[nodiscard]] std::optional<std::uint32_t> read_vm_u32(
         std::uint32_t address) const;
-    // Resolve Objective-C method implementations from the image's runtime
-    // metadata. This covers stripped firmware methods without relying on a
-    // version-specific virtual address.
     [[nodiscard]] std::optional<std::uint32_t> find_objc_instance_method(
         std::string_view class_name, std::string_view selector,
         VmStringResolver external_string = { }) const;
@@ -197,12 +183,7 @@ private:
     [[nodiscard]] std::span<const std::byte> byte_span() const noexcept;
 
     std::filesystem::path path_;
-    // Parsing owns one immutable byte snapshot. File-backed executable pages
-    // share it so delayed faults cannot observe later in-place host writes.
     std::shared_ptr<const std::vector<std::byte>> bytes_;
-    // Shared-cache images prefer a content-addressed, read-only mmap. Keeping
-    // this owner alive makes lazy parser reads and guest page faults observe
-    // exactly the generation that produced the metadata.
     std::shared_ptr<const ImmutableFileView> immutable_file_view_;
     std::uint32_t cpu_type_ { };
     std::uint32_t cpu_subtype_ { };
@@ -210,9 +191,6 @@ private:
     std::uint32_t flags_ { };
     std::uint32_t command_count_ { };
     ContentIdentity content_identity_;
-    // The parser and the later lazy file-backed mapping must agree on the
-    // opened vnode/file generation. If it changed, map_into copies this
-    // parsed snapshot instead of admitting a newer pathname generation.
     std::optional<GuestFileGeneration> file_generation_;
     std::optional<std::array<std::byte, 16>> uuid_;
     bool fat_container_ { };
@@ -232,4 +210,4 @@ private:
 [[nodiscard]] std::string mach_cpu_name(
     std::uint32_t cpu_type, std::uint32_t cpu_subtype);
 
-} // namespace shade
+}

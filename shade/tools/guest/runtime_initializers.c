@@ -10,7 +10,6 @@
 typedef int (*dyld_function_lookup)(char* name, unsigned long* address);
 typedef void (*module_initializer)(void);
 
-// Populated by the target dyld through the executable's __DATA,__dyld vector.
 extern unsigned long shade_dyld_function_lookup_pointer;
 
 void shade_guest_run_runtime_initializers(void)

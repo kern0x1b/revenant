@@ -233,9 +233,6 @@ struct RuntimeJitMemoryAggregate {
     void note_stats_sample() noexcept
     {
         ++stats_samples;
-        // CpuCluster::precompile_memory_stats() reads the published fixed-size
-        // snapshot without taking the queue mutex or walking any container
-        // node.
     }
 
     void observe(const void* runtime_key, const JitPrecompileMemoryStats& stats)
@@ -271,4 +268,4 @@ private:
     std::unordered_map<const void*, JitPrecompileMemoryStats> live_by_runtime;
 };
 
-} // namespace shade::runtime_detail
+}

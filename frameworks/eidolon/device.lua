@@ -1,4 +1,3 @@
--- xmake l device.lua copy LOCAL REMOTE | run "COMMAND" | fetch REMOTE LOCAL
 function main(action, a, b)
     local modules = assert(os.getenv("CHARON_MODULES"), "CHARON_MODULES must name the modules directory of a Charon checkout")
     local device = import("device", {rootdir = modules, anonymous = true})

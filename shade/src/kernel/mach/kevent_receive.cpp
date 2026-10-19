@@ -30,7 +30,6 @@ CompatibilityKernel::receive_kevent_mach_message(
     if (!object)
         return MachReceiveResult { darwin::mach_message::receive_invalid_name };
 
-    // XNU permits receive/large/trailer options here, never a send or a wait.
     constexpr std::uint32_t trailer_mask = 0xff00'0000U;
     const auto options = registration.filter_flags &
         (darwin::mach_message::option_receive |
@@ -44,9 +43,7 @@ CompatibilityKernel::receive_kevent_mach_message(
         .receive_object = object,
         .receive_is_port_set = shared_state_->mach_port_sets.contains(*object),
     };
-    // Leave an older blocked Mach receiver's FIFO position intact. An empty
-    // queue returns no kevent; this transient receive never enters the wait map.
     return receive_mach_message_locked(receive, false, waking_blocked_receiver);
 }
 
-} // namespace shade
+}

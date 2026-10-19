@@ -2,8 +2,6 @@ import UIKit
 import QuartzCore
 import CoreGraphics
 
-// MARK: Animatable for the value types SwiftUI animates
-
 extension CGSize: Animatable {
     public var animatableData: AnimatablePair<CGFloat, CGFloat> {
         get { AnimatablePair(width, height) }
@@ -42,8 +40,6 @@ extension UnitPoint: Animatable {
     }
 }
 
-// MARK: timing
-
 enum Easing {
     static func apply(_ curve: Animation.Curve, _ t: Double) -> Double {
         switch curve {
@@ -55,14 +51,11 @@ enum Easing {
     }
 }
 
-// Drives a value from the start of an animation to its end frame by frame, for the things Core Animation cannot
-// interpolate for us: the data of a custom Shape or GeometryEffect.
 final class ValueAnimator {
     nonisolated(unsafe) static var clock: () -> CFTimeInterval = { CACurrentMediaTime() }
     nonisolated(unsafe) static var manual = false
     nonisolated(unsafe) static var active: [ValueAnimator] = []
 
-    // One display link serves every running animation; it exists only while there is one, so an idle app has none.
     private final class Proxy: NSObject {
         @objc func fire() { ValueAnimator.tickAll() }
     }
@@ -84,8 +77,6 @@ final class ValueAnimator {
     var apply: (Double) -> Void
     var finished: (() -> Void)?
     private(set) var started: CFTimeInterval = 0
-    /// Where the animation stands a number of seconds after it began: the value to apply, and
-    /// whether it is over. An animation of its own curve — a keyframe track, a phase — says so itself.
     private let elapsed: (Double) -> (value: Double, done: Bool)
     private var frame: ((CFTimeInterval) -> Bool)?
 
@@ -95,7 +86,6 @@ final class ValueAnimator {
         self.elapsed = { at($0 - delay) }
     }
 
-    /// An animation that is run by the moments the clock gives: it is told each one, and says whether the animation is over by it.
     init(animation: Animation, frame: @escaping (CFTimeInterval) -> Bool) {
         self.animation = animation
         self.apply = { _ in }
@@ -137,10 +127,6 @@ final class ValueAnimator {
     func progress(at now: CFTimeInterval) -> (value: Double, done: Bool) { elapsed(now - started) }
 }
 
-// MARK: a value on its way
-
-/// What a node shows of a value that is animated, and what it does when it is given a new one: shows it, or takes the value there by
-/// the animation of the transaction, from where the value is, with what is going on still going on if it is on its way already (`Flights.swift`).
 final class Journey<Value: Animatable> {
     typealias Data = Value.AnimatableData
 
@@ -148,9 +134,7 @@ final class Journey<Value: Animatable> {
     private var target: Value?
     private var passage: Passage<Data>?
     private var animator: ValueAnimator?
-    /// Whether the two values are of a kind that one is taken into the other: a shape of another kind is not.
     private let compatible: (Value, Value) -> Bool
-    /// What the node does at each frame of the animation, once `shown` is the value of the frame.
     private let frame: () -> Void
 
     init(compatible: @escaping (Value, Value) -> Bool = { _, _ in true }, frame: @escaping () -> Void) {
@@ -164,7 +148,6 @@ final class Journey<Value: Animatable> {
         return value
     }
 
-    /// `animates` is false where a value is not to be taken anywhere yet (a shape that has not been given a size).
     func retarget(_ new: Value, animation: Animation?, animates: Bool = true) {
         let last = target
         target = new
@@ -175,7 +158,6 @@ final class Journey<Value: Animatable> {
         if let passage {
             let next = Passage.redirecting(passage, to: end, pace: animation?.pace, now: now)
             if next === passage {
-                // told to go where it is going: it goes on, with whatever else of the value was changed
                 shown = valued(passage.data(at: now), like: new)
                 return
             }
@@ -189,7 +171,6 @@ final class Journey<Value: Animatable> {
         drive(animation)
     }
 
-    /// The frames of the animation go to the passage the value is on at the moment of each, which a new place told to it changes.
     private func drive(_ animation: Animation) {
         animator?.stop()
         let driver = ValueAnimator(animation: animation) { [weak self] now in
@@ -220,8 +201,6 @@ final class Journey<Value: Animatable> {
     }
 }
 
-// MARK: the values of a kind that is only known when they are opened
-
 private func vector<A: Animatable>(of value: A) -> ErasedVector {
     if let wrapped = value as? AnyShape { return vector(of: wrapped.base) }
     return ErasedVector(value.animatableData)
@@ -238,7 +217,6 @@ private func rebuiltShape<S: Shape>(_ shape: S, from data: ErasedVector) -> any 
     return rebuilt(shape, from: data)
 }
 
-/// A shape, whatever its kind, as a value whose data is animated: the data of the kind it is.
 struct AnimatedShape: Animatable {
     var shape: any Shape
 
@@ -247,14 +225,12 @@ struct AnimatedShape: Animatable {
         set { shape = rebuiltShape(shape, from: newValue) }
     }
 
-    /// Whether one shape is taken into another: both of one kind, which for the type-erased one is the kind it holds.
     static func isOneKind(_ a: AnimatedShape, _ b: AnimatedShape) -> Bool {
         if let left = a.shape as? AnyShape, let right = b.shape as? AnyShape { return isOneKind(AnimatedShape(shape: left.base), AnimatedShape(shape: right.base)) }
         return type(of: a.shape) == type(of: b.shape)
     }
 }
 
-/// A geometry effect, whatever its kind, as a value whose data is animated.
 struct AnimatedEffect: Animatable {
     var effect: any GeometryEffect
 
@@ -265,8 +241,6 @@ struct AnimatedEffect: Animatable {
 
     static func isOneKind(_ a: AnimatedEffect, _ b: AnimatedEffect) -> Bool { type(of: a.effect) == type(of: b.effect) }
 }
-
-// MARK: GeometryEffect
 
 extension ProjectionTransform {
     var layerTransform: CATransform3D {
@@ -305,8 +279,6 @@ final class GeometryEffectNode: ContainerNode {
         applyTransform()
     }
 
-    // A geometry effect works in the view's own coordinates, with the origin in its top-left corner; a layer turns
-    // about its anchor point, which is the middle, so the transform is moved there and back.
     func applyTransform() {
         guard let effect else { return }
         let size = uiView.bounds.size
@@ -347,7 +319,6 @@ public struct _IgnoredByLayoutEffect<Base: GeometryEffect>: GeometryEffect {
 }
 
 extension GeometryEffect {
-    // Effects here are applied after layout, so no effect changes what the layout sees: this is what they all do.
     public func ignoredByLayout() -> _IgnoredByLayoutEffect<Self> { _IgnoredByLayoutEffect(self) }
 }
 
@@ -408,15 +379,12 @@ extension CGAffineTransform {
     }
 }
 
-// MARK: a ViewModifier that is Animatable
-
 protocol AnimatedModifierMaking {
     func makeAnimatedNode(_ env: EnvironmentValues) -> Node?
 }
 
 extension ModifiedContent: AnimatedModifierMaking where Modifier: Animatable {
     func makeAnimatedNode(_ env: EnvironmentValues) -> Node? {
-        // A geometry effect animates itself, and a modifier without data has nothing to interpolate.
         if modifier is any GeometryEffect || Modifier.AnimatableData.self == EmptyAnimatableData.self { return nil }
         let node = AnimatedModifierNode<Content, Modifier>()
         node.update(self, env)
@@ -424,7 +392,6 @@ extension ModifiedContent: AnimatedModifierMaking where Modifier: Animatable {
     }
 }
 
-// Every frame of an animation evaluates the body of the modifier again with data between the old and the new.
 final class AnimatedModifierNode<C: View, M: ViewModifier & Animatable>: ContainerNode {
     var contentView: C?
     var shown: M? { journey.shown }

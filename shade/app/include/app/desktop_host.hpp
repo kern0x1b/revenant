@@ -11,7 +11,6 @@
 
 namespace shade {
 
-// The CLI's composition root connects optional native adapters to a session.
 class DesktopHost final : public SessionHost {
 public:
     void initialize_graphics() override;
@@ -25,4 +24,4 @@ public:
     memory_budget_snapshot() const override;
 };
 
-} // namespace shade
+}

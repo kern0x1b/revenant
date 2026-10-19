@@ -51,12 +51,6 @@ namespace {
         return rootfs / relative.parent_path() / "Info.plist";
     }
 
-    // A number of pre-iOS 3 applications did not put an orientation key in
-    // their top-level manifest.  Their UIKit/OpenFeint resource profile is
-    // nevertheless explicit in the bundle layout (for example, an
-    // iPhone_Landscape resource bundle).  Treat a single, unambiguous resource
-    // orientation as a capability; never let a landscape-only helper coexist
-    // with a portrait profile and then guess which one the application wanted.
     std::optional<DisplayOrientation> resource_bundle_orientation(
         const std::filesystem::path& app_bundle)
     {
@@ -127,11 +121,6 @@ namespace {
         if (const auto value = read_string(
                 plist_dict_get_item(root, "UIInterfaceOrientation")))
             return value;
-        // UISupportedInterfaceOrientations is a capability set, not a request
-        // for the application's initial orientation. UIKit owns selection
-        // within that set; choosing the first parseable member here can rotate
-        // an application merely because an earlier capability is unknown to
-        // this host.
         return std::nullopt;
     }
 
@@ -156,7 +145,7 @@ namespace {
     }
 #endif
 
-} // namespace
+}
 
 ApplicationDisplay detect_application_display(
     const std::filesystem::path& rootfs, std::string_view executable_path,
@@ -378,4 +367,4 @@ std::vector<std::uint32_t> orient_display_pixels(
     return output;
 }
 
-} // namespace shade
+}

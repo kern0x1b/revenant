@@ -29,8 +29,6 @@ inline constexpr MachName null_name = 0;
 inline constexpr MachName dead_name = 0xffff'ffffU;
 inline constexpr MachName first_dynamic_name = 0x0001'0000U;
 inline constexpr MachName name_index_stride = 0x100U;
-// XNU stores ipc_entry user references in a 16-bit field. A live send
-// right reserves the all-ones value for dead-name conversion.
 inline constexpr std::uint32_t maximum_user_references = 0xffffU;
 inline constexpr std::uint32_t maximum_send_user_references =
     maximum_user_references - 1U;
@@ -60,10 +58,6 @@ struct NamedEntry {
     NameEntry entry;
 };
 
-// Models the ipc_space/ipc_entry boundary from XNU. A Mach name is only
-// meaningful in one task; queues and receive ownership use the separate port
-// object identifier. Callers serialize access with
-// KernelSharedState::mach_mutex.
 class MachNamespaceTable {
 public:
     void create_task(TaskId task);
@@ -75,9 +69,6 @@ public:
         TaskId task, MachObject object, MachTypeMask type);
     [[nodiscard]] std::optional<MachName> copyout(
         TaskId task, MachObject object, MachTypeMask type);
-    // Used only when an ABI explicitly restores a task-local name, such as a
-    // forked task inheriting the userspace bootstrap_port variable. Generic
-    // right copyout must never use a global MachObject as a preferred name.
     [[nodiscard]] std::optional<MachName> copyout_at_name(TaskId task,
         MachObject object, MachTypeMask type, MachName preferred_name);
 
@@ -111,9 +102,6 @@ private:
     struct Space {
         MachName next_name { first_dynamic_name };
         std::map<MachName, NameEntry> entries;
-        // Most ipc objects have one name in a task, but aliases are legal. Keep
-        // the names sorted so name_for/copyout preserve the same lowest-name
-        // result as the authoritative ipc_entry map without scanning that map.
         std::unordered_map<MachObject, std::vector<MachName>> names_by_object;
     };
 
@@ -125,4 +113,4 @@ private:
     std::map<TaskId, Space> spaces_;
 };
 
-} // namespace shade::xnu::ipc
+}

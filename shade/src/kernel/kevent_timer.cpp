@@ -35,7 +35,6 @@ std::optional<KeventTimer> KeventTimer::create(
     KeventTimer timer;
     const auto now = clock.now();
     if ((flags & timer_note_absolute) != 0U) {
-        // Darwin NOTE_ABSOLUTE is calendar time, converted at registration.
         const auto calendar = clock.wall_time();
         timer.deadline_ = add_saturated(now,
             duration > calendar ? duration - calendar : 0U);
@@ -43,8 +42,6 @@ std::optional<KeventTimer> KeventTimer::create(
         timer.interval_ = one_shot ? 0U : duration;
         timer.deadline_ = add_saturated(now, duration);
     }
-    // Leeway and priority flags permit coalescing; firing at the requested
-    // deadline is valid and keeps this model independent of host scheduling.
     return timer;
 }
 
@@ -78,4 +75,4 @@ void KeventTimer::consume(std::uint64_t now)
         deadline_ = now + delay;
 }
 
-} // namespace shade
+}

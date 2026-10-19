@@ -198,4 +198,4 @@ std::vector<PresentationScene> PresentationTracker::latest_scenes_locked() const
     return scenes;
 }
 
-} // namespace shade
+}

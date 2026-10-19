@@ -13,10 +13,6 @@
 
 namespace shade {
 
-// UIKit describes the logical orientation of an application's window
-// independently from the panel's native framebuffer geometry. Keep this
-// capability enum in the simulator boundary so host presentation and touch
-// mapping share one contract without depending on UIKit or SDL types.
 enum class DisplayOrientation : std::uint8_t {
     Portrait,
     PortraitUpsideDown,
@@ -30,8 +26,6 @@ enum class DisplayOrientation : std::uint8_t {
            orientation == DisplayOrientation::LandscapeRight;
 }
 
-// Guest-visible logical display geometry. Device profiles own the selected
-// value; graphics, input, and host presentation consume the same instance.
 struct DisplayGeometry {
     std::uint32_t width { };
     std::uint32_t height { };
@@ -47,9 +41,6 @@ struct DisplayGeometry {
     }
 };
 
-// Return the integral native-to-logical scale advertised by a device profile.
-// A non-integral or invalid relationship is kept at the legacy scale so a
-// custom geometry cannot silently distort input or capability data.
 [[nodiscard]] constexpr std::uint32_t display_scale_factor(
     DisplayGeometry native, DisplayGeometry logical)
 {
@@ -71,9 +62,6 @@ struct DisplayViewport {
     std::uint32_t height { };
 };
 
-// Fits a guest image into a host output without changing aspect ratio. The
-// viewport follows every host size, including fractional upscales, so device
-// profiles with native and logical geometries of any scale share one policy.
 [[nodiscard]] constexpr DisplayViewport fit_display_viewport(
     DisplayGeometry source, DisplayGeometry output)
 {
@@ -103,12 +91,10 @@ struct DisplayViewport {
         height };
 }
 
-// Used only when no explicit device profile is supplied. It is a default
-// configuration, not a renderer or frontend invariant.
 inline constexpr DisplayGeometry default_display_geometry { 320U, 480U };
 inline constexpr std::uint32_t default_display_width =
     default_display_geometry.width;
 inline constexpr std::uint32_t default_display_height =
     default_display_geometry.height;
 
-} // namespace shade
+}

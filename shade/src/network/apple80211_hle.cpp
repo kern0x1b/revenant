@@ -45,7 +45,7 @@ namespace {
     constexpr std::uint32_t arm_user_mode = 0x10;
     constexpr std::uint32_t arm_thumb_state_bit = 1U << 5U;
 
-} // namespace
+}
 
 Apple80211Hle::Apple80211Hle(UserlandHleRegistry& registry,
     std::shared_ptr<WifiState> state, StateChangedHandler state_changed)
@@ -195,9 +195,6 @@ Apple80211Hle::Apple80211Hle(UserlandHleRegistry& registry,
             return;
         }
         if (registration.callback_in_flight) {
-            // A successful asynchronous request promises a later completion.
-            // Reject recursive requests instead of acknowledging one that the
-            // service cannot complete while its callback is still running.
             call.set_return(apple80211_abi::invalid_argument);
             return;
         }
@@ -397,9 +394,6 @@ bool Apple80211Hle::deliver_pending_event(
         return false;
     }
     auto& registers = cpu.registers();
-    // Apple80211's event callback ABI is
-    // (status, context, event, event_payload). Scan completion carries the
-    // firmware-created CFArray as its payload.
     registers[0] = apple80211_abi::success;
     registers[1] = event.context;
     registers[2] = event.event;
@@ -487,4 +481,4 @@ void Apple80211Hle::queue_event_locked(std::uint32_t process_id,
     });
 }
 
-} // namespace shade
+}

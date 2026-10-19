@@ -1,28 +1,8 @@
--- surf-diff.lua: what a rewrite of the extractor lost, as sets, not as totals.
---
---     xmake l surf-diff.lua [--allow-empty-new] OLD.tsv NEW.tsv
---
--- A row is an (owner, kind, leaf member name) triple. The old extraction's owner column is wrong for every member of a
--- type nested in one - that is what the rewrite fixes - so a row that is in both files under a different owner is a
--- *move*, and it is paired by the leaf name **and** the line the interface declares it on, because a bare name has
--- several homes and only the line says which one moved.
---
--- The classes are sets, and they are checked against the sets they are supposed to partition:
---
---     |O| - |N| == |O\N| - |N\O|
---     O\N == moved + attribute + other
---     N\O == gained
---
--- Both files must have three tab-separated columns per row: owner, kind, name. A file of any other shape is a hard
--- error naming the file, the expected three and the count found - a wrong-shaped file read as the empty set would make
--- every identity below hold at zero.
-
 local text = import("lib.text", {rootdir = path.join(os.scriptdir(), "..", ".."), anonymous = true})
 local owners = import("lib.owners", {rootdir = path.join(os.scriptdir(), "..", ".."), anonymous = true})
 
 local COLUMNS = 3
 
--- the interfaces of the 26.2 SDK, the frameworks' first and then the stdlib's, each pattern in sorted order
 local function interfaces()
     local env = os.getenv("APPLE_26_SDK")
     local sdk = (env and env ~= "") and env or path.join(os.getenv("HOME"), "Git", "projects", "ios", "charon",
@@ -41,9 +21,6 @@ local function interfaces()
     return out
 end
 
--- The attribute and modifier words the leading noise of a declaration can hold, in the order the Python listed them.
--- Each item takes the text at pos and returns the position after it, or nil. The words with a trailing space need one
--- space; the others take the spaces that follow them, as their `\s*` does.
 local function word(literal, spaces)
     return function(s, pos)
         if not text.startswith(s, literal, pos) then
@@ -80,9 +57,6 @@ local NOISE_WORDS = {
     word("convenience", true), word("required", true), word("mutating", true), word("override", true),
 }
 
--- NOISE.sub('', s, count=1): the length of the leading noise of s, as the position the rest starts at. The Python
---     ^(?:@[\w.]+(?:\([^)]*\))?\s*|@\w+)*\s*(?:B)*
--- takes the greedy first alternative each time, and nothing follows the group that could fail, so no backtracking.
 local function noise_end(s)
     local pos = 1
     while string.sub(s, pos, pos) == "@" do
@@ -115,9 +89,7 @@ local function noise_end(s)
     return pos
 end
 
--- the first match of \b(WORDS)\s+(\w+), or \bWORD\b with no name when bare is set: the name, or "init"/"subscript"
 local function keyword_name(s, kinds, bare)
-    -- the leftmost position at which one of the kinds matches, and what that match names
     local best, best_name = nil, nil
     for _, kind in ipairs(kinds) do
         for _, at in ipairs(text.positions(s, kind)) do
@@ -148,7 +120,6 @@ end
 
 local TYPE_KINDS = {"struct", "class", "enum", "protocol", "actor", "typealias"}
 
--- the member name a row names, whether the column holds a bare name or a whole declaration
 local function leaf(raw)
     local s = text.strip(raw)
     local stripped = text.strip(string.sub(s, noise_end(s)))
@@ -167,9 +138,6 @@ local function leaf(raw)
     return text.strip(head)
 end
 
--- A list of (owner, kind, leaf) rows, each once. A line that does not have exactly three tab-separated columns is a
--- **hard error**: the sets partition what was read, so a file of the wrong shape read as the empty set makes the
--- identity hold at 0 == 0 and the classes below it partition an empty |O\N| exactly.
 local function read(file, allow_empty)
     local rows, seen, bad = {}, {}, {}
     local lines = text.split(io.readfile(file), "\n")
@@ -204,7 +172,6 @@ local function read(file, allow_empty)
     return rows, nil
 end
 
--- one pass over every interface: leaf name -> set of {owner, file, number, text, attributes above it}
 local index_cache = nil
 
 local function index()
@@ -327,8 +294,6 @@ function main(...)
     end
     local table_index = index()
 
-    -- where each name sits in the NEW file, by (name, file, line) - the pairing that says "moved" is the same declaration
-    -- at another owner, not merely the same name
     local new_leaves_by_line = {}
     for _, row in ipairs(new_rows) do
         for _, home in ipairs(table_index[row[3]] or {}) do
@@ -338,7 +303,6 @@ function main(...)
         end
     end
 
-    -- one pass, and the three classes partition |O\N| exactly
     local moved, attribute, other = {}, {}, {}
     for key, row in pairs(only_old) do
         local owner, name = row[1], row[3]
@@ -353,11 +317,11 @@ function main(...)
             end
         end
         if has_multi then
-            attribute[key] = row                    -- (c) a block with more than one attribute above it
+            attribute[key] = row
         elseif has_available then
-            other[key] = row                        -- an @available the old extractor dropped
+            other[key] = row
         elseif #homes == 0 then
-            other[key] = row                        -- no declaration of that name in the interfaces
+            other[key] = row
         else
             local is_moved = false
             for _, home in ipairs(homes) do
@@ -368,9 +332,9 @@ function main(...)
                 end
             end
             if is_moved then
-                moved[key] = row                    -- (a) the same declaration, at another owner
+                moved[key] = row
             else
-                other[key] = row                    -- the same name, but not the same declaration
+                other[key] = row
             end
         end
     end

@@ -1,27 +1,8 @@
--- coverage.lua: сколько публичной поверхности SwiftUI покрыто нашей реализацией.
---
--- Эталон — интерфейс SwiftUI из SDK (списки в ../bridge/apple-types.txt и apple-view-modifiers.txt),
--- наша сторона — исходники Sources/SwiftUI.
---
---   xmake l coverage.lua             счёт
---   xmake l coverage.lua --missing   чего нет
---   xmake l coverage.lua --ignored   что объявлено и игнорируется
---   xmake l coverage.lua --pending   заглушки: объявлены, пишут в журнал, ждут реализации
---   xmake l coverage.lua --check     проверка для сборки: счёт не упал, README сходится, у каждого
---                                    игнорируемого API есть строка причины в README
---   xmake l coverage.lua --update    записать текущий счёт в coverage-baseline.json и в README
---
--- The Python version of this file (coverage.py) read the same inputs with regular expressions. Each pattern is
--- written here as a Lua pattern or as a plain search; the comment above each one gives the regular expression it
--- stands for. The messages are the ones the Python printed.
-
 import("core.base.json")
 local text = import("lib.text", {rootdir = path.join(os.scriptdir(), ".."), anonymous = true})
 
 local here = os.scriptdir()
 
--- the lines of a file, as Python's `for line in open(...)` gives them: without the newline, and no empty line after
--- the last newline
 local function lines_of(content)
     local lines = text.split(content, "\n")
     if lines[#lines] == "" then
@@ -51,14 +32,12 @@ local function sorted_keys(set)
     return keys
 end
 
--- Python's str.format with named fields: {name} is replaced by the value of that key
 local function format_named(template, values)
     return (string.gsub(template, "{([%w_]+)}", function(key)
         return tostring(values[key])
     end))
 end
 
--- the first `count` characters of a string, counted in code points
 local function take(s, count)
     local length = utf8.len(s) or #s
     if length <= count then
@@ -67,7 +46,6 @@ local function take(s, count)
     return string.sub(s, 1, utf8.offset(s, count + 1) - 1)
 end
 
--- the line a position falls on: text.count(chr(10), 0, m.start()) + 1, with the position 1-based here
 local function line_at(content, pos)
     local count = 0
     for _ in string.gmatch(string.sub(content, 1, pos - 1), "\n") do
@@ -76,8 +54,6 @@ local function line_at(content, pos)
     return count + 1
 end
 
--- the Swift sources of the module, in the order os.walk gave them (the directory has no subdirectories, so its
--- files, sorted, are the walk)
 local function sources()
     local dir = path.join(here, "Sources", "SwiftUI")
     if #os.dirs(path.join(dir, "*")) > 0 then
@@ -95,12 +71,10 @@ local function sources()
     return out
 end
 
--- the public surface of Apple's SwiftUI for iOS 6, as the bridge files list it
 local function apple_surface()
     local types, type_names = {}, {}
     for _, line in ipairs(lines_of(read(path.join(here, "..", "bridge", "apple-types.txt")))) do
         local parts = text.split(line, "\t")
-        -- name, kind = line.rstrip('\n').split('\t')
         if #parts ~= 2 then
             raise("coverage: apple-types.txt line has " .. #parts .. " columns: " .. line)
         end
@@ -118,7 +92,6 @@ local function apple_surface()
     return types, type_names, mods
 end
 
--- the names in one of the iOS lists: a set of the stripped, non-empty lines
 local function ios_names(file)
     local set = {}
     for _, line in ipairs(lines_of(read(path.join(here, "..", "bridge", file)))) do
@@ -129,12 +102,6 @@ local function ios_names(file)
     return set
 end
 
--- Every call that writes to the journal, with what coverage makes of it: a counted modifier name, a partial note
--- that the README must name, or a call the counter cannot read at all.
---
--- The Python searched every line for the first `unimplemented(` or `ignored(` at a word boundary and not after
--- `func `: r'(?<!func )\b(unimplemented|ignored)\((.*)'. Its `.*` runs to the end of the line, so a line has at most
--- one such call, and that is what is searched here.
 local function first_call(line)
     local from = 1
     while true do
@@ -174,7 +141,6 @@ local function stub_calls()
                 end
             end
         end
-        -- r'_Unsupported\.(pendingNote|note)\("([^"]*)"': the note's text may run over lines, so the whole file is read
         local content = source.text
         local pos = 1
         while true do
@@ -196,7 +162,6 @@ local function stub_calls()
             local close = kind and string.find(content, '"', opening, true)
             if close then
                 local arg = string.sub(content, opening, close - 1)
-                -- r'[\w.]+(\([^)\\]*\))?' matched at the start of the note's text
                 local head = nil
                 local base = string.match(arg, "^[%w_%.]+")
                 if base then
@@ -212,13 +177,10 @@ local function stub_calls()
     return counted, partial, unreadable
 end
 
--- The names the module declares: its types, its modifiers of View, the names it ignores with the reason, and the
--- ones it only logs (pending).
 local function ours()
     local types, mods, ignored, pending = {}, {}, {}, {}
     for _, source in ipairs(sources()) do
         local content = source.text
-        -- r'public (?:@\w+\s+)*(struct|class|enum|protocol)\s+([A-Za-z_]\w*)'
         local pos = 1
         while true do
             local found, after_public = string.find(content, "public ", pos, true)
@@ -242,7 +204,6 @@ local function ours()
                 pos = found + 1
             end
         end
-        -- r'(?:public )?typealias\s+([A-Za-z_]\w*)' and r'associatedtype\s+([A-Za-z_]\w*)'
         for _, keyword in ipairs({"typealias", "associatedtype"}) do
             pos = 1
             while true do
@@ -257,7 +218,6 @@ local function ours()
                 pos = keyword_end + 1
             end
         end
-        -- r'ignored\(self, "(\w+)", "([^"]*)"\)': a later declaration of the same name replaces the reason
         pos = 1
         while true do
             local found, opening_end = string.find(content, 'ignored(self, "', pos, true)
@@ -270,7 +230,6 @@ local function ours()
             end
             pos = opening_end + 1
         end
-        -- r'unimplemented\(self, "(\w+)"\)'
         pos = 1
         while true do
             local found, opening_end = string.find(content, 'unimplemented(self, "', pos, true)
@@ -283,14 +242,12 @@ local function ours()
             end
             pos = opening_end + 1
         end
-        -- the modifiers of View: the lines of the file, read one by one with an `extension` line opening a section
         local in_view = false
         for _, line in ipairs(text.split(content, "\n")) do
             local extended = string.match(line, "^extension ([%w_%.]+)")
             if extended then
                 in_view = extended == "View"
             end
-            -- r'(public |final |)(struct|class|enum|protocol) '
             local declares = false
             for _, prefix in ipairs({"public ", "final ", ""}) do
                 if not declares and text.startswith(line, prefix) then
@@ -305,7 +262,6 @@ local function ours()
             if declares then
                 in_view = false
             end
-            -- r'    public func (\w+)'
             local modifier = string.match(line, "^    public func ([%w_]+)")
             if modifier and in_view then
                 mods[modifier] = true
@@ -321,7 +277,6 @@ local function ours()
     return types, mods, ignored, pending_only
 end
 
--- the number of public names no 26.2 interface declares, or nil when that file is not there
 local INVENTED_PATH = path.join(here, "..", "bridge", "api", "invented.txt")
 local INVENTED_PATH_NAME = "bridge/api/invented.txt"
 local INVENTED_GENERATOR = "bridge/api-surface.sh"
@@ -339,7 +294,6 @@ local function invented_count()
     return n
 end
 
--- The score lines of the README: the Python regular expressions, as Lua patterns with their captures
 local SCORE = "%*%*(%d+) типов%*%* и %*%*(%d+) модификаторов%*%*, из них %*%*(%d+) действуют%*%*, (%d+) заглушки %(пишут в журнал%), (%d+) объявлены"
 local IOS_SCORE = "Из того, что Apple объявляет доступным на iOS: %*%*(%d+) из (%d+) типов%*%* и %*%*(%d+) из (%d+) модификаторов%*%*, из них %*%*(%d+) действуют%*%*, (%d+) заглушки, (%d+) игнорируются"
 local SCORE_TEXT = "**{types} типов** и **{mods} модификаторов**, из них **{working} действуют**, {pending} заглушки (пишут в журнал), {ignored} объявлены"
@@ -361,7 +315,6 @@ local function counts()
             covered_types = covered_types + 1
         end
     end
-    -- apple_mods is a list: a modifier named twice in the file counts twice, as it did before
     local covered_mods, working, stubs = {}, {}, {}
     for _, name in ipairs(apple_mods) do
         if our_mods[name] then
@@ -386,7 +339,6 @@ local function counts()
         pending = #stubs,
         ignored = #covered_mods - #working - #stubs,
     }
-    -- ios_counts
     local ios_mod_list, ios_work, ios_pend = {}, {}, {}
     for _, name in ipairs(covered_mods) do
         if ios_mods[name] then
@@ -422,7 +374,6 @@ local function counts()
     }
 end
 
--- Python's json.dump(numbers, f, indent=2): no newline at the end
 local function baseline_json(n)
     local rows = {}
     for _, key in ipairs(NUMBER_KEYS) do
@@ -431,7 +382,6 @@ local function baseline_json(n)
     return "{\n" .. text.join(",\n", rows) .. "\n}"
 end
 
--- Python's repr of the dict numbers
 local function dict_repr(n)
     local rows = {}
     for _, key in ipairs(NUMBER_KEYS) do
@@ -485,7 +435,6 @@ function main(...)
             local baseline = json.decode(read(baseline_path))
             for _, key in ipairs({"types", "mods", "working"}) do
                 if n[key] < baseline[key] then
-                    -- json reads every number as a float; Python printed the integer it was written as
                     problems[#problems + 1] = key .. ": было " .. string.format("%d", baseline[key]) .. ", стало " .. n[key]
                         .. " — покрытие упало"
                 end
@@ -536,11 +485,7 @@ function main(...)
         said = said and tonumber(said)
         local actual = invented_count()
         if has_arg("--before-build") then
-            -- build.sh runs this first, and the file below is made from the module build.sh builds: on a fresh tree no
-            -- build can start if it must already be there. The full --check (without the flag) compares it afterwards.
         elseif actual == nil then
-            -- the oracle is generated, not tracked, so a fresh tree has none: a check that skipped a missing oracle would
-            -- pass any number at all, so the absence is the failure and it names what writes the file
             problems[#problems + 1] = INVENTED_PATH_NAME .. " нет, и без него счёт выдуманных имён не проверить: его пишет "
                 .. INVENTED_GENERATOR .. ", запустите его и обновите README (xmake l coverage.lua --update)"
         elseif said == nil then

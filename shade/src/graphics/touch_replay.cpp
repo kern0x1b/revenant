@@ -29,7 +29,7 @@ namespace {
         throw std::runtime_error { "unknown touch replay phase: " + value };
     }
 
-} // namespace
+}
 
 TouchReplay::TouchReplay(const std::filesystem::path& path)
 {
@@ -116,4 +116,4 @@ TouchReplay::settled_deadline(std::chrono::milliseconds quiet_period) const
     return start_time_ + final_delay + quiet_period;
 }
 
-} // namespace shade
+}

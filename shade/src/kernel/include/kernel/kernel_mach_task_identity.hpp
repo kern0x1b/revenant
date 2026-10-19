@@ -18,9 +18,6 @@ struct ProcessContext;
 
 namespace mach_task_identity {
 
-    // libSystem exposes these task-local names during the earliest iPhoneOS 1.0
-    // startup. They may repeat in every ipc_space; they are never global object
-    // identifiers.
     inline constexpr std::uint32_t initial_task_self_name = 0x103U;
     inline constexpr std::uint32_t initial_thread_self_name = 0x203U;
     inline constexpr std::uint32_t initial_host_self_name = 0x303U;
@@ -30,18 +27,12 @@ namespace mach_task_identity {
     inline constexpr std::uint32_t initial_io_master_name = 0x703U;
     inline constexpr std::uint32_t initial_io_registry_options_name = 0x713U;
 
-    // Installs the task-local names for PID 1 while allocating distinct global
-    // ipc_port objects for its task, thread, and bootstrap/job ports.
     [[nodiscard]] bool initialize_root(
         KernelSharedState& state, ProcessContext& process);
 
-    // Creates a child ipc_space. Task/thread self names intentionally reuse the
-    // initial local ABI values; the parent receives a separately copied-out
-    // child task capability, and the bootstrap special-port object is inherited
-    // without treating either task's local name as an object identifier.
     [[nodiscard]] bool inherit_child(KernelSharedState& state,
         const ProcessContext& parent, ProcessContext& child,
         bool inherit_registered_ports);
 
-} // namespace mach_task_identity
-} // namespace shade
+}
+}

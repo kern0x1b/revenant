@@ -58,4 +58,4 @@ void write_capture_file(
     }
 }
 
-} // namespace shade::bsd::baseband_device
+}

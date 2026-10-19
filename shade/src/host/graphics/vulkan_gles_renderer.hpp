@@ -14,11 +14,10 @@
 
 namespace shade {
 
-// Returns null when Vulkan exposes no device matching the selection policy.
 [[nodiscard]] std::unique_ptr<GlesRenderer> create_vulkan_gles_renderer(
     const std::filesystem::path& pipeline_cache,
     const VulkanPresenterConfiguration* presenter,
     GlesDeviceSelection selection,
     std::string* failure = nullptr) noexcept;
 
-} // namespace shade
+}

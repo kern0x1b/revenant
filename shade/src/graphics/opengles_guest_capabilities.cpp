@@ -58,10 +58,6 @@ namespace {
         2048,
     };
 
-    // The 7A341 SGX535 driver exposes both ES 1.1 and ES 2.0 strings. The HLE
-    // implements the fixed-function ES 1.1 ABI today, so keep the ES 2.0 shader
-    // capability private until that ABI is implemented instead of advertising a
-    // path that would fail after context creation.
     constexpr OpenGlesGuestCapabilities sgx535 {
         "sgx535-fixed-function",
         common_vendor,
@@ -90,8 +86,6 @@ namespace {
         sgx535.maximum_viewport_dimension,
     };
 
-    // Share the implemented SGX fixed-function contract; hardware identity
-    // stays separate from the host Vulkan renderer and from ES 2 support.
     constexpr OpenGlesGuestCapabilities sgx543 = [] {
         auto capabilities = sgx535_framebuffer_objects;
         capabilities.name = "sgx543-framebuffer-object";
@@ -101,12 +95,10 @@ namespace {
         return capabilities;
     }();
 
-} // namespace
+}
 
 EaglContextAbi detect_eagl_context_abi(const UserlandHleCall& call)
 {
-    // Stripped framework builds retain the C macro-context accessor even
-    // when the Objective-C implementation name is absent from the symbol table.
     return (call.symbol_address("-[EAGLContext GetMacroContextPrivate]") ||
                call.symbol_address("_EAGLGetCurrentMacroContextPrivate"))
                ? EaglContextAbi::FirmwareMacroDispatch
@@ -147,4 +139,4 @@ OpenGlesGuestCapabilitySet open_gles_framebuffer_capabilities(
     return OpenGlesGuestCapabilitySet::MbxLiteFramebufferObjects;
 }
 
-} // namespace shade
+}

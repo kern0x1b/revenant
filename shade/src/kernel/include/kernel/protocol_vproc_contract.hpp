@@ -18,10 +18,6 @@
 
 namespace shade::protocol_vproc {
 
-// Apple kept protocol_vproc's public prefix stable while adding and removing
-// private routines in the tail.  Describe the wire capability that changes
-// the following routine identifiers rather than keying compatibility to an
-// OS build or to a particular executable path.
 struct Contract {
     std::string_view name;
     std::uint32_t log_message_id;
@@ -47,4 +43,4 @@ inline constexpr std::array contracts { without_service_policy,
     return nullptr;
 }
 
-} // namespace shade::protocol_vproc
+}

@@ -1,24 +1,5 @@
--- classify-gaps.lua: why a row of the 26.2 surface is a gap, as classes the rows themselves support.
---
---     xmake l classify-gaps.lua gaps14.tsv [-o classified.tsv]
---
--- The gaps list is one column, `Owner#name`, and every row in it is a name the 26.2 surface carries and this tree
--- declares nothing for. The rows are not one kind of thing, and a single "missing" count says nothing about why: some
--- name no lookup can ever satisfy, some is a member the compiler writes for a conformance, some is machinery a header
--- declares and no application writes, and some is a member of a type this tree does not declare at all. The classes
--- are therefore ordered, so that every row lands in exactly one, and the count is a partition.
---
---     1 declaration-form  the row names no name at all - `init`, `subscript` - so declaring a name cannot close it
---     2 witness           a member the compiler synthesises for a conformance: an associatedtype witness,
---                         an Equatable/Hashable member, a protocol's collection member
---     3 machinery         a name a header declares for the runtime's own use, underscore-prefixed
---     4 nested            a member of a type nested in another, which the tree's owner is missing
---     5 top-level         a member of a type the tree does not declare, and nothing else about it
-
 local text = import("lib.text", {rootdir = path.join(os.scriptdir(), "..", ".."), anonymous = true})
 
--- A name the compiler writes out for a conformance rather than a declaration. `init` and `subscript` are not in this
--- set: they are declaration forms, and they are the first class instead.
 local WITNESSES = {}
 for _, name in ipairs({
     "Body", "hash", "hashValue", "hashValue(into:)", "Element", "ArrayLiteralElement", "RawValue",
@@ -34,7 +15,6 @@ local FORMS = {init = true, subscript = true}
 
 local CLASSES = {"declaration-form", "witness", "machinery", "nested", "top-level"}
 
--- the one class this row belongs to, in the order the classes are meant to be read
 local function classify(row)
     local owner, _, name = text.partition(row, "#")
     if FORMS[name] then
@@ -52,7 +32,6 @@ local function classify(row)
     return "top-level"
 end
 
--- the rows of a gaps list: blank lines and comments are skipped, and a line with no `#` is an error
 local function read(file)
     local rows = {}
     local content = io.readfile(file)

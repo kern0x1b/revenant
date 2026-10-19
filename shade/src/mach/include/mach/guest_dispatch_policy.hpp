@@ -16,9 +16,6 @@
 
 namespace shade {
 
-// Stable simulator facts supplied by a client. "Realtime" can represent a
-// display callback, audio callback or another bounded Guest dependency chain;
-// the policy never sees a renderer, executable path, App or firmware identity.
 struct GuestDispatchObservation {
     std::chrono::steady_clock::time_point now;
     std::optional<XnuThreadId> debugger_thread;
@@ -60,9 +57,6 @@ struct GuestDispatchDecision {
     bool explicit_handoff_stale { };
 };
 
-// Core host-dispatch policy layered above XNU runnable selection. A preferred
-// thread is a bounded handoff hint only: XnuScheduler still owns eligibility,
-// Guest priority, quantum, realtime deadlines and queue order.
 class GuestDispatchPolicy {
 public:
     explicit GuestDispatchPolicy(
@@ -87,4 +81,4 @@ private:
     std::size_t preferred_process_burst_ { };
 };
 
-} // namespace shade
+}

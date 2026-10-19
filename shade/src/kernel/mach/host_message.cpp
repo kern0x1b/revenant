@@ -67,7 +67,7 @@ namespace {
         return true;
     }
 
-} // namespace
+}
 
 bool CompatibilityKernel::dispatch_mach_host_message(
     Cpu& cpu, const MachMessageRequest& request)
@@ -134,8 +134,6 @@ bool CompatibilityKernel::dispatch_mach_host_message(
                 .value_or(0);
         if (flavor == host_info::basic_flavor &&
             requested_count >= host_info::basic_old_word_count) {
-            // The host_basic_info ABI accepts the five-word legacy prefix and
-            // returns the full structure when it fits.
             const auto configured_memory_size =
                 device_model_.memory.usable_ram_bytes != 0
                     ? std::min(device_model_.memory.usable_ram_bytes,
@@ -146,18 +144,18 @@ bool CompatibilityKernel::dispatch_mach_host_message(
                     std::numeric_limits<std::uint32_t>::max()));
             const auto max_mem = shared_state_->device_ram_bytes;
             const std::array<std::uint32_t, host_info::basic_word_count> info {
-                virtual_processor_count_, // max_cpus
-                virtual_processor_count_, // avail_cpus
+                virtual_processor_count_,
+                virtual_processor_count_,
                 memory_size,
                 shared_state_->device_cpu_type,
                 shared_state_->device_cpu_subtype,
-                0, // cpu_threadtype
-                virtual_processor_count_, // physical_cpu
-                virtual_processor_count_, // physical_cpu_max
-                virtual_processor_count_, // logical_cpu
-                virtual_processor_count_, // logical_cpu_max
-                static_cast<std::uint32_t>(max_mem), // max_mem, low 32 bits
-                static_cast<std::uint32_t>(max_mem >> 32U), // high 32 bits
+                0,
+                virtual_processor_count_,
+                virtual_processor_count_,
+                virtual_processor_count_,
+                virtual_processor_count_,
+                static_cast<std::uint32_t>(max_mem),
+                static_cast<std::uint32_t>(max_mem >> 32U),
             };
             const auto count = requested_count >= info.size()
                                    ? info.size()
@@ -168,14 +166,14 @@ bool CompatibilityKernel::dispatch_mach_host_message(
         if (flavor == host_info::priority_flavor &&
             requested_count >= host_info::priority_word_count) {
             const std::array<std::uint32_t, host_info::priority_word_count> info {
-                80, // MINPRI_KERNEL
-                80, // MINPRI_KERNEL
-                64, // MINPRI_RESERVED
-                31, // BASEPRI_DEFAULT
-                0, // DEPRESSPRI
-                0, // IDLEPRI
-                0, // MINPRI_USER
-                79, // MAXPRI_RESERVED
+                80,
+                80,
+                64,
+                31,
+                0,
+                0,
+                0,
+                79,
             };
             write_counted_reply(0, info);
             return true;
@@ -207,10 +205,6 @@ bool CompatibilityKernel::dispatch_mach_host_message(
                 memory_.resident_page_count(), total_pages);
             std::array<std::uint32_t, host_statistics::vm_rev2_word_count>
                 info { };
-            // vm_statistics free count includes speculative pages. The
-            // emulator has no separate global VM queues, so project the
-            // address space's resident pages into active memory and keep the
-            // total-page invariant visible to host consumers.
             info[0] = static_cast<std::uint32_t>(total_pages - resident_pages);
             info[1] = static_cast<std::uint32_t>(resident_pages);
             const auto count = requested_count >= host_statistics::vm_rev2_word_count
@@ -233,29 +227,29 @@ bool CompatibilityKernel::dispatch_mach_host_message(
     }
     if (*message_id == routine::host_page_size && registers[3] >= 40) {
         const std::array<std::uint32_t, 10> reply {
-            18, // MOVE_SEND_ONCE reply right
-            40, // message size
-            *local_port, // reply destination
+            18,
+            40,
+            *local_port,
             0,
             0,
-            *message_id + 100, // MIG reply ID
-            0x00000000U, // NDR bytes 0..3
-            0x00000001U, // little-endian NDR, bytes 4..7
-            0, // KERN_SUCCESS
+            *message_id + 100,
+            0x00000000U,
+            0x00000001U,
+            0,
             AddressSpace::page_size,
         };
         for (std::size_t index = 0; index < reply.size(); ++index) {
             if (!memory_.write32(
                     message_address + static_cast<std::uint32_t>(index * 4U),
                     reply[index])) {
-                registers[0] = 0x10004008U; // MACH_RCV_INVALID_DATA
+                registers[0] = 0x10004008U;
                 return true;
             }
         }
-        registers[0] = 0; // MACH_MSG_SUCCESS
+        registers[0] = 0;
         return true;
     }
     return false;
 }
 
-} // namespace shade
+}

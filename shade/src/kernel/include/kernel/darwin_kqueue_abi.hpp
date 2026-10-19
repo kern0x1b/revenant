@@ -61,14 +61,14 @@ namespace arm32_event {
     inline constexpr std::uint32_t data_offset = 12;
     inline constexpr std::uint32_t user_data_offset = 16;
     inline constexpr std::uint32_t size = 20;
-} // namespace arm32_event
+}
 
 namespace arm32_timespec {
     inline constexpr std::uint32_t seconds_offset = 0;
     inline constexpr std::uint32_t nanoseconds_offset = 4;
     inline constexpr std::uint32_t size = 8;
-} // namespace arm32_timespec
+}
 
 inline constexpr std::uint64_t nanoseconds_per_second = 1'000'000'000ULL;
 
-} // namespace shade::darwin::kqueue
+}

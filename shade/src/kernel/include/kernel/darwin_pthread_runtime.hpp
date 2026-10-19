@@ -49,14 +49,9 @@ struct DarwinWorkqueueWorker {
     bool idle { };
 };
 
-// Per-process state installed by Darwin's bsdthread_register syscall. The
-// compatibility kernel owns scheduling and memory; this object only retains
-// the Guest ABI registration across fork and clears it across exec.
 class DarwinPthreadRuntime {
 public:
     static constexpr std::uint32_t maximum_pthread_size = 64U * 1024U;
-    // Storage covers the largest audited v1 contract. The active count is
-    // configured from the firmware ABI when workq_open is handled.
     static constexpr std::uint32_t maximum_workqueue_priority_count = 4U;
     static constexpr std::uint32_t workqueue_overcommit = 0x0001'0000U;
     static constexpr std::size_t maximum_workqueue_workers = 64U;
@@ -122,8 +117,6 @@ public:
     void inherit_from(const DarwinPthreadRuntime& parent, bool fork) noexcept
     {
         registration_ = fork ? parent.registration_ : std::nullopt;
-        // XNU constructs a fresh workqueue for a child process.  The pthread
-        // ABI registration survives fork, but kernel workqueue state does not.
         reset_workqueue();
     }
 
@@ -141,4 +134,4 @@ private:
         target_concurrency_ { };
 };
 
-} // namespace shade
+}

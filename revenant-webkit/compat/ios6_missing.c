@@ -197,7 +197,7 @@ int mkostemps(char *templateName, int suffixLength, int flags)
 {
     int fd = mkstemps(templateName, suffixLength);
     if (fd >= 0 && flags)
-        fcntl(fd, 2 /* F_SETFD */, 1 /* FD_CLOEXEC */);
+        fcntl(fd, 2 , 1 );
     return fd;
 }
 

@@ -36,8 +36,6 @@ std::uint32_t VnodeWatch::pending(GuestFileGenerationRegistry& files) const
         pending_ |= current.last_mutation == GuestFileMutationKind::Rename
                         ? vnode_note_rename
                         : vnode_note_delete;
-        // Replacing the pathname must not silently retarget an existing knote
-        // to the new file object. The client can reopen and register it again.
         detached_ = true;
     } else if (before && after && current.revision != observed_.revision) {
         if (before->file_size != after->file_size ||
@@ -64,4 +62,4 @@ void VnodeWatch::acknowledge(std::uint32_t flags) const
     pending_ &= ~flags;
 }
 
-} // namespace shade
+}

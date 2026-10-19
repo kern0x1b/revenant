@@ -470,9 +470,6 @@ namespace {
         }
         PlistOwner root { parsed };
 
-        // WiFiManager on legacy firmware treats a missing capability as an
-        // uninitialized serialized-data response. Add only the default for a
-        // missing key; an explicit guest value remains guest-owned.
         if (plist_dict_get_item(root.get(), "WAPIEnabled") != nullptr)
             return false;
         plist_dict_set_item(root.get(), "WAPIEnabled", plist_new_bool(0));
@@ -482,7 +479,7 @@ namespace {
 
 #endif
 
-} // namespace
+}
 
 NetworkPreferencesResult ensure_network_preferences(
     const std::filesystem::path& rootfs,
@@ -622,4 +619,4 @@ NetworkPreferencesResult ensure_network_preferences(
     return result;
 }
 
-} // namespace shade
+}

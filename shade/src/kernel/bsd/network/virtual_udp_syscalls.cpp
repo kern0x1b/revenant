@@ -31,7 +31,7 @@ namespace {
         case bsd::VirtualUdpStatus::AlreadyConnected:
             return bsd_support::already_connected;
         case bsd::VirtualUdpStatus::AddressFamilyUnsupported:
-            return 47; // EAFNOSUPPORT
+            return 47;
         case bsd::VirtualUdpStatus::InvalidArgument:
             return bsd_support::invalid_argument;
         case bsd::VirtualUdpStatus::Success:
@@ -40,7 +40,7 @@ namespace {
         return bsd_support::invalid_argument;
     }
 
-} // namespace
+}
 
 bool CompatibilityKernel::send_host_socket_bytes(Cpu& cpu, std::uint32_t fd,
     std::vector<std::byte> bytes, std::vector<std::byte> destination,
@@ -195,4 +195,4 @@ bool CompatibilityKernel::send_socket_message(Cpu& cpu, std::uint32_t fd,
     return true;
 }
 
-} // namespace shade
+}

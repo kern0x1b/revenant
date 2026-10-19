@@ -1,13 +1,3 @@
-// Class objects laid out the way the Swift runtime lays them out, handed to libobjc the way it hands them over.
-//
-// Swift keeps its classes in the platform's objc_class layout (arm64: isa, superclass, two cache words, a data word with
-// the class_ro_t) and gives them to the Objective-C runtime in place: a class the compiler emitted and listed in
-// __objc_clsrolist is realized by the first message that reaches it, one the Swift runtime builds is handed over through
-// objc_readClassPair or _objc_realizeClassFromSwift, and a class with no name in its ro is named by the hook registered
-// through objc_setHook_lazyClassNamer. iOS 6 libobjc has none of the three calls and cannot read the layout at all.
-//
-// The program builds one of each and prints what the runtime answers. It is built for macOS, where objc4 is the real thing,
-// and expected.txt is what it printed there: the translated program on the iPad 2 must print the same.
 #include <objc/message.h>
 #include <objc/runtime.h>
 #include <stdint.h>
@@ -28,7 +18,7 @@ struct ro {
     uint32_t instance_start;
     uint32_t instance_size;
     uint32_t reserved;
-    const void *ivar_layout;  // a metaclass's: the class it belongs to, which a lazily named class needs
+    const void *ivar_layout;
     const char *name;
     const void *methods;
     const void *protocols;
@@ -63,7 +53,6 @@ static long ping(id self, SEL cmd, long x) { return x + 1; }
 static long class_ping(id self, SEL cmd, long x) { return x + 100; }
 static long pong(id self, SEL cmd, long x) { return x + 2; }
 
-// 1. A class the compiler laid out statically and listed only in __objc_clsrolist: nothing hands it over.
 static struct method_list static_methods = {24, 1, {{"xl_ping:", "q24@0:8q16", ping}}};
 static struct method_list static_class_methods = {24, 1, {{"xl_classPing:", "q24@0:8q16", class_ping}}};
 __attribute__((section("__DATA,__objc_const"))) static struct ro static_ro = {RO_ARC, 8, 8, 0, 0, "XLPairStatic", &static_methods, 0, 0, 0, 0};
@@ -72,8 +61,6 @@ static struct cls static_meta = {&OBJC_METACLASS_$_NSObject, &OBJC_METACLASS_$_N
 static struct cls static_class = {&static_meta, &OBJC_CLASS_$_NSObject, &_objc_empty_cache, 0, (uintptr_t)&static_ro};
 __attribute__((used, section("__DATA,__objc_clsrolist,regular,no_dead_strip"))) static const void *static_rolist[] = {&static_ro, &static_meta_ro};
 
-// 1b. A root class of the program's own (as libswiftCore's _SwiftObject is) with a Swift class beneath it that the compiler listed
-// in __objc_classlist: the Objective-C runtime registers the listed ones at load, so a lookup by name finds them from the start.
 static id root_self(id self, SEL cmd) { return self; }
 static Class root_class(id self, SEL cmd) { return object_getClass(self); }
 static struct method_list root_methods = {24, 2, {{"self", "@16@0:8", root_self}, {"class", "#16@0:8", root_class}}};
@@ -88,19 +75,10 @@ static struct method_list listed_class_methods = {24, 1, {{"xl_classPing:", "q24
 __attribute__((section("__DATA,__objc_const"))) static struct ro listed_ro = {RO_ARC, 8, 8, 0, 0, "XLPairListed", &listed_methods, 0, 0, 0, 0};
 __attribute__((section("__DATA,__objc_const"))) static struct ro listed_meta_ro = {RO_ARC | RO_META, 40, 40, 0, 0, "XLPairListed", &listed_class_methods, 0, 0, 0, 0};
 static struct cls listed_meta = {&root_meta, &root_meta, &_objc_empty_cache, 0, (uintptr_t)&listed_meta_ro};
-// bits 3: Swift's class flags (FAST_IS_SWIFT_LEGACY | FAST_IS_SWIFT_STABLE), as on a class the Swift compiler emits
 static struct cls listed_class = {&listed_meta, &root_class_object, &_objc_empty_cache, 0, (uintptr_t)((char *)&listed_ro + 3)};
 __attribute__((used, section("__DATA,__objc_classlist,regular,no_dead_strip"))) static struct cls *listed_classlist[] = {&root_class_object, &listed_class};
-// what the compiler emits for any Objective-C image, and without which the runtime reads no class list from it
 __attribute__((used, section("__DATA,__objc_imageinfo,regular,no_dead_strip"))) static const uint32_t image_info[2] = {0, 64};
 
-// 1c. A classlist class whose immediate superclass is laid out ONLY in __objc_clsrolist, with no ancestor of its own
-// (review of f248398: SplitGuestLayoutClasses's ancestor walk consulted only the classes __objc_classlist gave it, so a
-// clsrolist-only ancestor was invisible and this classlist class was silently kept at host layout instead of moved).
-// Its own superclass is root_class_object (not Null directly): a clsrolist-only class with no ancestor at all would also
-// need to answer "class" as a bare host root once shadow-built (xl_build_shadow realizes a host superclass by messaging
-// it), which a fresh objc_allocateClassPair(Nil, ...) root does not, before it has any NSObject-descended ancestor to
-// inherit that from -- a real limitation of the shadow builder, orthogonal to the ancestor-walk bug this fixture is for.
 __attribute__((section("__DATA,__objc_const"))) static struct ro clsroot_ro = {RO_ARC, 8, 8, 0, 0, "XLPairClsroRoot", 0, 0, 0, 0, 0};
 __attribute__((section("__DATA,__objc_const"))) static struct ro clsroot_meta_ro = {RO_ARC | RO_META, 40, 40, 0, 0, "XLPairClsroRoot", 0, 0, 0, 0, 0};
 static struct cls clsroot_meta = {&root_meta, &root_meta, &_objc_empty_cache, 0, (uintptr_t)&clsroot_meta_ro};
@@ -111,11 +89,9 @@ static struct method_list clsrochild_class_methods = {24, 1, {{"xl_classPing:", 
 __attribute__((section("__DATA,__objc_const"))) static struct ro clsrochild_ro = {RO_ARC, 8, 8, 0, 0, "XLPairListedOverClsro", &clsrochild_methods, 0, 0, 0, 0};
 __attribute__((section("__DATA,__objc_const"))) static struct ro clsrochild_meta_ro = {RO_ARC | RO_META, 40, 40, 0, 0, "XLPairListedOverClsro", &clsrochild_class_methods, 0, 0, 0, 0};
 static struct cls clsrochild_meta = {&root_meta, &clsroot_meta, &_objc_empty_cache, 0, (uintptr_t)&clsrochild_meta_ro};
-// bits 3: Swift's class flags, same as listed_class above -- what makes SplitGuestLayoutClasses consider moving it
 static struct cls clsrochild_class = {&clsrochild_meta, &clsroot_class, &_objc_empty_cache, 0, (uintptr_t)((char *)&clsrochild_ro + 3)};
 __attribute__((used, section("__DATA,__objc_classlist,regular,no_dead_strip"))) static struct cls *clsrochild_classlist[] = {&clsrochild_class};
 
-// The class the Swift runtime builds for itself: objects on the heap, from an ro it fills in.
 static struct cls *build(const char *name, struct cls *super, struct method_list *methods, struct method_list *class_methods,
                          struct cls **meta_out)
 {
@@ -171,15 +147,12 @@ static void report(const char *label, struct cls *c, struct cls *super, struct c
 int main(void)
 {
     setvbuf(stdout, 0, _IONBF, 0);
-    // 1. the static class, before anything hands it over
     report("static", &static_class, &OBJC_CLASS_$_NSObject, &static_meta, 1);
 
-    // 1b. the listed Swift class under a root of the program's own: registered at load, found by name before anything else
     printf("listed: found by name: %d\n", objc_getClass("XLPairListed") == (Class)&listed_class);
     printf("listed: root found by name: %d\n", objc_getClass("XLPairRoot") == (Class)&root_class_object);
     report("listed", &listed_class, &root_class_object, &listed_meta, 0);
 
-    // 2. a class built at run time and handed over through objc_readClassPair
     static struct method_list built_methods = {24, 1, {{"xl_ping:", "q24@0:8q16", ping}}};
     static struct method_list built_class_methods = {24, 1, {{"xl_classPing:", "q24@0:8q16", class_ping}}};
     struct cls *meta;
@@ -188,7 +161,6 @@ int main(void)
     printf("readClassPair: found by name: %d\n", objc_getClass("XLPairBuilt") == (Class)built);
     report("built", built, &OBJC_CLASS_$_NSObject, meta, 1);
 
-    // 3. a subclass of it, which inherits the method and overrides the other
     static struct method_list sub_methods = {24, 1, {{"xl_pong:", "q24@0:8q16", pong}}};
     struct cls *sub_meta;
     struct cls *sub = build("XLPairSub", built, &sub_methods, 0, &sub_meta);
@@ -201,13 +173,11 @@ int main(void)
     printf("subclass: instance is a kind of the built class: %ld\n",
            (long)((char (*)(id, SEL, Class))objc_msgSend)(sub_instance, sel_registerName("isKindOfClass:"), (Class)built));
 
-    // 4. a class built at run time and realized through _objc_realizeClassFromSwift, new (previously nil)
     struct cls *realized = build("XLPairRealized", &OBJC_CLASS_$_NSObject, &built_methods, &built_class_methods, 0);
     printf("realizeClassFromSwift: returns the class: %d\n", _objc_realizeClassFromSwift((Class)realized, 0) == (Class)realized);
     printf("realizeClassFromSwift: found by name: %d\n", objc_getClass("XLPairRealized") == (Class)realized);
     printf("realizeClassFromSwift: superclass: %s\n", class_getName(class_getSuperclass((Class)realized)));
 
-    // 5. a class with no name in its ro: the hook the Swift runtime registers names it
     lazy_namer previous = 0;
     objc_setHook_lazyClassNamer(namer, &previous);
     struct cls *lazy = build(0, &OBJC_CLASS_$_NSObject, &built_methods, &built_class_methods, 0);

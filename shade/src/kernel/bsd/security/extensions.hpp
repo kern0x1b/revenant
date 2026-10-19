@@ -12,9 +12,6 @@
 
 namespace shade::bsd::sandbox {
 
-// Opaque guest capabilities for the non-enforcing Sandbox provider. The
-// firmware decides when to grant access; these tokens never grant host access.
-// All calls are serialized by KernelSharedState::mach_mutex.
 class Extensions {
 public:
     [[nodiscard]] CallResult dispatch(AddressSpace& memory, std::uint32_t pid,
@@ -36,4 +33,4 @@ private:
     std::uint64_t next_handle_ { 1U };
 };
 
-} // namespace shade::bsd::sandbox
+}

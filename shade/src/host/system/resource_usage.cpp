@@ -39,7 +39,7 @@ namespace {
         }
     }
 
-} // namespace
+}
 
 [[nodiscard]] HostMemorySnapshot host_memory_snapshot()
 {
@@ -76,10 +76,6 @@ namespace {
         }
     }
 #elif defined(__APPLE__)
-    // Darwin keeps this in the task rather than in a file: the kernel answers
-    // for the process itself, and what it calls resident and virtual is what
-    // /proc/self/status calls VmRSS and VmSize. How much of the resident set is
-    // file-mapped it does not say, so that stays unknown rather than guessed.
     mach_task_basic_info_data_t task_memory { };
     mach_msg_type_number_t task_memory_count = MACH_TASK_BASIC_INFO_COUNT;
     if (::task_info(mach_task_self(), MACH_TASK_BASIC_INFO,
@@ -179,8 +175,6 @@ namespace {
         snapshot.cgroup_current_bytes = *current;
         snapshot.cgroup_current_known = true;
     }
-    // cgroup-v1 uses a very large sentinel for "unlimited". Treat any limit
-    // many times larger than physical memory as equivalent to no finite limit.
     if (snapshot.cgroup_limit_known && snapshot.physical_known &&
         snapshot.cgroup_limit_bytes != 0U && snapshot.physical_bytes != 0U &&
         snapshot.physical_bytes <=
@@ -191,12 +185,6 @@ namespace {
         snapshot.cgroup_limit_known = false;
     }
 #elif defined(__APPLE__)
-    // Darwin has no /proc/meminfo: the machine's memory is a sysctl, and what
-    // of it is available the kernel reports as page counts. Free and inactive
-    // pages are the ones a new mapping can have without pushing anything out,
-    // and the speculative ones are read-ahead the kernel drops first, so those
-    // three are what "available" means here. Without them the JIT sizes its
-    // code cache from a machine it believes has no memory at all.
     {
         std::uint64_t physical = 0;
         std::size_t physical_size = sizeof physical;
@@ -225,4 +213,4 @@ namespace {
     return snapshot;
 }
 
-} // namespace shade
+}

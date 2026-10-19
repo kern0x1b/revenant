@@ -182,9 +182,6 @@ bool CatalogMaintenance::collect_mutations(
                                !host_changes.structural_events.empty() ||
                                !host_changes.dirty_subtrees.empty();
     for (const auto& event : host_changes.structural_events) {
-        // Directory structure events are authoritative subtree boundaries.
-        // They must reach the catalog even when the directory did not
-        // previously contain a known executable.
         queue_path(event.path);
         refresh_pending_ = true;
     }
@@ -197,10 +194,6 @@ bool CatalogMaintenance::collect_mutations(
     for (const auto& mutation : mutations) {
         ++refresh_events_;
         if (mutation.dirty_subtree) {
-            // The registry deliberately coalesces an overflow into a
-            // structural marker.  Individual paths before this marker were
-            // evicted, so refresh the catalog root instead of pretending
-            // the remaining event list is complete.
             if (!root_error_) {
                 queue_path(root_);
                 refresh_pending_ = true;
@@ -222,9 +215,6 @@ bool CatalogMaintenance::collect_mutations(
         switch (mutation.mutation) {
         case GuestFileMutationKind::SubtreeCreate:
         case GuestFileMutationKind::SubtreeRemove:
-            // Namespace changes are already subtree-scoped.  Do not consult
-            // the old catalog index: this is how a newly installed bundle
-            // becomes visible to the next exec/mmap refresh.
             queue_path(mutation.path);
             refresh_pending_ = true;
             structural_boundary = true;
@@ -375,4 +365,4 @@ void CatalogMaintenance::report_refresh_stats() const
     }
 }
 
-} // namespace shade::runtime_detail
+}

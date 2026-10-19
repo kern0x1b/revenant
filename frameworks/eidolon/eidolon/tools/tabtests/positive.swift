@@ -2,8 +2,6 @@ import SwiftUI
 
 struct TabRow: Identifiable { let id: Int }
 
-// A tab with its value written in it is tab content, and a TabView takes it, with and without a
-// selection, and through a ForEach of them.
 func tabsReachATabView() {
     let tab = Tab("Inbox", systemImage: "envelope", value: 1) { Color.gray }
     let bar = TabView {
@@ -26,7 +24,6 @@ func tabsReachATabView() {
     _ = (tab, bar, chosen, nothing, each)
 }
 
-// A container's children are a collection an app can hand to Group(subviews:).
 func groupTakesAContainersChildren() {
     let rows = Group { Color.red; Color.green }
     _ = Group(subviews: rows) { children in Text("\\(children.count)") }

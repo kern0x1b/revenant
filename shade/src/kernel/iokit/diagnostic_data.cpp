@@ -22,10 +22,6 @@ std::uint32_t DiagnosticDataService::ensure_locked(KernelSharedState& state)
     if (existing != state.iokit_services.end())
         return existing->first;
 
-    // ARM SysCfg starts with six little-endian words; the final word is the
-    // count of 20-byte key records. An empty store is valid and cacheable by
-    // MobileGestalt, unlike an absent driver that must await publication on
-    // every query. Do not invent manufacturing identity or calibration keys.
     constexpr std::array<std::uint32_t, 6> header {
         0x53436667U, 24U, 0U, 1U, 0U, 0U
     };
@@ -52,4 +48,4 @@ std::uint32_t DiagnosticDataService::ensure_locked(KernelSharedState& state)
     return object;
 }
 
-} // namespace shade::kernel_iokit
+}

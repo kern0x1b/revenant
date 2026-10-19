@@ -50,7 +50,7 @@ namespace {
         return result;
     }
 
-} // namespace
+}
 
 bool CompatibilityKernel::dispatch_mach_vm_region_message(
     Cpu& cpu, const MachMessageRequest& request)
@@ -171,8 +171,6 @@ bool CompatibilityKernel::dispatch_mach_vm_region_message(
         0U,
         1U,
     };
-    // A complex MIG success reply has no RetCode between NDR and outputs.
-    // Error replies use the ordinary simple NDR/RetCode form instead.
     profile.append_address(reply, region->address);
     profile.append_address(reply, region->end - region->address);
     reply.push_back(requested_count);
@@ -196,4 +194,4 @@ bool CompatibilityKernel::dispatch_mach_vm_region_message(
     return true;
 }
 
-} // namespace shade
+}

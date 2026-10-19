@@ -43,16 +43,9 @@ struct SdlAudioSink::Impl {
     bool owns_audio_subsystem { };
     bool device_started { };
     std::list<QueuedChunk> queued_chunks;
-    // The callback only splices completed nodes here. Their storage is released
-    // later by a producer/control call, outside the real-time callback.
     std::list<QueuedChunk> retired_chunks;
     std::size_t queued_sample_count { };
     std::size_t output_channel_count { 1U };
-    // CoreAudio produces one hardware period at a time. Keep a short, bounded
-    // device lead at the start of a streaming run so the independently timed
-    // host callback does not race the producer's first adjacent buffers. Three
-    // periods cover normal guest/host scheduling jitter without making effects
-    // audibly late or allowing an unbounded audio queue to grow.
     static constexpr std::size_t streaming_lead_periods = 3U;
     std::size_t lead_silence_sample_count { };
     bool streaming_needs_lead { true };
@@ -347,10 +340,6 @@ bool SdlAudioSink::play(const AudioBuffer& buffer)
         std::lock_guard queue_lock { impl_->queue_mutex };
         retired.splice(retired.end(), impl_->retired_chunks);
         if (buffer.streaming && impl_->streaming_needs_lead) {
-            // A queued fade or other predecessor already provides device lead.
-            // Prepending global silence in that case would put the delay before
-            // the older samples and reverse the intended stop/replacement
-            // ordering.
             if (impl_->queued_sample_count == 0 &&
                 impl_->lead_silence_sample_count == 0) {
                 impl_->lead_silence_sample_count =
@@ -449,4 +438,4 @@ std::string SdlAudioSink::last_error() const
     return impl_->error;
 }
 
-} // namespace shade
+}

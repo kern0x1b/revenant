@@ -27,9 +27,6 @@ struct VirtualAccessPoint;
 
 namespace shade::darwin::network {
 
-// XNU / Darwin 8 networking constants. These are kept here rather than
-// scattered through the syscall dispatcher so both builders and ABI tests use
-// the same firmware-facing definitions.
 inline constexpr std::uint32_t address_family_unspecified = 0;
 inline constexpr std::uint32_t address_family_inet = 2;
 inline constexpr std::uint32_t address_family_link = 18;
@@ -102,9 +99,6 @@ inline constexpr std::uint32_t interface_family_ethernet = 2;
 inline constexpr std::uint32_t default_loopback_mtu = 16'384;
 inline constexpr std::uint32_t default_ethernet_mtu = 1'500;
 
-// Darwin 8 encodes the ioctl parameter size in bits 16..28. Matching the
-// direction/group/number separately keeps these identities valid for the
-// ARM32 structures used by the firmware while documenting their wire layout.
 inline constexpr std::uint32_t ioctl_identity_mask = 0xe000ffffU;
 inline constexpr std::uint32_t ioctl_get_interface_mtu = 0xc0006933U;
 inline constexpr std::uint32_t ioctl_set_interface_mtu = 0x80006934U;
@@ -126,9 +120,6 @@ inline constexpr std::uint32_t media_option_full_duplex = 0x00100000U;
 inline constexpr std::uint32_t media_status_valid = 0x00000001U;
 inline constexpr std::uint32_t media_status_active = 0x00000002U;
 
-// Darwin 8 AirPortFamily driver requests. Apple80211 passes this 32-byte
-// ifreq-derived envelope to a datagram socket; the payload remains guest
-// memory and is described by its final length/pointer fields.
 namespace apple80211_driver {
 
     inline constexpr std::string_view event_device_name = "airport";
@@ -148,10 +139,6 @@ namespace apple80211_driver {
     inline constexpr std::uint32_t command_scan = 10;
     inline constexpr std::uint32_t command_scan_result = 11;
     inline constexpr std::uint32_t command_interface_probe = 12;
-    // Legacy AirPortFamily clients issue this zero-length capability probe
-    // while constructing the Settings network pane.  It has no payload; a
-    // successful no-op is the driver contract when the virtual interface is
-    // present.
     inline constexpr std::uint32_t command_capability_probe = 15;
     inline constexpr std::uint32_t command_current_ssid = 1;
     inline constexpr std::uint32_t command_channel = 4;
@@ -188,9 +175,6 @@ namespace apple80211_driver {
         std::uint32_t ie_pointer_offset { };
     };
 
-    // Darwin 9 aligns the final pointer after a 16-bit IE length. Darwin 10's
-    // mobile driver removes that padding while preserving selector 201 and all
-    // preceding fields.
     inline constexpr NetworkRecordLayout aligned_network_record_layout { 144,
         136, 140 };
     inline constexpr NetworkRecordLayout compact_network_record_layout { 140,
@@ -214,15 +198,11 @@ namespace apple80211_driver {
     inline constexpr std::int32_t scan_signal_floor_dbm = -100;
     inline constexpr std::int32_t scan_signal_ceiling_dbm = 0;
 
-    // Builds the raw AirPortFamily network record consumed by the firmware's
-    // own Apple80211-to-CoreFoundation converter. A null access point
-    // represents a powered but unassociated interface and still produces a
-    // valid empty record.
     [[nodiscard]] std::optional<std::vector<std::byte>> make_network_record(
         const VirtualAccessPoint* access_point, NetworkRecordLayout layout,
         std::uint16_t ie_length, std::uint32_t ie_pointer);
 
-} // namespace apple80211_driver
+}
 
 constexpr std::uint32_t ioctl_identity(std::uint32_t command)
 {
@@ -281,4 +261,4 @@ struct InterfaceSnapshot {
     std::uint32_t event_subclass, std::uint32_t event_code,
     std::span<const std::byte> event_data);
 
-} // namespace shade::darwin::network
+}

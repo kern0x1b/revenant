@@ -16,8 +16,6 @@ bool CompatibilityKernel::reject_guarded_descriptor(
         return false;
     output_.line("[guard] fatal descriptor violation pid=" + std::to_string(process_.pid) +
         " fd=" + std::to_string(fd));
-    // Preserve the fatal default disposition without performing the forbidden
-    // operation. Mach EXC_GUARD exception-port delivery is not modeled yet.
     exit_process(0U, darwin::signal::kill);
     cpu.halt(Dynarmic::HaltReason::UserDefined1);
     return true;
@@ -85,7 +83,6 @@ void CompatibilityKernel::dispatch_bsd_guarded_file(Cpu& cpu, std::uint32_t numb
         return;
     }
     if (found->second.identifier != *guard) {
-        // A mismatched guarded close is fatal even if ordinary close is allowed.
         reject_guarded_descriptor(cpu, fd, DarwinFileGuard::duplicate);
         return;
     }
@@ -94,4 +91,4 @@ void CompatibilityKernel::dispatch_bsd_guarded_file(Cpu& cpu, std::uint32_t numb
     else
         bsd_error(cpu, bsd_support::bad_file_descriptor);
 }
-} // namespace shade
+}

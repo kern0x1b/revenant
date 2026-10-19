@@ -18,9 +18,6 @@
 
 namespace shade {
 
-// Maps Dynarmic's globally unique processor slots back to the AddressSpace
-// that owns the Guest virtual address. The resolver is shared by all runtime
-// clusters that use one process-wide ExclusiveMonitor.
 class GuestExclusiveAddressResolver {
 public:
     void bind(std::size_t processor_base, std::size_t processor_count,
@@ -44,4 +41,4 @@ private:
     std::map<std::size_t, Binding> bindings_;
 };
 
-} // namespace shade
+}

@@ -40,28 +40,6 @@ struct xl_thread {
 };
 
 #define XL_THREAD_HEADER 16u
-// What `mrs x, TPIDRRO_EL0` reads on real Darwin arm64: `_os_tsd_get_base()` in libsyscall's
-// os/tsd.h reads TPIDRRO_EL0 directly as a `void **`, and every direct-TSD consumer (libsyscall's
-// own pthread_self/errno/mig_reply at slots 0-9, libdispatch, libobjc, ..., Swift at slots 100-109,
-// tsd_private.h) indexes off that SAME base. A faithful block would carry a live pthread_self
-// pointer, errno, and the rest, filled in by libpthread's own thread-start code -- which does not
-// exist here (guest threads are not real pthreads).
-//
-// Measured by disassembling every guest image the Swift demo carries (demo-arm64, libswiftCore,
-// libc++, libc++abi) for every `mrs .., TPIDRRO_EL0`: there are exactly two, both in libswiftCore,
-// both in the exclusivity-check pair `swift_beginAccess`/`swift_endAccess`, both touching only
-// byte offset 0x358 (slot 107 = 0x358/8, Apple's own __PTK_FRAMEWORK_SWIFT_KEY7 -- a
-// Swift-runtime-private slot, tsd_private.h -- not any of libsyscall's or another framework's).
-// Round 10 tried to turn that one-time disassembly into a build-time guarantee (xlate/src/
-// tsd_scan.cpp, a scan for `mrs .., TPIDRRO_EL0` and every fixed-offset access off the register it
-// lands in); round 10's review (coordination/reviews/2026-09-27-katabasis-7ecd76e.md) reproduced
-// two real false negatives in that scan (no basic-block CFG: a dead-path register clobber earlier
-// in address order but never on the executed path defeats it; no interprocedural tracking: a
-// callee-saved register carrying the base across a real call into another function is not
-// followed). A static scan over guest code cannot be the whole proof that offset 0x358 is the
-// only one read -- so `xl_tsd_alloc` (runtime/xl_tsd_guard.h, shared with corpus/tsdguard's
-// host-only test of the same code) backs the claim with something a scan bug cannot silently
-// pass: real page protection, checked by the CPU on every access.
 #include "xl_tsd_guard.h"
 
 static void xl_state_destroy(void *value)
@@ -109,17 +87,12 @@ static void xl_dump(State *state)
 void xl_fault(State *state, const char *reason)
 {
     fprintf(stderr, "xlate: %s\n", reason);
-    // stderr is unreachable under SpringBoard: put the reason in the crash log too (the abort below then appends the
-    // signal report and guest frames after it).
     int log_fd = open("/private/var/charon/xlate-crash.log", O_WRONLY | O_CREAT | O_APPEND, 0666);
     if (log_fd >= 0) {
         dprintf(log_fd, "xlate: %s\n", reason);
         close(log_fd);
     }
     xl_dump(state);
-    // EXPERIMENT (flag file xl-fault-ends-thread): a fault on a worker thread (iSH's x86 emulator thread) normally aborts
-    // the whole process and takes the UI with it. With the flag, end just that thread so the UI the main thread built
-    // stays up -- a diagnostic to see the app's screen, not a fix: whatever the thread was doing is lost.
     if (!pthread_main_np() && access("/private/var/charon/xl-fault-ends-thread", F_OK) == 0) {
         int fd = open("/private/var/charon/xlate-crash.log", O_WRONLY | O_CREAT | O_APPEND, 0666);
         if (fd >= 0) {
@@ -155,7 +128,6 @@ void xl_report_guest_frame(void)
 
 static int xl_crash_fd(void);
 
-// Write a note plus the current guest call chain to the crash log (used when the app itself chooses to terminate).
 void xl_log_guest_frames(const char *why)
 {
     int fd = xl_crash_fd();
@@ -191,9 +163,6 @@ static void xl_crash_handler(int signal, siginfo_t *info, void *context)
         dprintf(fd, "xlate: host pc=0x%x lr=0x%x sp=0x%x cpsr=0x%x\n", ss->__pc, ss->__lr, ss->__sp, ss->__cpsr);
         for (int i = 0; i < 13; i++)
             dprintf(fd, "xlate: host r%d=0x%x\n", i, ss->__r[i]);
-        // Walk the host frame chain (armv7 uses r7 as the frame pointer; [r7]=prev r7,
-        // [r7+4]=saved lr). Names the host bridge (xl_h_*) that called into the aborting
-        // library function, which the guest register dump alone cannot show.
         {
             Dl_info info;
             if (dladdr((void *)(uintptr_t)ss->__pc, &info) && info.dli_sname)
@@ -222,9 +191,6 @@ static void xl_crash_handler(int signal, siginfo_t *info, void *context)
     raise(signal);
 }
 
-// A process that ends with no crash is otherwise undiagnosable under SpringBoard: leave a note (and the guest call chain
-// of the exiting thread) in its own file, xl-exit.log -- kept apart from xlate-crash.log so a clean exit never poses as a
-// crash. It fires for exit() and for a return from main (libc calls exit), not for a signal death.
 static void xl_note_exit(void)
 {
     int fd = open("/private/var/charon/xl-exit.log", O_WRONLY | O_CREAT | O_APPEND, 0666);
@@ -235,9 +201,6 @@ static void xl_note_exit(void)
     close(fd);
 }
 
-// Signals whose default action ends the process WITHOUT a crash report (SIGPIPE on a closed pipe/socket, SIGTERM, SIGFPE, ...)
-// leave no trace at all. Note which one, and the exiting thread's guest call chain, in xl-exit.log, then let the default
-// action proceed. (SIGKILL cannot be caught: a death with no note here at all is a SIGKILL -- jetsam, watchdog, or the kernel.)
 static void xl_signal_note(int signal, siginfo_t *info, void *context)
 {
     (void)info; (void)context;
@@ -264,9 +227,6 @@ __attribute__((constructor)) static void xl_install_crash_handler(void)
         for (int i = 0; i < 10; i++)
             sigaction((int[]){SIGPIPE, SIGTERM, SIGHUP, SIGQUIT, SIGFPE, SIGALRM, SIGUSR1, SIGUSR2, SIGXCPU, SIGSYS}[i], &note, NULL);
     }
-    // A guest-stack overflow (deep static init, e.g. a statically linked C++ library) faults
-    // with the stack pointer already off the mapping, so the handler needs its own stack to
-    // run at all -- without SA_ONSTACK such a crash kills the process silently, writing no log.
     static char alt_stack[SIGSTKSZ < (64 * 1024) ? (64 * 1024) : SIGSTKSZ];
     stack_t alt = {0};
     alt.ss_sp = alt_stack;
@@ -280,11 +240,6 @@ __attribute__((constructor)) static void xl_install_crash_handler(void)
         sigaction((int[]){SIGSEGV, SIGBUS, SIGILL, SIGABRT, SIGTRAP}[i], &action, NULL);
 }
 
-// sigaltstack is per-thread: the constructor above only covers the thread that loaded the image, so a
-// crash on any thread the app spawns (a worker, a UIKit/dispatch thread entering guest code) whose
-// stack is corrupt or overflowed would kill the process silently with no log. Give every thread that
-// enters guest code its own alternate stack, installed lazily on first entry (one pthread_getspecific
-// afterwards); the key destructor frees it at thread exit.
 static pthread_key_t xl_altstack_key;
 static pthread_once_t xl_altstack_once = PTHREAD_ONCE_INIT;
 

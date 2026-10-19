@@ -43,7 +43,7 @@ namespace {
     constexpr std::uint32_t simple_reply_size = 36;
     constexpr std::uint32_t map_reply_size = 44;
     constexpr std::uint32_t audio_mapping_search_base = 0x1e000000U;
-    constexpr std::uint32_t linear_pcm_format = 0x6c70636dU; // 'lpcm'
+    constexpr std::uint32_t linear_pcm_format = 0x6c70636dU;
     constexpr std::uint32_t linear_pcm_flags = 0x0cU;
     constexpr std::uint32_t stream_format_size = 40;
 
@@ -176,8 +176,6 @@ namespace {
             bits |= std::to_integer<std::uint64_t>(bytes[offset + index])
                     << (index * 8U);
         }
-        // IOAudio2 carries sample rates as unsigned 32.32 fixed point,
-        // including the physical stream format and nominal-rate setter.
         return static_cast<double>(bits) / 4294967296.0;
     }
 
@@ -725,7 +723,7 @@ namespace {
             unmapped ? iokit_abi::success : iokit_abi::bad_argument);
     }
 
-} // namespace
+}
 
 std::optional<MethodResult> dispatch_connect_method(KernelSharedState& state,
     const ProcessContext& process, std::uint32_t connection_object,
@@ -733,8 +731,6 @@ std::optional<MethodResult> dispatch_connect_method(KernelSharedState& state,
     std::span<const std::byte> inband_input,
     std::uint32_t scalar_output_capacity)
 {
-    // The generated IOAudio2 client reserves one scalar result slot for void
-    // methods. It is a capacity, not part of a method's input contract.
     static_cast<void>(scalar_output_capacity);
     std::lock_guard lock { state.mach_mutex };
     const auto* device =
@@ -799,13 +795,11 @@ std::optional<MethodResult> dispatch_connect_method(KernelSharedState& state,
         properties[std::string { profile.registry.sample_rate }] = {
             KernelSharedState::IOKitRegistryProperty::Kind::Number,
             connection.nominal_sample_rate };
-        notifications.publish(0, 0x6e737274U); // nominal sample rate
+        notifications.publish(0, 0x6e737274U);
         return MethodResult { iokit_abi::success, { } };
     }
 
     if (selector == profile.selectors.set_stream_current_format) {
-        // The stream identifier is the required scalar. Accept the extended
-        // request's trailing scalar as well as the original one-scalar form.
         if ((scalar_input.size() != 1 && scalar_input.size() != 2) ||
             !valid_stream_format(inband_input) ||
             scalar_input.front() > std::numeric_limits<std::uint32_t>::max()) {
@@ -840,7 +834,7 @@ std::optional<MethodResult> dispatch_connect_method(KernelSharedState& state,
                     number_property(read_u32(inband_input, 8 + index * 4));
             break;
         }
-        notifications.publish(stream_id, 0x70667420U); // physical format
+        notifications.publish(stream_id, 0x70667420U);
 
         return MethodResult { iokit_abi::success, { } };
     }
@@ -909,7 +903,6 @@ std::vector<std::uint32_t> ensure_services_locked(KernelSharedState& state)
             number_property(~std::uint32_t { 0 }));
         properties.emplace(profile.registry.io_buffer_frame_size,
             number_property(device.io_buffer_frame_size));
-        // A device without inputs publishes no input keys at all.
         const auto has_input = std::ranges::any_of(device.streams,
             [](const IOAudio2StreamDescription& stream) {
                 return stream.direction == IOAudio2StreamDirection::Input;
@@ -1009,4 +1002,4 @@ void close_connection(AddressSpace& memory, KernelSharedState& state,
     }
 }
 
-} // namespace shade::kernel_iokit::audio
+}

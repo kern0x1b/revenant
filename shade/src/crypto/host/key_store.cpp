@@ -31,7 +31,7 @@ namespace {
         ~Descriptor() { if (value >= 0) ::close(value); }
     };
 
-} // namespace
+}
 
 KeyStore::KeyStore(std::span<const std::byte, 32> secret)
 {
@@ -69,7 +69,6 @@ std::shared_ptr<KeyStore> KeyStore::open(
             ::write(fd, secret.bytes.data(), secret.bytes.size()) !=
                 static_cast<ssize_t>(secret.bytes.size()) ||
             ::fsync(fd) != 0) {
-            // Never replace existing device material when loading fails.
             ::unlink(state_file.c_str());
             return { };
         }
@@ -108,8 +107,6 @@ std::optional<std::vector<std::byte>> KeyStore::transform(
 {
     if (key_class < 1U || key_class > 11U)
         return std::nullopt;
-    // Domain-separated class keys keep protection classes independent while
-    // retaining one durable device secret. No guest process shares scratch.
     std::array<unsigned char, 22> label {
         'S', 'h', 'a', 'd', 'e', ' ', 'c', 'l', 'a', 's', 's', ' ',
         'k', 'e', 'y', ' ', 'v', '1', 0, 0, 0, 0
@@ -149,4 +146,4 @@ std::optional<std::vector<std::byte>> KeyStore::transform(
     return result;
 }
 
-} // namespace shade
+}

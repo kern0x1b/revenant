@@ -88,7 +88,7 @@ namespace {
             static_cast<std::uint32_t>(bottom - top) };
     }
 
-} // namespace
+}
 
 void ScanoutComposition::reset()
 {
@@ -233,10 +233,6 @@ bool ScanoutComposition::restore_background(std::uint32_t process_id,
         static_cast<std::uint64_t>(scene_level->height) +
             static_cast<std::uint32_t>(rectangle->y) >=
         descriptor.height;
-    // A primary local scene may begin below a system bar while still containing
-    // the transition's complete composition. Injecting an older scanout
-    // background into it reintroduces pixels outside the scene's own geometry;
-    // background reconstruction is for smaller moving scene slices only.
     if (primary_scene && covers_scanout_from_origin) {
         frame->second.scene_composited = true;
         return true;
@@ -255,22 +251,13 @@ bool ScanoutComposition::restore_background(std::uint32_t process_id,
         frame->second.primary_background_restored |= primary_scene;
         return true;
     }
-    // A small render target may contain only an effect, such as a shadow.
-    // Retained scanout pixels are a fallback for a primary scene and its
-    // companion slices, not a background beneath every translucent effect.
     if (!primary_scene && !frame->second.primary_background_restored)
         return true;
-    // A freshly drawn textured base and its later layers are already on
-    // scanout. Replaying the retained base would erase those later layers.
-    // Preserve it unless a preceding primary slice required reconstruction.
     if (frame->second.textured_background_drawn &&
         !frame->second.primary_background_restored) {
         frame->second.scene_composited |= primary_scene;
         return true;
     }
-    // Each local scene is self-contained. Adjacent scene slices can overlap
-    // while their separator moves, so the later slice must rebuild its whole
-    // destination instead of inheriting pixels from the earlier slice.
     if (!copy_surface(background->second.surface, surface, *rectangle, encoder))
         return false;
     restored = true;
@@ -322,7 +309,6 @@ bool ScanoutComposition::capture_background(std::uint32_t process_id,
     CommandEncoder& encoder, bool textured_candidate)
 {
     const auto frame = frames_.find(key);
-    // The draw reached scanout even when retaining its pixels is deferred.
     if (surface && frame != frames_.end())
         frame->second.textured_background_drawn = textured_candidate;
     if (!surface || (frame != frames_.end() && frame->second.scene_composited))
@@ -343,10 +329,6 @@ bool ScanoutComposition::capture_background(std::uint32_t process_id,
         frame != frames_.end() &&
         frame->second.previous_solid_background_deferred &&
         !frame->second.previous_scene_composited;
-    // Legacy compositors clear each scanout page to a solid before replaying
-    // translucent transition scenes. Defer that solid while a textured base is
-    // retained. A later texture cancels the deferral; a real solid-only base is
-    // accepted after the preceding presentation completed without a scene.
     if (!textured_candidate && background.valid && background.textured &&
         !confirmed_solid_background) {
         if (frame != frames_.end())
@@ -364,4 +346,4 @@ bool ScanoutComposition::capture_background(std::uint32_t process_id,
     return background.valid;
 }
 
-} // namespace shade
+}

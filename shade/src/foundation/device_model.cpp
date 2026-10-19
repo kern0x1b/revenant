@@ -82,10 +82,6 @@ namespace {
                     .supports_cellular_data = true,
                 },
             },
-            // iPhone OS 4 still routes its no-passcode bootstrap through the
-            // AppleKeyStore contract.  The service is virtualized here; the
-            // model describes the guest capability rather than physical
-            // silicon.
             .keybag = virtual_keybag_capabilities,
             .baseband = {
                 .transport = BasebandTransport::Offline,
@@ -424,7 +420,7 @@ namespace {
         },
     };
 
-} // namespace
+}
 
 const DeviceModel& DeviceModel::default_model() { return models.front(); }
 
@@ -440,4 +436,4 @@ const DeviceModel* DeviceModel::find(std::string_view product_type)
     return nullptr;
 }
 
-} // namespace shade
+}

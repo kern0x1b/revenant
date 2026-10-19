@@ -4,8 +4,6 @@ import CoreGraphics
 import UIKit
 import CoreGraphics
 
-/// Where a scroller may come to rest: the rectangle in its content's coordinates, and the point of
-/// that rectangle the container aligns with.
 public struct ScrollTarget: Hashable {
     public var rect: CGRect
     public var anchor: UnitPoint?
@@ -20,8 +18,6 @@ public struct ScrollTarget: Hashable {
     public var hashValue: Int { var h = Hasher(); hash(into: &h); return h.finalize() }
 }
 
-/// What the behaviour is told when it is asked where to rest: the target it started from, how fast
-/// the content is moving, how big everything is, and the environment of the scroller.
 @dynamicMemberLookup
 public struct ScrollTargetBehaviorContext {
     public var originalTarget: ScrollTarget = ScrollTarget()
@@ -34,7 +30,6 @@ public struct ScrollTargetBehaviorContext {
     public subscript<T>(dynamicMember keyPath: KeyPath<EnvironmentValues, T>) -> T { environment[keyPath: keyPath] }
 }
 
-/// The properties a behaviour animates between two resting points, and the context it reads them from.
 public struct ScrollTargetBehaviorProperties: Equatable {
     public var limitsScrolls: Bool
     public init() { limitsScrolls = true }
@@ -53,8 +48,6 @@ public protocol ScrollTargetBehavior {
     typealias TargetContext = ScrollTargetBehaviorContext
     typealias Properties = ScrollTargetBehaviorProperties
     typealias PropertiesContext = ScrollTargetBehaviorPropertiesContext
-    /// Moves `target` to where the scroller should rest. The scroller scrolls so that the target's
-    /// rectangle sits at its anchor.
     func updateTarget(_ target: inout ScrollTarget, context: Self.TargetContext)
 }
 
@@ -137,8 +130,6 @@ public struct AnyScrollTargetBehavior: ScrollTargetBehavior {
     }
 }
 
-/// What a scroll anchor is for: where the content starts, where it stays when its size changes, and
-/// what a view is aligned against.
 public struct ScrollAnchorRole: Hashable {
     let name: String
     public static var initialOffset: ScrollAnchorRole { ScrollAnchorRole(name: "initialOffset") }
@@ -347,6 +338,5 @@ extension GeometryProxy {
         guard let source = anchor.view, let target = node?.uiView else { return nil }
         return anchor.convert(anchor.measure(source.bounds), source, target)
     }
-    // Nothing the system draws on iOS 6 has rounded corners, so no container has corner insets to report.
     public var containerCornerInsets: EdgeInsets { EdgeInsets() }
 }

@@ -144,4 +144,4 @@ bool CompatibilityKernel::dispatch_bsd_memorystatus(
     return true;
 }
 
-} // namespace shade
+}

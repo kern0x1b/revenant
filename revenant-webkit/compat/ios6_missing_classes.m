@@ -162,7 +162,7 @@
 
 @implementation NSProcessInfo (WebKitIOS6Power)
 - (BOOL)isLowPowerModeEnabled { return NO; }
-- (NSInteger)thermalState { return 0; /* NSProcessInfoThermalStateNominal */ }
+- (NSInteger)thermalState { return 0;  }
 @end
 
 @implementation UITraitCollection
@@ -193,7 +193,7 @@ static UITraitCollection *webKitIOS6CurrentTraitCollection;
 {
     if (!block)
         return;
-    if (phase == 2 /* kCATransactionPhasePostCommit */) {
+    if (phase == 2 ) {
         void (^copied)(void) = [block copy];
         void (*runOnWebThread)(void (^)(void)) = (void (*)(void (^)(void)))dlsym(RTLD_DEFAULT, "WebThreadRun");
         if (runOnWebThread) {

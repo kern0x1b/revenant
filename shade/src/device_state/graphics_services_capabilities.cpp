@@ -117,10 +117,6 @@ namespace {
                     std::string_view { include_name,
                         static_cast<std::size_t>(length) },
                     visiting);
-                // load_capabilities returns the already-flattened capability
-                // dictionary. Do not look for a second "capabilities" wrapper
-                // here; inherited flags such as homescreen-wallpaper live at
-                // this level in the recursive result.
                 merge_dictionary(merged, include);
                 plist_free(include);
             }
@@ -252,7 +248,7 @@ namespace {
         return pack_payload(xml);
     }
 
-} // namespace
+}
 
 std::vector<std::byte> make_graphics_services_capability_memory(
     const std::filesystem::path& rootfs, const DeviceModel& profile)
@@ -268,4 +264,4 @@ std::vector<std::byte> make_graphics_services_capability_memory(
     return fallback_payload(profile);
 }
 
-} // namespace shade
+}

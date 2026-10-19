@@ -18,9 +18,6 @@
 
 namespace shade::dnssd_ipc {
 
-// DNSService IPC ABI used by the mDNSResponderSystemLibraries-120 client in
-// iPhoneOS 1.0.  The wire header is converted one 32-bit word at a time; the
-// two-word context keeps 32- and 64-bit clients interoperable.
 inline constexpr std::uint32_t version = 1;
 inline constexpr std::uint32_t flag_no_reply = 1U;
 inline constexpr std::uint32_t flag_reuse_socket = 2U;
@@ -141,9 +138,6 @@ struct GetAddressInfoReply {
            static_cast<std::uint32_t>(bytes[3]);
 }
 
-// client_context is deliberately opaque on the wire. The daemon copies its
-// eight bytes without byte swapping so a client can recover its own pointer;
-// this target is little-endian ARM32.
 [[nodiscard]] constexpr std::array<std::byte, 4> encode_arm32_u32(
     std::uint32_t value)
 {
@@ -254,7 +248,7 @@ namespace detail {
         return { reinterpret_cast<const char*>(wire.data() + start), size };
     }
 
-} // namespace detail
+}
 
 [[nodiscard]] inline std::optional<std::vector<std::byte>>
 encode_get_address_info_request(const GetAddressInfoRequest& request)
@@ -354,4 +348,4 @@ decode_get_address_info_reply(std::span<const std::byte> wire)
     };
 }
 
-} // namespace shade::dnssd_ipc
+}

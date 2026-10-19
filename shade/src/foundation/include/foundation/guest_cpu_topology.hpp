@@ -14,9 +14,6 @@
 
 namespace shade {
 
-// These bits describe the ISA visible to the guest. They are deliberately
-// independent of the host CPU feature set: a host may execute an ARMv6 guest
-// with a newer backend, but the guest must still observe the selected profile.
 namespace guest_cpu_isa {
 
     inline constexpr std::uint64_t armv6k = 1ULL << 0U;
@@ -24,7 +21,7 @@ namespace guest_cpu_isa {
     inline constexpr std::uint64_t thumb = 1ULL << 2U;
     inline constexpr std::uint64_t thumb2 = 1ULL << 3U;
 
-} // namespace guest_cpu_isa
+}
 
 enum class GuestCpuPerformanceClass : std::uint8_t {
     Unknown,
@@ -81,7 +78,7 @@ namespace detail {
         return ((std::uint64_t { 1 } << cpu_count) - 1U) << first_cpu;
     }
 
-} // namespace detail
+}
 
 constexpr bool GuestCpuTopology::valid() const noexcept
 {
@@ -138,4 +135,4 @@ constexpr GuestCpuTopology GuestCpuTopology::single_core(
         isa_feature_mask, cache_topology_id);
 }
 
-} // namespace shade
+}

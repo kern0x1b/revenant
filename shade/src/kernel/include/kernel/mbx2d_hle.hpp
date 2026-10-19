@@ -28,9 +28,6 @@ class GlesRenderer;
 struct KernelSharedState;
 class PresentationTracker;
 
-// User-mode compatibility implementation for the MBX2D API consumed by
-// LayerKit. Handles are opaque because every operation stays at this HLE
-// boundary; no PowerVR command buffer or GPU register is interpreted.
 class Mbx2dHle {
 public:
     Mbx2dHle(UserlandHleRegistry& registry,
@@ -53,9 +50,6 @@ private:
         bool framebuffer { };
         bool retains_core_surface { };
         std::optional<SurfaceStore::Backing> client_backing;
-        // Raw client memory is CPU-owned. A source-only host snapshot is
-        // refreshed at the firmware's FlushSurfaces publication boundary and
-        // never exposed as an MBX destination.
         std::shared_ptr<HostSurface> client_host_source;
         bool client_host_source_dirty { true };
     };
@@ -199,4 +193,4 @@ private:
     std::unique_ptr<CommandEncoder> command_encoder_;
 };
 
-} // namespace shade
+}

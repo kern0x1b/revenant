@@ -24,16 +24,11 @@ struct GuestExecutionRequest {
     std::uint64_t tick_budget { };
     std::chrono::nanoseconds host_slice_budget { };
     bool single_step { };
-    // A cooperative slice yields to the host clock. A bounded (--ticks) run
-    // turns that off so its tick counts depend on the guest alone.
     bool cooperative { true };
     CpuRunResult result;
     std::exception_ptr error;
 };
 
-// Owns host execution lanes for a batch selected by the Guest scheduler. The
-// caller supplies policy results and remains responsible for applying Guest
-// completion semantics; this class only executes independent CPU requests.
 class GuestExecutionCoordinator {
 public:
     explicit GuestExecutionCoordinator(std::size_t worker_count);
@@ -53,4 +48,4 @@ private:
     std::unique_ptr<Impl> impl_;
 };
 
-} // namespace shade
+}

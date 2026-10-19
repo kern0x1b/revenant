@@ -535,7 +535,7 @@ namespace {
         bool finish(PerfSubmitReason) override { return true; }
     };
 
-} // namespace
+}
 
 HostSurfacePresentationLease::HostSurfacePresentationLease(
     std::shared_ptr<HostSurface> surface)
@@ -804,4 +804,4 @@ std::unique_ptr<CommandEncoder> make_cpu_command_encoder()
     return std::make_unique<CpuCommandEncoder>();
 }
 
-} // namespace shade
+}

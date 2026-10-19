@@ -147,4 +147,4 @@ std::array<float, 4> GlesMatrix::transform(
     return result;
 }
 
-} // namespace shade
+}

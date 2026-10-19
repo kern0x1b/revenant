@@ -22,8 +22,6 @@ namespace {
             "[clock]",
             "[process]",
             "[cpu] fatal",
-            // What a verdict reads: the scale a run used, who ended a process
-            // and what a thread was still waiting for when the run stopped.
             "[time]",
             "[signal]",
             "[mach] stalled",
@@ -59,7 +57,7 @@ namespace {
         return false;
     }
 
-} // namespace
+}
 
 Output::Output(std::ostream& stream)
     : stream_ { &stream }
@@ -95,9 +93,6 @@ void Output::line(std::string_view text)
     std::lock_guard lock { mutex_ };
     stream_->write(text.data(), static_cast<std::streamsize>(text.size()));
     stream_->put('\n');
-    // Interactive performance windows end outside the measured interval, so
-    // flushing their one-line result cannot perturb the sample and lets a
-    // controller evaluate it before starting the next window.
     if (flush_each_write_ || text.starts_with("[perf-display]"))
         stream_->flush();
 }
@@ -118,4 +113,4 @@ bool Output::should_emit(std::string_view text) const
            concise_prefix(text);
 }
 
-} // namespace shade
+}

@@ -25,7 +25,7 @@ namespace {
     constexpr std::size_t maximum_operation_size = 256U;
     constexpr std::size_t maximum_path_size = 4096U;
 
-} // namespace
+}
 
 CallResult dispatch(
     AddressSpace& memory, DarwinSandboxAbi abi, std::uint32_t operation,
@@ -65,9 +65,6 @@ CallResult dispatch(
             return CallResult::BadAddress;
         if (name->empty())
             return CallResult::InvalidArgument;
-        // Named-profile initialization uses the same non-enforcing guest
-        // provider as checks below. No host sandbox policy is installed, and
-        // compiled-profile operations remain unsupported.
         return CallResult::Success;
     }
 
@@ -86,13 +83,10 @@ CallResult dispatch(
         return CallResult::BadAddress;
     }
 
-    // The compatibility kernel does not install or enforce a Sandbox MAC
-    // policy. A check therefore has no policy denial to report. Returning
-    // ENOSYS here makes libsandbox treat that absence as a denied operation.
     constexpr std::array<std::uint32_t, 2> allowed { 0U, 0U };
     if (!memory.copy_in(decision_address, std::as_bytes(std::span { allowed })))
         return CallResult::BadAddress;
     return CallResult::Success;
 }
 
-} // namespace shade::bsd::sandbox
+}

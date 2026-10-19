@@ -26,8 +26,6 @@ class Output;
 
 namespace shade::runtime_detail {
 
-// Owns the session's stable catalog object. Loaders can register mappings in
-// it; a completed refresh replaces its contents only at the runtime poll point.
 class SessionCatalog {
 public:
     SessionCatalog(std::filesystem::path rootfs,
@@ -55,8 +53,6 @@ private:
     bool loaded_ { };
 };
 
-// Bounded file observation and asynchronous catalog refresh. Worker captures
-// own their snapshots and completion state, never this object or a kernel.
 class CatalogMaintenance {
 public:
     CatalogMaintenance(SessionCatalog& catalog,
@@ -119,4 +115,4 @@ private:
     std::uint64_t stale_ { };
 };
 
-} // namespace shade::runtime_detail
+}

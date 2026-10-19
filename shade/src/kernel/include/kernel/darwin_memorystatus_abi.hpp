@@ -39,4 +39,4 @@ struct ProcessState {
         0 };
 }
 
-} // namespace shade::darwin::memorystatus
+}

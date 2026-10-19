@@ -58,7 +58,6 @@ void same_key_keeps_its_id_across_renames()
 {
     GuestIdTable table;
     const auto before = table.id_for(host(42U), "private/var/a");
-    // A rename moves the name, not the inode: the key is the same.
     const auto after = table.id_for(host(42U), "private/var/b");
     expect(before == after, "same host identity keeps its id across a rename");
 }
@@ -125,7 +124,7 @@ void colliding_paths_get_probed_distinct_ids()
         "forgetting a colliding identity does not renumber the others");
 }
 
-} // namespace
+}
 
 int main()
 {

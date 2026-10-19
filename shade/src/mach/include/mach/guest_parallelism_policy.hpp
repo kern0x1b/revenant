@@ -14,10 +14,6 @@
 
 namespace shade {
 
-// Core execution policy for a guest hardware profile with multiple CPUs.
-// Compute-heavy threads may run together, while syscall-dense threads stay on
-// the main executor so a serial compatibility-kernel call does not become a
-// worker barrier for every SVC.
 class GuestParallelismPolicy {
 public:
     explicit GuestParallelismPolicy(std::uint64_t guest_ticks_per_second);
@@ -42,4 +38,4 @@ private:
     std::map<XnuThreadId, ThreadHistory> histories_;
 };
 
-} // namespace shade
+}

@@ -37,7 +37,7 @@ namespace gdb_signal {
     inline constexpr std::uint8_t illegal_instruction = 4;
     inline constexpr std::uint8_t trap = 5;
     inline constexpr std::uint8_t segmentation_fault = 11;
-} // namespace gdb_signal
+}
 using GdbArmRegisters = std::array<std::uint32_t, gdb_arm_core_register_count>;
 
 class GdbTarget {
@@ -131,4 +131,4 @@ private:
     GdbRspProtocol protocol_;
 };
 
-} // namespace shade
+}

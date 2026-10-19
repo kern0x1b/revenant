@@ -82,4 +82,4 @@ std::size_t adaptive_jit_code_cache_size(const HostMemoryBudgetSnapshot& memory)
         effective.has_value(), memory.available_bytes, memory.available_known);
 }
 
-} // namespace shade::runtime_detail
+}

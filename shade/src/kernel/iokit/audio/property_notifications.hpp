@@ -9,7 +9,6 @@ namespace shade {
 struct KernelSharedState;
 namespace kernel_iokit::audio {
 
-// Call while holding mach_mutex, after publishing the new registry value.
 class IOAudio2PropertyNotifications {
 public:
     IOAudio2PropertyNotifications(KernelSharedState& state,
@@ -27,5 +26,5 @@ private:
     std::uint32_t service_object_;
 };
 
-} // namespace kernel_iokit::audio
-} // namespace shade
+}
+}

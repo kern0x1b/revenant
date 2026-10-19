@@ -21,4 +21,4 @@ inline constexpr std::size_t maximum_replay_bytes = 64U * 1024U * 1024U;
 void write_capture_file(
     const std::filesystem::path& path, std::span<const std::byte> bytes);
 
-} // namespace shade::bsd::baseband_device
+}

@@ -80,7 +80,7 @@ namespace {
 
 #endif
 
-} // namespace
+}
 
 LaunchdJobCatalog LaunchdJobCatalog::load(const std::filesystem::path& rootfs)
 {
@@ -158,4 +158,4 @@ void LaunchdJobCatalog::add_job(const std::filesystem::path& path)
 }
 #endif
 
-} // namespace shade
+}

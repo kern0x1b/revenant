@@ -28,4 +28,4 @@ private:
     std::filesystem::path rootfs_;
 };
 
-} // namespace shade
+}

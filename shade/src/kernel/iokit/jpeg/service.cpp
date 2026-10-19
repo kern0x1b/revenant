@@ -83,7 +83,7 @@ namespace {
                    KernelSharedState::IOKitUserClientKind::JpegAccelerator;
     }
 
-} // namespace
+}
 
 bool matches_service(std::span<const std::byte> matching)
 {
@@ -177,4 +177,4 @@ std::optional<MethodResult> dispatch_connect_method(KernelSharedState& state,
     return MethodResult { iokit_abi::success, std::move(output) };
 }
 
-} // namespace shade::kernel_iokit::jpeg
+}

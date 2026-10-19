@@ -35,7 +35,7 @@ namespace apple80211_abi {
     inline constexpr std::uint32_t success = 0;
     inline constexpr std::uint32_t invalid_argument = 0xffff'ffffU;
 
-} // namespace apple80211_abi
+}
 
 class Apple80211Hle {
 public:
@@ -107,4 +107,4 @@ private:
     UserlandHleRegistry& registry_;
 };
 
-} // namespace shade
+}

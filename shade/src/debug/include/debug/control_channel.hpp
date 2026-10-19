@@ -68,4 +68,4 @@ public:
     [[nodiscard]] virtual bool closed() const = 0;
 };
 
-} // namespace shade
+}

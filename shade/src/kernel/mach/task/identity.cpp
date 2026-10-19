@@ -26,10 +26,6 @@ namespace {
     bool install_kernel_send_port(KernelSharedState& state,
         const ProcessContext& process, std::uint32_t name)
     {
-        // The fixed early-boot names still denote global kernel ipc_port
-        // objects. Materialize them once so fallback MIG dispatch can
-        // distinguish a valid kernel destination from an invalid name without
-        // hard-coding a routine or firmware version.
         if (!state.mach_port_objects.contains(name) &&
             !state.mach_port_objects.create(name)) {
             return false;
@@ -38,7 +34,7 @@ namespace {
             process.pid, name, name, send_right);
     }
 
-} // namespace
+}
 
 bool initialize_root(KernelSharedState& state, ProcessContext& process)
 {
@@ -74,8 +70,6 @@ bool initialize_root(KernelSharedState& state, ProcessContext& process)
     state.task_port_pids.emplace(task_object, process.pid);
     state.task_thread_port_objects[process.pid][0] = thread_object;
     state.task_special_ports[task_object][4] = bootstrap_object;
-    // The task structure owns a kernel-held reference independent of the
-    // bootstrap receive name installed in the root ipc_space.
     ++state.mach_kernel_send_rights[bootstrap_object];
     return install_kernel_send_port(state, process, process.host_port) &&
            install_kernel_send_port(state, process, process.clock_port) &&
@@ -166,11 +160,9 @@ bool inherit_child(KernelSharedState& state, const ProcessContext& parent,
         }
     }
 
-    // task creation gives the parent a send right named in the parent's own
-    // ipc_space. It must not reuse the child's task_self name by convention.
     return state.mach_namespaces
         .copyout(parent.pid, child_task_object, send_right)
         .has_value();
 }
 
-} // namespace shade::mach_task_identity
+}

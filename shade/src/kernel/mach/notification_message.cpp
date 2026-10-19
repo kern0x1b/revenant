@@ -60,12 +60,10 @@ bool CompatibilityKernel::dispatch_mach_notification_message(
     if (*message_id == mig_message_id(xnu::mig::mach_port::Routine::
                                mach_port_request_notification) &&
         registers[3] >= 40) {
-        // mach_port_request_notification(task, name, id, sync, notify).
-        // Darwin 8 MIG places the notify descriptor before NDR/scalars.
         std::uint32_t result = 0;
         std::uint32_t previous_name = 0;
         if (registers[2] < 60) {
-            result = 4; // KERN_INVALID_ARGUMENT
+            result = 4;
         } else {
             const auto& notification_arguments = xnu::mig::mach_port::
                 mach_port_request_notification_arguments;
@@ -118,13 +116,13 @@ bool CompatibilityKernel::dispatch_mach_notification_message(
                        notification != mach_notify_no_senders &&
                        notification != mach_notify_dead_name &&
                        notification != mach_notify_send_possible) {
-                result = 18; // KERN_INVALID_VALUE
+                result = 18;
             } else if (!entry) {
-                result = 15; // KERN_INVALID_NAME
+                result = 15;
             } else if ((notification == mach_notify_port_destroyed ||
                            notification == mach_notify_no_senders) &&
                        (entry->type & receive_type) == 0) {
-                result = 17; // KERN_INVALID_RIGHT
+                result = 17;
             } else if ((notification == mach_notify_dead_name ||
                            notification == mach_notify_send_possible) &&
                        (entry->type & dead_name_types) == 0) {
@@ -145,7 +143,7 @@ bool CompatibilityKernel::dispatch_mach_notification_message(
                             : std::nullopt;
                     if (!right || *right != xnu::ipc::Right::SendOnce ||
                         !object) {
-                        result = 20; // KERN_INVALID_CAPABILITY
+                        result = 20;
                     } else {
                         notify_object = *object;
                     }
@@ -175,7 +173,7 @@ bool CompatibilityKernel::dispatch_mach_notification_message(
                         if ((entry->type & dead_type) != 0) {
                             if ((sync == 0 && notification == mach_notify_dead_name) ||
                                 notify_object == 0) {
-                                result = 4; // KERN_INVALID_ARGUMENT
+                                result = 4;
                             } else {
                                 static_cast<void>(
                                     shared_state_->mach_namespaces.install(
@@ -266,7 +264,7 @@ bool CompatibilityKernel::dispatch_mach_notification_message(
                 1,
                 previous_name,
                 0,
-                0x00120000U, // MOVE_SEND_ONCE port descriptor
+                0x00120000U,
             };
             for (std::size_t index = 0; index < reply.size(); ++index) {
                 if (!memory_.write32(message_address +
@@ -283,4 +281,4 @@ bool CompatibilityKernel::dispatch_mach_notification_message(
     return false;
 }
 
-} // namespace shade
+}

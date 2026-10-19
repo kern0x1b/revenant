@@ -25,9 +25,6 @@ enum class ArmCpuModelKind : std::uint8_t {
     CortexA9,
 };
 
-// ARM permits implementation-defined handling for instructions whose result
-// is architecturally UNKNOWN. Keep that policy attached to the emulated core,
-// independently of a device, firmware build, image, or guest address.
 enum class ArmUnpredictableInstructionPolicy : std::uint8_t {
     Strict,
     CortexA8,
@@ -51,19 +48,13 @@ enum class ArmUnpredictableInstructionPolicy : std::uint8_t {
 {
     switch (version) {
     case ArmArchitectureVersion::Armv6K:
-        return 6U; // CPU_SUBTYPE_ARM_V6
+        return 6U;
     case ArmArchitectureVersion::Armv7:
-        return 9U; // CPU_SUBTYPE_ARM_V7
+        return 9U;
     }
     return 6U;
 }
 
-// A device-specific ARM core model. It selects both the decoder architecture
-// and a static instruction-issue baseline. Dynarmic queries timing while
-// translating a block and embeds the result in its cycle count, so this
-// abstraction does not add a virtual call to execution of an already compiled
-// block. Cache, TLB, pipeline dependency, and branch-predictor state remain
-// intentionally outside the static baseline.
 class ArmCpuModel {
 public:
     virtual ~ArmCpuModel() = default;
@@ -87,7 +78,6 @@ public:
 [[nodiscard]] std::unique_ptr<ArmCpuModel> make_arm_cpu_model(
     ArmCpuModelKind kind, std::uint32_t clock_hz);
 
-// Used by CPU-only helpers and tests that do not select a DeviceModel.
 [[nodiscard]] const ArmCpuModel& default_arm_cpu_model();
 
-} // namespace shade
+}

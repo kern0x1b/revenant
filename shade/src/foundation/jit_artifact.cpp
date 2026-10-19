@@ -285,9 +285,6 @@ namespace {
 
         [[nodiscard]] std::ifstream stream() const
         {
-            // Reopening the descriptor link retains the inode selected above
-            // even if another process atomically replaces the cache path
-            // between checksum and deserialization.
             std::ifstream result { std::filesystem::path {
                                        "/proc/self/fd/" +
                                        std::to_string(descriptor_) },
@@ -1245,9 +1242,6 @@ namespace {
     [[nodiscard]] std::filesystem::path current_snapshot_path(
         const std::filesystem::path& path)
     {
-        // F7 is intentionally not layout-compatible with prior snapshots. Keep
-        // an unrecognized user cache and its journal intact while all current
-        // writers converge on the same versioned sibling.
         std::error_code error;
         if (!std::filesystem::exists(path, error) || error)
             return path;
@@ -2181,7 +2175,7 @@ namespace {
         }
     }
 
-} // namespace
+}
 
 std::size_t JitArtifactKeyHash::operator()(
     const JitArtifactKey& key) const noexcept
@@ -2331,9 +2325,6 @@ JitArtifactLookup JitArtifactStore::lookup(const JitArtifactKey& key,
             ++stats_.misses;
             return { };
         }
-        // Guest execution may opt into memory/hotset-only admission. Do not
-        // start or wait on a disk flight on that path; a later background pass
-        // can perform the full lookup without extending the CPU slice.
         if (!allow_disk_payload) {
             ++stats_.misses;
             return { };
@@ -2426,8 +2417,6 @@ JitArtifactLookup JitArtifactStore::lookup(const JitArtifactKey& key,
                     record.append_log ? disk_append_path_ : disk_source_path_;
             }
 
-            // The per-key flight owns retries while disk latency and
-            // deserialization remain outside the global store mutex.
             const auto demand_started = std::chrono::steady_clock::now();
             const auto loaded = read_artifact_at(source_path, record.offset,
                 record.serialized_bytes,
@@ -2991,18 +2980,12 @@ std::shared_ptr<const BlockArtifact> JitArtifactStore::publish(
         auto artifact = std::make_shared<const BlockArtifact>(
             BlockArtifact { std::move(key), std::move(data) });
         const auto& lookup_key = artifact->key;
-        // The queue owns the immutable artifact before insert_locked can evict
-        // a resident entry to make room for it.
         const auto requires_writeback =
             !writeback_disabled_ && !persistence_path_.empty() &&
             limits_.persistence_enabled && limits_.writeback_bytes != 0U &&
             !disk_artifacts_.contains(lookup_key);
         notify_writeback =
             enqueue_writeback_locked(artifact, *artifact_bytes, retention);
-        // Under ordinary queue pressure, decline the optional publication
-        // rather than evicting a retained artifact for an unqueued newcomer.
-        // Boot-set translations are the exception: keep them resident so the
-        // next full save can persist them after the bounded writer catches up.
         if (!requires_writeback || notify_writeback ||
             retention == JitArtifactRetention::BootWorkingSet) {
             insert_locked(artifact, *artifact_bytes, false, false, retention);
@@ -3399,14 +3382,9 @@ void JitArtifactStore::cancel_writeback() noexcept
 void JitArtifactStore::writeback_loop()
 {
 #if defined(__linux__)
-    // This shared persistence/prepare worker must yield to Guest execution and
-    // display work. Linux applies PRIO_PROCESS/0 to the calling thread.
     static_cast<void>(setpriority(PRIO_PROCESS, 0, 10));
 #endif
     constexpr std::size_t maximum_batch_bytes = 4U * 1024U * 1024U;
-    // Background prepare is optional and may be replenished continuously by
-    // Guest demand. Keep it ahead of idle work, but never let a hot prepare
-    // queue postpone persistence indefinitely once a writeback is pending.
     constexpr std::size_t maximum_consecutive_background_prepares = 16U;
     std::size_t consecutive_background_prepares { };
     for (;;) {
@@ -3921,9 +3899,6 @@ JitArtifactCompactionResult JitArtifactStore::compact_with_result(
                 return cancelled() ? finish() : failed();
             }
             std::optional<ArtifactFileLock> file_lock;
-            // flock() is deliberately polled in short, cancellable intervals.
-            // A compaction request must not leave the guest/UI thread parked
-            // behind another writer for hundreds of milliseconds.
             for (unsigned attempt = 0; attempt < 32U && !file_lock; ++attempt) {
                 if (cancelled())
                     return finish();
@@ -4727,9 +4702,6 @@ bool JitArtifactStore::save_full(const std::filesystem::path& path,
                             pending_writebacks_.size());
             std::size_t snapshot_entries_examined { };
             const auto snapshot_cancelled = [&] {
-                // Keep cancellation latency bounded while this potentially
-                // large metadata snapshot holds mutex_. A 64-entry interval
-                // avoids an atomic token read on every map/list visit.
                 constexpr std::size_t cancellation_interval = 64U;
                 const bool check =
                     snapshot_entries_examined++ % cancellation_interval == 0U;
@@ -5010,9 +4982,6 @@ bool JitArtifactStore::save_full(const std::filesystem::path& path,
                     [&entries](std::size_t left, std::size_t right) {
                         if (entries[left].boot_working_set !=
                             entries[right].boot_working_set) {
-                            // The on-disk order is the restart recency proxy.
-                            // Keep protected records at the recent end even
-                            // before their process next runs.
                             return !entries[left].boot_working_set;
                         }
                         return entries[left].disk_record.benefit_generation <
@@ -5351,10 +5320,6 @@ bool JitArtifactStore::save_full(const std::filesystem::path& path,
             }
             if (error) {
                 error.clear();
-                // The old snapshot remains authoritative if its publish fails.
-                // Remove the newly published sidecar so a crash cannot pair it
-                // with that old snapshot; a missing sidecar is a safe
-                // zero-prefetch state.
                 std::filesystem::remove(hotset_path, error);
                 return false;
             }
@@ -5404,9 +5369,6 @@ bool JitArtifactStore::save_full(const std::filesystem::path& path,
                         pending->second.boot_working_set);
                 entry.second.generation = next_disk_generation_locked();
             }
-            // Disk-backed SaveEntry pointers still refer to the old index.
-            // Retire pending owners before replacing that index, while every
-            // key is valid.
             for (const auto& entry : entries) {
                 retire_writeback_locked(*entry.key);
             }
@@ -5422,10 +5384,6 @@ bool JitArtifactStore::save_full(const std::filesystem::path& path,
             disk_snapshot_id_ = index_checksum;
             stats_.disk_records_indexed = disk_artifacts_.size();
             stats_.index_bytes = index_size;
-            // The snapshot and sidecar were written without holding the store
-            // lock. Preserve a concurrent membership or confirmed-benefit
-            // mutation so a subsequent save republishes ranking that was not in
-            // this snapshot.
             hotset_dirty_ = hotset_mutation_generation_ !=
                                 saved_hotset_mutation_generation ||
                             benefit_generation_ != saved_benefit_generation;
@@ -5562,4 +5520,4 @@ bool ExecutionContext::observe_slab_generation(
     }
 }
 
-} // namespace shade
+}

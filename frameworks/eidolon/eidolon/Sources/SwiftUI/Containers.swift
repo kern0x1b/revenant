@@ -177,7 +177,6 @@ protocol TabViewLike {
     func tabSelect(_ index: Int)
 }
 
-// The pages of a tab view: what the builder made, with a ForEach or a group opened into its views.
 func tabPages(_ view: any View) -> [any View] {
     if let each = view as? ForEachLike { return each.identifiedViews.flatMap { tabPages($0.1) } }
     if let group = view as? GroupView, !(view is EnvironmentGroupView), !(view is TaggedViewLike) { return group.childViews.flatMap(tabPages) }
@@ -186,7 +185,6 @@ func tabPages(_ view: any View) -> [any View] {
 
 extension TabView: TabViewLike {
     var tabChildren: [any View] { tabPages(content) }
-    // a selection is matched to a page by its tag; without tags the page number is the selection
     var tabSelectedIndex: Int? {
         guard let value = selection?.wrappedValue else { return nil }
         let tags = tabChildren.map { ($0 as? TaggedViewLike)?.tagValue }
@@ -275,7 +273,6 @@ final class TabViewNode: LayoutNode {
         var badge: String?
         var current: any View = view
         while true {
-            // .tabItem is usually written before .tag, so the tag is what wraps it
             if let tagged = current as? TaggedViewLike { current = tagged.taggedContent; continue }
             guard let modified = current as? ModifiedViewLike else { break }
             if let trait = modified.modifierValue as? RowTraitModifier, let value = trait.badge { badge = badge ?? value }

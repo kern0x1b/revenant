@@ -88,4 +88,4 @@ private:
     std::deque<Event> events_;
 };
 
-} // namespace shade
+}

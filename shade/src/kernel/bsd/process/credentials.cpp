@@ -21,7 +21,7 @@ namespace {
 
     constexpr std::uint32_t maximum_supplementary_groups = 16;
 
-} // namespace
+}
 
 bool CompatibilityKernel::dispatch_bsd_process_credentials(
     Cpu& cpu, std::uint32_t number)
@@ -68,10 +68,6 @@ bool CompatibilityKernel::dispatch_bsd_process_credentials(
             return true;
         }
 
-        // The compatibility model currently only consumes the effective group.
-        // Darwin stores it in cr_groups[0], so keep that observable part while
-        // leaving supplementary membership unexpanded until VFS authorization
-        // actually needs it.
         process_.effective_gid = groups[0];
         if (const auto record = shared_state_->processes.find(process_.pid);
             record != shared_state_->processes.end()) {
@@ -98,8 +94,6 @@ bool CompatibilityKernel::dispatch_bsd_process_credentials(
         const auto old_effective = process_.effective_gid;
         const auto privileged = process_.effective_uid == 0;
         const auto permitted = [&](std::uint32_t requested) {
-            // Set-id image transitions are not modeled yet, so the saved group
-            // ID has the same observable value as the real group ID.
             return requested == unchanged || privileged ||
                    requested == old_real || requested == old_effective;
         };
@@ -135,8 +129,6 @@ bool CompatibilityKernel::dispatch_bsd_process_credentials(
         const auto old_effective = process_.effective_uid;
         const auto privileged = old_effective == 0;
         const auto permitted = [&](std::uint32_t requested) {
-            // Set-id image transitions are not modeled yet, so the saved user
-            // ID has the same observable value as the real user ID.
             return requested == unchanged || privileged ||
                    requested == old_real || requested == old_effective;
         };
@@ -166,8 +158,6 @@ bool CompatibilityKernel::dispatch_bsd_process_credentials(
     if (number == darwin::syscall::set_user_id ||
         number == darwin::syscall::set_effective_user_id) {
         const auto requested_user = cpu.registers()[0];
-        // As with the saved group below, the saved user currently equals the
-        // real user because set-id executable transitions are not modeled yet.
         if (process_.effective_uid != 0 && requested_user != process_.uid) {
             bsd_error(cpu, darwin::error::operation_not_permitted);
             return true;
@@ -196,9 +186,6 @@ bool CompatibilityKernel::dispatch_bsd_process_credentials(
     }
 
     const auto requested_group = cpu.registers()[0];
-    // XNU permits the real or saved group without privilege. The current
-    // loader has no set-id image transition yet, so the saved group equals the
-    // real group. Root may select any effective group.
     if (process_.effective_uid != 0 && requested_group != process_.gid) {
         bsd_error(cpu, darwin::error::operation_not_permitted);
         return true;
@@ -225,4 +212,4 @@ bool CompatibilityKernel::dispatch_bsd_process_credentials(
     return true;
 }
 
-} // namespace shade
+}

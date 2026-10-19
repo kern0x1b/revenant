@@ -27,8 +27,6 @@ namespace {
         int height { };
         if (auto* renderer = SDL_GetRenderer(window))
             SDL_RenderGetLogicalSize(renderer, &width, &height);
-        // SDL renderer events use its logical coordinates; a native Vulkan
-        // window without an SDL renderer delivers window coordinates.
         if (width <= 0 || height <= 0)
             SDL_GetWindowSize(window, &width, &height);
         return { static_cast<std::uint32_t>(std::max(width, 0)),
@@ -115,7 +113,7 @@ namespace {
     }
 #endif
 
-} // namespace
+}
 
 bool SdlInput::poll(SDL_Window* window)
 {
@@ -305,4 +303,4 @@ std::vector<RingerSwitchInput> SdlInput::take_ringer_switch_events()
     return events;
 }
 
-} // namespace shade
+}

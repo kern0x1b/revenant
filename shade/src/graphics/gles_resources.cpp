@@ -177,10 +177,6 @@ namespace {
         return result;
     }
 
-    // PVRTC stores one 64-bit word per 4x4 (4bpp) or 8x4 (2bpp) texel region.
-    // The guest firmware normally lets the PowerVR driver decode these words;
-    // keeping the decoder here makes compressed uploads follow the same
-    // resource lifetime and host-surface path as ordinary GLES textures.
     constexpr std::uint32_t compressed_rgb_pvrtc_2bpp = 0x8c01;
     constexpr std::uint32_t compressed_rgba_pvrtc_2bpp = 0x8c03;
     constexpr std::uint32_t compressed_rgb_pvrtc_4bpp = 0x8c00;
@@ -613,7 +609,7 @@ namespace {
             gles_abi::bgra_apple, std::move(*pixels), backing.id, 0, { }, 0 };
     }
 
-} // namespace
+}
 
 std::uint64_t GlesResourceStore::allocate_texture_revision()
 {
@@ -962,8 +958,6 @@ std::shared_ptr<HostSurface> GlesResourceStore::ensure_texture_render_target(
         level->second.host_generation =
             level->second.host_surface->cpu_generation();
     }
-    // A texture's first row is its GL lower edge. Native host targets use a
-    // top-left row origin, so ordinary framebuffer rendering reverses Y.
     level->second.render_target_inverted_vertical = true;
     return level->second.host_surface;
 }
@@ -1030,8 +1024,6 @@ bool GlesResourceStore::synchronize_texture_to_cpu(std::uint32_t name,
     }
     std::vector<std::uint32_t> pixels;
     {
-        // The mapping holds the surface's lock: leave it before asking the
-        // surface for its generations.
         auto mapping = image.host_surface->map_cpu(
             false, PerfCpuMapReason::SoftwareFallback);
         const auto& frame = mapping.frame();
@@ -1151,4 +1143,4 @@ const GlesResourceStore::Buffer* GlesResourceStore::buffer(
     return found == buffers_.end() ? nullptr : &found->second;
 }
 
-} // namespace shade
+}

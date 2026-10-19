@@ -106,7 +106,7 @@ namespace {
         return result;
     }
 
-} // namespace
+}
 
 ProcessLoader::ProcessLoader(std::filesystem::path rootfs, AddressSpace& memory,
     ArmArchitectureVersion architecture, ExecutableCatalog* catalog,
@@ -183,11 +183,6 @@ LoadedProcess ProcessLoader::load(std::string guest_executable,
     if (!dynamic_linker.entry_point()) {
         throw std::runtime_error { "dynamic linker lacks LC_UNIXTHREAD" };
     }
-    // Each image can have several executable segments. Keep the first
-    // validated file backing for that image so later segments reuse its open
-    // descriptor and generation/content identity checks. The contexts are
-    // intentionally separate because the executable and dyld are different
-    // pathnames and may have independent generations.
     FileMappingBatchContext executable_mapping_context;
     executable.map_into(memory_, &executable_mapping_context);
     FileMappingBatchContext dynamic_linker_mapping_context;
@@ -206,20 +201,12 @@ LoadedProcess ProcessLoader::load(std::string guest_executable,
             "SHELL=/bin/sh",
         };
     }
-    // LaunchServices accepts a persistent database-directory override. Its
-    // native fallback can retain a pointer to a temporary path buffer across
-    // database reloads. Supply the firmware's default through the process
-    // environment so both the service and its clients retain stable storage.
     if (std::none_of(environment.begin(), environment.end(),
             [](const std::string& variable) {
                 return variable.starts_with(launch_services_directory_name);
             })) {
         environment.emplace_back("LS_DATABASE_DIR=/var/mobile/Library/Caches");
     }
-    // CoreAnimation and its LayerKit predecessor use aliases for the same
-    // adaptive renderer switch. Preserve an explicit guest choice through
-    // either alias; otherwise allow complex updates to select GLES while
-    // ordinary composition remains on the firmware's MBX2D fast path.
     const auto adaptive_ogl_is_explicit = std::any_of(environment.begin(),
         environment.end(), [](const std::string& variable) {
             return std::any_of(adaptive_ogl_names.begin(),
@@ -231,10 +218,6 @@ LoadedProcess ProcessLoader::load(std::string guest_executable,
         for (const auto setting : adaptive_ogl_settings)
             environment.emplace_back(setting);
     }
-    // The public EAGL bridge accepts the firmware's programmable compositor
-    // inputs and forwards them through the host renderer. Prefer that path to
-    // the firmware's CPU rasterizer; an explicit guest setting remains
-    // authoritative.
     const auto core_animation_ogl_is_explicit = std::any_of(environment.begin(),
         environment.end(), [](const std::string& variable) {
             return variable.starts_with(core_animation_ogl_name);
@@ -290,7 +273,7 @@ LoadedProcess ProcessLoader::load(std::string guest_executable,
 
     std::vector<std::uint32_t> words;
     words.reserve(5 + argument_pointers.size() + environment_pointers.size());
-    words.push_back(main_header); // dyld's ARM start shim consumes this first.
+    words.push_back(main_header);
     words.push_back(static_cast<std::uint32_t>(argument_pointers.size()));
     words.insert(
         words.end(), argument_pointers.begin(), argument_pointers.end());
@@ -389,4 +372,4 @@ bool ProcessLoader::validate(std::string guest_executable) const
     }
 }
 
-} // namespace shade
+}

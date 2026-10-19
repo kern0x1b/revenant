@@ -78,8 +78,6 @@ struct ExecutableCatalogEntry {
     bool fat_container { };
     std::vector<std::string> dependencies;
     std::vector<ExecutableMappingIdentity> mappings;
-    // Only entry points that can be tied to Mach-O metadata are retained. The
-    // high bit of the location descriptor marks an ARM Thumb entry.
     std::vector<std::uint64_t> reliable_entry_points;
 };
 
@@ -105,22 +103,12 @@ public:
         std::uint64_t byte_count);
     [[nodiscard]] std::size_t register_shared_cache(
         const DyldSharedCache& cache);
-    // Scans a firmware or overlay tree without treating unrelated data files as
-    // executable input. Malformed candidates are counted and skipped so an
-    // incomplete optional bundle cannot prevent a catalog rebuild.
     [[nodiscard]] ExecutableCatalogScanSummary register_tree(
         const std::filesystem::path& root,
         ArmArchitectureVersion architecture = ArmArchitectureVersion::Armv6K);
-    // Refreshes an existing catalog from a tree. Unchanged ordinary Mach-O
-    // paths are retained from the prior manifest without reading or hashing the
-    // whole file; changed, new, and malformed paths follow the normal scan
-    // path.
     [[nodiscard]] ExecutableCatalogScanSummary refresh_tree(
         const std::filesystem::path& root,
         ArmArchitectureVersion architecture = ArmArchitectureVersion::Armv6K);
-    // Refreshes only the supplied files and subtrees. Missing paths are removed
-    // from the index; unchanged paths are retained without rereading their
-    // contents. This is the bounded path for host/VFS dirty notifications.
     [[nodiscard]] ExecutableCatalogScanSummary refresh_paths(
         const std::filesystem::path& root,
         const std::vector<std::filesystem::path>& paths,
@@ -128,9 +116,6 @@ public:
         const std::map<std::filesystem::path, ExecutableCatalogKnownIdentity>&
             known_identities = { });
 
-    // The manifest is versioned and written through a temporary file followed
-    // by rename. Malformed input is rejected without changing the live index so
-    // callers can safely rebuild it from the firmware tree.
     [[nodiscard]] bool load(const std::filesystem::path& path) noexcept;
     [[nodiscard]] bool save(const std::filesystem::path& path) const noexcept;
 
@@ -139,23 +124,14 @@ public:
     [[nodiscard]] const ExecutableCatalogEntry* find_path(
         const std::filesystem::path& path) const;
     [[nodiscard]] bool path_is_current(const std::filesystem::path& path) const;
-    // Returns only metadata-backed entries for an executable segment mapped at
-    // its catalogued address. Slid, partial, stale, and non-executable mappings
-    // deliberately fall back to ordinary demand translation.
     [[nodiscard]] std::vector<std::uint64_t> fixed_mapping_entry_points(
         const std::filesystem::path& path, std::uint32_t mapping_address,
         std::uint32_t mapping_size, std::uint64_t file_offset) const;
     [[nodiscard]] std::size_t reliable_entry_point_count() const noexcept;
     [[nodiscard]] std::vector<ContentIdentity> content_identities() const;
-    // Firmware preparation consumes the immutable scan result after the
-    // manifest has been atomically refreshed. Entries remain catalog-owned and
-    // are never used as a substitute for runtime mapping validation.
     [[nodiscard]] std::span<const ExecutableCatalogEntry>
     entries() const noexcept;
     [[nodiscard]] std::size_t size() const noexcept { return entries_.size(); }
-    // Host-container estimate for diagnostics. This includes vector capacity,
-    // unordered-index buckets/nodes, and owned string/vector storage; it is not
-    // an allocator or operating-system RSS measurement.
     [[nodiscard]] std::size_t resident_bytes_estimate() const noexcept;
     [[nodiscard]] std::uint64_t revision() const noexcept
     {
@@ -181,12 +157,8 @@ private:
     std::vector<ExecutableCatalogEntry> entries_;
     std::unordered_map<ContentIdentity, std::size_t, ContentIdentityHash>
         identity_index_;
-    // Older manifests classified N_SECT symbols by segment protection and can
-    // therefore contain __cstring/data addresses. They remain readable for
-    // generation migration, but their entry lists must never be consumed or
-    // reused as trusted metadata.
     bool reliable_entry_points_current_ { true };
     std::uint64_t mutation_revision_ { };
 };
 
-} // namespace shade
+}

@@ -1,22 +1,9 @@
--- ios-surface.lua: from the SwiftUI interface in fw/, write the parts of apple-types.txt and apple-view-modifiers.txt
--- that an iOS app can actually use (drops declarations marked @available(iOS, unavailable) in every overload).
---
---     xmake l ios-surface.lua
---
--- The Python version searched the interface with two regular expressions. The declaration search is re.finditer
--- over the whole interface, and its attribute group `((?:@[^\n]*\n\s*)*)` is greedy: the longest run of attribute
--- lines that leaves a declaration after it wins, and the search goes on from the end of each declaration. decl_at
--- below does that, one position at a time.
-
 import("core.base.json")
 local text = import("lib.text", {rootdir = path.join(os.scriptdir(), ".."), anonymous = true})
 
 local KINDS = {"struct", "class", "enum", "protocol", "typealias", "actor"}
--- every first character a match can begin with: an attribute line, or the start of an access keyword, a modifier or
--- a kind of declaration
 local FIRST_CHARS = "@pofisctea"
 
--- the words of a file, as Python's str.split() gives them
 local function words_of(file)
     local set, count = {}, 0
     for word in string.gmatch(io.readfile(file), "%S+") do
@@ -37,10 +24,8 @@ local function sorted_keys(set)
     return keys
 end
 
--- the rest of decl after its attribute group, at position q: returns kind, name and the last position it uses
 local function declaration_at(src, q)
     local r = q
-    -- (?:public |open )?(?:final )?(?:@frozen )?(?:indirect )?
     if text.startswith(src, "public ", r) then
         r = r + 7
     elseif text.startswith(src, "open ", r) then
@@ -65,7 +50,6 @@ local function declaration_at(src, q)
     if not kind then
         return nil
     end
-    -- (struct|...)\s+(\w+)
     local _, space = string.find(src, "^%s+", r + #kind)
     if not space then
         return nil
@@ -77,9 +61,7 @@ local function declaration_at(src, q)
     return kind, name, space + #name
 end
 
--- the match of the declaration pattern that starts at p: the attribute text, the kind, the name, the last position
 local function decl_at(src, p)
-    -- the attribute lines: each is an @ up to a newline, then whitespace; stops[k + 1] follows k of them
     local stops = {p}
     local q = p
     while string.sub(src, q, q) == "@" do
@@ -100,12 +82,10 @@ local function decl_at(src, p)
     return nil
 end
 
--- r'@available\(iOS,\s*unavailable'
 local function unavailable_on_ios(attributes)
     return string.match(attributes, "@available%(iOS,%s*unavailable") ~= nil
 end
 
--- `(?:@\S+\s+)*extension SwiftUI\.View\b` at the start of a stripped line
 local function extends_view(s)
     local p = 1
     while true do
@@ -123,7 +103,6 @@ local function extends_view(s)
     return after == "" or not string.match(after, "[%w_]")
 end
 
--- `\bfunc (\w+)`: the position of the first match and its name
 local function find_func(s)
     local from = 1
     while true do
@@ -142,7 +121,6 @@ local function find_func(s)
     end
 end
 
--- the interface of the SwiftUI framework in fw/, the one file its Modules directory holds
 local here = os.scriptdir()
 local interfaces = os.files(path.join(here, "fw", "SwiftUI.framework", "Modules", "SwiftUI.swiftmodule", "*.swiftinterface"))
 table.sort(interfaces)

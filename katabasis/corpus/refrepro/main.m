@@ -20,11 +20,6 @@ static void Mark(NSString *event)
     [handle closeFile];
 }
 
-// Exact shape of OBAReferencesV2: five NSMutableDictionary object ivars.
-// Under ARC, -init's ivar stores become objc_storeStrong, which reads the OLD ivar
-// value (an 8-byte slot on the arm64 layout) before releasing it -- exactly the site
-// that faulted in OneBusAway (-[OBAReferencesV2 init] -> objc_release of a mis-sized
-// tail slot).
 @interface Refs : NSObject
 @end
 
@@ -51,8 +46,6 @@ static void Mark(NSString *event)
 
 @end
 
-// Dirty the small-object heap so a freshly allocated instance's out-of-bounds tail
-// slot (bytes past the shrunk instance size) contains garbage instead of zero.
 static void PoisonHeap(void)
 {
     enum { N = 4096 };
@@ -80,10 +73,6 @@ static void DumpObject(const char *tag, Refs *obj)
 
 static void RunRepro(void)
 {
-    // The guest arm64 layout is: 8-byte isa + five 8-byte object ivars = 48 bytes.
-    // If the runtime allocates fewer bytes (e.g. 44), the last ivar's 8-byte slot spills
-    // past the allocation and the release-of-old-ivar in -init reads an out-of-bounds
-    // high half -> objc_release(garbage<<32). Regression assertion: size must be 48.
     size_t size = class_getInstanceSize([Refs class]);
     Mark([NSString stringWithFormat:@"start instanceSize=%zu expected=48 -> %s",
                                      size, size == 48 ? "PASS" : "FAIL"]);

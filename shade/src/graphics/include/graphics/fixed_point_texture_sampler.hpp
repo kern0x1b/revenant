@@ -11,8 +11,6 @@
 
 namespace shade {
 
-// Scanline sampling with signed 16.16 coordinates and truncating eight-bit
-// interpolation weights. This preserves the integer software-renderer ABI.
 class FixedPointTextureSampler {
 public:
     static void sample(std::span<const std::uint32_t> first_row,
@@ -22,4 +20,4 @@ public:
         std::span<std::uint32_t> destination);
 };
 
-} // namespace shade
+}

@@ -13,10 +13,10 @@
 typedef struct {
     RevWasmHost *host;
     int instanceId;
-    int ordinal;         // position among this module's function imports
-    char argTypes[16];   // 'i' 'I' 'f' 'F'
+    int ordinal;
+    char argTypes[16];
     int argc;
-    char retType;        // 'i' 'I' 'f' 'F' 'v'
+    char retType;
 } RevWasmImport;
 
 @interface RevWasmInstance : NSObject {

@@ -28,7 +28,7 @@ namespace {
                    }) != matching.end();
     }
 
-} // namespace
+}
 
 std::optional<ServiceKind> matching_service(
     std::span<const std::byte> matching)
@@ -110,10 +110,6 @@ std::optional<MethodResult> dispatch_connect_method(KernelSharedState& state,
                 !inband_input.empty() || scalar_output_capacity != 0U) {
                 return MethodResult { iokit_abi::bad_argument, { } };
             }
-            // This user-client call controls a physical modem power rail. An
-            // offline endpoint has no rail to switch, so acknowledge either
-            // boolean state without changing transport availability or
-            // fabricating modem input.
             return MethodResult { iokit_abi::success, { } };
         }
         if (selector ==
@@ -122,10 +118,6 @@ std::optional<MethodResult> dispatch_connect_method(KernelSharedState& state,
                 scalar_output_capacity != 0U) {
                 return MethodResult { iokit_abi::bad_argument, { } };
             }
-            // The offline transport has no physical power rail or modem state
-            // to reset. Completing the firmware's recovery command is
-            // state-neutral; subsequent reads still observe the same empty
-            // offline channel.
             return MethodResult { iokit_abi::success, { } };
         }
         return MethodResult { iokit_abi::unsupported, { } };
@@ -138,10 +130,6 @@ std::optional<MethodResult> dispatch_connect_method(KernelSharedState& state,
 
     if (selector ==
         static_cast<std::uint32_t>(SerialMultiplexerSelector::Configure)) {
-        // The native driver uses these two scalars to tune its physical mux.
-        // The virtual baseband transport already owns queueing and framing, but
-        // retain the user-client ABI's strict shape instead of treating
-        // arbitrary selectors as successful.
         if (scalar_input.size() != 2U || !inband_input.empty() ||
             scalar_output_capacity != 0U || scalar_input[0] == 0U ||
             scalar_input[1] == 0U ||
@@ -158,9 +146,6 @@ std::optional<MethodResult> dispatch_connect_method(KernelSharedState& state,
             scalar_output_capacity != 0U) {
             return MethodResult { iokit_abi::bad_argument, { } };
         }
-        // The native driver forwards this advisory metric to its physical
-        // serial link. The offline transport has no link-quality state to
-        // update, but the ABI operation itself still completes successfully.
         return MethodResult { iokit_abi::success, { } };
     }
 
@@ -170,19 +155,11 @@ std::optional<MethodResult> dispatch_connect_method(KernelSharedState& state,
     if (!scalar_input.empty() || !inband_input.empty())
         return MethodResult { iokit_abi::bad_argument, { } };
 
-    // The selector is shape-overloaded across AppleSerialMultiplexer clients.
-    // A command form has no output, while the query form requests a timeval
-    // pair. Preserve both firmware-owned contracts without inventing a modem
-    // response for the command form.
     if (scalar_output_capacity == 0U)
         return MethodResult { iokit_abi::success, { } };
     if (scalar_output_capacity < 2U)
         return MethodResult { iokit_abi::bad_argument, { } };
 
-    // AppleSerialMultiplexer reports the kernel calendar as a timeval pair.
-    // CommCenter converts seconds + microseconds/1000 into its millisecond
-    // timeline, so source both fields from the same virtual calendar used by
-    // gettimeofday instead of consulting the host clock independently.
     const auto wall_time = state.clock.wall_time();
     const auto seconds = wall_time / nanoseconds_per_second;
     const auto microseconds =
@@ -192,4 +169,4 @@ std::optional<MethodResult> dispatch_connect_method(KernelSharedState& state,
     return MethodResult { iokit_abi::success, { seconds, microseconds } };
 }
 
-} // namespace shade::kernel_iokit::baseband
+}

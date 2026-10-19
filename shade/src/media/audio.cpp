@@ -172,7 +172,7 @@ namespace {
             static_cast<std::uint16_t>(*channel_count), std::move(samples) };
     }
 
-} // namespace
+}
 
 AudioService::AudioService(std::filesystem::path rootfs)
     : rootfs_ { std::move(rootfs) }
@@ -247,14 +247,8 @@ AudioPlayResult AudioService::queue_pcm(AudioBuffer buffer, float device_volume)
         result.detail = "invalid PCM buffer";
         return result;
     }
-    // Firmware mediaserverd has already applied its category gain to this PCM.
-    // The backend contributes only the emulated physical-device scalar.
     const auto gain = std::clamp(device_volume, 0.0F, 1.0F);
     result.applied_gain = gain;
-    // A queued SDL device naturally renders silence when it underruns.
-    // Enqueuing every silent hardware period only creates latency when guest
-    // virtual time advances faster than host playback time, potentially hiding
-    // the next audible buffer behind stale silence.
     const auto silent = std::visit(
         [](const auto& samples) {
             return std::ranges::none_of(
@@ -337,10 +331,6 @@ AudioService::observe_service_source_create_reply(
             source, ServiceSource {
                         *path, std::nullopt, 0.0F, service_output_stop_mode_ });
         latest_service_source_id_ = source;
-        // Some clients reuse the same server object for successive previews. A
-        // create reply begins a new generation: stale rate/volume state from
-        // the previous path must not start the replacement before its own
-        // rate=1.
         if (changed && playing_service_source_id_ == source) {
             stop_mode = previous_stop_mode;
             playing_service_source_id_.reset();
@@ -733,11 +723,6 @@ void AudioService::retire_finished_service_source_locked()
         return;
     }
 
-    // A host-decoded fallback is finite even if the retired Fig client leaves
-    // its rate positive. Once the sink consumes the final sample, retire only
-    // the fallback ownership. The firmware IOProc can then resume supplying
-    // PCM, and a later positive rate for the same service object can queue it
-    // again.
     playing_service_source_id_.reset();
     playing_service_source_.reset();
 }
@@ -780,4 +765,4 @@ void AudioService::load_system_volume_state()
 #endif
 }
 
-} // namespace shade
+}

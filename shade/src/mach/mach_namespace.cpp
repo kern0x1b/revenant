@@ -62,7 +62,7 @@ namespace {
         entry.type |= type;
     }
 
-} // namespace
+}
 
 void MachNamespaceTable::create_task(TaskId task) { spaces_.try_emplace(task); }
 
@@ -142,10 +142,6 @@ std::optional<MachName> MachNamespaceTable::copyout(
     TaskId task, MachObject object, MachTypeMask type)
 {
     auto& space = spaces_[task];
-    // Unlike ordinary Send rights, SendOnce rights never coalesce in an
-    // ipc_space and always have exactly one user reference. Distinct
-    // outstanding RPC reply rights to the same receive object therefore need
-    // distinct task-local names.
     if ((type & type_mask(Right::SendOnce)) != 0)
         return allocate(task, object, type);
     if (const auto names = indexed_names(space, object);
@@ -467,4 +463,4 @@ bool MachNamespaceTable::valid_name(MachName name)
     return name != null_name && name != dead_name;
 }
 
-} // namespace shade::xnu::ipc
+}

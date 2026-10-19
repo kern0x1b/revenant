@@ -42,43 +42,20 @@ struct DisplayFrame {
     std::uint32_t width { };
     std::uint32_t height { };
     std::uint64_t sequence { };
-    // Host submission time used only for presentation diagnostics. A default
-    // time point marks snapshots and synthetic frames that were not submitted
-    // by DisplayState.
     std::chrono::steady_clock::time_point submitted_at { };
     std::chrono::steady_clock::time_point native_queued_at { };
-    // Host-endian 0xAARRGGBB pixels. Backends perform any required upload
-    // format conversion without exposing it to the guest graphics HLE.
     std::vector<std::uint32_t> pixels;
-    // A hardware presenter consumes the native surface directly. CPU sinks
-    // invoke read_pixels only at an explicit screenshot/software boundary.
     std::shared_ptr<HostSurface> host_surface;
-    // Host-only content lease. A composition target cannot be reused while a
-    // queued presenter frame still points at it, even though the shared_ptr
-    // keeps the HostSurface object alive.
     std::shared_ptr<HostSurfacePresentationLease> presentation_lease;
-    // SDL's native presenter fills a bounded pool of private surfaces when a
-    // frame arrives as CPU pixels. Keep the source lease with the frame when a
-    // rotation pass creates a second destination surface; otherwise a queued
-    // frame could outlive the staging buffer that owns its pixels.
     std::shared_ptr<HostSurface> presentation_staging_surface;
     std::shared_ptr<HostSurfacePresentationLease> presentation_staging_lease;
     std::function<std::vector<std::uint32_t>()> read_pixels;
-    // Process incarnation that last populated the shared display state. This
-    // lets teardown revoke only stale application content without clearing a
-    // newer foreground client's frame.
     std::uint32_t owner_process_id { };
-    // Logical UIKit orientation requested by the owner. The framebuffer
-    // dimensions remain the device panel dimensions; frontends apply the
-    // orientation at the scanout boundary.
     DisplayOrientation orientation { DisplayOrientation::Portrait };
 };
 
 class DisplayState {
 public:
-    // A submitted frame is immutable after DisplayState hands it to the
-    // presenter. Passing ownership avoids a second full pixel-vector copy at
-    // the SDL admission boundary; snapshots remain const views of state.
     using Presenter = std::function<void(DisplayFrame)>;
     using OrientationResolver =
         std::function<DisplayOrientation(std::uint32_t process_id)>;
@@ -95,12 +72,8 @@ public:
         std::function<std::vector<std::uint32_t>()> read_pixels,
         std::uint32_t owner_process_id = 0,
         std::function<std::uint64_t()> content_revision_reader = { });
-    // The framebuffer keeps its last scanout contents while the LCD is off.
-    // Presenters and snapshots expose a black panel until power is restored.
     void set_powered_on(bool powered_on);
     void present(std::uint32_t owner_process_id = 0);
-    // Detach content produced by an exited process and submit a safe black
-    // boundary. Returns false when a newer process already owns the scanout.
     bool clear_if_owner(std::uint32_t owner_process_id);
 
     [[nodiscard]] DisplayFrame snapshot() const;
@@ -131,4 +104,4 @@ private:
     DisplayOrientation content_orientation_ { DisplayOrientation::Portrait };
 };
 
-} // namespace shade
+}

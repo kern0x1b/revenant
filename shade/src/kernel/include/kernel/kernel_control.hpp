@@ -32,4 +32,4 @@ struct Endpoint {
 [[nodiscard]] std::optional<std::string_view> name_for_identifier(
     std::uint32_t identifier);
 
-} // namespace shade::bsd::kernel_control
+}

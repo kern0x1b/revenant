@@ -183,11 +183,6 @@ bool CompatibilityKernel::dispatch_mach_task_vm_message(
                             }
                             registered_objects[index] = entry->object;
                             if (move_send) {
-                                // Preflight every duplicate before changing any
-                                // uref. The commit below runs under the same
-                                // mach_mutex, so a valid plan cannot fail
-                                // halfway through and leave the old stash or
-                                // caller namespace partially changed.
                                 std::uint32_t occurrences = 1;
                                 for (std::uint32_t prior = 0; prior < index;
                                     ++prior) {
@@ -235,22 +230,12 @@ bool CompatibilityKernel::dispatch_mach_task_vm_message(
                             }
                         }
                         if (!commit_succeeded) {
-                            // The preflight and commit share mach_mutex, so
-                            // this is an invariant failure rather than an
-                            // expected path. Still restore every successful
-                            // MOVE_SEND and release all temporary holds so the
-                            // old stash remains the only committed state.
                             for (const auto& [name, object] : consumed_rights) {
                                 const auto restored =
                                     shared_state_->mach_namespaces.install(
                                         process_.pid, name, object,
                                         xnu::ipc::type_mask(source_right));
                                 if (!restored) {
-                                    // The name/object was validated while
-                                    // holding the same mutex; reaching this
-                                    // branch indicates a broken namespace
-                                    // invariant that cannot be repaired by
-                                    // another IPC path.
                                     valid = false;
                                 }
                             }
@@ -261,9 +246,6 @@ bool CompatibilityKernel::dispatch_mach_task_vm_message(
                             }
                             valid = false;
                         } else {
-                            // Every MOVE_SEND was preflighted while holding
-                            // mach_mutex; COPY_SEND deliberately leaves the
-                            // caller's uref untouched.
                             if (previous !=
                                 shared_state_->mach_registered_ports.end()) {
                                 for (const auto object : previous->second) {
@@ -394,8 +376,6 @@ bool CompatibilityKernel::dispatch_mach_task_vm_message(
         registers[0] = 0;
         if (creates_running_thread && scheduler_preemption_query_ &&
             scheduler_preemption_query_(cpu.processor_id())) {
-            // Scheduler AST boundary. Unlike an explicit yield, this preserves
-            // the remainder of the current first timeslice.
             cpu.request_guest_preemption();
         }
         return true;
@@ -444,11 +424,6 @@ bool CompatibilityKernel::dispatch_mach_task_vm_message(
                     if (object == xnu::ipc::null_name)
                         continue;
                     if (!shared_state_->mach_port_objects.contains(object)) {
-                        // ipc_port_copy_send() returns IP_DEAD for an inactive
-                        // port. The lookup ABI exposes that result as
-                        // MACH_PORT_DEAD rather than failing the whole
-                        // three-slot copyout or resurrecting a Send name for a
-                        // retired object.
                         port_names[index] = xnu::ipc::dead_name;
                         continue;
                     }
@@ -509,10 +484,10 @@ bool CompatibilityKernel::dispatch_mach_task_vm_message(
             1U,
             ports_address,
             3U,
-            0x02110000U, // OOL_PORTS, MOVE_SEND
+            0x02110000U,
             0U,
             1U,
-            3U, // init_port_setCnt
+            3U,
         };
         for (std::size_t index = 0; index < reply.size(); ++index) {
             if (!memory_.write32(
@@ -528,7 +503,6 @@ bool CompatibilityKernel::dispatch_mach_task_vm_message(
             mig_message_id(
                 xnu::mig::mach_port::Routine::mach_port_get_attributes) &&
         registers[3] >= 44) {
-        // mach_port_get_attributes.
         const auto& attribute_arguments =
             xnu::mig::mach_port::mach_port_get_attributes_arguments;
         const auto flavor =
@@ -541,7 +515,6 @@ bool CompatibilityKernel::dispatch_mach_task_vm_message(
                         attribute_arguments[3].request_count_offset)
                 .value_or(0);
         if (flavor == 1 && requested_count >= 1) {
-            // MACH_PORT_LIMITS_INFO: one natural_t queue limit.
             const auto name = memory_
                                   .read32(message_address +
                                           attribute_arguments[1].request_offset)
@@ -578,7 +551,7 @@ bool CompatibilityKernel::dispatch_mach_task_vm_message(
                 0x00000000U,
                 0x00000001U,
                 result,
-                1, // port_info_outCnt
+                1,
                 queue_limit,
             };
             for (std::size_t index = 0; index < reply.size(); ++index) {
@@ -593,9 +566,6 @@ bool CompatibilityKernel::dispatch_mach_task_vm_message(
             return true;
         }
         if (flavor == 2 && requested_count >= 10 && registers[3] >= 80) {
-            // MACH_PORT_RECEIVE_STATUS. launchd's demand thread uses the
-            // real queue depth to select one member after its zero-length
-            // MACH_RCV_LARGE probe reports MACH_RCV_TOO_LARGE.
             const auto name = memory_
                                   .read32(message_address +
                                           attribute_arguments[1].request_offset)
@@ -604,7 +574,7 @@ bool CompatibilityKernel::dispatch_mach_task_vm_message(
             std::uint32_t mscount = 0;
             std::uint32_t msgcount = 0;
             bool has_send_rights = false;
-            std::uint32_t result = 15; // KERN_INVALID_NAME
+            std::uint32_t result = 15;
             {
                 std::lock_guard mach_lock { shared_state_->mach_mutex };
                 const auto target = target_task_for_port(
@@ -616,11 +586,6 @@ bool CompatibilityKernel::dispatch_mach_task_vm_message(
                 if (target && entry &&
                     (entry->type & xnu::ipc::type_mask(
                                        xnu::ipc::Right::PortSet)) != 0) {
-                    // A port-set name has a receive right for the set itself,
-                    // not for an individual queue.  Darwin reports the
-                    // aggregate pending depth here; GraphicsServices uses it to
-                    // decide whether its heartbeat may remain paused after a
-                    // timeout.
                     if (const auto set =
                             shared_state_->mach_port_sets.find(entry->object);
                         set != shared_state_->mach_port_sets.end()) {
@@ -653,10 +618,6 @@ bool CompatibilityKernel::dispatch_mach_task_vm_message(
                                 entry->object)) {
                         mscount = object->make_send_count;
                     }
-                    // Include rights held by messages and kernel services as
-                    // well as task namespaces, just like no-senders delivery.
-                    // Native transaction fences depend on this becoming false
-                    // when their last sender releases the port.
                     has_send_rights = port_has_send_rights_locked(
                         *shared_state_, entry->object);
                     if (const auto queue =
@@ -680,17 +641,17 @@ bool CompatibilityKernel::dispatch_mach_task_vm_message(
                 0x00000000U,
                 0x00000001U,
                 result,
-                10, // port_info_outCnt
-                port_set, // mps_pset
-                0, // mps_seqno
-                mscount, // mps_mscount
-                5, // mps_qlimit
-                msgcount, // mps_msgcount
-                0, // mps_sorights
-                has_send_rights ? 1U : 0U, // mps_srights
-                0, // mps_pdrequest
-                0, // mps_nsrequest
-                0, // mps_flags
+                10,
+                port_set,
+                0,
+                mscount,
+                5,
+                msgcount,
+                0,
+                has_send_rights ? 1U : 0U,
+                0,
+                0,
+                0,
             };
             if (process_.pid == 1 && port_status_trace_count_ < 64) {
                 output_.write(
@@ -721,7 +682,7 @@ bool CompatibilityKernel::dispatch_mach_task_vm_message(
             *message_id + 100,
             0x00000000U,
             0x00000001U,
-            4, // KERN_INVALID_ARGUMENT
+            4,
         };
         for (std::size_t index = 0; index < reply.size(); ++index) {
             if (!memory_.write32(
@@ -807,4 +768,4 @@ bool CompatibilityKernel::dispatch_mach_task_vm_message(
     return false;
 }
 
-} // namespace shade
+}

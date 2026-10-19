@@ -21,16 +21,11 @@ namespace shade {
 class UserlandHleCall;
 class UserlandHleRegistry;
 
-// Some libnotify generations contact notifyd from image initializers, including
-// notifyd's own image initialization. Their bootstrap-aware abi supplies
-// process-local check tokens while the server is absent, then returns to the
-// firmware service once notifyd has checked in.
 enum class DarwinNotifyStateAbi : std::uint8_t {
     NativeServerTokens,
     BootstrapAwareServerTokens,
 };
 
-// Adapts host-backed device state to Darwin notify without replacing notifyd.
 class DarwinNotifyStateHle {
 public:
     using StateProvider = std::function<std::uint64_t()>;
@@ -88,4 +83,4 @@ private:
     std::set<RegistrationKey> owned_registrations_;
 };
 
-} // namespace shade
+}

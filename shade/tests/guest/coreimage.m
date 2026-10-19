@@ -29,8 +29,6 @@ static void check(const char *name, BOOL good, const char *why)
     fflush(stdout);
 }
 
-// A 4x4 image of one premultiplied RGBA colour (components given as the premultiplied bytes), with
-// or without an alpha channel in the CGImage itself.
 static CGImageRef makeImage(uint8_t r, uint8_t g, uint8_t b, uint8_t a, BOOL withAlpha)
 {
     CGColorSpaceRef space = CGColorSpaceCreateDeviceRGB();
@@ -50,7 +48,6 @@ static CGImageRef makeImage(uint8_t r, uint8_t g, uint8_t b, uint8_t a, BOOL wit
     return image;
 }
 
-// The first pixel of an image drawn into a premultiplied RGBA bitmap, replacing what was there.
 static void readBack(CGImageRef image, uint8_t out[4])
 {
     CGColorSpaceRef space = CGColorSpaceCreateDeviceRGB();
@@ -61,7 +58,6 @@ static void readBack(CGImageRef image, uint8_t out[4])
     CGContextRelease(bitmap);
 }
 
-// What a context's rendering of the image reads back as in the first pixel, premultiplied RGBA.
 static BOOL render(CIContext *context, CGImageRef source, uint8_t out[4])
 {
     CIImage *input = [CIImage imageWithCGImage:source];
@@ -99,7 +95,6 @@ static void expectPixel(const char *name, CIContext *context, uint8_t r, uint8_t
     check(name, same, why);
 }
 
-// Where an alpha source goes wrong, told apart by what the image is made of and what it is drawn to.
 static void expectPixelFrom(const char *name, CIImage *input, CIContext *context, const uint8_t want[4])
 {
     CGImageRef drawn = [context createCGImage:input fromRect:CGRectMake(0, 0, 4, 4)];
@@ -139,8 +134,6 @@ static void expectBitmap(const char *name, CIImage *input, CIContext *context, C
     check(name, same, why);
 }
 
-// A pixel of an image (row counted from the top), read from a copy of the whole image drawn into a
-// premultiplied RGBA bitmap of its own size, replacing what was there.
 static void pixelAt(CGImageRef image, int x, int y, uint8_t out[4])
 {
     size_t width = CGImageGetWidth(image), height = CGImageGetHeight(image);
@@ -154,9 +147,6 @@ static void pixelAt(CGImageRef image, int x, int y, uint8_t out[4])
     CGContextRelease(bitmap);
 }
 
-// CIGaussianBlur over a 40x20 picture of a red half and a blue half, drawn over the whole extent the
-// blur makes (it widens the picture by three times the radius on every side): where the halves meet
-// the pixel is a mixture of the two colours.
 static void expectBlur(const char *name, CIContext *context)
 {
     CGColorSpaceRef space = CGColorSpaceCreateDeviceRGB();
@@ -198,14 +188,13 @@ static void expectBlur(const char *name, CIContext *context)
 int main(void)
 {
     @autoreleasepool {
-        setenv("CL_LOG_ERRORS", "stdout", 1); // OpenCL names what it refuses, where it refuses it
+        setenv("CL_LOG_ERRORS", "stdout", 1);
 
         EAGLContext *es2 = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES2];
         check("EAGLContext ES2", es2 != nil, "initWithAPI:kEAGLRenderingAPIOpenGLES2 answered nil");
         EAGLContext *es1 = [[EAGLContext alloc] initWithAPI:kEAGLRenderingAPIOpenGLES1];
         check("EAGLContext ES1", es1 != nil, "initWithAPI:kEAGLRenderingAPIOpenGLES1 answered nil");
 
-        // The control: the same source, read back without Core Image in between.
         CGImageRef plain = makeImage(128, 0, 0, 128, YES);
         uint8_t direct[4] = {0, 0, 0, 0};
         if (plain) readBack(plain, direct);

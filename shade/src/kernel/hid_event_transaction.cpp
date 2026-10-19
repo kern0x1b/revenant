@@ -18,9 +18,6 @@
 namespace shade {
 namespace {
 
-    // Darwin's ARM32 C ABI packs the uint64 timestamp into r1/r2 and
-    // passes CGFloat coordinates as float words on the stack. The firmware
-    // owns the event layout, collection metadata and reference counting.
     struct Arm32DigitizerEventProfile {
         static constexpr std::uint32_t finger = 2U;
         static constexpr std::uint32_t hand = 3U;
@@ -29,7 +26,6 @@ namespace {
         static constexpr std::uint32_t position_changed = 4U;
         static constexpr std::uint32_t identity_changed = 0x20U;
         static constexpr std::uint32_t cancelled = 0x80U;
-        // Contacts originate on the built-in display, not an indirect pad.
         static constexpr std::uint32_t display_integrated = 0x80000U;
         static constexpr std::uint32_t stack_scratch_bytes = 64U;
     };
@@ -140,8 +136,6 @@ namespace {
             case Step::Keyboard: {
                 const auto& key =
                     std::get<HidEventQueue::KeyboardInput>(event_.input);
-                // Darwin ARM32 packs timestamp into r1/r2, with usage,
-                // down and options as the three remaining stack arguments.
                 r[13] -= 16U;
                 r[0] = 0U;
                 r[1] = static_cast<std::uint32_t>(event_.timestamp);
@@ -241,7 +235,7 @@ namespace {
         std::uint32_t finger_ { };
     };
 
-} // namespace
+}
 
 bool HidEventTransaction::enqueue(UserlandHleRegistry& registry,
     const HidEventQueue::Consumer& consumer, HidEventQueue::Event event,
@@ -253,4 +247,4 @@ bool HidEventTransaction::enqueue(UserlandHleRegistry& registry,
         ->start(registry, consumer.processor);
 }
 
-} // namespace shade
+}

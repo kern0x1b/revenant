@@ -34,7 +34,7 @@ bool CompatibilityKernel::create_kernel_control_socket(Cpu& cpu)
     }
     const auto fd = allocate_file_descriptor();
     if (!fd) {
-        bsd_error(cpu, 24); // EMFILE
+        bsd_error(cpu, 24);
         return true;
     }
     virtual_descriptors_.emplace(
@@ -169,8 +169,6 @@ bool CompatibilityKernel::name_kernel_control_socket(Cpu& cpu, bool peer)
     const auto endpoint = kernel_control_endpoints_.find(registers[0]);
     if (endpoint == kernel_control_endpoints_.end())
         return false;
-    // XNU provides ctl_peeraddr but deliberately has no local sockaddr
-    // operation for kernel-control sockets.
     if (!peer) {
         bsd_error(cpu, darwin::error::operation_not_supported);
         return true;
@@ -228,10 +226,8 @@ bool CompatibilityKernel::write_kernel_control_socket(
             " hex=" + bsd_support::format_payload_prefix(bytes) + "\n");
         ++socket_payload_trace_count_;
     }
-    // The simulated modem is offline: the IP interface control accepts
-    // outgoing configuration frames but deliberately fabricates no replies.
     bsd_success(cpu, static_cast<std::uint32_t>(bytes.size()));
     return true;
 }
 
-} // namespace shade
+}

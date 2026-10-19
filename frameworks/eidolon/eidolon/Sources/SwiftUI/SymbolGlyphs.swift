@@ -1,8 +1,6 @@
 import UIKit
 import CoreGraphics
 
-// iOS 6 has no SF Symbols. The names apps use most are drawn here, as line art in a unit square, and tinted like a
-// template image; a name outside the set is reported and drawn as an outlined square with a question mark.
 struct GlyphPen {
     let context: CGContext
     let size: CGFloat
@@ -17,7 +15,6 @@ struct GlyphPen {
         return path
     }
 
-    // stroke, or fill when the symbol is the ".fill" variant and the shape can be filled
     func draw(_ path: CGPath, fillable: Bool = true) {
         context.addPath(path)
         if filled && fillable { context.fillPath() } else { context.strokePath() }
@@ -258,7 +255,6 @@ enum SymbolGlyphs {
             for i in 0..<8 { let a = CGFloat(i) * .pi / 4; g.lines([(0.5 + 0.28 * cos(a), 0.5 + 0.28 * sin(a)), (0.5 + 0.42 * cos(a), 0.5 + 0.42 * sin(a))]) }
         },
         "moon": { g in
-            // the crescent is circle A less circle B: A's long way round between the two crossings, then B's inner arc back
             let a = CGPoint(x: 0.5, y: 0.5), b = CGPoint(x: 0.66, y: 0.4), ra: CGFloat = 0.4, rb: CGFloat = 0.32
             let d = hypot(b.x - a.x, b.y - a.y), along = (ra * ra - rb * rb + d * d) / (2 * d), h = (ra * ra - along * along).squareRoot()
             let ux = (b.x - a.x) / d, uy = (b.y - a.y) / d
@@ -298,7 +294,6 @@ enum SymbolGlyphs {
         },
     ]
 
-    // "heart.fill", "plus.circle", "xmark.circle.fill", "checkmark.square"...: a base glyph, in a circle or a square, filled or not
     static func resolve(_ name: String) -> (base: Glyph, circled: Bool, squared: Bool, filled: Bool)? {
         var rest = name
         var filled = false, circled = false, squared = false
@@ -322,7 +317,6 @@ enum SymbolGlyphs {
         let pen = GlyphPen(context: context, size: points, filled: filled && !circled && !squared)
         context.setLineWidth(pen.line * (bold ? 1.5 : 1))
         if circled || squared {
-            // a symbol in a container: the container outlined, or solid with the symbol cut out of it
             let container = GlyphPen(context: context, size: points, filled: filled)
             if squared { container.rect(0.06, 0.06, 0.94, 0.94, radius: 0.16) } else { container.circle(0.5, 0.5, 0.44) }
             context.saveGState()
@@ -338,7 +332,6 @@ enum SymbolGlyphs {
         return UIGraphicsGetImageFromCurrentImageContext()
     }
 
-    // what a name that is not in the set looks like: an outlined square with a question mark
     static func placeholder(points: CGFloat) -> UIImage? {
         UIGraphicsBeginImageContextWithOptions(CGSize(width: points, height: points), false, 0)
         defer { UIGraphicsEndImageContext() }

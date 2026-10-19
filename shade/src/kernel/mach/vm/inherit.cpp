@@ -29,7 +29,7 @@ namespace {
         darwin::mig_wire::word_size;
     constexpr std::uint32_t kern_invalid_argument = 4U;
 
-} // namespace
+}
 
 bool CompatibilityKernel::dispatch_mach_vm_inherit_message(
     Cpu& cpu, const MachMessageRequest& request)
@@ -90,4 +90,4 @@ bool CompatibilityKernel::dispatch_mach_vm_inherit_message(
     return true;
 }
 
-} // namespace shade
+}

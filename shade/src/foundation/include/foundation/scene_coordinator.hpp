@@ -15,9 +15,6 @@
 
 namespace shade {
 
-// Host/display coordinates to an OS client's input coordinate space. The full
-// affine form supports translation, scale, rotation, and later graphics stacks
-// without exposing any host backend or private framework object layout.
 struct SceneTransform {
     float xx { 1.0F };
     float xy { };
@@ -43,9 +40,6 @@ struct ClientScene {
     ClientSceneState state { ClientSceneState::Committed };
 };
 
-// Common semantic scene state. Version-specific graphics adapters commit
-// logical clients here; input, display policy, and lifecycle code consume the
-// same process identity without depending on LayerKit, QuartzCore, or SDL.
 class SceneCoordinator {
 public:
     void commit_client_scene(std::uint32_t client_process_id,
@@ -53,10 +47,6 @@ public:
     [[nodiscard]] std::optional<ClientScene> client_scene(
         std::uint32_t client_process_id) const;
     [[nodiscard]] std::optional<ClientScene> active_client_scene() const;
-    // The outgoing scene remains visually foreground while its exit transition
-    // is being composed. Display policy consumes this broader lifetime; input
-    // continues to use active_client_scene() so an exiting client cannot
-    // receive new touches.
     [[nodiscard]] std::optional<ClientScene> foreground_client_scene() const;
     void activate_client_scene(std::uint32_t client_process_id);
     void begin_client_scene_exit(std::uint32_t client_process_id);
@@ -75,4 +65,4 @@ private:
     std::map<std::uint32_t, ClientScene> client_scenes_;
 };
 
-} // namespace shade
+}

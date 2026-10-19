@@ -8,8 +8,6 @@
 
 namespace shade {
 
-// Keep the initial stack below the reserved shared-cache interval. These
-// addresses are a process ABI contract, independent of host memory layout.
 enum class DarwinAddressLayout { ClassicArm, ExpandedArmSharedRegion };
 
 struct DarwinAddressBounds {
@@ -25,4 +23,4 @@ constexpr DarwinAddressBounds darwin_address_bounds(DarwinAddressLayout layout)
     return { 0x30000000U, 0x30000000U, 0x40000000U };
 }
 
-} // namespace shade
+}

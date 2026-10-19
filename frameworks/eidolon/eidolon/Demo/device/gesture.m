@@ -1,4 +1,3 @@
-// From the Charon tree, tests/backports/device/gesture.m (MIT, kern0x1b): real touches for a device test, as IOHID digitizer events.
 #import "gesture.h"
 #include <dlfcn.h>
 #include <mach/mach_time.h>

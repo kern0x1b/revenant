@@ -47,14 +47,14 @@ namespace {
             return trailer_sequence_size;
         if (elements == trailer_sender)
             return trailer_sender_size;
-        if (elements == 4U) { // MACH_RCV_TRAILER_CTX
+        if (elements == 4U) {
             return trailer_audit_size +
                 (context_width == DarwinMachVmAddressWidth::Wide64 ? 8U : 4U);
         }
         return trailer_audit_size;
     }
 
-} // namespace
+}
 
 bool normalize_send_header(std::vector<std::byte>& bytes, std::size_t send_size)
 {
@@ -126,7 +126,7 @@ std::optional<ReceivedMessage> prepare_received_message(
     write_word(result.bytes, darwin::mig_wire::header_local_port_offset,
         destination_name);
 
-    write_word(result.bytes, aligned_size, 0); // MACH_MSG_TRAILER_FORMAT_0
+    write_word(result.bytes, aligned_size, 0);
     write_word(result.bytes, aligned_size + 4U,
         static_cast<std::uint32_t>(result.trailer_size));
     if (result.trailer_size >= 12U) {
@@ -162,4 +162,4 @@ std::optional<ReceivedMessage> prepare_received_message(
     return result;
 }
 
-} // namespace shade::mach_ipc
+}

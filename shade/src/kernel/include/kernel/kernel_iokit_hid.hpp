@@ -33,7 +33,6 @@ namespace kernel_iokit::hid {
 
     [[nodiscard]] bool matches_service(std::span<const std::byte> matching);
 
-    // The caller holds KernelSharedState::mach_mutex.
     [[nodiscard]] std::uint32_t ensure_service_locked(
         KernelSharedState& state, std::uint32_t parent_object);
 
@@ -55,5 +54,5 @@ namespace kernel_iokit::hid {
     void close_connection(AddressSpace& memory, KernelSharedState& state,
         std::uint32_t connection_object);
 
-} // namespace kernel_iokit::hid
-} // namespace shade
+}
+}

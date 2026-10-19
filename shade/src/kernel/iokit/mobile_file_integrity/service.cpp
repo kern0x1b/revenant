@@ -33,7 +33,7 @@ namespace {
         return value;
     }
 
-} // namespace
+}
 
 bool matches_service(std::span<const std::byte> matching)
 {
@@ -94,13 +94,10 @@ std::optional<MethodResult> dispatch_connect_method(KernelSharedState& state,
         return MethodResult { iokit_abi::not_found, { } };
     }
     auto output = target->second.code_signature_entitlements;
-    // IOCFUnserialize accepts a C string. The embedded entitlement blob stores
-    // the exact XML bytes without a terminator, while the AMFI user-client ABI
-    // returns a terminated in-band buffer.
     output.push_back(std::byte { 0 });
     if (output.size() > inband_output_capacity)
         return MethodResult { iokit_abi::bad_argument, { } };
     return MethodResult { iokit_abi::success, std::move(output) };
 }
 
-} // namespace shade::kernel_iokit::mobile_file_integrity
+}

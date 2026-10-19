@@ -1,14 +1,3 @@
--- Verdict helper for tests/check.sh: lists the project files that repeat a run of five significant lines from the
--- plugin's own text. A significant line is at least eight characters after its whitespace is collapsed and trimmed.
--- Files that are not UTF-8, and files that cannot be read, are skipped.
--- Usage: xmake l tests/copied_text.lua PLUGIN_DIR PROJECT_DIR
--- Output, one line per copied file: "PATH repeats PLUGIN_PATH: FIRST_LINE" (FIRST_LINE cut to 60 characters).
--- This replaces an inline python3 script. The Python walked with os.walk, which took the first plugin file it saw
--- for each run; this takes them in sorted order. Differences: only ASCII whitespace is collapsed (Python's split()
--- also takes Unicode spaces), and a run's "first line" is the first matching run in file order, not a set's order.
-
--- Lines of a file that count, as the Python made them: universal newlines, the splitlines() separators, collapsed
--- whitespace, and a length of eight or more characters.
 local function significant_lines(text)
     text = (string.gsub(text, "\r\n", "\n"))
     text = (string.gsub(text, "\r", "\n"))
@@ -26,7 +15,6 @@ local function significant_lines(text)
     return lines
 end
 
--- Every run of five consecutive significant lines, in file order.
 local function runs(lines)
     local out = {}
     for i = 1, #lines - 4 do
@@ -35,8 +23,6 @@ local function runs(lines)
     return out
 end
 
--- Files and symlinks under root, skipping the named directories at any depth; find does not follow links, as
--- os.walk did not. The Python listed hidden files too, and so does find.
 local function files_under(root, skip)
     local prune = {}
     for _, name in ipairs(skip) do

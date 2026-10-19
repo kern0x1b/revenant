@@ -45,8 +45,6 @@ namespace {
     constexpr std::uint32_t hfs_block_size = allocation_block_size;
 
 #if defined(__APPLE__)
-    // Darwin has no attribute namespaces: the user namespace names Linux
-    // gives these attributes are the bare names here.
     ssize_t host_getxattr(const char* path, const char* name, void* value,
         std::size_t size, bool follow)
     {
@@ -377,7 +375,7 @@ namespace {
         return (value.size() + 1U + 3U) & ~3U;
     }
 
-} // namespace
+}
 
 std::uint32_t GuestIdTable::id_for(
     const Identity& identity, std::string_view guest_path)
@@ -515,7 +513,6 @@ std::optional<Metadata> MetadataProvider::query(
         } else if (parent == root_) {
             result.parent_catalog_id = hfs_root_catalog_id;
         } else {
-            // Only a parent without a cnid takes a sighting here.
             result.parent_catalog_id =
                 table_id(parent_status.st_dev, parent_status.st_ino, parent)
                     .value_or(inode_catalog_id(parent_status));
@@ -625,7 +622,6 @@ std::vector<std::byte> MetadataProvider::pack_attributes(
         word(static_cast<std::uint32_t>(value.seconds));
         word(static_cast<std::uint32_t>(value.nanoseconds));
     };
-    // ATTR_CMN_RETURNED_ATTRS precedes all ordinary common attributes.
     if (request.common & common_returned_attributes) {
         word(request.common);
         word(0);
@@ -679,7 +675,7 @@ std::vector<std::byte> MetadataProvider::pack_attributes(
     if (request.common & common_flags)
         word(metadata.flags);
     if (request.common & common_user_access)
-        word(7); // emulated root credential
+        word(7);
     if (request.common & common_file_id)
         wide(metadata.permanent_id);
     if (request.common & common_parent_file_id)
@@ -789,9 +785,6 @@ std::vector<std::byte> MetadataProvider::pack_volume_attributes(
         word(0);
     }
 
-    // Darwin 8's volume-common view represents the mounted filesystem, not
-    // the root catalog record.  Consequently object IDs/type are zero while
-    // ownership and times are sourced from the HFS root vnode/volume.
     if (request.common & common_name)
         string(volume.name);
     if (request.common & common_device)
@@ -881,8 +874,6 @@ std::vector<std::byte> MetadataProvider::pack_volume_attributes(
     if (mask & volume_encodings_used)
         wide(volume.encodings_used);
     if (mask & volume_capabilities) {
-        // Mirrors xnu hfs_attrlist.c for an HFSX, non-journal-active
-        // volume.  HFS+ advertises journal capability even when inactive.
         constexpr std::array<std::uint32_t, 8> capabilities { 0x00000f0fU,
             0x000003dfU, 0, 0, 0x00000fffU, 0x000003ffU, 0, 0 };
         for (const auto value : capabilities)
@@ -893,9 +884,9 @@ std::vector<std::byte> MetadataProvider::pack_volume_attributes(
             volume_valid_mask, directory_supported_mask, 0x0000'7fffU,
             0x0000'0003U };
         for (const auto value : attributes)
-            word(value); // validattr
+            word(value);
         for (const auto value : attributes)
-            word(value); // nativeattr
+            word(value);
     }
     return result;
 }
@@ -1012,4 +1003,4 @@ std::filesystem::path MetadataProvider::resource_sidecar(
     return result;
 }
 
-} // namespace shade::hfs
+}

@@ -26,13 +26,11 @@ namespace {
     using namespace mach_support;
     using namespace mach_vm_support;
 
-    // The pointer-sized vm_map subsystem numbers this routine relative to 3800;
-    // mach_vm publishes the same ARM32 wire contract relative to 4800.
     constexpr std::uint32_t mach_vm_deallocate_identifier = 4801U;
     constexpr std::uint32_t request_size = 40U;
     constexpr std::uint32_t reply_size = 36U;
 
-} // namespace
+}
 
 bool CompatibilityKernel::dispatch_mach_vm_deallocate_message(
     Cpu& cpu, const MachMessageRequest& request)
@@ -64,8 +62,6 @@ bool CompatibilityKernel::dispatch_mach_vm_deallocate_message(
     }
     auto result = darwin::mach::invalid_argument;
     if (address && size && targets_current_task) {
-        // vm_deallocate treats an already-unmapped subrange as success; unmap
-        // whatever currently overlaps the requested page range.
         static_cast<void>(unmap_memory(cpu, *address, *size));
         result = darwin::mach::success;
     }
@@ -91,4 +87,4 @@ bool CompatibilityKernel::dispatch_mach_vm_deallocate_message(
     return true;
 }
 
-} // namespace shade
+}

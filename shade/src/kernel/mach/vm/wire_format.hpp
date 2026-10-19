@@ -20,9 +20,6 @@
 
 namespace shade::mach_vm_support {
 
-// Later ARM32 mach_vm clients widened addresses and sizes within Darwin 11.
-// The vm_map subsystem retains natural-sized fields. Both use four-byte MIG
-// alignment, including for an eight-byte address following a scalar word.
 class MachVmWireFormat {
 public:
     [[nodiscard]] static constexpr MachVmWireFormat for_interface(
@@ -61,4 +58,4 @@ private:
     std::uint32_t size_;
 };
 
-} // namespace shade::mach_vm_support
+}

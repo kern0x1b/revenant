@@ -50,10 +50,6 @@ namespace {
         return abi;
     }();
 
-    // Darwin 13 keeps the audited wide-VM wire contracts and the high-address
-    // commpage. Keep the profile separate so later Darwin revisions can
-    // evolve their contracts without making this compatibility boundary
-    // depend on a firmware build string.
     constexpr DarwinAbi darwin13_wide_vm_high_commpage_abi = [] {
         auto abi = darwin11_wide_vm_high_vectors_abi;
         abi.abi_epoch = DarwinAbiEpoch::Darwin13;
@@ -66,8 +62,6 @@ namespace {
         return abi;
     }();
 
-    // Release identity and ABI values are independent. Entries sharing a
-    // Darwin release retain the wire differences required by their callers.
     constexpr std::array configurations {
         DarwinConfigurationEntry {
             .name = "darwin9.0.0d1",
@@ -247,8 +241,6 @@ namespace {
                    revision.back() >= 'a' && revision.back() <= 'z');
     }
 
-    // Both firmware metadata and frontend overrides use this mapping. Dispatch
-    // depends on the selected contracts, never on firmware build strings.
     const DarwinConfigurationEntry* configuration_for_build(
         std::string_view build)
     {
@@ -265,8 +257,6 @@ namespace {
             Rule { "8C", "darwin10.4.0" },
             Rule { "8F", "darwin11.0.0-inline-iokit" },
             Rule { "9A", "darwin11.0.0-wide-vm" },
-            // The 9B dyld keeps the Darwin 11 wire contracts but probes the
-            // high commpage while selecting atomic routines.
             Rule { "9B", "darwin11.0.0-wide-vm-high-vectors" },
             Rule { "10", "darwin13.0.0-wide-vm-high-commpage" },
             Rule { "11", "darwin14.0.0" },
@@ -281,7 +271,7 @@ namespace {
         return nullptr;
     }
 
-} // namespace
+}
 
 std::span<const DarwinConfigurationEntry> darwin_configurations()
 {
@@ -341,4 +331,4 @@ DarwinKernelConfiguration resolve_darwin_configuration(
     return configuration;
 }
 
-} // namespace shade
+}

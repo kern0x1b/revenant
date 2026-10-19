@@ -31,8 +31,8 @@ extern void xl_tail(State *state);
 extern void xl_fault(State *state, const char *reason);
 
 static CFMutableDictionaryRef xl_selector_table;
-static CFMutableDictionaryRef xl_selector_variant_table;  // SEL -> (encoding CFString -> guest addr)
-static CFMutableDictionaryRef xl_variant_cache;           // host IMP -> guest addr (resolved variant)
+static CFMutableDictionaryRef xl_selector_variant_table;
+static CFMutableDictionaryRef xl_variant_cache;
 static CFMutableDictionaryRef xl_guest_imps;
 static CFMutableDictionaryRef xl_variadic_table;
 static pthread_once_t xl_setup_once = PTHREAD_ONCE_INIT;
@@ -54,10 +54,6 @@ static void xl_uncaught(NSException *exception)
 
 static void xl_fix_layouts(void);
 
-// EXPERIMENT (flag-file gated, diagnostics only): API-gap survey. With /private/var/charon/xl-exp-null-missing present,
-// a message NO class implements is logged (class + selector, one line per distinct pair) to xl-missing.log and answered
-// by this null object -- every unknown message returns nil/0 -- instead of raising "unrecognized selector". The app
-// then keeps running and a single launch yields the full list of missing (backport-needed) methods.
 @interface XLNullObject : NSObject
 @end
 @implementation XLNullObject
@@ -99,14 +95,6 @@ static id xl_null_missing(id self_, SEL forwarding_sel, SEL missing)
     return null_object;
 }
 
-// iOS 6 (and 7/8) run the Auto Layout pass INSIDE UIView's -layoutSubviews, and raise "Auto Layout still required after
-// executing -layoutSubviews. X's implementation of -layoutSubviews needs to call super" if an override never reached it.
-// Modern iOS (10+) runs the engine BEFORE calling the override, so apps written for it legitimately omit [super
-// layoutSubviews] -- and would raise here. Emulate the modern order for the translated app's own UIView subclasses: wrap
-// each override so UIView's implementation runs first, then the guest's (a guest that also calls super merely repeats an
-// idempotent pass). Disabled by the flag file /private/var/charon/xl-no-layout-super.
-// Memory profile (flag file /private/var/charon/xl-memlog): a run that vanishes with no crash and no exit() is usually
-// the low-memory killer; sampling resident/virtual size every 100 ms into xl-mem.log leaves the profile up to the kill.
 static void *xl_memlog_thread(void *arg)
 {
     (void)arg;
@@ -176,13 +164,8 @@ static void xl_setup(void)
         CFDictionarySetValue(xl_selector_table, sel_registerName(shim->selector), (void *)(uintptr_t)shim->guest);
     for (const struct xl_imp_entry *entry = xl_imp_map; entry->imp; entry++)
         CFDictionarySetValue(xl_guest_imps, entry->imp, (void *)(uintptr_t)entry->guest);
-    // Ambiguous-selector variants: SEL -> (type-encoding -> guest bridge). Built once; xl_route
-    // then dispatches a polymorphic selector to the bridge matching the receiver's real method.
     xl_selector_variant_table = CFDictionaryCreateMutable(NULL, 0, NULL, NULL);
     xl_variant_cache = CFDictionaryCreateMutable(NULL, 0, NULL, NULL);
-    // EXPERIMENT (flag-file gated, NOT part of the translator): find the layers behind a backports gap
-    // without a round trip. Real UIKit's constraint validation (_UIViewConstraintWithItemsIsPotentially-
-    // Dangly) sends -superview to a UILayoutGuide constraint item; give the guide that method here.
     xl_wrap_layout_subviews();
     if (access("/private/var/charon/xl-memlog", F_OK) == 0) {
         pthread_t thread;
@@ -193,19 +176,11 @@ static void xl_setup(void)
         class_replaceMethod([NSObject class], @selector(forwardingTargetForSelector:), imp, "@@::");
         class_replaceMethod(object_getClass([NSObject class]), @selector(forwardingTargetForSelector:), imp, "@@::");
     }
-    // EXPERIMENT (flag-file gated, diagnostics only): /private/var/charon/xl-stubs.txt lists "+Class selector" or
-    // "-Class selector" lines; each named method that the class does not implement is added, answering nil/0. Where
-    // xl-exp-null-missing cannot reach (CoreFoundation does not always consult the NSObject forwarding hook), this
-    // steps a translated app past one API gap at a time to find the next -- without a rebuild. The list of stubbed
-    // names is the hand-off to whoever owns the backport.
     FILE *stubs = fopen("/private/var/charon/xl-stubs.txt", "r");
     if (stubs) {
         char line[256];
         while (fgets(line, sizeof line, stubs)) {
             char cls[128], sel[128];
-            // "+"/"-" add the method where the class lacks it; "=" (instance) / "#" (class) REPLACE an existing one --
-            // iOS 6 Foundation ships some later-OS selectors as stubs that raise doesNotRecognizeSelector (for example
-            // -[NSBundle appStoreReceiptURL]), so respondsToSelector: says yes and the call still throws.
             char kind = line[0];
             if ((kind != '+' && kind != '-' && kind != '=' && kind != '#') || sscanf(line + 1, "%127s %127s", cls, sel) != 2)
                 continue;
@@ -228,11 +203,7 @@ static void xl_setup(void)
             IMP imp = imp_implementationWithBlock(^id(id self_) { return [self_ performSelector:@selector(owningView)]; });
             class_addMethod(guide, @selector(superview), imp, "@@:");
         }
-        // Real UIKit's Auto Layout engine also probes private item methods on every constraint item
-        // (_supportsContentDimensionVariables, ...). Forward whatever a guide does not implement to its
-        // owning view, and LOG each selector so the complete list can be handed to the backports owner.
         if (guide) {
-            // A guide has no content-size variables of its own.
             IMP no = imp_implementationWithBlock(^BOOL(id self_) { return NO; });
             class_addMethod(guide, NSSelectorFromString(@"_supportsContentDimensionVariables"), no, "c@:");
         }
@@ -266,11 +237,6 @@ static void xl_setup(void)
     xl_bridge_init_generated();
 }
 
-// Storyboards compiled by a recent Xcode name segue-template classes that iOS 6 does not have
-// (UIStoryboardShowSegueTemplate, ...): unarchiving the storyboard throws NSInvalidUnarchiveOperation
-// "Could not instantiate class named ..." on the first scene. Register the missing names as subclasses of
-// the closest iOS 6 template so the unarchive succeeds and the segue behaves as its iOS 6 counterpart
-// (show -> push, presentation -> modal). A stand-in only when the class is absent.
 static void xl_register_storyboard_segues(void)
 {
     static const struct { const char *name, *base; } segues[] = {
@@ -307,7 +273,6 @@ void xl_run_initializers(void)
 void xl_bridge_init(void)
 {
     pthread_once(&xl_setup_once, xl_setup);
-    // After the setup, not inside it: registering a class can run a guest +initialize, which calls back in here.
     xl_shadow_register_listed();
 }
 
@@ -388,9 +353,6 @@ static int xl_class_neutralized(Class cls)
 {
     if (!xl_neutralized_prefixes.count)
         return 0;
-    // Match the class or any ancestor, so a neutralized service is absent as a whole:
-    // this catches the KVO runtime subclass (NSKVONotifying_GAI, whose superclass is GAI)
-    // and every subclass of a neutralized class, not just names carrying the prefix.
     for (Class c = cls; c; c = class_getSuperclass(c)) {
         const char *name = class_getName(c);
         if (!name)
@@ -405,8 +367,6 @@ static int xl_class_neutralized(Class cls)
 
 void xl_report_guest_frame(void);
 
-// xl_route's answer for a message whose selector has no guest bridge (xlgen only knows selectors that appear in the
-// SDK headers and in the app): the caller then marshals the call from the runtime's own method type encoding.
 #define XL_NO_BRIDGE ((uint64_t)-1)
 
 static void xl_dynamic_send(State *state, id receiver, Class lookup, SEL selector);
@@ -415,9 +375,6 @@ static uint64_t xl_route(State *state, Class lookup, SEL selector, id receiver, 
 {
     if (xl_selector_neutralized(selector) || xl_class_neutralized(lookup))
         return 0;
-    // class_getMethodImplementation runs the class's +initialize on first use, and a guest +initialize executes on
-    // THIS thread's register state: it clobbers the argument registers of the message being routed (a message to
-    // an uninitialized class arrived at its method with x2 = the +initialize IMP). Keep the state across the lookup.
     uint8_t saved[XL_STATE_SIZE] __attribute__((aligned(16)));
     memcpy(saved, state, XL_STATE_SIZE);
     IMP imp = class_getMethodImplementation(lookup, selector);
@@ -427,9 +384,6 @@ static uint64_t xl_route(State *state, Class lookup, SEL selector, id receiver, 
         guest = xl_shadow_imp(imp);
     if (guest)
         return guest;
-    // Polymorphic selector: pick the bridge whose signature matches the receiver's ACTUAL method,
-    // not the majority-voted one. Cache by IMP (uniquely identifies method + signature); the
-    // encoding lookup runs only on the first miss for a given IMP.
     if (imp) {
         uintptr_t cached = (uintptr_t)CFDictionaryGetValue(xl_variant_cache, imp);
         if (cached)
@@ -440,8 +394,6 @@ static uint64_t xl_route(State *state, Class lookup, SEL selector, id receiver, 
         Method method = class_getInstanceMethod(lookup, selector);
         const char *enc = method ? method_getTypeEncoding(method) : NULL;
         if (enc) {
-            // Normalise to match xlgen's NormalizeEncoding: strip offset digits and replace
-            // struct/union tag names with '?' (device runtime encodings are anonymous {?=...}).
             char stripped[256];
             int j = 0;
             for (const char *p = enc; *p && j < (int)sizeof stripped - 1;) {
@@ -465,9 +417,6 @@ static uint64_t xl_route(State *state, Class lookup, SEL selector, id receiver, 
                     CFDictionarySetValue(xl_variant_cache, imp, (void *)variant);
                 return variant;
             }
-            // No variant matched the runtime encoding: fall back to the voted default below, but
-            // log it — a miss on a class that really exists on this release means the SDK encoding
-            // xlgen recorded drifted from the device libobjc's, which we'd want to reconcile.
             FILE *f = fopen("/private/var/charon/xlate-variant-miss.log", "a");
             if (f) {
                 fprintf(f, "-[%s %s] enc=%s: no variant match, using default\n",
@@ -479,8 +428,6 @@ static uint64_t xl_route(State *state, Class lookup, SEL selector, id receiver, 
     guest = (uintptr_t)CFDictionaryGetValue(xl_selector_table, selector);
     if (!guest) {
         fprintf(stderr, "xlate: no bridge for -[%s %s]\n", class_getName(lookup), sel_getName(selector));
-        // stderr is invisible for an app SpringBoard launched: keep the receiver class and selector in a file
-        // (an abort otherwise says only "message without a bridge").
         FILE *nb = fopen("/private/var/charon/xlate-nobridge.log", "a");
         if (nb) {
             fprintf(nb, "%c[%s %s]\n", class_isMetaClass(lookup) ? '+' : '-', class_getName(lookup), sel_getName(selector));
@@ -490,9 +437,6 @@ static uint64_t xl_route(State *state, Class lookup, SEL selector, id receiver, 
                 (void *)receiver, receiver ? *(uint32_t *)receiver : 0, (void *)lookup, class_getName(lookup),
                 class_isMetaClass(lookup), (void *)imp);
         xl_report_guest_frame();
-        // Collect mode: env XL_COLLECT, or a flag file (env does not propagate to a
-        // SpringBoard-launched app on iOS 6). Log the missing selector and neutralize it
-        // (return 0) so the app runs on and surfaces every gap in one pass.
         if (getenv("XL_COLLECT") || access("/private/var/charon/xl-collect", F_OK) == 0) {
             FILE *log = fopen("/private/var/charon/xlate-missing.log", "a");
             if (log) { fprintf(log, "-[%s %s]\n", class_getName(lookup), sel_getName(selector)); fclose(log); }
@@ -509,12 +453,6 @@ static int xl_is_guest_block(uint64_t guest);
 static struct xl_block_wrapper *xl_wrapper_for(uint64_t guest);
 uint64_t xl_object_out(uintptr_t host);
 
-// A message no generated bridge covers (typically a private or newer-SDK selector on a system class, e.g.
-// +[AXSpringBoardServer server]). Marshal it from the receiver's real method type encoding instead of faulting:
-// integer/pointer/object arguments come straight from the guest argument registers (x2...), and a scalar, object or
-// pointer result goes back in x0. Floating-point, struct arguments/results and stack-passed arguments are not
-// handled and still fault, naming the selector. A receiver that does not implement the selector is sent the plain
-// message, so the host raises (or forwards) exactly as it would for a native caller.
 static void xl_dynamic_send(State *state, id receiver, Class lookup, SEL selector)
 {
     Method method = class_getInstanceMethod(lookup, selector);
@@ -610,8 +548,6 @@ void xl_h_objc_msgSend(State *state)
         return;
     }
     if (xl_is_guest_block(self)) {
-        // Capture the selector and arguments before xl_wrapper_for: it re-enters the
-        // guest (guest _Block_copy) and clobbers the caller-saved state registers.
         SEL bsel = (SEL)(uintptr_t)XL_REG(state, X1);
         uint64_t a2 = XL_REG(state, X2), a3 = XL_REG(state, X3), a4 = XL_REG(state, X4);
         struct xl_block_wrapper *w = xl_wrapper_for(self);
@@ -623,19 +559,12 @@ void xl_h_objc_msgSend(State *state)
     }
     id receiver = (id)xl_narrow_pointer(self, "objc_msgSend", 0);
     SEL selector = (SEL)(uintptr_t)XL_REG(state, X1);
-    // Flag-file-gated message trace: log every message's raw receiver pointer + selector with a
-    // direct write() (no stdio buffering), so the LAST line written before a crash names the
-    // faulting -[receiver selector]. Deliberately does NOT deref the receiver's isa here, so a
-    // garbage/nil receiver is still recorded rather than crashing the trace itself.
     if (access("/private/var/charon/xl-trace", F_OK) == 0) {
         static int xl_tfd = -1;
         if (xl_tfd < 0)
             xl_tfd = open("/private/var/charon/xlate-msgtrace.log", O_WRONLY | O_CREAT | O_APPEND, 0666);
         if (xl_tfd >= 0) {
             const char *sn = sel_getName(selector);
-            // Probe the receiver without faulting: write() to /dev/null returns EFAULT for an
-            // unmapped address, so this distinguishes a junk pointer (marshaling delivered garbage)
-            // from a freed object that still has a plausible isa (a lifetime/over-release bug).
             static int xl_nf = -1;
             if (xl_nf < 0) xl_nf = open("/dev/null", O_WRONLY);
             const char *state_s = "UNMAPPED";
@@ -645,10 +574,6 @@ void xl_h_objc_msgSend(State *state)
                 uint32_t isa = *(uint32_t *)(uintptr_t)receiver;
                 if (isa && write(xl_nf, (void *)(uintptr_t)isa, 4) == 4) {
                     const char *cn = class_getName((Class)(uintptr_t)isa);
-                    // CFGetRetainCount sends -retainCount, which for a CLASS receiver initializes the class: the guest
-                    // +initialize then runs on this state and clobbers the argument registers of the very message being
-                    // traced (a Heisenbug: tracing alone made an FIRCoreDiagnosticsConnector message arrive with x2 = the
-                    // +initialize IMP). Never send anything from the trace to a class object.
                     long rc = class_isMetaClass((Class)(uintptr_t)isa) ? -1 : CFGetRetainCount((CFTypeRef)receiver);
                     snprintf(cls, sizeof cls, " isa=0x%x class=%s rc=%ld", isa, cn ? cn : "?", rc);
                 } else {
@@ -664,16 +589,12 @@ void xl_h_objc_msgSend(State *state)
             if (n > (int)sizeof line - 2) n = (int)sizeof line - 2;
             line[n++] = '\n';
             write(xl_tfd, line, n);
-            // Guest-built error messages are the fastest pointer to a failing lower layer (a C library
-            // the app links reports through NSError): log the format string / error domain+code.
             if (sn && (!strcmp(sn, "stringWithFormat:") || !strcmp(sn, "errorWithDomain:code:userInfo:"))) {
                 id arg = (id)xl_object_in(XL_REG(state, X2), "trace", 0);
                 if (arg && [arg isKindOfClass:[NSString class]]) {
                     char tl[600];
                     int tn;
                     if (!strcmp(sn, "stringWithFormat:")) {
-                        // Darwin arm64 passes variadic arguments on the guest STACK, in order from sp; show the
-                        // first two as a string pointer and an integer (covers the common "%s, line %d").
                         uint64_t sp = XL_REG(state, SP);
                         uint64_t v0 = *(uint64_t *)(uintptr_t)sp, v1 = *(uint64_t *)(uintptr_t)(sp + 8);
                         const char *first = "";
@@ -686,8 +607,6 @@ void xl_h_objc_msgSend(State *state)
                     write(xl_tfd, tl, tn);
                 }
             }
-            // Paths handed to C code (mount points, fakefs roots) are a common source of "not normalized" style
-            // failures: log what -fileSystemRepresentation / -path actually return.
             if (sn && state_s[0] == 'm' && (!strcmp(sn, "fileSystemRepresentation") || !strcmp(sn, "path")) &&
                 strstr(cls, "NSURL")) {
                 id v = ((id (*)(id, SEL))objc_msgSend)(receiver, selector);
@@ -697,13 +616,7 @@ void xl_h_objc_msgSend(State *state)
                 if (tn > (int)sizeof tl) tn = (int)sizeof tl;
                 write(xl_tfd, tl, tn);
             }
-            // When the guest asks an NSException for its name/reason, log the text too: the guest's
-            // own uncaught-exception handler is the only thing that ever reads them, and if its next
-            // step crashes the process (it walks callStackReturnAddresses), the cause of the ORIGINAL
-            // exception would otherwise be lost. Only for a mapped NSException receiver.
             if (sn && state_s[0] == 'm' && !strcmp(sn, "callStackReturnAddresses") && strstr(cls, "NSException")) {
-                // Symbolicate the throw site with dladdr so the log names the image and function that
-                // raised (real UIKit vs a backport vs app code) without a symbolicated crash report.
                 NSArray *frames = ((id (*)(id, SEL))objc_msgSend)(receiver, selector);
                 for (NSUInteger i = 0; i < [frames count] && i < 24; i++) {
                     uintptr_t a = (uintptr_t)[[frames objectAtIndex:i] unsignedIntValue];
@@ -738,8 +651,6 @@ void xl_h_objc_msgSend(State *state)
                     class_getName(object_getClass(receiver)), classref);
         }
     }
-    // The class a message to this receiver looks its method up in: the shadow when the receiver is a guest class or an
-    // instance of one, whose isa the host runtime cannot read.
     Class receiver_class = xl_class_of(receiver);
     if (xl_class_neutralized(receiver_class) || xl_selector_neutralized(selector)) {
         xl_zero_result(state);
@@ -790,9 +701,6 @@ void xl_h_objc_msgSendSuper2(State *state)
 void xl_h_xl_unsupported(State *state)
 {
     const char *message = (const char *)xl_narrow_pointer(XL_REG(state, X0), "xl_unsupported", 0);
-    // Collect mode (flag file): log the unbridged C import and return a zero result instead of
-    // aborting, so one run surfaces every C-function gap on the way to a screen -- the sibling
-    // of xl_route's objc collect mode. The zero return is a best-effort stub for the survey.
     if (access("/private/var/charon/xl-collect", F_OK) == 0) {
         FILE *log = fopen("/private/var/charon/xlate-missing.log", "a");
         if (log) { fprintf(log, "C %s\n", message); fclose(log); }
@@ -894,10 +802,6 @@ struct __attribute__((packed)) xl_init_format_pack {
     uint64_t r;
 };
 
-// initWithFormat:arguments: receives an explicit va_list, so unlike the variadic format
-// methods it cannot be reached through the inline-vararg path. The guest hands over a guest
-// arm64 va_list, which the host method would misread as an armv7 one; rebuild the arguments
-// from the guest va_list and format the string on the host side.
 void xl_manual_init_with_format_arguments(void *pack)
 {
     struct xl_init_format_pack *p = pack;
@@ -925,10 +829,6 @@ static id *xl_weak_slot(uint64_t address)
     return (id *)xl_narrow_pointer(address, "weak reference slot", 0);
 }
 
-// The objc runtime's "copy" calls return a malloc'd ARRAY of host pointers (32-bit slots). The guest reads 64-bit
-// slots, so the array is rebuilt with widened entries; the guest releases it with free(), which the bridge
-// forwards to the host allocator the new array came from. The generic bridge cannot marshal these ("pointer to
-// const char *, whose layout differs"), which is what stopped Firebase's runtime scan in Zebra.
 static uint64_t xl_widen_pointer_array(const void *const *host, unsigned count)
 {
     uint64_t *guest = malloc(((size_t)count + 1) * sizeof *guest);
@@ -968,7 +868,6 @@ void xl_manual_objc_copyClassList(void *pack)
     unsigned count = 0;
     Class *classes = objc_copyClassList(&count);
     p->r = classes ? xl_widen_pointer_array((const void *const *)classes, count) : 0;
-    // A shadow class is listed by the guest class it stands for.
     for (unsigned i = 0; p->r && i < count; i++)
         ((uint64_t *)(uintptr_t)p->r)[i] = xl_class_out((uintptr_t)classes[i]);
     free(classes);
@@ -1045,13 +944,6 @@ void xl_h_xl_host_block_release(State *state)
     xl_return(state);
 }
 
-// A guest block and its host wrapper are one logical block with two ABI shapes: the
-// invoke pointer sits at a different offset in each (armv7 12, arm64 16) so neither
-// runtime can drive the other's representation. A+ keeps both, with a canonical
-// mapping so the same guest block always yields the same wrapper (pointer identity,
-// keys, comparison), one linked reference count (the wrapper holds one guest ref for
-// its whole life), and per-side invocation.
-
 extern void *_NSConcreteMallocBlock;
 
 struct xl_block_desc {
@@ -1085,7 +977,6 @@ static int xl_is_guest_block(uint64_t guest)
            isa == XL_GUEST__NSConcreteGlobalBlock || isa == XL_GUEST__NSConcreteAutoBlock;
 }
 
-// One ObjC type token: 'V' void, 'I' integer-like, 'P' pointer-like, 'X' unsupported.
 static char xl_type_token(const char **p)
 {
     while (**p == 'r' || **p == 'n' || **p == 'N' || **p == 'o' || **p == 'O' || **p == 'R' || **p == 'V')
@@ -1106,8 +997,6 @@ static char xl_type_token(const char **p)
     }
 }
 
-// Count of real arguments (past the block parameter) when the signature is simple
-// (void/integer/pointer return and args only); -1 if unsupported.
 static int xl_block_simple_args(const char *sig)
 {
     if (!sig)
@@ -1179,11 +1068,6 @@ static struct xl_block_desc xl_block_descriptor = {
     0, sizeof(struct xl_block_wrapper), xl_block_copy_helper, xl_block_dispose_helper, 0
 };
 
-// Returns the canonical wrapper for a guest block with one extra reference for the
-// caller: the same guest block always maps to the same wrapper, and every reference
-// count (guest _Block_copy/_Block_release, host retain/release) funnels through the
-// wrapper's single host count. The wrapper holds exactly one guest reference for its
-// whole life; when the count reaches zero the dispose helper drops it.
 static struct xl_block_wrapper *xl_wrapper_for(uint64_t guest)
 {
     pthread_mutex_lock(&xl_block_lock);
@@ -1226,7 +1110,7 @@ void xl_report_guest_frame(void);
 
 uintptr_t xl_object_in(uint64_t guest, const char *symbol, unsigned index)
 {
-    if (guest && guest < 0x4000) {  // below __PAGEZERO: an integer reached an object slot
+    if (guest && guest < 0x4000) {
         fprintf(stderr, "xlate: %s argument %u is 0x%llx, not an object pointer\n", symbol, index, guest);
         xl_report_guest_frame();
         abort();
@@ -1242,8 +1126,6 @@ uint64_t xl_object_out(uintptr_t host)
     return w ? w->guest : xl_class_out(host);
 }
 
-// Reference counting of a guest block routes to its wrapper so the two ABI shapes
-// share one count.
 uint64_t xl_block_retain(uint64_t guest)
 {
     xl_wrapper_for(guest);
@@ -1275,7 +1157,6 @@ uintptr_t xl_protocol(uint64_t guest)
 
 static uint64_t xl_variadic_arg(State *state, unsigned index)
 {
-    // Apple arm64: the named first object is in x2; the variadic rest are on the guest stack.
     if (index == 0)
         return XL_REG(state, X2);
     uint64_t sp = XL_REG(state, SP);
@@ -1336,18 +1217,11 @@ void xl_h_setWithObjects(State *state)
     xl_return(state);
 }
 
-// ARC return-value handling across the bridge must use the slow path: the fast
-// path stores a token in thread-local storage expecting objc_retainAutoreleasedReturnValue
-// to run as the very next call, but host ObjC inside the bridges runs in between and
-// corrupts that token, which turned returned objects into nil downstream.
 struct __attribute__((packed)) xl_arc_pack {
     uint64_t a0;
     uint64_t r;
 };
 
-// The reference counting calls of the host runtime dispatch on the object's class, which they cannot read when the object is
-// an instance the guest allocated of a class that keeps the guest's layout (swift_classes.m): the guest's own -retain,
-// -release and -autorelease answer for it.
 static uintptr_t xl_host_retain(uint64_t guest, const char *symbol)
 {
     id object = (id)xl_narrow_pointer(guest, symbol, 0);
@@ -1400,17 +1274,11 @@ void xl_manual_objc_unsafeClaimAutoreleasedReturnValue(struct xl_arc_pack *p)
     p->r = p->a0;
 }
 
-// A guest block carries the arm64 Block_layout (8-byte isa/invoke/descriptor, 8-byte
-// descriptor size). Handing it to the host block runtime copies it by the armv7 layout,
-// reading the size field at the wrong offset, so _Block_copy runs memmove over a garbage
-// length. ARC block copies stay guest-side: copy through the guest's own Block runtime.
 void xl_manual_objc_retainBlock(struct xl_arc_pack *p)
 {
     p->r = (p->a0 && xl_is_guest_block(p->a0)) ? xl_block_retain(p->a0) : p->a0;
 }
 
-// Same flag-file-gated trace as the message path, for the ARC runtime ops (which do not go
-// through objc_msgSend): the last op before a crash names the object being retained/released.
 static void xl_arc_trace(uint64_t obj, const char *op)
 {
     if (access("/private/var/charon/xl-trace", F_OK) != 0)
@@ -1422,8 +1290,6 @@ static void xl_arc_trace(uint64_t obj, const char *op)
     const char *st = "UNMAPPED";
     char cls[128]; cls[0] = 0;
     if (obj && xl_is_guest_block(obj)) {
-        // A guest block's isa is a block-class data symbol, not an ObjC class: class_getName /
-        // CFGetRetainCount on it fault inside libobjc, so the trace helper itself crashed the app.
         st = "guest-block";
     } else if (obj && nf >= 0 && write(nf, (void *)(uintptr_t)obj, 4) == 4) {
         st = "mapped";
@@ -1478,13 +1344,6 @@ void xl_manual_objc_autorelease(struct xl_arc_pack *p)
 
 extern const struct xl_class_layout xl_class_layouts[];
 
-// Variant A: reconcile guest ObjC subclass ivar layout with the host superclass.
-// The guest metadata carries arm64 offsets (8-byte slots, instanceStart sized for the
-// arm64 superclass). On armv7 the host superclass has a different instanceSize, so the
-// runtime's own ivar slide would use the wrong base and corrupt every offset. We do the
-// slide ourselves with the real host superclass size, keeping the guest's 8-byte slots
-// (no per-ivar repacking, so no NSInteger/int64 ambiguity), then set instanceStart to the
-// host superclass size so the runtime leaves the class alone.
 static const struct xl_class_layout *xl_find_layout(uint32_t address)
 {
     for (const struct xl_class_layout *l = xl_class_layouts; l->ro; l++)
@@ -1515,9 +1374,6 @@ static uint32_t xl_fix_layout(const struct xl_class_layout *l)
     if (CFSetContainsValue(xl_fixed_layouts, l->ro))
         return l->ro->instance_size;
     CFSetAddValue(xl_fixed_layouts, l->ro);
-    // Compute from the ORIGINAL guest values recorded at translation time, not from the
-    // current class_ro: the ObjC runtime may have already realized (and mis-slid) this
-    // class before this runs, so reading current fields would double-apply or read garbage.
     uint32_t super_size;
     if (l->super_guest) {
         super_size = xl_fix_layout(xl_find_layout(l->super_guest));
@@ -1528,21 +1384,8 @@ static uint32_t xl_fix_layout(const struct xl_class_layout *l)
         super_size = l->guest_instance_start;
     }
     int32_t shift = (int32_t)super_size - (int32_t)l->guest_instance_start;
-    // Only ever slide ivars UP. When the host superclass is SMALLER than the arm64
-    // superclass (the common case, since 32-bit classes are smaller) the shift is
-    // negative, but the lifted code still addresses ivars with the arm64 offsets --
-    // baked as immediates (`str x0, [self, #40]`) where the compiler knew the layout,
-    // or loaded from an offset variable it may have constant-folded. Packing the offsets
-    // down would leave those accesses pointing at the old slots while the shrunk
-    // instance size drops the last ivar's 8-byte slot past the end of the allocation,
-    // so its high half is read/written out of bounds. Keeping the guest's arm64 slots
-    // (a harmless gap after the smaller host isa) costs a few bytes and stays correct.
     if (shift < 0)
         shift = 0;
-    // A Swift class keeps its field offsets in read-only memory: store only what changes. A guest chain
-    // that ends at a guest root has no shift; one that ends at a host class can, and then a field offset
-    // in read-only memory cannot follow the shift -- the class's code holds the arm64 layout as
-    // constants -- so say which class it is instead of faulting on the store.
     for (uint32_t i = 0; i < l->ivar_count; i++) {
         int32_t offset = (int32_t)l->ivars[i].guest_offset + shift;
         if (*l->ivars[i].offset_var == offset)

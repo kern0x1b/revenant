@@ -309,4 +309,4 @@ constexpr std::uint32_t id(Routine routine) {
     return static_cast<std::uint32_t>(routine);
 }
 
-}  // namespace shade::xnu::mig::vm_map
+}

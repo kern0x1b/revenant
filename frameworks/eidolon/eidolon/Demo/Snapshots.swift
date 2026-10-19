@@ -294,7 +294,6 @@ struct CalendarCase: View {
     }
 }
 
-/// A date picker in each of the three styles, so the label is in the tree for all of them.
 struct DatePickerStyleCase: View {
     @State var date = Date(timeIntervalSince1970: 1_260_000_000)
     var body: some View {
@@ -514,9 +513,6 @@ func writeSnapshots(to folder: String) {
             tree += "\nnavigation depth \(probe.navigationDepth)"
             probe.hostView.removeFromSuperview()
         }
-        // A scenario that cannot be written is a failure of the run, not a scenario quietly missing from
-        // it: the comparison against the references is the assertion, and a swallowed write would make
-        // it pass over a scenario that was never rendered.
         do {
             try tree.write(toFile: folder + "/" + scenario.name + ".txt", atomically: true, encoding: .utf8)
         } catch {
@@ -550,9 +546,6 @@ func writeSnapshots(to folder: String) {
         logProbe(String(format: "snapshot %@ image %d bytes in %.0f ms", scenario.name, data.count, Date().timeIntervalSince(imageStarted) * 1000))
     }
     logProbe("snapshots done")
-    // The bundle that was asked for them is done, so the application is: in the emulator
-    // `xmake emulate launch ... until-exit` holds the guest until this process is gone and then takes the
-    // last frame. A phone run watches for the line above and leaves the application up.
     if run.fromBundle {
         exit(0)
     }

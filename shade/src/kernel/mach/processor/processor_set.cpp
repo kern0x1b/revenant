@@ -64,7 +64,7 @@ namespace {
             state.default_processor_set_control_object));
     }
 
-} // namespace
+}
 
 bool CompatibilityKernel::dispatch_mach_processor_message(
     Cpu& cpu, const MachMessageRequest& request)
@@ -79,9 +79,6 @@ bool CompatibilityKernel::dispatch_mach_processor_message(
 
     if (message_id == mig_message_id(host_routine::host_processor_sets) ||
         message_id == mig_message_id(host_routine::host_processor_set_priv)) {
-        // MIG identifiers are local to a destination's subsystem. The host
-        // privilege range overlaps launchd's vproc protocol, so a matching
-        // number alone must not intercept messages to a user-space server.
         std::lock_guard mach_lock { shared_state_->mach_mutex };
         const auto destination = shared_state_->mach_namespaces.resolve(
             process_.pid, request.remote_port);
@@ -120,8 +117,6 @@ bool CompatibilityKernel::dispatch_mach_processor_message(
             }
         }
         const auto count = result == mach_message_success ? 1U : 0U;
-        // Complex MIG success replies omit RetCode. The trailing scalar is the
-        // array count at the generated reply_count_offset (48).
         const std::array<std::uint32_t, 13> reply {
             complex_move_send_once,
             complex_ool_ports_reply_size,
@@ -289,4 +284,4 @@ bool CompatibilityKernel::dispatch_mach_processor_message(
     return false;
 }
 
-} // namespace shade
+}

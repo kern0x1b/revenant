@@ -9,8 +9,6 @@
 
 namespace shade {
 
-// A knote's timer uses the guest clock. Expirations accumulate lazily, so a
-// disabled or unobserved queue needs no host callback or polling thread.
 class KeventTimer {
 public:
     static std::optional<KeventTimer> create(std::int64_t data,
@@ -24,4 +22,4 @@ private:
     std::uint64_t interval_ { };
 };
 
-} // namespace shade
+}

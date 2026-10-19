@@ -77,11 +77,6 @@ namespace {
     void populate_power_root_properties(
         KernelSharedState::IOKitService& service)
     {
-        // AppleARM publishes this platform override on IOPMrootDomain. The
-        // Darwin IOPMLib uses it to turn the immutable default power-profile
-        // plist into its working profile set. Returning not-found here makes
-        // the iPad 4.x client call its private mutable-dictionary path with
-        // the immutable plist object and hit CoreFoundation's BKPT guard.
         service.properties.insert_or_assign("SystemPowerProfileOverrideDict",
             power_profile_override_property());
     }
@@ -296,7 +291,7 @@ namespace {
             memory, message_address, local_port, message_id, notification_name);
     }
 
-} // namespace
+}
 
 std::optional<std::uint32_t> handle_power_mach_request(AddressSpace& memory,
     Output& output, KernelSharedState& shared_state, ProcessContext& process,
@@ -313,4 +308,4 @@ std::optional<std::uint32_t> handle_power_mach_request(AddressSpace& memory,
         message_id, message_address, receive_size, remote_object, local_port);
 }
 
-} // namespace shade::kernel_iokit
+}

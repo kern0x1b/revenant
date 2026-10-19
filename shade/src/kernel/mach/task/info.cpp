@@ -68,7 +68,7 @@ namespace {
         }
     }
 
-} // namespace
+}
 
 bool CompatibilityKernel::dispatch_mach_task_info_message(
     Cpu& cpu, const MachMessageRequest& request)
@@ -168,10 +168,9 @@ bool CompatibilityKernel::dispatch_mach_task_info_message(
             info[9] = darwin::mach::task_info::timeshare_policy;
     }
     if (*flavor == darwin::mach::task_info::dyld_info_flavor) {
-        // mach_vm_address_t and mach_vm_size_t are 64-bit even on ARM32.
         info[0] = target_record->second.dyld_all_image_info_address;
         info[2] = target_record->second.dyld_all_image_info_size;
-        info[4] = 0; // TASK_DYLD_ALL_IMAGE_INFO_32
+        info[4] = 0;
     }
     reply.insert(reply.end(), info.begin(), info.end());
     registers[0] = write_words(memory_, request.address, reply)
@@ -184,4 +183,4 @@ bool CompatibilityKernel::dispatch_mach_task_info_message(
     return true;
 }
 
-} // namespace shade
+}

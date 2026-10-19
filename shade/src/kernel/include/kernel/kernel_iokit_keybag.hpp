@@ -37,7 +37,6 @@ namespace kernel_iokit::keybag {
     [[nodiscard]] bool matches_effaceable_storage_service(
         std::span<const std::byte> matching);
 
-    // The caller holds KernelSharedState::mach_mutex.
     [[nodiscard]] std::uint32_t ensure_service_locked(
         KernelSharedState& state, std::uint32_t parent_object);
 
@@ -61,5 +60,5 @@ namespace kernel_iokit::keybag {
         std::uint32_t scalar_output_capacity,
         std::uint32_t inband_output_capacity);
 
-} // namespace kernel_iokit::keybag
-} // namespace shade
+}
+}

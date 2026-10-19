@@ -32,9 +32,6 @@ namespace {
 
     constexpr std::uint32_t vm_map_request_size = 84U;
     constexpr std::uint32_t vm_map_64_request_size = 88U;
-    // Darwin 8 also publishes the same ARM32 wire contract through the
-    // mach_vm subsystem.  Its mach_vm_map routine is numbered relative to the
-    // 4800 subsystem base instead of vm_map's 3800 base.
     constexpr std::uint32_t mach_vm_map_identifier = 4811U;
     constexpr std::uint32_t reply_size = 40U;
     constexpr std::uint32_t kern_protection_failure = 2U;
@@ -68,7 +65,7 @@ namespace {
         return (size + mask) & ~mask;
     }
 
-} // namespace
+}
 
 bool CompatibilityKernel::dispatch_mach_vm_map_message(
     Cpu& cpu, const MachMessageRequest& request)
@@ -94,8 +91,6 @@ bool CompatibilityKernel::dispatch_mach_vm_map_message(
 
     const auto& arguments = is_64 ? xnu::mig::vm_map::vm_map_64_arguments
                                   : xnu::mig::vm_map::vm_map_arguments;
-    // The object port remains a descriptor. Only the three address-sized
-    // inline fields before flags expand in the wide mach_vm interface.
     const auto request_offset = [&](std::size_t index) {
         const auto expanded_fields = index == 5U ? 0U
             : index <= 1U ? 0U : index <= 3U ? index - 1U : 3U;
@@ -190,9 +185,6 @@ bool CompatibilityKernel::dispatch_mach_vm_map_message(
 
     bool map_ok = false;
     if (result == kern_success && entry) {
-        // VM_PROT_IS_MASK requests the intersection with a named entry's
-        // permissions. Without it, exceeding those permissions remains an
-        // error. The flag is a mapping operation, never a page permission.
         if ((*protection & vm_protection_is_mask) != 0U)
             effective_protection &= entry->protection;
         if ((*maximum_protection & vm_protection_is_mask) != 0U)
@@ -272,4 +264,4 @@ bool CompatibilityKernel::dispatch_mach_vm_map_message(
     return true;
 }
 
-} // namespace shade
+}

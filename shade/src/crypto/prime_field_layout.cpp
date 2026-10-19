@@ -27,4 +27,4 @@ std::optional<PrimeFieldLayout> PrimeFieldLayout::resolve(
     return std::nullopt;
 }
 
-} // namespace shade
+}

@@ -21,8 +21,6 @@ extension Never: Gesture {
     public func _makeRuntime() -> _GestureRuntime<Never> { fatalError("Never has no gesture") }
 }
 
-// MARK: events, leaves and runtimes
-
 enum GesturePhase { case changed, ended, cancelled }
 
 enum RawGestureEvent {
@@ -110,8 +108,6 @@ func leafRuntime<V>(_ leaf: Leaf<V>) -> _GestureRuntime<V> {
     return runtime
 }
 
-// State a gesture keeps between two evaluations of the view body: a re-render in the middle of a drag builds
-// the runtime again, and what the gesture has seen so far has to survive it.
 final class GestureStore {
     var boxes: [AnyObject] = []
     var cursor = 0
@@ -140,8 +136,6 @@ enum GestureBuild {
 }
 
 final class Flag { var value = false }
-
-// MARK: primitive gestures
 
 public struct TapGesture: Gesture {
     public typealias Value = Void
@@ -338,8 +332,6 @@ public struct RotationGesture: Gesture {
         })
     }
 }
-
-// MARK: combinators
 
 public struct _ChangedGesture<Content: Gesture>: Gesture {
     public typealias Value = Content.Value
@@ -680,10 +672,6 @@ public struct GestureMask: OptionSet {
     public static let all = GestureMask(rawValue: 3)
 }
 
-// MARK: UIKit side
-
-// A long-press recogniser that also reports the finger going down and up: SwiftUI's LongPressGesture is "pressed"
-// from the touch, while UIKit only reports once the duration has passed.
 final class PressRecognizer: UILongPressGestureRecognizer {
     var touchDown: (() -> Void)?
     var touchUp: (() -> Void)?
@@ -780,7 +768,6 @@ final class GestureTarget: NSObject, UIGestureRecognizerDelegate {
         leaves[index].handle(event)
     }
 
-    // Used by the probe: every leaf sees the event and takes what belongs to it.
     func inject(_ event: RawGestureEvent) {
         for leaf in leaves { leaf.handle(event) }
     }
@@ -841,7 +828,6 @@ final class GestureTarget: NSObject, UIGestureRecognizerDelegate {
 
     func gestureRecognizer(_ recognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith other: UIGestureRecognizer) -> Bool { true }
 
-    // A gesture added with highPriorityGesture makes the recognisers of the views below it wait for its own.
     func gestureRecognizer(_ recognizer: UIGestureRecognizer, shouldBeRequiredToFailBy other: UIGestureRecognizer) -> Bool {
         guard priority == .high, let mine = view, let theirs = other.view, theirs !== mine else { return false }
         return theirs.isDescendant(of: mine)

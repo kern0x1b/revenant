@@ -145,4 +145,4 @@ void SceneCoordinator::retire_process(std::uint32_t process_id)
     client_scenes_.erase(process_id);
 }
 
-} // namespace shade
+}

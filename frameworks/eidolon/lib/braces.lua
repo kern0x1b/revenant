@@ -1,15 +1,3 @@
--- The braces a line of Swift really opens and closes.
---
--- Counting them with a plain count of "{" is wrong the moment a line carries a brace in a string or a
--- comment, and from that line on any walk over the file sits at the wrong depth. So the line is read as
--- Swift: "//", "/* */", a plain string, a multi-line one and a raw one with any number of hashes carry no
--- brace, and a block comment or a multi-line literal carries its state to the next line.
---
--- One function, used by every tool that counts depth in Swift on either side of the comparison, so a
--- depth is counted the same way on each side.
---
--- Returns opened, closed, in_block, in_multiline, hashes.
-
 local text = import("lib.text", {rootdir = path.join(os.scriptdir(), ".."), anonymous = true})
 
 function braces(line, in_block, in_multiline, hashes)

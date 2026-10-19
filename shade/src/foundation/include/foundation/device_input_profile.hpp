@@ -10,9 +10,6 @@
 
 namespace shade {
 
-// Host-driven system gestures are expressed in the firmware's normalized UI
-// coordinate space. Keeping this data in the device model avoids teaching
-// the control frontend about product names, builds, or SpringBoard pages.
 struct NormalizedDragGesture {
     float start_x_fraction { };
     float start_y_fraction { };
@@ -31,8 +28,6 @@ struct SystemGestures {
 
 inline constexpr SystemGestures classic_compact_system_gestures {
     "classic-compact-slider",
-    // Start inside the native arrow handle and keep the gesture close to the
-    // compact slider's full travel while pacing it on the host clock.
     { 0.15625F, 0.8958333333F, 0.9375F, 0.8958333333F, 300U, 12U, 16U, 300U },
 };
 
@@ -44,11 +39,7 @@ inline constexpr SystemGestures classic_centered_tablet_system_gestures {
 
 struct DeviceInputProfile {
     SystemGestures system_gestures { classic_compact_system_gestures };
-    // Some early tablet digitizer stacks crash when fed synthesized native
-    // HID events; those devices keep the GraphicsServices path as their
-    // canonical input boundary. This is a hardware capability, not an app or
-    // firmware-version switch.
     bool native_hid_touch_events { true };
 };
 
-} // namespace shade
+}

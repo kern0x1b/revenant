@@ -111,7 +111,7 @@ constexpr auto wifi_scan_completion_delay =
     return std::nullopt;
 }
 
-} // namespace
+}
 
 namespace shade {
 
@@ -119,19 +119,19 @@ void CompatibilityKernel::dispatch_bsd_events(Cpu& cpu, std::uint32_t number)
 {
     auto& registers = cpu.registers();
     switch (number) {
-    case 54: { // ioctl
+    case 54: {
         const auto fd = registers[0];
         if (const auto block = virtual_block_descriptors_.find(fd);
             block != virtual_block_descriptors_.end()) {
             switch (registers[1]) {
-            case 0x40046418U: // DKIOCGETBLOCKSIZE / legacy DKIOCBLKSIZE
+            case 0x40046418U:
                 if (!memory_.write32(registers[2], 512)) {
                     bsd_error(cpu, bsd_support::bad_address);
                 } else {
                     bsd_success(cpu, 0);
                 }
                 return;
-            case 0x40086419U: { // DKIOCGETBLOCKCOUNT
+            case 0x40086419U: {
                 std::error_code size_error;
                 const auto size = std::filesystem::file_size(
                     file_descriptors_.at(fd), size_error);
@@ -142,7 +142,7 @@ void CompatibilityKernel::dispatch_bsd_events(Cpu& cpu, std::uint32_t number)
                 }
                 return;
             }
-            case 0x40046419U: { // DKIOCGETBLOCKCOUNT32
+            case 0x40046419U: {
                 std::error_code size_error;
                 const auto size = std::filesystem::file_size(
                     file_descriptors_.at(fd), size_error);
@@ -155,15 +155,15 @@ void CompatibilityKernel::dispatch_bsd_events(Cpu& cpu, std::uint32_t number)
                 }
                 return;
             }
-            case 0x40046417U: // DKIOCISFORMATTED
-            case 0x4004641dU: // DKIOCISWRITABLE
+            case 0x40046417U:
+            case 0x4004641dU:
                 if (!memory_.write32(registers[2], 1)) {
                     bsd_error(cpu, bsd_support::bad_address);
                 } else {
                     bsd_success(cpu, 0);
                 }
                 return;
-            case 0x20006416U: // DKIOCSYNCHRONIZECACHE
+            case 0x20006416U:
                 bsd_success(cpu, 0);
                 return;
             default: {
@@ -179,7 +179,7 @@ void CompatibilityKernel::dispatch_bsd_events(Cpu& cpu, std::uint32_t number)
         }
         const auto device = virtual_descriptors_.find(fd);
         if (device == virtual_descriptors_.end()) {
-            bsd_error(cpu, 25); // ENOTTY
+            bsd_error(cpu, 25);
             return;
         }
         if (registers[1] == darwin::socket::ioctl_non_block) {
@@ -200,9 +200,6 @@ void CompatibilityKernel::dispatch_bsd_events(Cpu& cpu, std::uint32_t number)
             return;
         if (ioctl_kernel_control_socket(cpu))
             return;
-        // Keep FIONREAD on the common descriptor path. In particular, do not
-        // let the baseband/serial tty branches turn a readiness query into an
-        // unrelated private-ioctl success or ENOTTY.
         if (registers[1] == darwin::socket::ioctl_pending_bytes) {
             std::uint32_t pending_error = 0;
             const auto pending_count =
@@ -253,7 +250,6 @@ void CompatibilityKernel::dispatch_bsd_events(Cpu& cpu, std::uint32_t number)
             return;
         }
         if (tty_descriptor && registers[1] == darwin::tty::drain_output) {
-            // Both virtual serial implementations consume output synchronously.
             bsd_success(cpu, 0);
             return;
         }
@@ -793,7 +789,7 @@ void CompatibilityKernel::dispatch_bsd_events(Cpu& cpu, std::uint32_t number)
                                   std::to_string(process_.pid) +
                                   " fd=" + std::to_string(fd) +
                                   " interface=" + name + "\n");
-                    bsd_error(cpu, 6); // ENXIO
+                    bsd_error(cpu, 6);
                     return;
                 }
                 if (registers[1] == wifi_driver::set_request &&
@@ -894,7 +890,7 @@ void CompatibilityKernel::dispatch_bsd_events(Cpu& cpu, std::uint32_t number)
                 if (registers[1] == wifi_driver::get_request &&
                     *command == wifi_driver::command_association_result) {
                     if (!wifi_state_->snapshot().associated_access_point) {
-                        bsd_error(cpu, 57); // ENOTCONN
+                        bsd_error(cpu, 57);
                         return;
                     }
                     if (!memory_.write32(
@@ -912,7 +908,7 @@ void CompatibilityKernel::dispatch_bsd_events(Cpu& cpu, std::uint32_t number)
                     const auto associated =
                         wifi_state_->snapshot().associated_access_point;
                     if (!associated) {
-                        bsd_error(cpu, 57); // ENOTCONN
+                        bsd_error(cpu, 57);
                         return;
                     }
                     if (!memory_.write32(
@@ -937,11 +933,7 @@ void CompatibilityKernel::dispatch_bsd_events(Cpu& cpu, std::uint32_t number)
                     const auto associated =
                         wifi_state_->snapshot().associated_access_point;
                     if (!associated) {
-                        // A successful command means that an association
-                        // exists. Returning an empty successful payload makes
-                        // legacy Apple80211 clients construct a non-null
-                        // "current network" object from a scan result.
-                        bsd_error(cpu, 57); // ENOTCONN
+                        bsd_error(cpu, 57);
                         return;
                     }
                     const auto copied =
@@ -978,7 +970,7 @@ void CompatibilityKernel::dispatch_bsd_events(Cpu& cpu, std::uint32_t number)
                     const auto associated =
                         wifi_state_->snapshot().associated_access_point;
                     if (!associated) {
-                        bsd_error(cpu, 57); // ENOTCONN
+                        bsd_error(cpu, 57);
                         return;
                     }
                     if (!memory_.copy_in(
@@ -1002,7 +994,7 @@ void CompatibilityKernel::dispatch_bsd_events(Cpu& cpu, std::uint32_t number)
                     const auto associated =
                         wifi_state_->snapshot().associated_access_point;
                     if (!associated) {
-                        bsd_error(cpu, 57); // ENOTCONN
+                        bsd_error(cpu, 57);
                         return;
                     }
                     if (!memory_.write32(
@@ -1032,7 +1024,7 @@ void CompatibilityKernel::dispatch_bsd_events(Cpu& cpu, std::uint32_t number)
                     const auto associated =
                         wifi_state_->snapshot().associated_access_point;
                     if (!associated) {
-                        bsd_error(cpu, 57); // ENOTCONN
+                        bsd_error(cpu, 57);
                         return;
                     }
                     const auto signal = static_cast<std::uint32_t>(
@@ -1100,7 +1092,7 @@ void CompatibilityKernel::dispatch_bsd_events(Cpu& cpu, std::uint32_t number)
                                       std::to_string(process_.pid) +
                                       " fd=" + std::to_string(fd) + "\n");
                         bsd_error(cpu,
-                            5); // EIO terminates the firmware scan iterator.
+                            5);
                         return;
                     }
                     const auto access_points = wifi_state_->scan();
@@ -1123,10 +1115,6 @@ void CompatibilityKernel::dispatch_bsd_events(Cpu& cpu, std::uint32_t number)
                         bsd_error(cpu, bsd_support::bad_address);
                         return;
                     }
-                    // Preserve only the firmware-owned IE scratch pointer.
-                    // Copying the entire input record would leak uninitialized
-                    // caller flags into the native parser and can make a
-                    // discovered AP appear associated.
                     const auto result =
                         wifi_driver::make_network_record(&access_point,
                             wifi_driver::aligned_network_record_layout, 0,
@@ -1198,7 +1186,7 @@ void CompatibilityKernel::dispatch_bsd_events(Cpu& cpu, std::uint32_t number)
             std::unique_lock network_lock { shared_state_->network_mutex };
             const auto interface = shared_state_->network_interfaces.find(name);
             if (interface == shared_state_->network_interfaces.end()) {
-                bsd_error(cpu, 6); // ENXIO
+                bsd_error(cpu, 6);
                 return;
             }
             const auto ioctl_identity =
@@ -1335,7 +1323,7 @@ void CompatibilityKernel::dispatch_bsd_events(Cpu& cpu, std::uint32_t number)
                 }
                 return;
             }
-            if (ioctl_identity == 0x80006919U) { // SIOCDIFADDR[_IN6]
+            if (ioctl_identity == 0x80006919U) {
                 const auto ipv6 = device->second == "inet6-dgram";
                 const auto family = static_cast<std::uint8_t>(
                     ipv6 ? darwin::network::address_family_inet6
@@ -1384,7 +1372,7 @@ void CompatibilityKernel::dispatch_bsd_events(Cpu& cpu, std::uint32_t number)
                 return;
             }
             switch (registers[1]) {
-            case 0xc0206911U: // SIOCGIFFLAGS
+            case 0xc0206911U:
                 if (!memory_.write16(
                         registers[2] + 16, interface->second.flags)) {
                     bsd_error(cpu, bsd_support::bad_address);
@@ -1392,7 +1380,7 @@ void CompatibilityKernel::dispatch_bsd_events(Cpu& cpu, std::uint32_t number)
                 }
                 bsd_success(cpu, 0);
                 return;
-            case 0x80206910U: { // SIOCSIFFLAGS
+            case 0x80206910U: {
                 const auto flags = memory_.read16(registers[2] + 16);
                 if (!flags) {
                     bsd_error(cpu, bsd_support::bad_address);
@@ -1409,7 +1397,7 @@ void CompatibilityKernel::dispatch_bsd_events(Cpu& cpu, std::uint32_t number)
                 bsd_success(cpu, 0);
                 return;
             }
-            case 0x8040691aU: { // SIOCAIFADDR, struct ifaliasreq
+            case 0x8040691aU: {
                 const auto previously_configured = interface->second.has_ipv4;
                 const auto address = memory_.read_bytes(registers[2] + 16, 16);
                 const auto broadcast =
@@ -1443,7 +1431,7 @@ void CompatibilityKernel::dispatch_bsd_events(Cpu& cpu, std::uint32_t number)
                 bsd_success(cpu, 0);
                 return;
             }
-            case 0x8078691aU: { // SIOCAIFADDR_IN6, struct in6_aliasreq
+            case 0x8078691aU: {
                 const auto address = memory_.read_bytes(registers[2] + 16, 28);
                 const auto netmask = memory_.read_bytes(registers[2] + 72, 28);
                 if (!address || !netmask) {
@@ -1484,7 +1472,7 @@ void CompatibilityKernel::dispatch_bsd_events(Cpu& cpu, std::uint32_t number)
             bsd_error(cpu, 25);
             return;
         }
-        if (registers[1] == 0x800c6502U) { // SIOCSKEVFILT
+        if (registers[1] == 0x800c6502U) {
             std::array<std::uint32_t, 3> filter { };
             for (std::size_t index = 0; index < filter.size(); ++index) {
                 const auto value = memory_.read32(
@@ -1499,7 +1487,7 @@ void CompatibilityKernel::dispatch_bsd_events(Cpu& cpu, std::uint32_t number)
             bsd_success(cpu, 0);
             return;
         }
-        if (registers[1] == 0x400c6503U) { // SIOCGKEVFILT
+        if (registers[1] == 0x400c6503U) {
             const auto filter = system_event_filters_[fd];
             for (std::size_t index = 0; index < filter.size(); ++index) {
                 if (!memory_.write32(
@@ -1512,7 +1500,7 @@ void CompatibilityKernel::dispatch_bsd_events(Cpu& cpu, std::uint32_t number)
             bsd_success(cpu, 0);
             return;
         }
-        if (registers[1] == 0x40046501U) { // SIOCGKEVID
+        if (registers[1] == 0x40046501U) {
             std::uint32_t last_identifier = 0;
             {
                 std::lock_guard socket_lock { shared_state_->socket_mutex };
@@ -1526,10 +1514,10 @@ void CompatibilityKernel::dispatch_bsd_events(Cpu& cpu, std::uint32_t number)
             bsd_success(cpu, 0);
             return;
         }
-        bsd_error(cpu, 25); // ENOTTY
+        bsd_error(cpu, 25);
         return;
     }
-    case darwin::syscall::poll: { // poll
+    case darwin::syscall::poll: {
         constexpr std::uint32_t maximum_poll_descriptors = 1024;
         constexpr std::uint64_t nanoseconds_per_millisecond = 1'000'000ULL;
         const auto descriptor_count = registers[1];
@@ -1590,9 +1578,6 @@ void CompatibilityKernel::dispatch_bsd_events(Cpu& cpu, std::uint32_t number)
                     ? std::numeric_limits<std::uint64_t>::max()
                     : now + duration;
         }
-        // A negative timeout blocks indefinitely, while zero returned above
-        // without registering a wait. This is the same state transition used by
-        // select/kevent, so Offline baseband readiness wakes consistently.
         process_.waiting_for_events = true;
         pending_polls_[cpu.processor_id()] = PendingPoll { registers[0],
             std::move(entries), cpu.processor_id(), timeout_deadline };
@@ -1603,7 +1588,7 @@ void CompatibilityKernel::dispatch_bsd_events(Cpu& cpu, std::uint32_t number)
         cpu.halt(Dynarmic::HaltReason::UserDefined5);
         return;
     }
-    case 93: { // select
+    case 93: {
         constexpr std::uint64_t microseconds_per_second = 1'000'000ULL;
         constexpr std::uint64_t nanoseconds_per_microsecond = 1'000ULL;
         const auto descriptor_count = registers[0];
@@ -1673,11 +1658,6 @@ void CompatibilityKernel::dispatch_bsd_events(Cpu& cpu, std::uint32_t number)
                 return;
             }
         }
-        // Unlike poll(2), select(2) has no per-entry revents field. XNU reports
-        // EBADF when any requested descriptor is invalid instead of silently
-        // treating it as not ready. Validate both sets before writing filtered
-        // results back to the guest so an error cannot leave a partially
-        // updated fd_set behind.
         for (std::uint32_t word_index = 0; word_index < words; ++word_index) {
             for (std::uint32_t bit = 0; bit < 32; ++bit) {
                 const auto fd = word_index * 32U + bit;
@@ -1722,9 +1702,6 @@ void CompatibilityKernel::dispatch_bsd_events(Cpu& cpu, std::uint32_t number)
                 bsd_success(cpu, 0);
                 return;
             }
-            // select(2)'s timeout applies to every descriptor provider,
-            // including a disconnected character device with no host poll
-            // source.
             const auto now = shared_state_->clock.now();
             timeout_deadline =
                 duration > std::numeric_limits<std::uint64_t>::max() - now
@@ -1743,7 +1720,7 @@ void CompatibilityKernel::dispatch_bsd_events(Cpu& cpu, std::uint32_t number)
         cpu.halt(Dynarmic::HaltReason::UserDefined5);
         return;
     }
-    case 202: { // __sysctl
+    case 202: {
         const auto mib0 = memory_.read32(registers[0]);
         const auto mib1 =
             registers[1] >= 2 ? memory_.read32(registers[0] + 4) : std::nullopt;
@@ -1805,8 +1782,6 @@ void CompatibilityKernel::dispatch_bsd_events(Cpu& cpu, std::uint32_t number)
         if (*mib0 == darwin::sysctl::control_unspecified &&
             *mib1 == darwin::sysctl::operation_name_to_oid &&
             registers[1] == 2) {
-            // XNU's sysctl.name2oid consumes an un-terminated name through the
-            // new value and returns the integer MIB through the old value.
             constexpr std::uint32_t maximum_name_length = 1024;
             if (registers[4] == 0 || registers[5] == 0 ||
                 registers[5] >= maximum_name_length) {
@@ -1887,9 +1862,6 @@ void CompatibilityKernel::dispatch_bsd_events(Cpu& cpu, std::uint32_t number)
             *mib1 == darwin::sysctl::vfs_generic &&
             registers[1] >= 4 && mib2 &&
             *mib2 == darwin::sysctl::vfs_conf) {
-            // vfs.generic.conf.<type> is a sparse table keyed by the
-            // historical filesystem type number. An unregistered type is a
-            // normal ENOTSUP result in XNU, not an unimplemented syscall.
             if (!memory_.read32(registers[0] + 12U)) {
                 bsd_error(cpu, bsd_support::bad_address);
                 return;
@@ -1905,9 +1877,6 @@ void CompatibilityKernel::dispatch_bsd_events(Cpu& cpu, std::uint32_t number)
             (*route_operation == darwin::route::sysctl_dump ||
                 *route_operation == darwin::route::sysctl_flags ||
                 *route_operation == darwin::route::sysctl_dump2)) {
-            // CTL_NET/PF_ROUTE/NET_RT_DUMP, NET_RT_FLAGS, or NET_RT_DUMP2.
-            // rt_msghdr and ARM32 rt_msghdr2 are both 92 bytes; offsets 16,
-            // 20, and 24 become refcnt/parentflags/reserved for RTM_GET2.
             const auto address_family = memory_.read32(registers[0] + 12);
             const auto flags = memory_.read32(registers[0] + 20);
             if (!address_family || !flags || registers[3] == 0) {
@@ -1947,8 +1916,6 @@ void CompatibilityKernel::dispatch_bsd_events(Cpu& cpu, std::uint32_t number)
             registers[1] == 6 &&
             memory_.read32(registers[0] + 16).value_or(0) ==
                 darwin::route::sysctl_interface_list) {
-            // CTL_NET/PF_ROUTE/NET_RT_IFLIST. XNU returns a sequence of
-            // variable-length if_msghdr/ifa_msghdr records, not host ifaddrs.
             const auto address_family = memory_.read32(registers[0] + 12);
             const auto interface_index = memory_.read32(registers[0] + 20);
             if (!address_family || !interface_index || registers[3] == 0) {
@@ -1983,7 +1950,7 @@ void CompatibilityKernel::dispatch_bsd_events(Cpu& cpu, std::uint32_t number)
             }
             if (registers[2] != 0) {
                 if (*old_size < required) {
-                    bsd_error(cpu, 12); // ENOMEM
+                    bsd_error(cpu, 12);
                     return;
                 }
                 if (!memory_.copy_in(registers[2], records)) {
@@ -1997,7 +1964,7 @@ void CompatibilityKernel::dispatch_bsd_events(Cpu& cpu, std::uint32_t number)
         if (*mib0 == darwin::sysctl::control_kernel &&
             (*mib1 == darwin::sysctl::kernel_process_arguments ||
                 *mib1 == darwin::sysctl::kernel_process_arguments2) &&
-            registers[1] == 3) { // KERN_PROCARGS[2] / pid
+            registers[1] == 3) {
             const auto requested_pid = memory_.read32(registers[0] + 8U);
             if (!requested_pid || registers[3] == 0) {
                 bsd_error(cpu, bsd_support::bad_address);
@@ -2046,8 +2013,6 @@ void CompatibilityKernel::dispatch_bsd_events(Cpu& cpu, std::uint32_t number)
         const auto encode_process_info =
             [this](std::uint32_t pid,
                 const KernelSharedState::ProcessRecord& record) {
-                // The 32-bit kinfo_proc layout is 492 bytes
-                // (extern_proc=196, eproc=296).
                 std::vector<std::byte> bytes(
                     darwin::sysctl::arm32_kernel_process_info_size);
                 const auto put16 = [&](std::size_t offset,
@@ -2071,10 +2036,6 @@ void CompatibilityKernel::dispatch_bsd_events(Cpu& cpu, std::uint32_t number)
                         shared_state_->process_kevent_states.find(pid);
                     state != shared_state_->process_kevent_states.end() &&
                     state->second.exec_generation != 0U) {
-                    // extern_proc.p_flag. P_EXEC is the level state paired with
-                    // the edge-triggered NOTE_EXEC notification: clients attach
-                    // their knote first, then inspect this bit to close the
-                    // exec race.
                     put32(16, darwin::sysctl::process_flag_exec);
                 }
                 bytes[162] = static_cast<std::byte>(
@@ -2086,13 +2047,13 @@ void CompatibilityKernel::dispatch_bsd_events(Cpu& cpu, std::uint32_t number)
                         static_cast<std::byte>(record.command[index]);
                 }
                 put16(188, static_cast<std::uint16_t>(record.exit_status));
-                put32(280, record.uid); // e_pcred.p_ruid
-                put32(284, record.uid); // e_pcred.p_svuid
-                put32(288, record.gid); // e_pcred.p_rgid
-                put32(292, record.gid); // e_pcred.p_svgid
-                put32(304, record.effective_uid); // e_ucred.cr_uid
-                put16(308, 1); // e_ucred.cr_ngroups
-                put32(312, record.effective_gid); // e_ucred.cr_groups[0]
+                put32(280, record.uid);
+                put32(284, record.uid);
+                put32(288, record.gid);
+                put32(292, record.gid);
+                put32(304, record.effective_uid);
+                put16(308, 1);
+                put32(312, record.effective_gid);
                 put32(416, record.parent_pid);
                 put32(420, record.process_group);
                 return bytes;
@@ -2165,9 +2126,6 @@ void CompatibilityKernel::dispatch_bsd_events(Cpu& cpu, std::uint32_t number)
                 case darwin::sysctl::kernel_process_session:
                 case darwin::sysctl::kernel_process_tty:
                 case darwin::sysctl::kernel_process_lcid:
-                    // These attributes are not represented by the shared
-                    // process record, so an unsupported attribute cannot
-                    // accidentally match every process.
                     matches = false;
                     break;
                 default:
@@ -2284,9 +2242,6 @@ void CompatibilityKernel::dispatch_bsd_events(Cpu& cpu, std::uint32_t number)
                 return;
             }
             case darwin::sysctl::kernel_clock_rate: {
-                // Darwin 11 exposes struct clockinfo for KERN_CLOCKRATE:
-                // hz, tick, tickadj, stathz and profhz. These are stable
-                // kernel timing values, independent of host scheduling.
                 constexpr std::array<std::uint32_t, 5> clock_info {
                     100U, 10'000U, 0U, 100U, 100U };
                 std::array<std::byte, clock_info.size() * sizeof(std::uint32_t)>
@@ -2305,7 +2260,7 @@ void CompatibilityKernel::dispatch_bsd_events(Cpu& cpu, std::uint32_t number)
                 break;
             }
         }
-        if (*mib0 == 1 && *mib1 == 61 && registers[1] == 3) { // KERN_TFP
+        if (*mib0 == 1 && *mib1 == 61 && registers[1] == 3) {
             const auto selector = memory_.read32(registers[0] + 8);
             if (!selector || (*selector != 2 && *selector != 3) ||
                 registers[4] == 0 || registers[5] != 4) {
@@ -2323,7 +2278,7 @@ void CompatibilityKernel::dispatch_bsd_events(Cpu& cpu, std::uint32_t number)
         }
         if (*mib0 == darwin::sysctl::control_kernel &&
             *mib1 == darwin::sysctl::kernel_security_level &&
-            registers[1] == 2) { // KERN_SECURELVL
+            registers[1] == 2) {
             const auto previous =
                 shared_state_->security_level.load(std::memory_order_relaxed);
             std::optional<std::int32_t> requested_level;
@@ -2369,7 +2324,7 @@ void CompatibilityKernel::dispatch_bsd_events(Cpu& cpu, std::uint32_t number)
             bsd_success(cpu, 0);
             return;
         }
-        if (*mib0 == 1 && *mib1 == 5) { // KERN_MAXVNODES (read/write)
+        if (*mib0 == 1 && *mib1 == 5) {
             const auto previous = shared_state_->desired_vnodes;
             if (registers[4] != 0) {
                 if (registers[5] != 4) {
@@ -2396,7 +2351,7 @@ void CompatibilityKernel::dispatch_bsd_events(Cpu& cpu, std::uint32_t number)
             bsd_success(cpu, 0);
             return;
         }
-        if (*mib0 == 1 && *mib1 == 10) { // KERN_HOSTNAME (read/write)
+        if (*mib0 == 1 && *mib1 == 10) {
             const auto previous = shared_state_->hostname;
             if (registers[4] != 0) {
                 if (registers[5] == 0 || registers[5] > 256) {
@@ -2443,7 +2398,7 @@ void CompatibilityKernel::dispatch_bsd_events(Cpu& cpu, std::uint32_t number)
             bsd_success(cpu, 0);
             return;
         }
-        if (*mib0 == 6 && *mib1 == 24) { // HW_MEMSIZE
+        if (*mib0 == 6 && *mib1 == 24) {
             if (registers[3] == 0 || !memory_.write32(registers[3], 8)) {
                 bsd_error(cpu, bsd_support::bad_address);
                 return;
@@ -2523,9 +2478,8 @@ void CompatibilityKernel::dispatch_bsd_events(Cpu& cpu, std::uint32_t number)
                     *mib1 == darwin::sysctl::hardware_logical_cpu_max ||
                     *mib1 == darwin::sysctl::hardware_cpu_frequency_max ||
                     *mib1 == darwin::sysctl::hardware_bus_frequency_max))) {
-            // Common read-only capacity/boot values plus HW_NCPU.
             if (registers[4] != 0) {
-                bsd_error(cpu, 1); // EPERM: read-only MIB
+                bsd_error(cpu, 1);
                 return;
             }
             if (!memory_.write32(registers[3], 4)) {
@@ -2534,7 +2488,7 @@ void CompatibilityKernel::dispatch_bsd_events(Cpu& cpu, std::uint32_t number)
             }
             if (registers[2] != 0) {
                 if (*old_size < 4) {
-                    bsd_error(cpu, 12); // ENOMEM
+                    bsd_error(cpu, 12);
                     return;
                 }
                 std::uint32_t value = 1;
@@ -2542,16 +2496,16 @@ void CompatibilityKernel::dispatch_bsd_events(Cpu& cpu, std::uint32_t number)
                     switch (*mib1) {
                     case 5:
                         value = 65'536;
-                        break; // KERN_MAXVNODES
+                        break;
                     case 6:
                         value = 2'048;
-                        break; // KERN_MAXPROC
+                        break;
                     case 7:
                         value = 12'288;
-                        break; // KERN_MAXFILES
+                        break;
                     case 8:
                         value = 262'144;
-                        break; // KERN_ARGMAX
+                        break;
                     case darwin::sysctl::kernel_maximum_files_per_process:
                         value = static_cast<std::uint32_t>(
                             darwin::resource::maximum_open_files);
@@ -2559,11 +2513,11 @@ void CompatibilityKernel::dispatch_bsd_events(Cpu& cpu, std::uint32_t number)
                     case 35:
                         value = darwin_address_bounds(
                             shared_state_->darwin_abi.address_layout).stack_top;
-                        break; // KERN_USRSTACK32
-                    case 40: // KERN_NETBOOT
+                        break;
+                    case 40:
                     case 66:
                         value = 0;
-                        break; // KERN_SAFEBOOT
+                        break;
                     default:
                         value = 1;
                         break;
@@ -2577,13 +2531,13 @@ void CompatibilityKernel::dispatch_bsd_events(Cpu& cpu, std::uint32_t number)
                     switch (*mib1) {
                     case darwin::sysctl::hardware_byte_order:
                         value = 1234;
-                        break; // HW_BYTEORDER
+                        break;
                     case darwin::sysctl::hardware_physical_memory:
                         value =
                             static_cast<std::uint32_t>(std::min<std::uint64_t>(
                                 configured_memory_size,
                                 std::numeric_limits<std::uint32_t>::max()));
-                        break; // HW_PHYSMEM
+                        break;
                     case darwin::sysctl::hardware_user_memory:
                         value =
                             static_cast<std::uint32_t>(std::min<std::uint64_t>(
@@ -2592,50 +2546,50 @@ void CompatibilityKernel::dispatch_bsd_events(Cpu& cpu, std::uint32_t number)
                                           0x01000000U
                                     : shared_state_->device_ram_bytes,
                                 std::numeric_limits<std::uint32_t>::max()));
-                        break; // HW_USERMEM
+                        break;
                     case darwin::sysctl::hardware_page_size:
                         value = 4096;
-                        break; // HW_PAGESIZE
+                        break;
                     case 11:
                         value = 1;
-                        break; // HW_FLOATINGPT
+                        break;
                     case 13:
                         value = 0;
-                        break; // HW_VECTORUNIT
+                        break;
                     case darwin::sysctl::hardware_cache_line:
                         value = 64;
-                        break; // HW_CACHELINE
+                        break;
                     case darwin::sysctl::hardware_l1_i_cache_size:
                     case darwin::sysctl::hardware_l1_d_cache_size:
                         value = 32U * 1024U;
-                        break; // HW_L1{I,D}CACHESIZE
+                        break;
                     case darwin::sysctl::hardware_l2_settings:
                         value = 0;
-                        break; // HW_L2SETTINGS
+                        break;
                     case darwin::sysctl::hardware_l2_cache_size:
                         value = 1024U * 1024U;
-                        break; // HW_L2CACHESIZE
+                        break;
                     case darwin::sysctl::hardware_l3_settings:
                     case darwin::sysctl::hardware_l3_cache_size:
                         value = 0;
-                        break; // HW_L3{SETTINGS,CACHESIZE}
+                        break;
                     case darwin::sysctl::hardware_bus_frequency:
                     case darwin::sysctl::hardware_bus_frequency_max:
                         value = device_model_.processor.bus_hz;
-                        break; // HW_BUS_FREQ
+                        break;
                     case darwin::sysctl::hardware_cpu_frequency:
                     case darwin::sysctl::hardware_cpu_frequency_max:
                         value = device_model_.processor.frequency_hz();
-                        break; // HW_CPU_FREQ
+                        break;
                     case darwin::sysctl::hardware_physical_cpu:
                     case darwin::sysctl::hardware_physical_cpu_max:
                         value = std::min<std::uint32_t>(
                             device_model_.processor.topology.physical_core_count,
                             virtual_processor_count_);
-                        break; // hw.physicalcpu
+                        break;
                     default:
                         value = virtual_processor_count_;
-                        break; // HW_NCPU, HW_AVAILCPU, hw.logicalcpu
+                        break;
                     }
                 }
                 if (!memory_.write32(registers[2], value)) {
@@ -2667,4 +2621,4 @@ void CompatibilityKernel::dispatch_bsd_events(Cpu& cpu, std::uint32_t number)
     }
 }
 
-} // namespace shade
+}

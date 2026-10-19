@@ -19,8 +19,6 @@
 
 namespace shade {
 
-// Non-blocking line-oriented control channel used by headless interactive
-// sessions. The descriptor remains owned by the caller.
 class LiveControl final : public ControlChannel {
 public:
     explicit LiveControl(int descriptor,
@@ -28,8 +26,6 @@ public:
         SystemGestures system_gestures = classic_compact_system_gestures);
 
     [[nodiscard]] std::vector<LiveControlCommand> poll() override;
-    // Blocks until the descriptor is readable/hung up or the timeout expires.
-    // The next poll() still owns buffering and command parsing.
     void wait_for(std::chrono::nanoseconds timeout) override;
     [[nodiscard]] bool closed() const override { return closed_; }
 
@@ -43,4 +39,4 @@ private:
     bool closed_ { };
 };
 
-} // namespace shade
+}

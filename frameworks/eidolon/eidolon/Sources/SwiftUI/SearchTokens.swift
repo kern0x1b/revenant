@@ -1,8 +1,5 @@
 import UIKit
 
-// The search field of iOS 6 has no tokens, so they are shown as a row of chips above it: each one is what `token`
-// makes of an element, with a cross that removes it; the suggested tokens show while the field is being used, and a
-// tap on one moves it into the tokens.
 struct _TokenStrip<C: RandomAccessCollection & RangeReplaceableCollection, T: View>: View where C.Element: Identifiable {
     let tokens: Binding<C>
     let suggested: Binding<C>?

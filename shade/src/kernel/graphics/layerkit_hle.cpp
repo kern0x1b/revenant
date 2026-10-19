@@ -24,7 +24,7 @@ namespace {
 
     constexpr const char* layerkit_image = "LayerKit.framework/LayerKit";
 
-} // namespace
+}
 
 void LayerKitHle::register_handlers(UserlandHleRegistry& registry,
     std::shared_ptr<KernelSharedState> shared_state,
@@ -158,4 +158,4 @@ void LayerKitHle::inherit_state(const LayerKitHle& parent)
     compatibility_ = parent.compatibility_;
 }
 
-} // namespace shade
+}

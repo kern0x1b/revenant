@@ -60,4 +60,4 @@ void GuestParallelismPolicy::forget_process(std::uint32_t process_id)
     });
 }
 
-} // namespace shade
+}

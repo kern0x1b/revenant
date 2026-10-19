@@ -11,7 +11,6 @@ namespace shade {
 class AddressSpace;
 struct KernelSharedState;
 
-// Caller holds the shared Mach lock and has resolved the target task.
 std::uint32_t dispatch_guarded_port_trap(KernelSharedState& state,
     AddressSpace& memory, std::uint32_t task,
     const std::array<std::uint32_t, 16>& registers, std::uint32_t trap);

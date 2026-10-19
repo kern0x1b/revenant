@@ -41,7 +41,7 @@ namespace {
                rhs == AdvisoryLockKind::Exclusive;
     }
 
-} // namespace
+}
 
 RegularFileOpenDescription::RegularFileOpenDescription(std::uint64_t identifier,
     std::uint32_t permanent_file_id, int host_descriptor,
@@ -144,8 +144,6 @@ bool AdvisoryFileLockRegistry::try_set_record_lock(
         }
     }
 
-    // POSIX replaces the caller's locks only within the requested byte range.
-    // Preserve any non-overlapping prefix/suffix when changing lock type.
     std::vector<OwnedRecordLock> replacement;
     replacement.reserve(file.size() + 1U);
     for (const auto& candidate : file) {
@@ -217,7 +215,7 @@ void AdvisoryFileLockRegistry::release_process_record_locks(
     }
 }
 
-} // namespace shade::bsd
+}
 
 namespace shade {
 namespace {
@@ -249,7 +247,7 @@ namespace {
             static_cast<std::int64_t>(*length), *pid, *type, *whence };
     }
 
-} // namespace
+}
 
 std::shared_ptr<bsd::RegularFileOpenDescription>
 CompatibilityKernel::ensure_regular_file_open_description(std::uint32_t fd)
@@ -343,9 +341,9 @@ bool CompatibilityKernel::dispatch_bsd_record_locking(
 
     std::int64_t base = 0;
     switch (guest->whence) {
-    case 0: // SEEK_SET
+    case 0:
         break;
-    case 1: { // SEEK_CUR
+    case 1: {
         const auto current = file_offsets_.find(fd);
         if (current == file_offsets_.end() ||
             current->second > static_cast<std::uint64_t>(
@@ -356,7 +354,7 @@ bool CompatibilityKernel::dispatch_bsd_record_locking(
         base = static_cast<std::int64_t>(current->second);
         break;
     }
-    case 2: { // SEEK_END
+    case 2: {
         std::error_code error;
         const auto size = std::filesystem::file_size(file->second, error);
         if (error || size > static_cast<std::uint64_t>(
@@ -516,8 +514,6 @@ bool CompatibilityKernel::dispatch_bsd_filesystem_locking(
                           ? std::optional { bsd::AdvisoryLockKind::Shared }
                           : std::nullopt;
     if (!kind) {
-        // Darwin 8's flock implementation returns EBADF when neither lock mode
-        // bit is present, even though later APIs often use EINVAL here.
         bsd_error(cpu, bsd_support::bad_file_descriptor);
         return true;
     }
@@ -547,4 +543,4 @@ bool CompatibilityKernel::dispatch_bsd_filesystem_locking(
     return true;
 }
 
-} // namespace shade
+}

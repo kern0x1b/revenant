@@ -27,10 +27,6 @@
 
 namespace shade {
 
-// Constants and ordering are taken from XNU osfmk/kern/sched.h
-// and sched_prim.c. These defaults serve CPU-only helpers and unit tests. A
-// full boot derives its tick rate from the selected device instruction-timing
-// model instead of assuming that the CPU clock equals the system bus clock.
 namespace xnu::scheduler {
 
     constexpr std::size_t run_queue_count = 128;
@@ -62,7 +58,7 @@ namespace xnu::scheduler {
     constexpr std::uint64_t maximum_realtime_computation_ticks =
         default_guest_ticks_per_second * 50'000 / microseconds_per_second;
 
-} // namespace xnu::scheduler
+}
 
 struct XnuThreadId {
     std::uint32_t process { };
@@ -150,10 +146,6 @@ struct XnuThreadSchedulingInfo {
     bool depressed { };
 };
 
-// A deterministic implementation of XNU's traditional processor-set run
-// queue. It preserves FIFO order at each of the 128 priorities. A thread keeps
-// the head position while its first timeslice remains; equal-priority threads
-// rotate only when that quantum expires, matching csw_needed().
 class XnuScheduler {
 public:
     explicit XnuScheduler(
@@ -171,15 +163,8 @@ public:
     std::size_t remove_process(std::uint32_t process);
 
     bool make_runnable(XnuThreadId thread);
-    // Process-level pid_suspend/pid_resume operate on every thread in the
-    // task while retaining each thread's independent suspend count.
     std::size_t suspend_process(std::uint32_t process);
     std::size_t resume_process(std::uint32_t process);
-    // Device and IPC completion can race a thread's final blocking SVC. Keep
-    // that wake pending until complete_slice observes the Block transition.
-    // `handled` reports whether the thread identity/state was valid; the
-    // separate preemption bit lets callers coalesce a queued or duplicate
-    // wake without treating it as a failed wake.
     XnuThreadWakeResult wake_thread(XnuThreadId thread);
     bool block(XnuThreadId thread);
     bool suspend_thread(XnuThreadId thread);
@@ -191,11 +176,6 @@ public:
     bool set_realtime(XnuThreadId thread, std::uint64_t period_ticks,
         std::uint64_t computation_ticks, std::uint64_t constraint_ticks,
         bool preemptible);
-    // Realtime policy deadlines are defined from mach_absolute_time(), not
-    // from the amount of guest execution that has completed. The interactive
-    // host loop updates this converted device-clock value before processing
-    // wakeups and policy changes; deterministic callers retain the scheduler
-    // execution clock until they opt into this source.
     void set_realtime_clock_ticks(std::uint64_t elapsed_ticks);
 
     [[nodiscard]] std::optional<XnuScheduledSlice> choose_next(
@@ -205,19 +185,11 @@ public:
         std::optional<XnuThreadId> preferred = std::nullopt);
     [[nodiscard]] XnuPreemption preemption_for(
         XnuThreadId running_thread, std::size_t processor) const;
-    // XNU's scheduler policy owns the yield decision. Resolve the physical
-    // processor from the running thread instead of confusing it with the
-    // emulator's per-process CPU-context slot.
     [[nodiscard]] bool should_yield(XnuThreadId running_thread) const;
     bool complete_slice(XnuThreadId thread, std::uint64_t consumed_ticks,
         XnuSliceCompletion completion,
         XnuTimeAccounting time_accounting = XnuTimeAccounting::Advance);
     void advance_time(std::uint64_t elapsed_ticks);
-    // XNU's scheduler tick is a periodic mach_absolute_time event. Interactive
-    // execution can advance that device clock beyond instruction accounting
-    // while the host services an expensive syscall or translation. Catch the
-    // scheduler housekeeping clock up to the same absolute point without
-    // synthesizing CPU usage or changing thread quanta.
     void synchronize_time(std::uint64_t elapsed_ticks);
 
     [[nodiscard]] bool contains(XnuThreadId thread) const;
@@ -229,24 +201,13 @@ public:
         return processor_run_queues_.size();
     }
     [[nodiscard]] std::size_t runnable_count() const { return runnable_count_; }
-    // Host cooperation may use this read-only count to bound one wall-clock
-    // scheduling round. It does not alter XNU queue order or policy.
     [[nodiscard]] std::size_t runnable_count_at_or_above_priority(
         std::int32_t priority) const;
-    // Process exit can retire a task's host execution pool while unrelated
-    // Guest processes remain runnable. Count only this process's Runnable or
-    // Running threads so reclamation never depends on global queue activity.
     [[nodiscard]] std::size_t process_runnable_count(
         std::uint32_t process) const;
-    // Return the oldest runnable thread for a process without changing any
-    // Guest scheduling state.  Interactive display completion uses this only
-    // inside a bounded host-side callback lease to let a blocked callback's
-    // same-process dependency make progress.
     [[nodiscard]] std::optional<XnuThreadId> oldest_runnable_thread(
         std::uint32_t process,
         std::optional<XnuThreadId> excluded = std::nullopt) const;
-    // Host role dispatch uses the process's own XNU ordering: highest
-    // scheduled priority first, realtime deadline next, then FIFO age.
     [[nodiscard]] std::optional<XnuThreadId>
     highest_priority_runnable_thread(std::uint32_t process,
         std::optional<XnuThreadId> excluded = std::nullopt) const;
@@ -263,9 +224,6 @@ private:
 
     struct RunQueue {
         std::array<ReadyQueue, xnu::scheduler::run_queue_count> queues;
-        // Realtime queues are ordered by deadline. The list remains the
-        // removal index for all priorities; this side index avoids a linear
-        // deadline insertion/search on the scheduler hot path.
         std::set<RealtimeQueueKey> realtime_order;
         std::array<std::uint32_t, xnu::scheduler::run_queue_count / 32>
             bitmap { };
@@ -290,8 +248,6 @@ private:
         std::uint64_t enqueue_sequence { };
         std::chrono::steady_clock::time_point enqueued_at;
         std::uint64_t runnable_generation { };
-        // A partially used quantum stays at the queue head. Preserve that
-        // continuation priority when local and global queues are compared.
         bool front_continuation { };
         std::optional<ReadyQueue::iterator> queue_position;
         std::optional<RealtimeQueueKey> realtime_queue_key;
@@ -352,9 +308,6 @@ private:
     std::unordered_map<std::uint32_t,
         std::unordered_set<XnuThreadId, XnuThreadIdHash>>
         process_threads_;
-    // Runnable/Running membership is a scheduler state-machine invariant.
-    // Keep its per-task projection beside the run queues so host cooperation
-    // and JIT policy observations do not rescan every thread on each turn.
     std::unordered_map<std::uint32_t, std::size_t> process_runnable_counts_;
     std::set<std::pair<std::uint64_t, XnuThreadId>> depression_order_;
     std::set<std::pair<std::uint64_t, XnuThreadId>> failsafe_order_;
@@ -373,4 +326,4 @@ private:
     bool dispatch_diagnostics_enabled_ { };
 };
 
-} // namespace shade
+}

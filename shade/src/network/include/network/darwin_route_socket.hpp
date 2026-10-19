@@ -23,8 +23,6 @@
 
 namespace shade::darwin::route {
 
-// XNU / Darwin 8 PF_ROUTE wire constants.  The target firmware is ARM32,
-// where rt_msghdr is 92 bytes and routing sockaddrs are aligned to 32 bits.
 inline constexpr std::uint32_t protocol_family = 17;
 inline constexpr std::uint8_t message_version = 5;
 inline constexpr std::size_t message_header_size = 92;
@@ -127,9 +125,6 @@ struct InterfaceRouteUpdate {
     std::string interface_name, std::uint16_t interface_index,
     std::span<const std::byte> gateway);
 
-// XNU broadcasts the result on PF_ROUTE after filling the sender, DONE flag,
-// and errno fields.  Keeping this separate also makes future route listeners
-// and NET_RT_DUMP support use the exact same response encoding.
 [[nodiscard]] std::vector<std::byte> make_response(
     std::span<const std::byte> request, std::uint32_t sender_pid,
     std::uint32_t darwin_error, std::uint16_t interface_index = 0);
@@ -160,4 +155,4 @@ private:
     std::vector<Entry> entries_;
 };
 
-} // namespace shade::darwin::route
+}

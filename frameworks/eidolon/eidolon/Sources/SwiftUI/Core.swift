@@ -13,10 +13,6 @@ import UIKit
 }
 
 extension View {
-    /// The body as a view, which is how a container reads a view's children the way SwiftUI does: a
-    /// custom view that only stands for a group is that group, not a leaf of its own. The port's own, so
-    /// it is not public API: an app reads a container's children through `ForEach(subviews:)` and
-    /// `Group(subviews:)`, which is the interface 26.2 declares.
     var bodyView: any View {
         self is any PrimitiveView ? AnyView(self) : AnyView(body)
     }

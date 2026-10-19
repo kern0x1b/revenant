@@ -23,17 +23,16 @@ bool can_serve_empty_catalogue(const std::filesystem::path& rootfs)
 std::optional<std::vector<std::uint32_t>> reply_payload(
     std::uint32_t request_identifier)
 {
-    // NDR: little-endian integer representation, followed by kern_return_t.
     constexpr std::uint32_t ndr_word0 = 0;
     constexpr std::uint32_t ndr_word1 = 1;
     constexpr std::uint32_t success = 0;
     switch (request_identifier) {
-    case 990000U: // open catalogue session; one means available
+    case 990000U:
         return std::vector<std::uint32_t> { ndr_word0, ndr_word1, success, 1U };
-    case 990005U: // audio and video item counts
+    case 990005U:
         return std::vector<std::uint32_t> { ndr_word0, ndr_word1, success, 0U,
             0U };
-    case 990001U: // close catalogue session
+    case 990001U:
         return std::vector<std::uint32_t> { ndr_word0, ndr_word1, success };
     default:
         return std::nullopt;
@@ -42,9 +41,7 @@ std::optional<std::vector<std::uint32_t>> reply_payload(
 
 bool is_request_identifier(std::uint32_t identifier)
 {
-    // The service reserves this 100-message request subrange; replies use the
-    // corresponding +100 identifiers.
     return identifier >= 990000U && identifier < 990100U;
 }
 
-} // namespace shade::media_library_service
+}

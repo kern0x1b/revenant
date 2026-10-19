@@ -41,4 +41,4 @@ void CompatibilityKernel::dispatch_mach_thread_self_trap(Cpu& cpu)
     cpu.registers()[0] = name;
 }
 
-} // namespace shade
+}

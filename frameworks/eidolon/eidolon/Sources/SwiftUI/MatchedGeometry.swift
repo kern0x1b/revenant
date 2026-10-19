@@ -22,7 +22,6 @@ final class MatchedGeometryNode: ContainerNode {
     var isSource = true
     var from: CGRect?
     var placedOnce = false
-    // not ObjectIdentifier: a node that has gone can leave its address to the next one, which would then look like the same owner
     let owner: Int = { MatchedFrames.nextOwner += 1; return MatchedFrames.nextOwner }()
 
     override func update(_ view: any View, _ env: EnvironmentValues) {

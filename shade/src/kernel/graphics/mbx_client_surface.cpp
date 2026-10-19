@@ -111,4 +111,4 @@ void Mbx2dHle::release_client_renderer_resources()
     retired_client_host_sources_.clear();
 }
 
-} // namespace shade
+}

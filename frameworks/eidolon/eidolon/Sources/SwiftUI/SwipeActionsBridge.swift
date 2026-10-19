@@ -1,8 +1,5 @@
 import UIKit
 
-// The swipe actions of later iOS (UIContextualAction, UISwipeActionsConfiguration) are not in iOS 6, but the backports
-// carry them and hand them to the table's delegate like the release does. They are looked up by name at run time, so
-// the module still builds and runs on a phone without the backports, where the native Delete button is used instead.
 enum SwipeActionsBridge {
     static var available: Bool {
         NSClassFromString("UISwipeActionsConfiguration") != nil && NSClassFromString("UIContextualAction") != nil
@@ -41,8 +38,6 @@ enum SwipeActionsBridge {
     }
 }
 
-// The delegate methods are added to the controller at run time: the SDK declares them with types of iOS 11, which this
-// module cannot name, and the backports look for them by selector.
 extension ListController {
     nonisolated(unsafe) private static var registered = false
     nonisolated(unsafe) static var swipeQueries: [String] = []

@@ -133,7 +133,7 @@ namespace {
         return volume;
     }
 
-} // namespace
+}
 
 VolumeLayout::VolumeLayout(
     std::filesystem::path rootfs, std::uint64_t storage_bytes)
@@ -204,4 +204,4 @@ bool VolumeLayout::is_mount_root(std::string_view path) const
     return normalized.generic_string() == for_guest_path(path).mount_point;
 }
 
-} // namespace shade::hfs
+}

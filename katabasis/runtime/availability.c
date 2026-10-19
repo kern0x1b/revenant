@@ -1,8 +1,3 @@
-// The _availability_version_check that dyld provides from iOS 12: guest code, compiled for arm64 and lifted
-// with the image that calls it. compiler-rt's @available check in an arm64 image takes this function when
-// the symbol is bound; unbound, it falls back to CoreFoundation function pointers from dlsym, which on the
-// armv7 host are host addresses the guest cannot call. The answer is the device's own release, read from
-// the record it keeps of it, as compiler-rt's armv7 fallback does.
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
@@ -43,8 +38,6 @@ int _availability_version_check(uint32_t count, const struct build_version *vers
     device_version_read = 1;
     if (!device_version) fputs("xlate: cannot read ProductVersion from SystemVersion.plist; every @available check answers no\n", stderr);
   }
-  // A release that cannot be read counts as version 0: a false answer takes the code written for a release
-  // without the API, where a true one would call an API the device may not have.
   for (uint32_t i = 0; i < count; i++)
     if (versions[i].platform == PLATFORM_IOS)
       return device_version >= versions[i].version;

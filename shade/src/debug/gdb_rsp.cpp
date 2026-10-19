@@ -206,7 +206,7 @@ namespace {
             std::as_bytes(std::span { text.data(), text.size() }));
     }
 
-} // namespace
+}
 
 void GdbRspProtocol::set_stop(GdbThreadId thread, std::uint8_t signal)
 {
@@ -317,11 +317,6 @@ GdbPacketResult GdbRspProtocol::handle(
     if (packet.starts_with('H') && packet.size() >= 3) {
         const auto operation = packet[1];
         const auto id = packet.substr(2);
-        // GDB uses Hc0 before a normal all-stop `c`: thread id zero asks the
-        // target to pick any thread, rather than selecting the current thread
-        // as the only runnable one.  Keep both wildcard forms unscoped so the
-        // guest system can schedule every process needed to service the
-        // continued thread.
         if (operation == 'c' && (id == "-1" || id == "0")) {
             continue_thread_.reset();
             return { "OK", std::nullopt, false };
@@ -714,4 +709,4 @@ void GdbRemoteServer::detach()
     close_client();
 }
 
-} // namespace shade
+}

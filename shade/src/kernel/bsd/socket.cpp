@@ -43,7 +43,7 @@ void CompatibilityKernel::dispatch_bsd_socket(Cpu& cpu, std::uint32_t number)
 {
     auto& registers = cpu.registers();
     switch (number) {
-    case 27: { // recvmsg
+    case 27: {
         auto fd = registers[0];
         if (const auto duplicate = duplicated_descriptors_.find(fd);
             duplicate != duplicated_descriptors_.end()) {
@@ -62,7 +62,7 @@ void CompatibilityKernel::dispatch_bsd_socket(Cpu& cpu, std::uint32_t number)
         cpu.halt(Dynarmic::HaltReason::UserDefined5);
         return;
     }
-    case 28: { // sendmsg
+    case 28: {
         auto fd = registers[0];
         if (const auto duplicate = duplicated_descriptors_.find(fd);
             duplicate != duplicated_descriptors_.end()) {
@@ -74,7 +74,7 @@ void CompatibilityKernel::dispatch_bsd_socket(Cpu& cpu, std::uint32_t number)
         if (endpoint == socket_pair_endpoints_.end()) {
             bsd_error(cpu, virtual_descriptors_.contains(fd)
                                ? 57U
-                               : bsd_support::bad_file_descriptor); // ENOTCONN
+                               : bsd_support::bad_file_descriptor);
             return;
         }
         if (!endpoint->second.local_write_open() ||
@@ -298,7 +298,7 @@ void CompatibilityKernel::dispatch_bsd_socket(Cpu& cpu, std::uint32_t number)
             const auto accepted_fd =
                 install_host_socket(accepted.accepted_socket);
             if (!accepted_fd) {
-                bsd_error(cpu, 24); // EMFILE
+                bsd_error(cpu, 24);
                 return;
             }
             if (!copy_socket_address(
@@ -330,8 +330,8 @@ void CompatibilityKernel::dispatch_bsd_socket(Cpu& cpu, std::uint32_t number)
         cpu.halt(Dynarmic::HaltReason::UserDefined5);
         return;
     }
-    case 31: // getpeername
-    case 32: { // getsockname
+    case 31:
+    case 32: {
         const auto fd = registers[0];
         const auto socket = virtual_descriptors_.find(fd);
         if (socket == virtual_descriptors_.end()) {
@@ -416,7 +416,7 @@ void CompatibilityKernel::dispatch_bsd_socket(Cpu& cpu, std::uint32_t number)
             return;
         }
 
-        std::uint8_t family = 1; // AF_UNIX
+        std::uint8_t family = 1;
         if (socket->second == "inet-dgram")
             family = 2;
         else if (socket->second == "inet6-dgram")
@@ -480,7 +480,7 @@ void CompatibilityKernel::dispatch_bsd_socket(Cpu& cpu, std::uint32_t number)
                 registers[1] == darwin::socket::stream) {
                 const auto fd = allocate_file_descriptor();
                 if (!fd) {
-                    bsd_error(cpu, 24); // EMFILE
+                    bsd_error(cpu, 24);
                     return;
                 }
                 virtual_descriptors_.emplace(
@@ -508,7 +508,7 @@ void CompatibilityKernel::dispatch_bsd_socket(Cpu& cpu, std::uint32_t number)
                 }
                 const auto fd = install_host_socket(created.socket);
                 if (!fd) {
-                    bsd_error(cpu, 24); // EMFILE
+                    bsd_error(cpu, 24);
                     return;
                 }
                 bsd_success(cpu, *fd);
@@ -526,7 +526,7 @@ void CompatibilityKernel::dispatch_bsd_socket(Cpu& cpu, std::uint32_t number)
             auto udp = shared_state_->virtual_udp_network->create(registers[0]);
             if (!udp) {
                 virtual_descriptors_.erase(*fd);
-                bsd_error(cpu, 47); // EAFNOSUPPORT
+                bsd_error(cpu, 47);
                 return;
             }
             virtual_udp_sockets_[*fd] = std::move(udp);
@@ -542,7 +542,7 @@ void CompatibilityKernel::dispatch_bsd_socket(Cpu& cpu, std::uint32_t number)
                 registers[2] == darwin::network::address_family_inet6)) {
             const auto fd = allocate_file_descriptor();
             if (!fd) {
-                bsd_error(cpu, 24); // EMFILE
+                bsd_error(cpu, 24);
                 return;
             }
             virtual_descriptors_.emplace(*fd, "route-socket");
@@ -565,12 +565,9 @@ void CompatibilityKernel::dispatch_bsd_socket(Cpu& cpu, std::uint32_t number)
         if (registers[0] == darwin::kernel_control::protocol_family_system &&
             registers[1] == darwin::socket::raw &&
             registers[2] == darwin::kernel_control::protocol_event) {
-            // PF_SYSTEM, SOCK_RAW, SYSPROTO_EVENT. Host kernels do not expose
-            // this Darwin family, so it is backed by the guest kernel event
-            // queue.
             const auto fd = allocate_file_descriptor();
             if (!fd) {
-                bsd_error(cpu, 24); // EMFILE
+                bsd_error(cpu, 24);
                 return;
             }
             virtual_descriptors_.emplace(*fd, "system-event-socket");
@@ -587,7 +584,7 @@ void CompatibilityKernel::dispatch_bsd_socket(Cpu& cpu, std::uint32_t number)
         if (create_kernel_control_socket(cpu))
             return;
         trace_unknown(cpu, "BSD socket domain", registers[0]);
-        bsd_error(cpu, 47); // EAFNOSUPPORT
+        bsd_error(cpu, 47);
         return;
     }
     case darwin::syscall::connect: {
@@ -657,8 +654,6 @@ void CompatibilityKernel::dispatch_bsd_socket(Cpu& cpu, std::uint32_t number)
             return;
         }
         if (kernel_network::is_isolated_stream_descriptor(socket->second)) {
-            // Isolation keeps the local endpoint model usable without
-            // translating a guest destination onto the host loopback namespace.
             bsd_error(cpu, darwin::error::network_unreachable);
             return;
         }
@@ -678,7 +673,7 @@ void CompatibilityKernel::dispatch_bsd_socket(Cpu& cpu, std::uint32_t number)
                       " fd=" + std::to_string(fd) +
                       " family=" + std::to_string(*family) + " " + name + "\n");
         if (*family != 1 || !socket->second.starts_with("unix-")) {
-            bsd_error(cpu, 47); // EAFNOSUPPORT
+            bsd_error(cpu, 47);
             return;
         }
         if (socket_pair_endpoints_.contains(fd)) {
@@ -774,7 +769,7 @@ void CompatibilityKernel::dispatch_bsd_socket(Cpu& cpu, std::uint32_t number)
             if (std::to_integer<std::uint8_t>(
                     (*address)[darwin::network::sockaddr_family_offset]) !=
                 expected_family) {
-                bsd_error(cpu, 47); // EAFNOSUPPORT
+                bsd_error(cpu, 47);
                 return;
             }
             if (bound_socket_names_.contains(registers[0])) {
@@ -848,7 +843,7 @@ void CompatibilityKernel::dispatch_bsd_socket(Cpu& cpu, std::uint32_t number)
         bsd_success(cpu, 0);
         return;
     }
-    case 105: { // setsockopt
+    case 105: {
         const auto fd = registers[0];
         if (!virtual_descriptors_.contains(fd)) {
             bsd_error(cpu, bsd_support::bad_file_descriptor);
@@ -966,8 +961,6 @@ void CompatibilityKernel::dispatch_bsd_socket(Cpu& cpu, std::uint32_t number)
                 }
                 existing->credentials.emplace(
                     process_.effective_uid, process_.effective_gid);
-                // unlink after bind but before listen leaves an unnamed
-                // listening socket. Do not resurrect the pathname.
                 if (linked)
                     shared_state_->unix_listeners[name] = existing;
                 unix_listener_states_[registers[0]] = std::move(existing);
@@ -980,7 +973,7 @@ void CompatibilityKernel::dispatch_bsd_socket(Cpu& cpu, std::uint32_t number)
         }
         return;
     }
-    case 118: { // getsockopt
+    case 118: {
         const auto fd = registers[0];
         const auto socket = virtual_descriptors_.find(fd);
         if (socket == virtual_descriptors_.end()) {
@@ -1300,9 +1293,6 @@ void CompatibilityKernel::dispatch_bsd_socket(Cpu& cpu, std::uint32_t number)
             bsd_success(cpu, static_cast<std::uint32_t>(bytes->size()));
             return;
         }
-        // An unconnected Unix datagram needs a live destination. Darwin's
-        // sendto arguments beyond r3 are stack based, and the current callers
-        // reach this path only after a failed /var/run/syslog connection.
         bsd_error(cpu, bsd_support::not_connected);
         return;
     }
@@ -1356,12 +1346,12 @@ void CompatibilityKernel::dispatch_bsd_socket(Cpu& cpu, std::uint32_t number)
             (registers[1] != darwin::socket::stream &&
                 registers[1] != darwin::socket::datagram &&
                 registers[1] != darwin::socket::sequenced_packet)) {
-            bsd_error(cpu, 47); // EAFNOSUPPORT
+            bsd_error(cpu, 47);
             return;
         }
         const auto first = allocate_file_descriptor();
         if (!first) {
-            bsd_error(cpu, 24); // EMFILE
+            bsd_error(cpu, 24);
             return;
         }
         virtual_descriptors_.emplace(*first, "socketpair");
@@ -1372,7 +1362,7 @@ void CompatibilityKernel::dispatch_bsd_socket(Cpu& cpu, std::uint32_t number)
             virtual_descriptors_.erase(*first);
             file_status_flags_.erase(*first);
             descriptor_flags_.erase(*first);
-            bsd_error(cpu, 24); // EMFILE
+            bsd_error(cpu, 24);
             return;
         }
         virtual_descriptors_.emplace(*second, "socketpair");
@@ -1409,4 +1399,4 @@ void CompatibilityKernel::dispatch_bsd_socket(Cpu& cpu, std::uint32_t number)
     }
 }
 
-} // namespace shade
+}

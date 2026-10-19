@@ -33,9 +33,6 @@ namespace mach_support {
     }
 
     inline constexpr std::size_t maximum_message_io = 16U * 1024U * 1024U;
-    // OOL memory descriptors describe VM-backed data and are not part of the
-    // inline Mach message size. Keep a separate host-allocation guard large
-    // enough for the fixed-size buffers used by system MIG servers.
     inline constexpr std::size_t maximum_ool_payload = 64U * 1024U * 1024U;
     inline constexpr std::uint32_t default_dynamic_base = 0x10000000U;
     inline constexpr std::uint32_t ool_receive_base = 0x1d000000U;
@@ -59,9 +56,6 @@ namespace mach_support {
         std::uint32_t address { };
     };
 
-    // vm_allocate is exposed through both MIG and Darwin's direct kernel-RPC
-    // traps. Keep address selection and overlap handling identical at both
-    // entry points.
     [[nodiscard]] VmAllocationResult allocate_guest_vm_region(
         AddressSpace& memory, std::uint32_t requested_address,
         std::uint32_t size, std::uint32_t flags,
@@ -87,10 +81,6 @@ namespace mach_support {
     [[nodiscard]] std::optional<std::uint32_t> resolve_name_with_right(
         const KernelSharedState& state, std::uint32_t task, std::uint32_t name,
         xnu::ipc::Right right);
-    // mach_msg receive accepts only a task-local receive right or port-set
-    // right. A generic namespace resolve is intentionally insufficient because
-    // send-only names resolve to the same global object but are not receive
-    // capabilities.
     [[nodiscard]] std::optional<std::uint32_t> resolve_receive_object(
         const KernelSharedState& state, std::uint32_t task, std::uint32_t name);
     [[nodiscard]] bool receive_name_is_in_set(
@@ -123,17 +113,10 @@ namespace mach_support {
         const KernelSharedState::MachMessage& message);
     void remove_port_object_locked(
         KernelSharedState& state, std::uint32_t object);
-    // Named VM entries are kernel-owned send-only ports. Reclaim them only
-    // after the last namespace/in-flight Send reference disappears; unlike
-    // generic ipc_port objects this cannot invalidate a receive right or a
-    // service port.
     void release_unreferenced_memory_entry_locked(
         KernelSharedState& state, std::uint32_t object);
     void release_unreferenced_fileport_locked(
         KernelSharedState& state, std::uint32_t object);
-    // Task and thread ports are kernel-owned objects. When their task exits,
-    // all outstanding Send names must become DeadName before the backing
-    // indexes are dropped, matching ipc_space/task termination in XNU.
     void terminate_exited_task_ports_locked(
         KernelSharedState& state, std::uint32_t pid);
     void terminate_exited_semaphores_locked(
@@ -181,5 +164,5 @@ namespace mach_support {
         std::uint32_t member_name, std::uint32_t set_name,
         PortMembershipOperation operation);
 
-} // namespace mach_support
-} // namespace shade
+}
+}

@@ -144,7 +144,7 @@ namespace {
         return now + duration;
     }
 
-} // namespace
+}
 
 bool dispatch(Cpu& cpu, AddressSpace& memory, Output& output,
     KernelSharedState& state, const ProcessContext& process,
@@ -242,4 +242,4 @@ void retire_process(KernelSharedState& state, std::uint32_t process_id)
     state.process_interval_timers.erase(process_id);
 }
 
-} // namespace shade::kernel_bsd::interval_timer
+}

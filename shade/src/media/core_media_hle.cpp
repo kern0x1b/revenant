@@ -18,7 +18,7 @@ namespace {
     constexpr std::string_view core_media_image {
         "/System/Library/PrivateFrameworks/CoreMedia.framework/CoreMedia"
     };
-} // namespace
+}
 
 CoreMediaHle::CoreMediaHle(UserlandHleRegistry& registry)
 {
@@ -32,4 +32,4 @@ void CoreMediaHle::copy_device_route_for_audio_category(UserlandHleCall& call)
     call.resume_original_persistently();
 }
 
-} // namespace shade
+}

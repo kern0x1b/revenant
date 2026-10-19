@@ -23,4 +23,4 @@ namespace shade {
     }
     return text.str();
 }
-} // namespace shade
+}

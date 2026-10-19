@@ -1,7 +1,6 @@
 import UIKit
 import CoreGraphics
 
-// What a slider reads and writes: any floating-point binding, seen as Doubles.
 struct SliderModel {
     var get: () -> Double
     var set: (Double) -> Void

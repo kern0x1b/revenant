@@ -28,9 +28,6 @@ struct AudioBuffer {
     std::uint32_t sample_rate { };
     std::uint16_t channel_count { };
     AudioSamples samples { std::vector<std::int16_t> { } };
-    // Hardware callbacks are adjacent pieces of one PCM timeline. Backends may
-    // retain converter history between these buffers; decoded files remain
-    // self-contained and flush their converter at the end.
     bool streaming { };
 
     [[nodiscard]] bool empty() const
@@ -49,9 +46,6 @@ class AudioSink {
 public:
     virtual ~AudioSink() = default;
     [[nodiscard]] virtual bool play(const AudioBuffer& buffer) = 0;
-    // Reports whether the host backend still owns samples that have not reached
-    // the output device. Guest service state uses this completion boundary to
-    // hand control back to its normal PCM path after a decoded fallback ends.
     [[nodiscard]] virtual bool has_pending_audio() const = 0;
     virtual void set_gain(float gain) = 0;
     virtual void stop(AudioStopMode mode = AudioStopMode::Immediate) = 0;
@@ -103,9 +97,6 @@ public:
         AudioBuffer buffer, float device_volume = 1.0F);
     void stop_playback(AudioStopMode mode = AudioStopMode::Immediate);
 
-    // The guest FigMovie service is the source-of-truth for source selection.
-    // A create request's path is correlated with its reply through the Mach
-    // reply-port object; subsequent properties address the returned movie ID.
     void observe_service_source_create_request(
         std::uint32_t reply_object, std::filesystem::path guest_path);
     [[nodiscard]] std::optional<std::filesystem::path>
@@ -183,4 +174,4 @@ private:
         0.5F } };
 };
 
-} // namespace shade
+}

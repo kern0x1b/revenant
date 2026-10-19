@@ -71,7 +71,6 @@ public struct Path: Equatable {
     public var isEmpty: Bool { storage.isEmpty }
     public var boundingRect: CGRect { storage.boundingBoxOfPath }
 
-    // A path is a value: a copy that is changed must not change the original, though both hold the same CGPath until then.
     mutating func unique() {
         if !isKnownUniquelyReferenced(&storage) { storage = storage.mutableCopy() ?? CGMutablePath() }
     }
@@ -204,7 +203,6 @@ final class ShapeNode: LayoutNode {
     var lastSize = CGSize.zero
     lazy var journey = Journey<AnimatedShape>(compatible: AnimatedShape.isOneKind) { [unowned self] in self.layoutContents(self.lastSize) }
 
-    // The shape on screen is `shape`; while an animation runs it is the shape on the way to the last one it was given.
     func retarget(_ new: any Shape, animation: Animation?) {
         journey.retarget(AnimatedShape(shape: new), animation: animation, animates: lastSize != .zero)
     }

@@ -91,8 +91,6 @@ namespace {
         std::uint32_t stencil;
     };
 
-    // The device EGL driver exposes the native CoreAnimation color formats plus
-    // a depth/stencil variant used by regular GLES applications.
     constexpr std::array egl_configs {
         EglConfigDescriptor { 1, 8, 8, 8, 8, 24, 8 },
         EglConfigDescriptor { 2, 8, 8, 8, 8, 0, 0 },
@@ -183,7 +181,7 @@ namespace {
         return display == egl_default_display;
     }
 
-} // namespace
+}
 
 OpenGlesHle::OpenGlesHle(UserlandHleRegistry& registry,
     std::shared_ptr<DisplayState> display,
@@ -638,9 +636,6 @@ bool OpenGlesHle::refresh_pixmap_surface(
     const auto cpu_generation = host_surface->cpu_generation();
     if (cpu_generation <= state.backing_cpu_generation)
         return true;
-    // A newer GPU generation is still the authoritative render target. Do not
-    // overwrite its native image with the older guest shadow; record the CPU
-    // watermark so a later completed GPU-to-CPU synchronization is observed.
     if (host_surface->gpu_generation() > cpu_generation) {
         state.backing_cpu_generation = cpu_generation;
         return true;
@@ -724,8 +719,6 @@ OpenGlesHle::resolve_render_target(UserlandHleCall& call, ContextState& context)
             return std::nullopt;
         const auto renderbuffer = context.renderbuffers.find(
             framebuffer->second.color_renderbuffer);
-        // Texture rows start at the GL lower edge. A drawable's rows are
-        // already in panel order, so it uses the display coordinate origin.
         const bool display_oriented = renderbuffer != context.renderbuffers.end() &&
                                       renderbuffer->second.display_oriented;
         return RenderTargetBinding { RenderTargetKind::Framebuffer,
@@ -900,11 +893,6 @@ std::optional<DisplayFrame> OpenGlesHle::render_target(
             return std::nullopt;
         const auto descriptor = binding.host_surface->descriptor();
         if (renderer_->accelerated()) {
-            // Native renderers already own the authoritative image after the
-            // first upload. Carry the HostSurface across the renderer boundary
-            // so it can compare CPU/GPU generations without copying the full
-            // CPU shadow for every draw. Software backends retain the owning
-            // pixel frame below.
             return DisplayFrame { descriptor.width, descriptor.height, 0, { },
                 binding.host_surface };
         }
@@ -1228,7 +1216,6 @@ void OpenGlesHle::draw(UserlandHleCall& call, bool indexed)
         context->current_program != 0U
             ? programs_.program(context->current_program)
             : nullptr;
-    // A draw with a program that did not link is an error.
     if (context->current_program != 0U &&
         (active_program == nullptr || !active_program->linked)) {
         set_gl_error(call, gles_abi::invalid_operation);
@@ -1249,8 +1236,6 @@ void OpenGlesHle::draw(UserlandHleCall& call, bool indexed)
     std::vector<GlesRasterVertex> vertices;
     std::optional<ShadedDraw> shaded;
     if (interpreted) {
-        // Points and lines are not drawn with a shader: say so, rather than
-        // draw them without it.
         if (mode != gles_abi::triangles && mode != gles_abi::triangle_strip &&
             mode != gles_abi::triangle_fan) {
             set_gl_error(call, gles_abi::invalid_operation);
@@ -1332,7 +1317,6 @@ void OpenGlesHle::draw(UserlandHleCall& call, bool indexed)
             programmable ? programmable->rectangle_textures[unit_index]
                          : (!interpreted && unit.texture_rectangle_enabled);
         auto& raster_unit = state.texture_units[unit_index];
-        // A sampler reads the 2D texture bound to its unit.
         raster_unit.enabled =
             interpreted ? unit.bound_texture_2d != 0U
             : programmable
@@ -1432,9 +1416,6 @@ bool OpenGlesHle::load_target_pixels(
     const RenderTargetBinding& binding, DisplayFrame& frame)
 {
     if (binding.host_surface && renderer_->accelerated()) {
-        // The newest image lives with the GPU and the frame carries no CPU
-        // pixels: bring it back and read the surface's CPU copy, as a texture
-        // sampled by a draw is.
         if (!renderer_->map_cpu(
                 *binding.host_surface, true, PerfCpuMapReason::SoftwareFallback))
             return false;
@@ -1468,8 +1449,6 @@ void OpenGlesHle::read_pixels(UserlandHleCall& call)
         set_gl_error(call, gles_abi::invalid_value);
         return;
     }
-    // GLES 2 guarantees only this pair; the tests and engines that read
-    // pixels back ask for it.
     if (format != gles_abi::rgba || type != gles_abi::unsigned_byte) {
         set_gl_error(call, gles_abi::invalid_operation);
         return;
@@ -1507,8 +1486,6 @@ void OpenGlesHle::read_pixels(UserlandHleCall& call)
     }
     const auto frame_height = static_cast<std::int64_t>(frame->height);
     for (std::int32_t row = 0; row < height; ++row) {
-        // GL rows count up from the lower edge. A texture-backed target keeps
-        // its first row there; a drawable's rows are in panel order.
         const auto gl_row = static_cast<std::int64_t>(y) + row;
         if (gl_row < 0 || gl_row >= frame_height)
             continue;
@@ -1542,7 +1519,6 @@ void OpenGlesHle::read_pixels(UserlandHleCall& call)
 
 void OpenGlesHle::register_eagl(UserlandHleRegistry& registry)
 {
-    // Resolve the native capability without patching its Objective-C entry.
     registry.register_guest_function(std::string { opengles_image },
         "-[EAGLContext GetMacroContextPrivate]");
     registry.register_guest_function(std::string { opengles_image },
@@ -1647,10 +1623,6 @@ void OpenGlesHle::register_eagl(UserlandHleRegistry& registry)
                     return;
                 }
 
-                // Older engines may reach the public EGL implementation
-                // while EAGL switches context. Reuse that firmware-created
-                // context when present; only bridge engines whose private
-                // current-context path did not establish an HLE context.
                 const auto current_is_eagl = std::any_of(eagl_contexts_.begin(),
                     eagl_contexts_.end(), [&](const auto& entry) {
                         return entry.first.first == process_id &&
@@ -1695,9 +1667,6 @@ void OpenGlesHle::register_eagl(UserlandHleRegistry& registry)
                     call.resume_original_persistently();
                     return;
                 }
-                // The host renderer completes synchronously and the
-                // IOMobileFramebuffer HLE owns swap ordering, so there is
-                // no driver transaction token to forward.
                 call.set_return(0U);
             });
     };
@@ -1800,9 +1769,6 @@ void OpenGlesHle::register_eagl(UserlandHleRegistry& registry)
                 call.set_return(0U);
                 return;
             }
-            // Guest texture row zero is the GL lower edge while host render
-            // targets use top-left row order. A normal EAGL render reverses
-            // target Y; invertedRender asks the driver for the opposite.
             const auto requires_vertical_flip = !inverted_render;
             const auto error = resources_.import_surface_texture(call.memory(),
                 texture, *surface_store_, *identifier, requires_vertical_flip);
@@ -1890,7 +1856,6 @@ void OpenGlesHle::register_egl(UserlandHleRegistry& registry)
                     if (const auto actual =
                             egl_config_attribute(config, *attribute)) {
                         if (*requested == egl_dont_care) {
-                            // EGL_DONT_CARE leaves this attribute unfiltered.
                         } else if (*attribute == egl_config_id) {
                             matches_config &= *actual == *requested;
                         } else if (*attribute == egl_surface_type ||
@@ -3469,9 +3434,6 @@ void OpenGlesHle::register_gles(UserlandHleRegistry& registry)
             destination = &context->unpack.row_bytes;
             break;
         case gles_abi::unpack_client_storage_apple:
-            // Decoding client formats into host ARGB requires conversion, so
-            // retain the extension's copy/decode fallback rather than an alias
-            // to guest memory. The hint does not alter pixel layout.
             context->unpack_client_storage = value != 0U;
             return;
         default:
@@ -4015,9 +3977,6 @@ void OpenGlesHle::register_gles(UserlandHleRegistry& registry)
 
 void OpenGlesHle::unsupported(UserlandHleCall& call)
 {
-    // Most GLES 1.1 state setters are safe to defer until the renderer consumes
-    // them. The public prefix hook is still essential: it prevents any call
-    // from falling through into the PowerVR command-stream implementation.
     if (unsupported_trace_count_ < maximum_unsupported_traces) {
         call.output().write(
             "[opengles] deferred symbol=" + std::string { call.symbol() } +
@@ -4027,4 +3986,4 @@ void OpenGlesHle::unsupported(UserlandHleCall& call)
     call.set_return(0);
 }
 
-} // namespace shade
+}

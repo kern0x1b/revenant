@@ -23,7 +23,6 @@ namespace {
     {
         if (!panel.valid())
             throw std::runtime_error { "invalid boot panel geometry" };
-        // Firmware logos are small. Bound allocations even for corrupt assets.
         if (png.width == 0 || png.height == 0 || png.width > 4096 ||
             png.height > 4096)
             throw std::runtime_error {
@@ -65,7 +64,7 @@ namespace {
         return pixels;
     }
 
-} // namespace
+}
 
 std::vector<std::uint32_t> BootLogo::load(
     const std::filesystem::path& path, DisplayGeometry panel)
@@ -85,4 +84,4 @@ std::vector<std::uint32_t> BootLogo::placeholder(DisplayGeometry panel)
     return render(image.value, panel);
 }
 
-} // namespace shade
+}

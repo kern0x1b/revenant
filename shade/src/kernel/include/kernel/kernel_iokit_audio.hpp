@@ -36,8 +36,6 @@ namespace kernel_iokit::audio {
 
     [[nodiscard]] bool matches_service(std::span<const std::byte> matching);
 
-    // The caller holds KernelSharedState::mach_mutex. IOAudio2 publishes one
-    // service per physical endpoint, so matching returns the complete catalog.
     [[nodiscard]] std::vector<std::uint32_t> ensure_services_locked(
         KernelSharedState& state);
 
@@ -48,11 +46,8 @@ namespace kernel_iokit::audio {
         std::uint32_t receive_size, std::uint32_t connection_object,
         std::uint32_t local_port);
 
-    // Explicit IOServiceClose still has the owning AddressSpace available, so
-    // it can release the mapping immediately. Process teardown destroys the
-    // whole AddressSpace and only needs to discard the shared-state metadata.
     void close_connection(AddressSpace& memory, KernelSharedState& state,
         std::uint32_t connection_object);
 
-} // namespace kernel_iokit::audio
-} // namespace shade
+}
+}

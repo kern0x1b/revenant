@@ -55,7 +55,7 @@ namespace {
             std::move(bytes) };
     }
 
-} // namespace
+}
 
 bool matches_service(
     std::span<const std::byte> matching, const KernelSharedState& state)
@@ -98,4 +98,4 @@ std::uint32_t ensure_service_locked(KernelSharedState& state)
     return object;
 }
 
-} // namespace shade::kernel_iokit::environment
+}

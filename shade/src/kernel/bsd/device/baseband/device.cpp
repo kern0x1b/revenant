@@ -53,7 +53,7 @@ namespace {
         return numeric_suffix(candidate).value_or(0U);
     }
 
-} // namespace
+}
 
 std::shared_ptr<OpenDescription> State::open_description(
     std::string_view candidate, std::uint32_t process_id)
@@ -355,8 +355,6 @@ std::uint32_t State::register_mux_channel(
         }
         if (anonymous_mux_channel_capacity_ != 0 &&
             mux_channels_.size() >= anonymous_mux_channel_capacity_) {
-            // Keep the finite logical-channel table bounded; otherwise an
-            // offline CommCenter retry loop could grow this map indefinitely.
             return 0;
         }
         if (requested_unit && *requested_unit != 0U) {
@@ -558,9 +556,6 @@ std::size_t State::write_channel(
         }
         return bytes.size();
     }
-    // Logical DLCI endpoints are real bounded endpoints, but Offline has no
-    // modem peer. Their successful writes terminate at this null sink and do
-    // not share the fixed TTY's capture history.
     if (channel_number != 0U)
         return bytes.size();
     if (transmit_sink_) {
@@ -572,9 +567,6 @@ std::size_t State::write_channel(
     }
     if (!transmit_capture_enabled_)
         return bytes.size();
-    // Retain only the newest diagnostic bytes. Device write semantics remain
-    // synchronous and successful, while the in-memory inspection path cannot
-    // grow with an offline CommCenter retry loop.
     if (bytes.size() >= transmit_capture_capacity) {
         transmitted_.assign(bytes.end() - static_cast<std::ptrdiff_t>(
                                               transmit_capture_capacity),
@@ -607,9 +599,6 @@ bool State::sink_failed_channel(std::uint32_t channel_number) const
 void State::flush_channel(std::uint32_t channel_number, std::uint32_t what)
 {
     const std::lock_guard lock { mutex_ };
-    // Darwin's TIOCFLUSH treats zero as both FREAD and FWRITE. The offline
-    // endpoint has no asynchronous transmit queue; only its receive side can
-    // contain bytes that need to be discarded here.
     if (what == 0 || (what & 0x1U) != 0) {
         channels_[channel_number].receive_queue.clear();
         channels_[channel_number].scheduled_receive_queue.clear();
@@ -698,4 +687,4 @@ bool is_path(std::string_view candidate)
            is_mux_path(candidate);
 }
 
-} // namespace shade::bsd::baseband_device
+}

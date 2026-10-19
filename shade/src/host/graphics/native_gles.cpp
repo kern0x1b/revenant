@@ -19,10 +19,8 @@ void register_native_gles_renderer()
 #if defined(SHADE_HAS_VULKAN)
     configure_gles_accelerated_factory(create_vulkan_gles_renderer);
 #else
-    // Without Vulkan there is no accelerated factory: the software renderer
-    // is then the one a boot gets.
     configure_gles_accelerated_factory(nullptr);
 #endif
 }
 
-} // namespace shade
+}

@@ -79,8 +79,6 @@ extension List where SelectionValue == Never {
     }
 }
 
-// An outline group's rows for a table are its leaves' rows: a node with children is a section, and the
-// row content of a node is the content of the leaf it stands for. The row value is the leaf's own.
 extension OutlineGroup: TableRowContent where Leaf: TableRowContent {
     public typealias TableRowValue = Leaf.TableRowValue
     public typealias TableRowBody = Never

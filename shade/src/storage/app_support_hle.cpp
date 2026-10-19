@@ -28,7 +28,7 @@ namespace {
         "_CPSqliteConnectionRollback",
     };
 
-} // namespace
+}
 
 void register_app_support_hle(UserlandHleRegistry& registry)
 {
@@ -36,11 +36,6 @@ void register_app_support_hle(UserlandHleRegistry& registry)
         registry.register_function(std::string { app_support_image },
             std::string { operation }, [](UserlandHleCall& call) {
                 if (call.argument(0) == 0) {
-                    // Calendar's alarm-engine boot path can legitimately have
-                    // no readable database connection on a freshly extracted
-                    // firmware filesystem. The original AppSupport routine
-                    // dereferences it unconditionally; report SQLITE_ERROR so
-                    // the framework treats the calendar as empty instead.
                     call.set_return(sqlite_error);
                 } else {
                     call.resume_original();
@@ -49,4 +44,4 @@ void register_app_support_hle(UserlandHleRegistry& registry)
     }
 }
 
-} // namespace shade
+}

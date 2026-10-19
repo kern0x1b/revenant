@@ -930,8 +930,8 @@ void smoke(const std::vector<std::string>& args, Output& output)
         MemoryPermission::Read | MemoryPermission::Write |
             MemoryPermission::Execute);
     std::array<std::byte, 8> code { };
-    append_word(code, 0, 0xe2800001U); // add r0, r0, #1
-    append_word(code, 4, 0xef000080U); // svc #0x80 (Darwin syscall gate)
+    append_word(code, 0, 0xe2800001U);
+    append_word(code, 4, 0xef000080U);
     memory.copy_in(code_address, code);
 
     Dynarmic::ExclusiveMonitor shared_exclusive_monitor { core_count };
@@ -945,7 +945,7 @@ void smoke(const std::vector<std::string>& args, Output& output)
         cluster.cpu(index).registers()[0] =
             static_cast<std::uint32_t>(index * 100);
         cluster.cpu(index).registers()[15] = code_address;
-        cluster.cpu(index).set_cpsr(0x10); // ARM user mode, ARM state
+        cluster.cpu(index).set_cpsr(0x10);
     }
     const auto results = cluster.run_parallel(16);
 
@@ -999,10 +999,10 @@ void benchmark(const std::vector<std::string>& args, Output& output)
         throw std::runtime_error { "ARM benchmark code mapping failed" };
     }
     std::array<std::byte, 16> code { };
-    append_word(code, 0, 0xe3a01000U); // mov r1, #0
-    append_word(code, 4, 0xe2811001U); // add r1, r1, #1
-    append_word(code, 8, 0xe2500001U); // subs r0, r0, #1
-    append_word(code, 12, 0x1afffffcU); // bne 0x1004
+    append_word(code, 0, 0xe3a01000U);
+    append_word(code, 4, 0xe2811001U);
+    append_word(code, 8, 0xe2500001U);
+    append_word(code, 12, 0x1afffffcU);
     if (!memory.copy_in(code_address, code)) {
         throw std::runtime_error { "ARM benchmark code upload failed" };
     }
@@ -1137,16 +1137,13 @@ void boot(const std::vector<std::string>& args, Output& output)
     }
     options.baseband_input = option(args, "--baseband-input");
     options.baseband_output = option(args, "--baseband-output");
-    // Tracing every syscall, mach message and IOKit request costs more than
-    // the guest work it describes, so a run traces only what a verdict reads
-    // unless it is asked for the whole trace.
     options.quiet_output = !flag(args, "--verbose");
     DesktopHost host;
     EmulatorSession session { std::move(options), host, output };
     session.run();
 }
 
-} // namespace
+}
 
 int main(int argc, char** argv)
 {

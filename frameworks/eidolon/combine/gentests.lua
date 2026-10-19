@@ -1,14 +1,6 @@
--- gentests.lua: the XCTest runner of OpenCombine's tests, from the symbol graph the test module emits.
---
---     xmake l gentests.lua symbols.json main.swift
---
--- Every test method of a class that (through its superclasses) is an XCTestCase is run by name. An async test is not
--- run: it is written as a comment, because the runner cannot await it.
-
 import("core.base.json")
 local text = import("lib.text", {rootdir = path.join(os.scriptdir(), ".."), anonymous = true})
 
--- A dict of the Python: a key keeps the position it was first given, and its value is the last one given.
 local function keyed(list, key_of)
     local order, values = {}, {}
     for _, item in ipairs(list) do
@@ -21,7 +13,6 @@ local function keyed(list, key_of)
     return order, values
 end
 
--- sorted(items, key=...) of Python: stable, so equal keys keep the order they came in.
 local function stable_sort(items, key_of)
     local indexed = {}
     for i, item in ipairs(items) do
@@ -58,7 +49,6 @@ function main(...)
         return s["identifier"]["precise"]
     end)
 
-    -- parent: the superclass of each class; members: the symbols each container holds, in the order the graph has them
     local parent, members = {}, {}
     for _, r in ipairs(graph["relationships"]) do
         if r["kind"] == "inheritsFrom" then
@@ -69,7 +59,6 @@ function main(...)
         end
     end
 
-    -- while c in parent: c = parent[c]; if c is XCTestCase: True
     local function is_case(c)
         while parent[c] ~= nil do
             c = parent[c]

@@ -36,4 +36,4 @@ private:
     std::array<float, 16> values_ { };
 };
 
-} // namespace shade
+}

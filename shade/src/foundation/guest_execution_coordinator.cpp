@@ -140,4 +140,4 @@ void GuestExecutionCoordinator::worker_loop()
     }
 }
 
-} // namespace shade
+}

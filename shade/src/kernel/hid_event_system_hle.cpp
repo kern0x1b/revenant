@@ -29,9 +29,6 @@ HidEventSystemHle::HidEventSystemHle(UserlandHleRegistry& registry)
                     .has_value();
             call.resume_original_persistently([this, consumer](
                                                   UserlandHleCall& completed) {
-                // Opening the event system establishes the hardware event
-                // consumer even when its callback is installed later.
-                // Native dispatch owns callback and client routing.
                 if (!state_ || completed.argument(0) == 0U ||
                     !state_->user_interface_geometry.valid())
                     return;
@@ -107,4 +104,4 @@ bool HidEventSystemHle::prepare_pending_event(
     return delivering_;
 }
 
-} // namespace shade
+}

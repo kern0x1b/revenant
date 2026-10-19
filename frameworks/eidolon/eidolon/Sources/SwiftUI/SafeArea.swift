@@ -1,8 +1,6 @@
 import UIKit
 import CoreGraphics
 
-// iOS 6 draws one thing over the content: the status bar. That is the whole safe area here, so a view
-// that ignores the safe area extends under the bar and one that does not is pushed below it.
 func statusBarHeight() -> CGFloat {
     UIScreen.main.scale > 1 ? 40 : 20
 }
@@ -44,7 +42,6 @@ final class ContainerFrameNode: LayoutNode {
     }
     override func mountContents() { inner.mount() }
 
-    // The container is whatever laid this view out: its parent's size, which is what the frame is relative to.
     private var container: CGSize {
         guard let host = uiView.superview, host.bounds.size.width > 0 else { return CGSize(width: 320, height: 480) }
         return host.bounds.size

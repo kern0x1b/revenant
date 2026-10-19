@@ -62,10 +62,6 @@ struct WifiSnapshot {
     std::optional<WifiIpv4Configuration> ipv4;
 };
 
-// User-visible 802.11 state. It intentionally models radio/link and IP
-// configuration, not Broadcom registers or an IO80211 hardware data path.
-// BSD sockets continue through HostNetwork while SystemConfiguration observes
-// this state through en0 and XNU kernel events.
 class WifiState {
 public:
     WifiState();
@@ -94,4 +90,4 @@ private:
     std::optional<WifiIpv4Configuration> ipv4_;
 };
 
-} // namespace shade
+}

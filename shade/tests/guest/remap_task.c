@@ -22,7 +22,6 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
-// fork is marked unavailable by the SDK headers of later releases; the device's libSystem has it.
 extern pid_t child_fork(void) __asm__("_fork");
 
 static int failures;
@@ -48,8 +47,6 @@ static int receive_word(int fd, uint32_t *word)
     return read(fd, word, sizeof *word) == (ssize_t)sizeof *word;
 }
 
-// The child: for each address it is sent it answers the two words it finds there, then waits to be told
-// to write a word and answers it was done.
 static void child_main(int commands, int answers)
 {
     uint32_t address;

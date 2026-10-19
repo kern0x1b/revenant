@@ -16,7 +16,6 @@
 
 namespace shade::darwin::mig_wire {
 
-// Darwin 8 uses the 32-bit natural-aligned Mach message ABI on ARMv6.
 inline constexpr std::uint32_t message_header_size = 24;
 inline constexpr std::uint32_t header_bits_offset = 0;
 inline constexpr std::uint32_t header_size_offset = 4;
@@ -186,4 +185,4 @@ static_assert(ool_descriptor_metadata(true) == 0x01000101U);
 static_assert(
     ool_ports_descriptor_metadata(disposition_move_send, true) == 0x02110101U);
 
-} // namespace shade::darwin::mig_wire
+}

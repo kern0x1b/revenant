@@ -21,7 +21,7 @@ import Foundation
         reported.insert(api)
         reasons[api] = reason
         let line = "[SwiftUI] \(api) ignored on iOS 6: \(reason)\n"
-        fputs(line, stderr)   // not FileHandle: that raises when an app has no stderr, as one started by SpringBoard has not
+        fputs(line, stderr)
         NSLog("%@", "[SwiftUI] \(api) ignored on iOS 6: \(reason)")
         writeReport()
     }

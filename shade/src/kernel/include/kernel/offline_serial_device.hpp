@@ -19,9 +19,6 @@
 
 namespace shade::bsd::offline_serial_device {
 
-// A controller may be absent while its firmware-defined serial node remains
-// discoverable. The descriptor implements ordinary TTY setup and a minimal
-// H4 transport that rejects complete HCI commands with Hardware Failure.
 inline constexpr std::string_view descriptor_kind { "offline-serial" };
 inline constexpr std::string_view directory_name { "cu.bluetooth" };
 inline constexpr unsigned device_minor = 4;
@@ -49,4 +46,4 @@ private:
 
 [[nodiscard]] bool is_path(std::string_view candidate);
 
-} // namespace shade::bsd::offline_serial_device
+}

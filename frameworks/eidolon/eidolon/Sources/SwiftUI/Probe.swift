@@ -69,8 +69,6 @@ import CoreImage
 
     public var gestureCount: Int { gestureNodes.count }
 
-    // The animations of shapes and effects are driven by a display link; a test drives them with a clock of its own.
-    // The fallback that finds a view's fields by Mirror, checked against the runtime's own reflection on the same value.
     public static func useMirrorReflection(_ on: Bool) {
 #if !REV_NO_FIELD_REFLECTION
         FieldReflection.forceMirror = on
@@ -92,7 +90,6 @@ import CoreImage
 #endif
     }
 
-    // What the table's delegate answers for a row's swipe, as the backports would ask it.
     public func swipeConfiguration(row: Int, leading: Bool) -> AnyObject? {
         var table: UITableView?
         func walk(_ v: UIView) { if table == nil, let t = v as? UITableView { table = t }; v.subviews.forEach(walk) }
@@ -104,7 +101,6 @@ import CoreImage
         return delegate.perform(selector, with: table, with: IndexPath(row: row, section: 0) as NSIndexPath)?.takeUnretainedValue()
     }
 
-    // Where the hand-over of swipe actions stands, for a phone: are the classes there, and do they answer the factory selectors.
     public static func swipeBridgeState() -> String {
         let action = NSClassFromString("UIContextualAction") as? NSObject.Type
         let configuration = NSClassFromString("UISwipeActionsConfiguration") as? NSObject.Type
@@ -124,7 +120,6 @@ import CoreImage
             + "makeAction=\(action?.responds(to: makeAction) ?? false) makeConfiguration=\(configuration?.responds(to: makeConfiguration) ?? false)"
     }
 
-    // The recognisers on every table in a window, for a phone: does the swipe facade of the backports show among them?
     public static func tableRecognizers(in root: UIView) -> String {
         var found: [String] = []
         func walk(_ v: UIView) {
@@ -149,7 +144,6 @@ import CoreImage
 
     public static var runningAnimations: Int { ValueAnimator.active.count }
 
-    // What the recognisers would deliver, so a test can drive a gesture without a finger.
     public func send(_ event: GestureEvent, toGesture index: Int = 0) {
         let nodes = gestureNodes
         guard index < nodes.count else { return }
@@ -256,23 +250,15 @@ import CoreImage
         return list.rows[index].traits.badge
     }
 
-    // What stands between a row and the row below it: the table's own hairline, or the line the row draws over it - and
-    // what colour that line is.
     public func rowSeparator(_ index: Int) -> (rowLine: Bool, coversTheTables: Bool, colour: UIColor?) {
         guard let list = listNode, let table = list.uiView as? UITableView, index < list.rows.count else { return (false, false, nil) }
         let row = list.rows[index]
         _ = table.dataSource!.tableView(table, cellForRowAt: IndexPath(row: index, section: 0))
         guard let cell = row.cell, let line = row.separatorLine, line.superview === cell else { return (false, false, nil) }
-        // what is behind the line, read from the cell itself rather than from the row's traits: a check that asks the same
-        // expression the implementation uses proves nothing
         let behind = cell.backgroundColor ?? table.backgroundColor
         return (true, line.backgroundColor?.isEqual(behind) ?? false, line.backgroundColor)
     }
 
-    // The size a text is drawn at under a size category, as the screen works it out: what a font modifier and a category
-    // between them add up to. The headless tests cannot draw text, so this is where the size itself is read.
-    // What the screen drew of a filtered view: the pixel at a point of the picture the filter produced. The headless tests
-    // cannot draw text but they can read a picture, so this is where a colour filter is checked.
     public func filteredPicture(_ index: Int = 0) -> UIImage? {
         var pictures: [UIImage] = []
         func walk(_ v: UIView) {
@@ -295,14 +281,11 @@ import CoreImage
         return (Int(bytes[0]), Int(bytes[1]), Int(bytes[2]), Int(bytes[3]))
     }
 
-    // What stands under a point of the screen, for a picture that lies over the content: the touches must still reach it.
     public func hitViewName(at point: CGPoint) -> String? {
         let hit = host.view.hitTest(point, with: nil)
         return hit.map { "\(type(of: $0))" }
     }
 
-    // Which of the two spellings of a Core Image context this release answers: Swift gives +[CIContext
-    // contextWithOptions:] and -[CIContext initWithOptions:] the same name, and only one of them is in iOS 6's Core Image.
     public static func coreImageContextSpellings() -> String {
         let classFactory = (CIContext.self as AnyObject).responds(to: NSSelectorFromString("contextWithOptions:"))
         let instanceInit = CIContext.instancesRespond(to: NSSelectorFromString("initWithOptions:"))
@@ -310,9 +293,6 @@ import CoreImage
         return "class factory \(classFactory), initWithOptions \(instanceInit), init \(plainInit)"
     }
 
-    // Which of the Core Image filters these modifiers are built on this release has.
-    // What each render of a filtered view was given and what came out of it, for a device where the picture has to be
-    // looked at rather than only measured.
     public static nonisolated(unsafe) var tracesFilterRenders = false
     public static nonisolated(unsafe) var filterRenders = 0
     static func tracedFilterRender(_ line: String) {
@@ -326,39 +306,30 @@ import CoreImage
         return wanted.filter { CIFilter(name: $0) != nil }
     }
 
-    // The colour a row's cell is painted in, as the table itself would answer for it.
     public func rowCellColour(_ index: Int) -> UIColor? {
         guard let list = listNode, let table = list.uiView as? UITableView, index < list.rows.count else { return nil }
         let cell = table.dataSource!.tableView(table, cellForRowAt: IndexPath(row: index, section: 0))
         return cell.backgroundColor ?? table.backgroundColor
     }
 
-    // Which of these classes this release has, and which of these selectors one of its classes answers: the reason a
-    // modifier is declared absent has to be a measurement, so a test can name what it measured and the answer stays pinned.
     public static func releaseClasses(_ names: [String]) -> [String] { names.filter { NSClassFromString($0) != nil } }
     public static func releaseAnswers(_ selectors: [String], on className: String) -> [String] {
         guard let cls = NSClassFromString(className) as? NSObject.Type else { return [] }
         return selectors.filter { cls.instancesRespond(to: NSSelectorFromString($0)) }
     }
 
-    // The menu a long press put up, and what each of its items does: the release's own action sheet, read by title.
     public static var shownMenu: [String] { ContextMenuKeeper.shown }
     public static func pressMenuItem(_ index: Int) {
         let actions = ContextMenuKeeper.shared.delegate.actions
         if index >= 0 && index < actions.count { actions[index]() }
     }
 
-    // What a blocking .submitScope does to the return key of a field of several lines. The editor itself cannot be
-    // built in the headless process - a UITextView sets a font, and a font traps it - so the question is put to the
-    // delegate's own decision, and the scope a screen sets is read from the environment a view of that screen sees.
-    // What a payload is copied as, as the copy does it: the pasteboard of a session that has none is not the question.
     public static func copiedText(_ payload: [String]) -> String { pasteboardText(payload) }
 
     public static func returnKeyBlocked(_ text: String, blocking: Bool) -> Bool {
         TextEditorDelegate.blocked(text, blocking: blocking)
     }
 
-    // What the share sheet of the release would be given for a payload: its items, and what they are.
     public static func sharedItems<T>(_ payload: [T]) -> [String] {
         activityItems(payload).map { item in
             if let url = item as? URL { return url.absoluteString }
@@ -367,9 +338,6 @@ import CoreImage
         }
     }
 
-    // The background of a screen this one presented, which is what .presentationBackground paints it in. The screen is
-    // the one the engine put up, read from its own node: a sheet presented with no window to present it in is not the
-    // host's presentedViewController, and the engine knows of it either way.
     public var presentedBackground: UIColor? {
         var found: SheetNode?
         func look(_ n: Node) {
@@ -380,9 +348,6 @@ import CoreImage
         return found?.presented?.view?.backgroundColor
     }
 
-    // Whether CoreAnimation of this release lays a compositing filter over a layer as it draws. The layer is red and the
-    // background behind it black, so a filter that mixes the two changes the pixel and a filter that is not applied leaves
-    // it red: the answer is the picture and not the setting.
     public static func compositingFilterPaints(_ name: String) -> String {
         guard let filter = CIFilter(name: name) else { return "absent" }
         let size = CGSize(width: 4, height: 4)
@@ -409,9 +374,6 @@ import CoreImage
         return "\(name): \(pixel[0]),\(pixel[1]),\(pixel[2])"
     }
 
-    // What a .submitScope set for the views inside it: the environment key is internal state, an app has no business
-    // reading it, and a text editor cannot be built in the headless process at all (a UITextView sets a font, and a font
-    // traps it), so the node the scope made is what a test asks.
     public static func submitScopeSet<V: View>(_ view: V, width: CGFloat = 60, height: CGFloat = 60) -> Bool {
         let probe = _Probe(view, width: width, height: height)
         var found: Bool?
@@ -423,8 +385,6 @@ import CoreImage
         return found ?? false
     }
 
-    // The label the engine drew for a view that carries an attributed string: where the attributes of a SwiftUI text are
-    // observed, on the string the screen actually drew.
     public func drawnLabel() -> UILabel? {
         var found: UILabel?
         func walk(_ v: UIView) {
@@ -435,8 +395,6 @@ import CoreImage
         return found
     }
 
-    /// The value under a key of the string the screen drew, for the key an attribute's name is (nil when this release
-    /// has no such key, which is the answer for the attributes it cannot carry).
     public func drawnAttribute(_ name: String) -> Any? {
         guard let key = AttributeScopes.SwiftUIAttributes.key(of: name), let text = drawnLabel()?.attributedText else { return nil }
         return (text.attributes(at: 0, effectiveRange: nil) as NSDictionary)[key] as Any
@@ -477,10 +435,6 @@ import CoreImage
         var lines: [String] = []
         func walk(_ v: UIView, _ depth: Int) {
             var f = v.frame
-            // The wheel of a picker is a table of a hundred thousand rows, and UIKit scrolls it to the revolution nearest to the
-            // clock (the same date puts a row 12 rows further down when it is read at another hour, and a month wheel does the
-            // same with the month), so a row is printed where it is in the window the wheel shows, not at its offset in the table,
-            // and the rows of a wheel are listed from the bottom of the window up (see below), not in the order they were made in.
             if let table = v.superview as? UITableView, NSStringFromClass(type(of: v)) == "UIPickerTableViewWrapperCell" {
                 f.origin.y -= table.contentOffset.y
             }
@@ -500,7 +454,6 @@ import CoreImage
             lines.append(String(repeating: "  ", count: depth) + "\(type(of: v)) (\(Int(f.origin.x)),\(Int(f.origin.y)),\(Int(f.size.width)),\(Int(f.size.height)))\(extra)")
             var subviews = v.subviews
             if NSStringFromClass(type(of: v)) == "UIPickerTableView" {
-                // the order the rows were made in is the history of the scrolling: the rows go from the bottom of the window up, the rest as it was
                 let rows = subviews.filter { NSStringFromClass(type(of: $0)) == "UIPickerTableViewWrapperCell" }
                 subviews = rows.sorted { $0.frame.origin.y > $1.frame.origin.y } + subviews.filter { !rows.contains($0) }
             }

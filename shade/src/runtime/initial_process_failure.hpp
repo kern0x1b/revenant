@@ -12,8 +12,6 @@
 
 namespace shade::runtime_detail {
 
-// The first process dying of a fatal stop or a signal. Each kind has its own
-// message, and the run fails with it, so the boot exits non-zero.
 struct InitialProcessFailure {
     enum class Kind : std::uint8_t {
         UndefinedInstruction,
@@ -25,8 +23,8 @@ struct InitialProcessFailure {
     };
     Kind kind { };
     std::uint32_t pid { };
-    std::uint32_t pc { };      // the instruction that stopped the process
-    std::uint32_t address { }; // the address an abort touched, or the signal
+    std::uint32_t pc { };
+    std::uint32_t address { };
 };
 
 [[nodiscard]] inline std::string initial_process_failure_message(
@@ -61,4 +59,4 @@ struct InitialProcessFailure {
     return message.str();
 }
 
-} // namespace shade::runtime_detail
+}

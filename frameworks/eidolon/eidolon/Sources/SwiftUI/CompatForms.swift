@@ -22,7 +22,6 @@ extension Alignment {
 
 extension Font {
     public func monospaced() -> Font { Font(uiFont: UIFont(name: "Courier", size: uiFont.pointSize) ?? uiFont) }
-    // digits of the system font of iOS 6 already have one width
     public func monospacedDigit() -> Font { self }
     public func lowercaseSmallCaps() -> Font {
         _Unsupported.note("Font.smallCaps", "the fonts of iOS 6 have no small-capital variants; the text keeps its case")

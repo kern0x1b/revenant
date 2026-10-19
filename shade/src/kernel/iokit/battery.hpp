@@ -21,8 +21,7 @@ namespace kernel_iokit::battery {
 
     [[nodiscard]] bool matches_service(std::span<const std::byte> matching);
 
-    // The caller holds KernelSharedState::mach_mutex.
     [[nodiscard]] std::uint32_t ensure_service_locked(KernelSharedState& state);
 
-} // namespace kernel_iokit::battery
-} // namespace shade
+}
+}

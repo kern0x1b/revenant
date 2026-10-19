@@ -59,43 +59,27 @@ struct IOAudio2ControlDescription {
     std::uint32_t element;
     std::uint32_t value;
     bool read_only;
-    // A level control's range map, one segment per dB step size.
     std::span<const IOAudio2ControlRangeDescription> ranges;
     std::span<const IOAudio2SelectorItemDescription> items;
-    // The device properties a change of this selector also changes; the
-    // driver publishes them so the HAL knows which listeners to notify.
     std::span<const std::uint32_t> property_selectors { };
-    // A selector whose value is the array of selected items; it starts with
-    // none selected.
     bool multi_selector { };
 };
 
 struct IOAudio2DeviceDescription {
-    // Absent for a driver that publishes no name (HighlandPark's).
     std::optional<std::string_view> name;
     std::string_view manufacturer;
     std::string_view uid;
-    // AudioHardware transport four-character code (for example, 'bltn' for a
-    // device integrated into the platform).  It is part of the firmware-facing
-    // registry contract, independent of the host audio backend.  Zero leaves
-    // the property out, as the drivers of an iPhone 4S's built-in devices do.
     std::uint32_t transport_type;
     std::uint32_t io_buffer_frame_size;
     std::span<const IOAudio2StreamDescription> streams;
     std::span<const IOAudio2ControlDescription> controls;
-    // Frames the hardware adds on either side of the I/O cycle, as the
-    // driver publishes them.
     std::uint32_t input_latency { };
     std::uint32_t output_latency { };
     std::uint32_t input_safety_offset { };
     std::uint32_t output_safety_offset { };
-    // The clock the device runs from, published only by drivers that do.
     std::optional<std::uint32_t> clock_domain { };
 };
 
-// A device catalog models hardware endpoints. Firmware-facing ABI details
-// remain in IOKitAudioAbi so device differences never leak into MIG
-// dispatch or host audio backends.
 class IOAudio2DeviceCatalog final {
 public:
     [[nodiscard]] static std::span<const IOAudio2DeviceDescription> devices(
@@ -105,4 +89,4 @@ public:
         AudioHardwareProfile profile = AudioHardwareProfile::CodecBaseband);
 };
 
-} // namespace shade::kernel_iokit::audio
+}

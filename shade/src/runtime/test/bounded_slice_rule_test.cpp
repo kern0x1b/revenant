@@ -36,14 +36,9 @@ void expect(bool condition, const std::string& what)
 }
 
 constexpr std::uint32_t code_address = 0x1000U;
-// A ring of ARM "b" instructions: each one branches to the next, and the last
-// branches back to the first. The ring never halts, so a bounded slice runs to
-// its tick budget.
 constexpr std::uint32_t ring_length = 16U;
 constexpr std::uint64_t tick_budget = 100'000U;
 
-// One guest processor running the branch ring. No firmware, kernel or SVC
-// handler is involved.
 struct Machine {
     AddressSpace memory;
     Dynarmic::ExclusiveMonitor monitor { 1U };
@@ -55,7 +50,6 @@ struct Machine {
             MemoryPermission::Read | MemoryPermission::Write |
                 MemoryPermission::Execute);
         for (std::uint32_t index = 0; index < ring_length; ++index) {
-            // The offset is relative to pc + 8 and counts words.
             const auto next = index + 1U == ring_length ? 0U : index + 1U;
             const auto offset = static_cast<std::int32_t>(next) -
                                 static_cast<std::int32_t>(index) - 2;
@@ -75,12 +69,11 @@ GuestExecutionRequest slice(Cpu& cpu, bool cooperative,
         false, cooperative };
 }
 
-} // namespace
+}
 
 int main()
 {
     {
-        // A bounded run uses the whole budget and never yields to the host.
         Machine machine;
         auto request = slice(machine.cpu, false, std::chrono::nanoseconds { });
         GuestExecutionCoordinator::execute(request);
@@ -94,7 +87,6 @@ int main()
             "bounded slice performs no host yield checks");
     }
     {
-        // Two bounded runs of the same guest state agree on every counter.
         Machine first;
         Machine second;
         auto first_request =
@@ -110,9 +102,6 @@ int main()
             "two bounded runs stop at the same pc");
     }
     {
-        // Control: a cooperative slice consults the host clock, which is what
-        // the bounded run above must never do. The same guest code, with no
-        // host time left, yields to the host.
         Machine machine;
         auto request = slice(machine.cpu, true, std::chrono::nanoseconds { });
         GuestExecutionCoordinator::execute(request);

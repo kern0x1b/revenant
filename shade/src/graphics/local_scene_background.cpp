@@ -22,11 +22,8 @@ namespace {
     constexpr float bounds_tolerance = 0.05F;
 
     struct AxisAlignedQuad {
-        // left, top, right, bottom in host pixel coordinates.
         std::array<float, 4> position_bounds { };
         std::array<float, 4> texture_bounds { };
-        // texture x = [0] * position x + [1], texture y = [2] * position y +
-        // [3]. Texture coordinates are expressed in source pixels.
         std::array<float, 4> texture_from_position { };
     };
 
@@ -196,7 +193,7 @@ namespace {
             { scale_x, offset_x, scale_y, offset_y } };
     }
 
-} // namespace
+}
 
 void LocalSceneBackground::reset() { states_.clear(); }
 
@@ -214,9 +211,6 @@ void LocalSceneBackground::observe(const std::shared_ptr<HostSurface>& target,
     if (!target || !state.render_target_premultiplied || state.blend_enabled)
         return;
 
-    // An unblended write starts a new local base. Keep no older provenance if
-    // the replacement cannot be represented by the conservative direct-layer
-    // model below.
     states_.erase(target->key());
     if (state.scissor_enabled || !std::ranges::all_of(state.color_mask,
                                      [](bool enabled) { return enabled; })) {
@@ -305,9 +299,6 @@ bool LocalSceneBackground::restore(const std::shared_ptr<HostSurface>& scene,
     const auto destination_descriptor = destination->descriptor();
     const auto source_descriptor = retained->second.source->descriptor();
     const auto& local_bounds = retained->second.target_bounds;
-    // Scanout restoration only handles full-width scene slices. Requiring the
-    // retained source layer to span the local target's full width prevents a
-    // cropped primary scene from being mistaken for a complete background.
     if (local_bounds[0] > bounds_tolerance ||
         local_bounds[2] <
             static_cast<float>(scene_descriptor.width) - bounds_tolerance) {
@@ -371,4 +362,4 @@ bool LocalSceneBackground::restore(const std::shared_ptr<HostSurface>& scene,
     return true;
 }
 
-} // namespace shade
+}

@@ -74,7 +74,7 @@ namespace {
         return true;
     }
 
-} // namespace
+}
 
 std::optional<std::vector<ArgumentWirePosition>> compute_wire_layout(
     std::span<const ArgumentInfo> arguments, WireLayoutSide side,
@@ -234,4 +234,4 @@ std::optional<RoutineInfo> lookup_routine(std::uint32_t identifier)
         system_configuration::subsystem_name, system_configuration::routines);
 }
 
-} // namespace shade::xnu::mig
+}

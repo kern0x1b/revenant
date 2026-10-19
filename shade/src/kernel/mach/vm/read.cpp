@@ -24,9 +24,6 @@
 namespace shade {
 namespace {
 
-    // XNU's mach_vm subsystem omits vm_region from the leading routine
-    // sequence, so mach_vm_read is 4804 rather than vm_map's 3805. ARM32 keeps
-    // the same 32-bit request and OOL reply contract used by vm_read.
     constexpr std::uint32_t mach_vm_read_identifier = 4804U;
     constexpr std::uint32_t vm_read_request_size =
         xnu::mig::vm_map::vm_read_arguments[2].request_offset +
@@ -35,7 +32,7 @@ namespace {
         xnu::mig::vm_map::vm_read_arguments[3].reply_count_offset +
         darwin::mig_wire::word_size;
 
-} // namespace
+}
 
 bool CompatibilityKernel::dispatch_mach_vm_read_message(
     Cpu& cpu, const MachMessageRequest& request)
@@ -112,8 +109,8 @@ bool CompatibilityKernel::dispatch_mach_vm_read_message(
         copied_address,
         *size,
         darwin::mig_wire::ool_descriptor_metadata(false),
-        0U, // NDR migration/character/float representation word
-        1U, // NDR little-endian integer representation word
+        0U,
+        1U,
         *size,
     };
     if (!write_words(memory_, request.address, reply)) {
@@ -132,4 +129,4 @@ bool CompatibilityKernel::dispatch_mach_vm_read_message(
     return true;
 }
 
-} // namespace shade
+}

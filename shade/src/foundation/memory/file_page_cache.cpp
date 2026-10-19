@@ -459,10 +459,6 @@ namespace {
         result.available_bytes =
             proc_meminfo_bytes("MemAvailable:").value_or(result.total_bytes);
 
-        // Use the cgroup limit when the emulator runs in a memory-constrained
-        // container. The /proc value describes the host and can otherwise make
-        // the snapshot cache claim far more memory than this process can
-        // actually use.
         const auto cgroup_limit =
             read_uint64_file("/sys/fs/cgroup/memory.max")
                 .value_or(read_uint64_file(
@@ -622,11 +618,6 @@ namespace {
         const std::scoped_lock lock { global_identity_mutex };
         erase_global_identity_locked(normalized_path);
         global_identity_flights.erase(normalized_path);
-        // Generation-registry keys intentionally retain the lexical namespace
-        // path, while the shared identity cache is keyed by the resolved file
-        // object. Invalidate both views for an existing path.  If the path is a
-        // symlink, this resolves the current target without changing the
-        // namespace key.
         const auto object_path = stable_path(normalized_path);
         if (object_path == normalized_path)
             return;
@@ -656,7 +647,7 @@ namespace {
         return 0;
     }
 
-} // namespace
+}
 
 ImmutableFileView::ImmutableFileView(int file_descriptor, void* mapping,
     std::uint64_t byte_size, std::filesystem::path backing_path,
@@ -817,10 +808,6 @@ SharedFileIdentityResult shared_file_identity(const std::filesystem::path& path,
         return { content_identity, false };
 
     if (compute) {
-        // Full-file I/O deliberately stays outside global_identity_mutex. The
-        // second locked section only publishes if this flight still owns the
-        // same generation/revision key; replacement invalidation can discard
-        // it.
         const auto computed_identity = sha256_file(descriptor);
         {
             const std::scoped_lock lock { global_identity_mutex };
@@ -871,9 +858,6 @@ SharedFileIdentityResult shared_file_identity(const std::filesystem::path& path,
 SharedFileIdentityResult shared_file_identity(const std::filesystem::path& path,
     std::optional<std::uint64_t> generation_revision)
 {
-    // Identity queries never write. A writable descriptor would emit a
-    // write-close notification even without a write, causing the file watcher
-    // to rehash and potentially invalidate an unchanged backing generation.
     const auto descriptor = ::open(path.c_str(), O_RDONLY | O_CLOEXEC);
     if (descriptor < 0)
         return { };
@@ -1106,9 +1090,6 @@ std::shared_ptr<const std::vector<std::byte>> share_immutable_snapshot(
             immutable_snapshot_catalog_scan_bytes > limits.catalog_scan_bytes ||
             immutable_snapshots.size() > limits.entries) &&
         !immutable_snapshot_lru.empty()) {
-        // Catalog scans are disposable metadata work. Prefer evicting them
-        // while the combined cache is full so runtime mappings retain their hot
-        // bytes.
         auto eviction_position = immutable_snapshot_lru.begin();
         if (const auto catalog_scan = std::find_if(
                 immutable_snapshot_lru.begin(), immutable_snapshot_lru.end(),
@@ -1284,10 +1265,6 @@ void GuestFileGenerationRegistry::enqueue_mutation_locked(
         return;
     }
     if (pending_mutations_.size() >= maximum_pending_mutations) {
-        // Once an event is evicted, retaining the remaining path-level queue is
-        // no longer a complete description of the tree.  Publish one structural
-        // marker instead; the catalog consumer will rescan its bounded root and
-        // recover every lost create, rename, and unlink deterministically.
         pending_mutations_.clear();
         pending_mutations_.push_back(GuestFileMutationEvent {
             next_mutation_sequence_++, std::filesystem::path { "/" },
@@ -1322,10 +1299,6 @@ GuestFileGenerationSnapshot GuestFileGenerationRegistry::record_descriptor(
     std::optional<ContentIdentity> content_identity)
 {
     const auto key = normalize_path(path);
-    // The descriptor may have outlived an atomic replacement or unlink.  A
-    // descriptor opened by the watcher is current only if the pathname still
-    // resolves to the same vnode when publication reaches this point; this
-    // check prevents detached Guest writeback from resurrecting an old path.
     const auto current_path_generation = read_generation(path);
     std::lock_guard lock { mutex_ };
     const auto current_entry = entries_.find(key);
@@ -1355,10 +1328,6 @@ GuestFileGenerationSnapshot GuestFileGenerationRegistry::record_descriptor(
             result = entry.snapshot;
     }
     if (!matched_key) {
-        // Descriptor identity and namespace identity are separate. A descriptor
-        // may refer to an inode already known through another alias, but the
-        // event's pathname still needs its own generation record. The
-        // current-path check above has already ruled out a detached old vnode.
         auto& entry = ensure_entry_locked(key)->second;
         entry.snapshot = GuestFileGenerationSnapshot { next_revision_++,
             generation, mutation, std::move(content_identity) };
@@ -1934,11 +1903,6 @@ std::optional<std::shared_ptr<GuestFileBacking>> FilePageCache::open_mapping(
         close_descriptor();
         return std::nullopt;
     }
-    // An immutable view already carries the exact generation and content
-    // identity. Use its content-addressed backing as the page-cache key and
-    // avoid rebuilding the guest namespace path for every shared-cache range.
-    // Ordinary mappings retain the namespace/canonical split below because
-    // their path can be replaced while a descriptor remains alive.
     const auto normalized_path =
         immutable_file_view ? immutable_file_view->backing_path().string()
         : reusable          ? reusable->cache_path
@@ -1985,9 +1949,6 @@ std::optional<std::shared_ptr<GuestFileBacking>> FilePageCache::open_mapping(
         }
     }
     if (!content_identity && expected_content_identity && immutable_snapshot) {
-        // MachOImage has already read and generation-validated this immutable
-        // snapshot. Reuse its identity directly so mapping the parsed image
-        // does not hash the same bytes a second time.
         content_identity = *expected_content_identity;
         seed_shared_file_identity(normalized_path, generation,
             *content_identity, generation_revision);
@@ -2030,13 +1991,6 @@ std::optional<std::shared_ptr<GuestFileBacking>> FilePageCache::open_mapping(
         return std::nullopt;
     }
 
-    // Every immutable executable mapping used to retain its own descriptor.
-    // Firmware fork fan-out maps the same binaries into many AddressSpaces and
-    // can therefore exhaust a normal host RLIMIT_NOFILE even though only a
-    // modest number of distinct vnodes are in use. Share the descriptor for an
-    // unchanged canonical path/generation; replacement installs a new record
-    // while existing mappings keep the old vnode alive through their shared
-    // state.
     std::shared_ptr<GuestFileIoState> io_state;
     if (reusable) {
         io_state = reusable->io_state;
@@ -2235,4 +2189,4 @@ FilePageCacheStats FilePageCache::stats() const
     return stats_;
 }
 
-} // namespace shade
+}

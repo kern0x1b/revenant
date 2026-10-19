@@ -21,8 +21,6 @@ struct _StyledPart: View, WrappedView {
     var body: some View { AnyView(wrapped) }
 }
 
-// GroupBox
-
 public protocol GroupBoxStyle {
     associatedtype Body: View
     typealias Configuration = GroupBoxStyleConfiguration
@@ -58,8 +56,6 @@ extension GroupBox where Label == GroupBoxStyleConfiguration.Label, Content == G
     }
 }
 
-// LabeledContent
-
 public protocol LabeledContentStyle {
     associatedtype Body: View
     typealias Configuration = LabeledContentStyleConfiguration
@@ -94,8 +90,6 @@ extension LabeledContent where Label == LabeledContentStyleConfiguration.Label, 
     }
 }
 
-// ControlGroup
-
 public protocol ControlGroupStyle {
     associatedtype Body: View
     typealias Configuration = ControlGroupStyleConfiguration
@@ -119,8 +113,6 @@ public struct NavigationControlGroupStyle: ControlGroupStyle {
     public func makeBody(configuration: Configuration) -> some View { HStack(spacing: 0) { configuration.content } }
 }
 
-/// A group drawn as a palette of its controls: on iOS 6 a control group is a segmented control, and a
-/// palette is that with the segments' own backgrounds rather than the system's.
 public struct PaletteControlGroupStyle: ControlGroupStyle {
     public init() {}
     public func makeBody(configuration: Configuration) -> some View {
@@ -164,8 +156,6 @@ extension ControlGroup where Content == ControlGroupStyleConfiguration.Content {
         self.init(content: { configuration.content })
     }
 }
-
-// Gauge
 
 public protocol GaugeStyle {
     associatedtype Body: View
@@ -242,9 +232,6 @@ extension GaugeStyle where Self == AccessoryCircularGaugeStyle {
     public static var accessoryCircularCapacity: AccessoryCircularGaugeStyle { AccessoryCircularGaugeStyle() }
 }
 
-// The two names Apple puts on GaugeStyle itself (arm64-apple-ios.swiftinterface:3237 for the circular
-// one): the port aliases the styles above, and the statics have to be on the type it names, or they are
-// not there at all.
 extension GaugeStyle where Self == AccessoryCircularGaugeStyle {
     public static var circular: AccessoryCircularGaugeStyle { AccessoryCircularGaugeStyle() }
 }
@@ -252,8 +239,6 @@ extension GaugeStyle where Self == AccessoryCircularGaugeStyle {
 extension GaugeStyle where Self == DefaultGaugeStyle {
     public static var linear: DefaultGaugeStyle { DefaultGaugeStyle() }
 }
-
-// Form
 
 public protocol FormStyle {
     associatedtype Body: View

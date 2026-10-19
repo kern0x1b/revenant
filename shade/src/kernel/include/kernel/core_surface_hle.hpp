@@ -29,9 +29,6 @@ class SurfaceStore;
 class UserlandHleCall;
 class UserlandHleRegistry;
 
-// User-space replacement for the private CoreSurface/IOSurface transports.
-// Public CFRuntime wrappers remain firmware code; both private symbol-family
-// profiles project their backing storage through one shared SurfaceStore.
 class CoreSurfaceHle {
 public:
     using CreateSurfacePortHandler =
@@ -53,10 +50,6 @@ public:
     void set_scene_coordinator(std::shared_ptr<SceneCoordinator> scenes);
     void set_surface_port_handlers(
         CreateSurfacePortHandler create, LookupSurfacePortHandler lookup);
-    // The display user client exposes its front buffer as a reserved
-    // CoreSurface ID. Unlike ordinary buffers, firmware draws into it while
-    // it remains locked and the display controller scans it out at vsync.
-    // Return true only when a newly visible frame was submitted.
     bool refresh_default_scanout(
         AddressSpace& memory, std::uint32_t owner_process_id = 0);
 
@@ -76,9 +69,6 @@ private:
             surface_transport::Kind::CoreSurfaceClientBuffer
         };
         bool owns_memory { };
-        // Lookup imports a shared backing into this process' AddressSpace.
-        // Keep the exact page range so the final client release can drop the
-        // mapping without touching wrapped guest memory.
         std::uint32_t imported_mapping_base { };
         std::uint32_t imported_mapping_size { };
         std::uint64_t imported_mapping_lease_token { };
@@ -137,9 +127,6 @@ private:
     std::map<std::pair<std::uint32_t, surface_transport::Kind>, std::uint32_t>
         clients_by_id_;
     std::map<std::uint32_t, std::vector<std::uint32_t>> free_client_buffers_;
-    // Imported page ranges come from the HLE data arena, whose general-purpose
-    // allocator is intentionally monotonic. Reuse only ranges that this class
-    // allocated, unmapped, and observed through final client release.
     std::map<std::uint32_t, std::uint32_t> free_imported_mappings_;
     std::size_t unsupported_trace_count_ { };
     std::optional<std::uint64_t> last_scanout_generation_;
@@ -153,4 +140,4 @@ private:
     LookupSurfacePortHandler lookup_surface_port_;
 };
 
-} // namespace shade
+}

@@ -4,8 +4,6 @@ public protocol TabViewStyle {}
 public struct DefaultTabViewStyle: TabViewStyle { public init() {} }
 
 public struct PageTabViewStyle: TabViewStyle {
-    /// Apple's is a struct with three constants, not an enum, so `.page(indexDisplayMode: .never)` reads
-    /// the same either way but the declared shape is this one.
     public struct IndexDisplayMode: Hashable {
         let mode: Int
         init(_ mode: Int) { self.mode = mode }
@@ -171,36 +169,23 @@ extension View {
     }
 }
 
-/// What a tab bar's content is: content that yields tabs, all of one tab value, with a body that is
-/// more of the same. Apple's is the same shape, with a primary associated type and the constraint that
-/// a body carries the tab value its content does. Two of Apple's members are left out on purpose:
-/// `_identifiedView` is internal to Apple and nothing dispatches it here, and `_TabContentBodyAdaptor`
-/// exists only to view that internal requirement, so a declared one would be a shell.
 public protocol TabContent {
     associatedtype TabValue: Hashable
     associatedtype Body: TabContent where Body.TabValue == Self.TabValue
     var body: Self.Body { get }
 }
 
-/// The tabs a content yields, in order. A list of them is itself tab content of the same value, which is
-/// what makes the body recursive without a cast.
-/// One tab: the view that stands for it and the value that names it, or nothing when the content did
-/// not name one. A tab with no value is matched the way an untagged page already is here, by position.
 public struct _TabContentRow {
     public let value: AnyHashable?
     public let view: any View
     init(value: AnyHashable?, view: any View) { self.value = value; self.view = view }
 }
 
-/// The tabs a content yields, as the builder hands them to a TabView. A `_TabContentList` names each of
-/// its rows; anything else that is tab content is one tab it names itself, and a plain view is a tab with
-/// no name, which is what a TabView over plain views has always been.
 func tabContentRows(_ content: any TabContent) -> [_TabContentRow] {
     if let list = content as? any TabContentNaming { return list.namedRows }
     return [_TabContentRow(value: nil, view: AnyView(EmptyView()))]
 }
 
-/// One tab content wrapped so a list of tabs can be held together whatever their types are.
 public struct AnyTabContent<TabValue: Hashable>: TabContent {
     public typealias TabValue = TabValue
     public typealias Body = AnyTabContent<TabValue>
@@ -210,7 +195,6 @@ public struct AnyTabContent<TabValue: Hashable>: TabContent {
     var namedRows: [_TabContentRow] { tabContentRows(content) }
 }
 
-/// The label a tab shows when the app does not write one: the release's own tab bar item.
 public struct DefaultTabLabel: View, PrimitiveView {
     public typealias Body = Never
     public var body: Never { neverBody(Self.self) }
@@ -220,8 +204,6 @@ public struct DefaultTabLabel: View, PrimitiveView {
     func makeNode(_ env: EnvironmentValues) -> Node { EmptyView().makeNode(env) }
 }
 
-/// The tabs, in order, each with the view it stands for and the value that names it. This is what
-/// `ForEach` of tab content is: one tab per element, named by the element.
 struct _TabContentList<Element: Hashable>: TabContent, TabContentNaming {
     public typealias TabValue = AnyHashable
     public typealias Body = _TabContentList<Element>
@@ -248,13 +230,9 @@ public struct TabContentBuilder<TabValue: Hashable> {
     public static func buildExpression<C: TabContent>(_ content: C) -> [_TabContentRow] where C.TabValue == TabValue {
         tabContentRows(content)
     }
-    /// A TabView's selection may be an optional of what its tabs carry, and then the tabs are of the
-    /// wrapped value: `TabView(selection: $mailbox) { ForEach(mailboxes) { ... } }` selects on a `Mailbox`.
     @_disfavoredOverload
     public static func buildExpression<C: TabContent, V: Hashable>(_ content: C) -> [_TabContentRow]
         where C.TabValue == V, TabValue == V? { tabContentRows(content) }
-    /// The builder of a TabView with no selection carries no tab value of its own, so it takes tab content of
-    /// any value -- which is what `TabView { ForEach(mailboxes) { ... } }` is: the tabs name themselves.
     @_disfavoredOverload
     public static func buildExpression<C: TabContent>(_ content: C) -> [_TabContentRow] where TabValue == Never {
         tabContentRows(content)
@@ -270,28 +248,21 @@ public struct TabContentBuilder<TabValue: Hashable> {
     public static func buildLimitedAvailability(_ content: [_TabContentRow]) -> [_TabContentRow] { content }
 }
 
-/// The tabs a content yields, as the views a TabView shows: each one tagged with the value that names
-/// it, which is what `TabViewNode`'s own walk already reads to match a selection to a page.
 public struct _TabContentRows: View, PrimitiveView, GroupView {
     public typealias Body = Never
     public var body: Never { neverBody(Self.self) }
     let rows: [_TabContentRow]
     init(rows: [_TabContentRow]) { self.rows = rows }
-    // each tab is tagged with the value that names it, which is what TabViewNode's own walk already reads
     var childViews: [any View] { rows.map { $0.view } }
 
 }
 
 extension TabView {
-    /// A binding whose own value is an optional is left to the initialiser below, which builds over what it
-    /// selects on rather than over the optional.
     @_disfavoredOverload
     public init(selection: Binding<SelectionValue>, @TabContentBuilder<SelectionValue> content: () -> [_TabContentRow])
         where Content == _TabContentRows {
         self.selection = selection; self.content = _TabContentRows(rows: content())
     }
-    /// The same, when the selection is an optional: the builder is over what it selects on, so the tabs are
-    /// of that value and the binding may hold nothing.
     public init(selection: Binding<SelectionValue?>, @TabContentBuilder<SelectionValue> content: () -> [_TabContentRow])
         where Content == _TabContentRows {
         var last = selection.wrappedValue
@@ -306,9 +277,6 @@ extension TabView {
     }
 }
 
-// A ForEach over tab content: the collection is the tabs, and each element's content is the tab for
-// that element. This is the initialiser an app writes, and the one Apple's ForEach has for tab values;
-// the view initialisers above take a View, which tab content is not.
 extension ForEach where Content: TabContent {
     public init<Data: RandomAccessCollection>(_ data: Data, id: KeyPath<Data.Element, ID>,
                                               content: @escaping (Data.Element) -> Content) {
@@ -321,8 +289,6 @@ extension ForEach where Content: TabContent {
     }
 }
 
-/// A ForEach of tab content is the tabs, one per element, named by the element -- which is what a
-/// TabView reads, and what makes a tab's value the element's own.
 extension ForEach: TabContent, TabContentNaming where Content: TabContent {
     public typealias TabValue = Content.TabValue
     public typealias Body = AnyTabContent<Content.TabValue>
@@ -339,23 +305,16 @@ extension ForEach: TabContent, TabContentNaming where Content: TabContent {
     }
 }
 
-// The two rows Apple's frozen interface prints for an anchor's hashing. `==` and `hash(into:)` are
-// declared in TextModifiers.swift, where the anchor's own equality lives; `hashValue` follows them here so
-// the three are declared rather than derived, as they are for a frozen type.
 extension Anchor where Value: Hashable {
     public var hashValue: Int { var hasher = Hasher(); hash(into: &hasher); return hasher.finalize() }
 }
 
-/// What a tab is for, which is what a bar that adapts between a sidebar and a bar reads.
 public struct TabRole: Hashable {
     let name: String
     public static var search: TabRole { TabRole(name: "search") }
     public static var `default`: TabRole { TabRole(name: "default") }
 }
 
-/// A tab, with the value that names it written in the tab itself. A tab bar on iOS 6 shows a bar and has
-/// no sidebar, so a role is carried and the bar has nowhere to sort by it: the tab's value is what a
-/// selection matches, and the title and image are what the bar shows, which is the release's own bar item.
 public struct Tab<Value, Content, Label> {
     let title: String
     let image: String?
@@ -397,7 +356,6 @@ extension Tab where Label == DefaultTabLabel, Value: Hashable, Content: View {
                 @ViewBuilder content: () -> Content) {
         self.init(title: titleKey.text, image: systemImage, role: nil, value: value, content: content(), label: nil)
     }
-    /// The value is optional, so `Tab("Inbox", value: .inbox)` fills in the tab's own value type.
     public init<S: StringProtocol, T: Hashable>(_ title: S, image: String? = nil, value: T,
                                                 @ViewBuilder content: () -> Content)
         where Value == T? {
@@ -421,7 +379,6 @@ extension Tab where Label == DefaultTabLabel, Value: Hashable, Content: View {
 }
 
 extension Tab where Value: Hashable, Content: View {
-    /// The label is a view the app writes, as Apple's is when it is not the default one.
     public init(_ title: String, image: String? = nil, value: Value, @ViewBuilder label: () -> Label,
                 @ViewBuilder content: () -> Content) {
         self.init(title: title, image: image, role: nil, value: value, content: content(), label: label())

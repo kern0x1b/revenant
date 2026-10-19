@@ -36,4 +36,4 @@ constexpr bool has_permission(MemoryPermission value, MemoryPermission required)
            static_cast<unsigned>(required);
 }
 
-} // namespace shade
+}

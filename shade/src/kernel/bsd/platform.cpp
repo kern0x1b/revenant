@@ -26,10 +26,6 @@ namespace {
     std::array<std::byte, host_uuid_size> platform_uuid(
         const DeviceModel& profile)
     {
-        // A platform UUID identifies the emulated device, not the host that is
-        // currently running it. Derive it from stable hardware-profile fields
-        // so moving a data volume or changing the host graphics backend cannot
-        // alter the guest-visible identity.
         std::string identity { "Shade-platform-uuid-v1" };
         for (const auto field :
             { profile.identity.product_type, profile.identity.board_config,
@@ -46,7 +42,7 @@ namespace {
         return uuid;
     }
 
-} // namespace
+}
 
 void CompatibilityKernel::dispatch_bsd_platform(
     Cpu& cpu, std::uint32_t number)
@@ -58,10 +54,6 @@ void CompatibilityKernel::dispatch_bsd_platform(
     }
 
     const auto& registers = cpu.registers();
-    // XNU copies in the caller's ARM32 timespec before asking IOKit for the
-    // already-available platform UUID. Preserve that pointer-fault contract;
-    // the timeout value itself does not delay a UUID that is immediately
-    // available from the emulated platform expert.
     if (!memory_.read_bytes(registers[1], arm32_timespec_size)) {
         bsd_error(cpu, bsd_support::bad_address);
         return;
@@ -78,4 +70,4 @@ void CompatibilityKernel::dispatch_bsd_platform(
     bsd_success(cpu, 0);
 }
 
-} // namespace shade
+}

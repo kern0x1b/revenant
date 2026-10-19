@@ -40,7 +40,6 @@ namespace {
                 data.size() };
         if (const auto end = xml.find('\0'); end != std::string_view::npos)
             xml = xml.substr(0, end);
-        // IOCFSerialize returns an XML value without a plist document wrapper.
         const auto document = std::string { "<plist version=\"1.0\">" } +
                               std::string { xml } + "</plist>";
         plist_t parsed = nullptr;
@@ -123,4 +122,4 @@ std::uint32_t BacklightControl::set_properties(
 #endif
 }
 
-} // namespace shade::kernel_iokit
+}

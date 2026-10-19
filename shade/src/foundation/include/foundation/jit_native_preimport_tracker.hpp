@@ -15,19 +15,11 @@
 
 namespace shade {
 
-// The tracker is a bounded diagnostic correlation window, not a copy of the
-// complete profile. Eight 32-entry queue windows cover the largest expected
-// sequence of imports that can remain unused while keeping the hot-pool
-// accounting independent of profile history size.
 inline constexpr std::size_t jit_native_preimport_tracker_capacity = 256U;
 inline constexpr std::size_t jit_native_preimport_tracker_hash_capacity = 512U;
 inline constexpr std::size_t jit_demand_seen_tracker_capacity = 8'192U;
 inline constexpr std::size_t jit_demand_seen_tracker_hash_capacity = 16'384U;
 
-// This tracker correlates profile-originated native imports with later
-// execution. It is deliberately bounded and host-only. Tombstones preserve
-// open-addressing probe chains after consume or range invalidation; a zero
-// slot remains the only end-of-chain marker.
 class JitNativePreimportTracker {
 public:
     JitNativePreimportTracker() noexcept { clear(); }
@@ -72,8 +64,6 @@ public:
                 ready_count_.fetch_add(1U, std::memory_order_release);
                 return;
             }
-            // compare_exchange_weak may fail spuriously without changing
-            // expected. Retry the same slot instead of skipping a chain link.
             if (expected != expected_value)
                 return;
         }
@@ -106,10 +96,6 @@ public:
                             1U, std::memory_order_release);
                         return;
                     }
-                    // Retry a spurious weak-CAS failure at this slot. A
-                    // genuine change is impossible while demand_lock_ is
-                    // held, but is handled conservatively by continuing the
-                    // probe if one is observed.
                     if (known != 0U)
                         break;
                 }
@@ -173,7 +159,6 @@ public:
                         decrement_ready();
                         return true;
                     }
-                    // Do not advance on a spurious weak-CAS failure.
                     if (expected != known)
                         return false;
                 }
@@ -237,8 +222,6 @@ public:
                         0U, std::memory_order_release);
                     break;
                 }
-                // A weak CAS can fail spuriously. Retry the same location;
-                // only a genuine value change ends this deletion attempt.
                 if (expected != known)
                     break;
             }
@@ -323,4 +306,4 @@ private:
 inline constexpr std::size_t jit_native_preimport_tracker_object_bytes =
     sizeof(JitNativePreimportTracker);
 
-} // namespace shade
+}

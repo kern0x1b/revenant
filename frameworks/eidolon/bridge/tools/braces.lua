@@ -1,10 +1,3 @@
--- braces.lua: the depth a Swift file ends at, counted from stdin with the braces lib/braces.lua reads as Swift.
---
---     xmake l braces.lua < file.swift
---
--- A brace in a string or a comment moves no depth; a block comment or a multi-line literal carries its state to the
--- next line. ours-check.lua has the controls for each of those.
-
 local braces = import("lib.braces", {rootdir = path.join(os.scriptdir(), "..", ".."), anonymous = true})
 
 function main(...)

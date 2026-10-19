@@ -23,9 +23,6 @@
 namespace shade {
 namespace {
 
-    // Darwin also publishes this routine in the mach_vm subsystem. ARM32 keeps
-    // the same scalar request/reply layout while the subsystem-relative ID
-    // moves.
     constexpr std::uint32_t mach_vm_purgable_control_identifier = 4818U;
     constexpr std::uint32_t request_size = 44U;
     constexpr std::uint32_t reply_size = 40U;
@@ -35,13 +32,6 @@ namespace {
     constexpr std::uint32_t vm_purgable_get_state = 1U;
     constexpr std::uint32_t vm_purgable_nonvolatile = 0U;
     constexpr std::uint32_t vm_purgable_state_mask = 3U;
-    // A state word also carries a volatile group (bits 8-10), a behavior
-    // (bit 6), an ordering (bit 5), an obsolete order flag (bit 4) and debug
-    // flags (bits 12-13); osfmk/mach/vm_purgable.h in xnu-2050.48.11 names
-    // them VM_PURGABLE_ALL_MASKS together with the state. vm_map_purgable_control
-    // refuses a set request with any other bit, and the object keeps only the
-    // state: the queue a volatile object waits in is not part of what a state
-    // query or the previous state answers.
     constexpr std::uint32_t vm_purgable_all_masks =
         vm_purgable_state_mask | (1U << 4U) | (1U << 5U) | (1U << 6U) |
         (7U << 8U) | (3U << 12U);
@@ -51,7 +41,7 @@ namespace {
         return address & ~(AddressSpace::page_size - 1U);
     }
 
-} // namespace
+}
 
 bool CompatibilityKernel::dispatch_mach_vm_purgable_message(
     Cpu& cpu, const MachMessageRequest& request)
@@ -144,4 +134,4 @@ bool CompatibilityKernel::dispatch_mach_vm_purgable_message(
     return true;
 }
 
-} // namespace shade
+}

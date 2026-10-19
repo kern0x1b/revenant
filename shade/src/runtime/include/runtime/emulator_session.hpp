@@ -16,8 +16,6 @@ namespace shade {
 class Output;
 class SessionHost;
 
-// Owns one boot, including guest scheduling, lifecycle, time and shutdown.
-// Options and host services are independent of command-line argument syntax.
 class EmulatorSession {
 public:
     EmulatorSession(BootOptions options, SessionHost& host, Output& output)
@@ -38,4 +36,4 @@ private:
     bool started_ { };
 };
 
-} // namespace shade
+}

@@ -50,7 +50,7 @@ namespace {
 
     constexpr std::uint32_t maximum_semaphore_wait_traces = 128;
 
-} // namespace
+}
 
 using namespace mach_support;
 
@@ -83,7 +83,7 @@ std::uint32_t CompatibilityKernel::signal_semaphore_object_locked(
 {
     const auto semaphore = shared_state_->mach_semaphores.find(object);
     if (semaphore == shared_state_->mach_semaphores.end()) {
-        return 4; // KERN_INVALID_ARGUMENT
+        return 4;
     }
     auto& waiters = semaphore->second.waiters;
     if (all) {
@@ -95,7 +95,6 @@ std::uint32_t CompatibilityKernel::signal_semaphore_object_locked(
                 woken_threads->push_back(waiter);
         }
         waiters.clear();
-        // semaphore_signal_all never leaves a prepost behind.
         semaphore->second.count = 0;
     } else if (!waiters.empty()) {
         shared_state_->semaphore_wakeups.insert(waiters.front());
@@ -116,7 +115,7 @@ std::uint32_t CompatibilityKernel::signal_semaphore_locked(std::uint32_t name,
         *shared_state_, process_.pid, name, xnu::ipc::Right::Send);
     return object ? signal_semaphore_object_locked(
                         *object, all, prepost, woken_thread, woken_threads)
-                  : 4U; // KERN_INVALID_ARGUMENT
+                  : 4U;
 }
 
 std::uint32_t CompatibilityKernel::signal_semaphore_thread_locked(
@@ -168,10 +167,6 @@ void CompatibilityKernel::wake_thread_and_maybe_preempt(
         thread_wake_handler_(thread->first, thread->second);
     if (wake_result.preemption_needed && scheduler_preemption_query_ &&
         scheduler_preemption_query_(cpu.processor_id())) {
-        // The wake happened in the active CPU's HLE/SVC dispatch. Request the
-        // same AST boundary used by thread creation and policy changes; the
-        // main loop will complete the target's pending wait before dispatching
-        // it.
         cpu.request_guest_preemption();
     }
 }
@@ -190,10 +185,6 @@ void CompatibilityKernel::wake_threads_and_maybe_preempt(
     }
     if (preemption_needed && scheduler_preemption_query_ &&
         scheduler_preemption_query_(cpu.processor_id())) {
-        // The wake happened in the active CPU's HLE/SVC dispatch. Request the
-        // same AST boundary used by thread creation and policy changes; the
-        // main loop will complete the target's pending wait before dispatching
-        // it.
         cpu.request_guest_preemption();
     }
 }
@@ -265,8 +256,6 @@ void CompatibilityKernel::wait_on_semaphore_object(Cpu& cpu,
                     bsd_result };
             blocked = true;
         }
-        // XNU first establishes/consumes the wait and only then performs the
-        // paired signal, keeping pthread condition-variable handoff atomic.
         if (result == 0 && signal_object) {
             result = signal_semaphore_object_locked(
                 *signal_object, false, true, &woken_thread);
@@ -307,4 +296,4 @@ void CompatibilityKernel::wait_on_semaphore_object(Cpu& cpu,
     cpu.halt(Dynarmic::HaltReason::UserDefined5);
 }
 
-} // namespace shade
+}

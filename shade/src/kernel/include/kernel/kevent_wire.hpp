@@ -20,8 +20,6 @@ struct KeventValue {
     std::array<std::uint64_t, 2> extension { };
 };
 
-// Both syscall formats share knote state and readiness semantics. Only the
-// guest copyin/copyout boundary depends on the event's wire representation.
 class KeventWireFormat {
 public:
     explicit constexpr KeventWireFormat(bool extended)
@@ -86,4 +84,4 @@ private:
     bool extended_;
 };
 
-} // namespace shade
+}

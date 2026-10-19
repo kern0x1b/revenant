@@ -17,9 +17,8 @@ struct VisualEffect {
     var scale = CGSize(width: 1, height: 1)
     var scaleAnchor = UnitPoint.center
     var interaction: Bool?
-    var dimmed = false   // .disabled dims what it covers; .allowsHitTesting does not
+    var dimmed = false
 
-    // an effect that only turns touches on or off, which is all .disabled and .allowsHitTesting say
     var onlyInteraction: Bool {
         opacity == nil && cornerRadius == nil && borderColor == nil && borderWidth == 0 && shadowColor == nil && shadowRadius == 0
             && shadowOffset == .zero && !clips && !hidden && offset == .zero && rotation == 0 && scale == CGSize(width: 1, height: 1)

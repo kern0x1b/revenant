@@ -22,8 +22,6 @@ CallResult Extensions::dispatch(AddressSpace& memory, std::uint32_t pid,
 {
     if (operation != issue && operation != consume && operation != release)
         return CallResult::Unsupported;
-    // The handle-based ABI uses 64-bit slots even in an ARM32 task. The older
-    // string-only extension interface has a different layout and dispatcher.
     const auto count = operation == issue ? 5U : 3U;
     if (argument == 0U || argument > UINT32_MAX - count * 8U + 1U)
         return CallResult::BadAddress;
@@ -114,4 +112,4 @@ void Extensions::exit_process(std::uint32_t pid)
     handles_.erase(pid);
 }
 
-} // namespace shade::bsd::sandbox
+}

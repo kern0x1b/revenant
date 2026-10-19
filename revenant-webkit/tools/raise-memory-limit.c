@@ -14,7 +14,7 @@ static int raiseFor(int32_t pid, uint32_t megabytes)
         setuid(0);
 
     errno = 0;
-    if (memorystatus_control(5 /* set high-water mark */, pid, megabytes, NULL, 0)) {
+    if (memorystatus_control(5 , pid, megabytes, NULL, 0)) {
         fprintf(stderr, "refused for pid %d: errno %d (uid %d euid %d)\n", pid, errno, getuid(), geteuid());
         return 1;
     }

@@ -22,9 +22,6 @@ enum class JitScheduledTarget : std::uint8_t {
     PortableIr,
 };
 
-// A frontend describes simulator runtimes only through stable scheduler facts.
-// No renderer, window, executable path, App or firmware identity enters the
-// core selection algorithm.
 struct JitWorkCandidate {
     std::uint64_t identity { };
     bool exited { };
@@ -65,8 +62,6 @@ struct JitScheduledWork {
 
 inline constexpr std::size_t jit_work_maximum_translation_lanes =
     jit_work_policy_maximum_translation_lanes;
-// One core-owned admission boundary never creates more work than the bounded
-// aggregate translation-lane budget, regardless of candidate count.
 inline constexpr std::size_t jit_work_schedule_maximum_entries =
     jit_work_maximum_translation_lanes;
 
@@ -91,9 +86,6 @@ struct JitWorkScheduleRequest {
     std::size_t maximum_translation_lanes { 1U };
 };
 
-// Cheap facts sampled before the frontend constructs JitWorkCandidate and the
-// full JitWorkObservation. The monotonically changing generation can combine
-// demand-recorder, worker-completion and runtime-lifecycle signals.
 struct JitWorkObservationGateRequest {
     std::chrono::steady_clock::time_point now;
     std::uint64_t work_generation { };
@@ -102,9 +94,6 @@ struct JitWorkObservationGateRequest {
     bool worker_active { };
 };
 
-// Simulator-core selector and admission controller. The frontend performs the
-// returned work through its host resource implementation; it does not choose
-// runtime priority, target fallback, budgets or deadline reserves.
 class JitWorkScheduler {
 public:
     [[nodiscard]] static std::size_t recommended_translation_lanes(
@@ -119,9 +108,6 @@ public:
     }
     [[nodiscard]] JitWorkSchedule schedule(
         const JitWorkScheduleRequest& request) const noexcept;
-    // Coalesce hot-path change notifications into bounded observations. This
-    // is deliberately stateful core policy: clients publish facts but do not
-    // choose polling periods or special-case interactive workloads.
     [[nodiscard]] bool observation_due(
         const JitWorkObservationGateRequest& request) noexcept;
 
@@ -134,4 +120,4 @@ private:
     std::chrono::steady_clock::time_point last_observation_;
 };
 
-} // namespace shade
+}

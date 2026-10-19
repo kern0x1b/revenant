@@ -32,10 +32,6 @@ namespace {
     constexpr std::size_t maximum_bytes = 16U * 1024U * 1024U;
     constexpr std::uint32_t maximum_instructions = 16U * 1024U;
     constexpr std::uint32_t maximum_terminal_depth = 32U;
-    // Dynarmic's x64 allocator has 64 spill slots. Keeping the entire
-    // live-value frontier within that pool guarantees that an adversarial
-    // dependency graph cannot exhaust spills regardless of which host registers
-    // the configuration reserves for fastmem or page-table state.
     constexpr std::size_t maximum_live_values = 64U;
 
     enum class ValueTag : std::uint8_t {
@@ -235,9 +231,6 @@ namespace {
             bool operator()(const Dynarmic::IR::Term::Interpret& value) const
             {
                 const Dynarmic::A32::LocationDescriptor next { value.next };
-                // Both current backends either assert these invariants or do
-                // not emit Interpret terminals at all. Keep malformed portable
-                // IR off Emit().
                 return canonical_a32_location(value.next) &&
                        aligned_a32_location(value.next) &&
                        value.num_instructions == 1U &&
@@ -742,10 +735,6 @@ namespace {
         if (!is_fp_opcode(instruction.opcode))
             return true;
 
-        // Dynarmic's FP control operands are compile-time IR metadata. Several
-        // x64 emitters dereference lookup tables or optional rounding encodings
-        // directly, so a reference here is not merely semantically odd: it is
-        // unsafe input.
         for (std::size_t argument = 0; argument < instruction.arguments.size();
             ++argument) {
             const auto expected =
@@ -1587,7 +1576,7 @@ namespace {
         }
     }
 
-} // namespace
+}
 
 std::optional<std::vector<std::byte>> serialize_dynarmic_ir(
     const Dynarmic::IR::Block& block)
@@ -1717,9 +1706,6 @@ std::optional<Dynarmic::IR::Block> deserialize_dynarmic_ir(
         return std::nullopt;
     }
 
-    // No Dynarmic IR object is touched until every byte and every x64 emitter
-    // precondition above has been checked without assertions. The construction
-    // calls below therefore only receive producer-shaped data.
     Dynarmic::IR::Block block { location };
     std::vector<Dynarmic::IR::Inst*> instructions;
     instructions.reserve(encoded_instructions.size());
@@ -1754,4 +1740,4 @@ bool validate_dynarmic_ir(std::span<const std::byte> bytes)
     return deserialize_dynarmic_ir(bytes).has_value();
 }
 
-} // namespace shade
+}

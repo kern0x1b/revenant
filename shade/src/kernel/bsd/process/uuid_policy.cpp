@@ -21,8 +21,6 @@ std::uint32_t control(AddressSpace& memory, const ProcessContext& caller,
 {
     if (caller.effective_uid != 0U)
         return darwin::error::operation_not_permitted;
-    // No per-executable cellular/flow-divert policy provider is installed.
-    // Clearing the empty table is valid and does not inspect the UUID input.
     if (operation == 0U)
         return 0;
     if (operation != 1U && operation != 2U)
@@ -35,9 +33,8 @@ std::uint32_t control(AddressSpace& memory, const ProcessContext& caller,
     if (std::all_of(uuid->begin(), uuid->end(),
             [](std::byte value) { return value == std::byte { 0 }; }))
         return darwin::error::invalid_argument;
-    // Do not acknowledge installing flags that networking cannot enforce.
     return operation == 1U ? darwin::error::not_supported
                            : darwin::error::no_entry;
 }
 
-} // namespace shade::kernel_bsd::uuid_policy
+}

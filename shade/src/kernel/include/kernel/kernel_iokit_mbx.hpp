@@ -26,9 +26,6 @@ namespace kernel_iokit::mbx {
 
     [[nodiscard]] bool matches_service(std::span<const std::byte> matching);
 
-    // The caller holds KernelSharedState::mach_mutex. The platform expert is
-    // supplied by the registry owner so this hardware module does not need to
-    // duplicate the guest registry hierarchy.
     [[nodiscard]] std::uint32_t ensure_service_locked(
         KernelSharedState& state, std::uint32_t platform_expert_object);
 
@@ -46,11 +43,8 @@ namespace kernel_iokit::mbx {
         std::uint32_t scalar_output_capacity,
         std::uint32_t inband_output_capacity);
 
-    // Explicit IOServiceClose still has the owning AddressSpace available, so
-    // it can release command-transport resources immediately. Process teardown
-    // owns the entire AddressSpace and only discards the shared-state metadata.
     void close_connection(AddressSpace& memory, KernelSharedState& state,
         std::uint32_t connection_object);
 
-} // namespace kernel_iokit::mbx
-} // namespace shade
+}
+}

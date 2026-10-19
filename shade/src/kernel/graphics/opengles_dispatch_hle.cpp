@@ -92,16 +92,14 @@ OpenGlesDispatchHle::OpenGlesDispatchHle(
                 return;
             }
             const auto parameter = call.argument(1);
-            // Driver scheduling/storage hints selected by native EAGL. Host
-            // command submission and surface ownership implement these roles.
             switch (parameter) {
             case 0x38eU:
             case 0x399U:
                 call.set_return(set_surface_parameter(call,
                     found->second.host_context, parameter, call.argument(2)));
                 return;
-            case 701U: // client linked-OS compatibility hint
-            case 927U: // shared ES3 object semantics
+            case 701U:
+            case 927U:
             case 0x3a0U:
             case 0x3a1U:
             case 0x3e3U:
@@ -118,8 +116,6 @@ OpenGlesDispatchHle::OpenGlesDispatchHle(
     registry.register_function(
         engine_image, "_gliGetInteger", [this](UserlandHleCall& call) {
             const auto parameter = call.argument(1);
-            // This query has no context dependency. Let the firmware report
-            // its own table extent, including before a host context exists.
             if (parameter == 0xe0U) {
                 call.resume_original_persistently();
                 return;
@@ -337,19 +333,19 @@ void OpenGlesDispatchHle::choose_pixel_format(UserlandHleCall& call)
             break;
         }
         switch (*attribute) {
-        case 4U: // RGBA
-        case 5U: // double buffer
-        case 51U: // minimum policy
-        case 52U: // maximum policy
-        case 73U: // accelerated
-        case 74U: // closest policy
+        case 4U:
+        case 5U:
+        case 51U:
+        case 52U:
+        case 73U:
+        case 74U:
             break;
-        case 7U: // auxiliary buffers
-        case 8U: // color bits
-        case 11U: // alpha bits
-        case 12U: // depth bits
-        case 13U: // stencil bits
-        case 14U: // accumulation bits
+        case 7U:
+        case 8U:
+        case 11U:
+        case 12U:
+        case 13U:
+        case 14U:
         {
             if (++index >= 50U) {
                 call.set_return(bad_attribute);
@@ -382,8 +378,6 @@ void OpenGlesDispatchHle::choose_pixel_format(UserlandHleCall& call)
         return;
     }
     if (pixel_format_ == 0U) {
-        // GLI's linked format record. EAGL copies this record into its native
-        // sharegroup and forwards the renderer identifier to libGFXShared.
         const std::array<std::uint32_t, 13> format { 0U, host_renderer_id,
             0x500U, 0U, 0U, 0U, 0U, 0U, 0U, 0U, 0U, 0U, 1U };
         pixel_format_ = call.allocate_data(sizeof(format), 4U);
@@ -510,8 +504,6 @@ std::uint32_t OpenGlesDispatchHle::set_surface_parameter(UserlandHleCall& call,
     if (texture == 0U)
         return bad_value;
     if (attach) {
-        // IOSurface image descriptor: ID, target, internal format, width,
-        // height, external format, type, plane and storage flags.
         const auto error = owner_.resources_.import_surface_texture(
             call.memory(), texture, *owner_.surface_store_, words[0], true);
         if (error != gles_abi::no_error)
@@ -528,4 +520,4 @@ std::uint32_t OpenGlesDispatchHle::set_surface_parameter(UserlandHleCall& call,
     return 0U;
 }
 
-} // namespace shade
+}

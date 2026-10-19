@@ -1,14 +1,3 @@
-// remap.c: guest regression test for stale translated code.
-//
-// 1. Images swapped at one address: dlopen A, call it, dlclose, dlopen B -
-//    which dyld places where A was - and call again. The call must run B's
-//    code, never A's translation. Repeated, alternating.
-// 2. Protection churn: threads keep calling a function while another thread
-//    takes execute permission away from its page and gives it back. Calls
-//    between the churn must return the right value; a call while the page is
-//    not executable faults, which the test catches and counts.
-//
-// Prints one line per part and exits with the number of failures.
 #include <dlfcn.h>
 #include <pthread.h>
 #include <setjmp.h>
@@ -35,7 +24,7 @@ static int swap_images(const char *first, const char *second, int rounds)
         }
         value_fn value = (value_fn)dlsym(image, "remap_value");
         int got = 0;
-        for (int call = 0; call < 64; ++call)   // hot enough to be translated
+        for (int call = 0; call < 64; ++call)
             got = value();
         uintptr_t here = (uintptr_t)value & ~(uintptr_t)0xfff;
         if (round == 0) base = here;
@@ -57,7 +46,7 @@ static volatile int stop_callers;
 static volatile int wrong_calls;
 static volatile long calls;
 static volatile long faults;
-static pthread_key_t escape_key;   // no __thread before iOS 8
+static pthread_key_t escape_key;
 
 static void on_fault(int signal)
 {
@@ -90,8 +79,6 @@ static int churn_protection(const char *path, int rounds)
     churned = (value_fn)dlsym(image, "remap_value");
     void *page = (void *)((uintptr_t)churned & ~(uintptr_t)(getpagesize() - 1));
     pthread_key_create(&escape_key, NULL);
-    // The handler leaves with siglongjmp, which on iOS 6 does not restore the
-    // signal mask; SA_NODEFER keeps the next fault deliverable.
     struct sigaction action;
     memset(&action, 0, sizeof action);
     action.sa_handler = on_fault;
@@ -109,7 +96,6 @@ static int churn_protection(const char *path, int rounds)
     }
     stop_callers = 1;
     for (int i = 0; i < 3; ++i) pthread_join(threads[i], NULL);
-    // A device faults every call made while the page is not executable.
     printf("churn: %d rounds, %ld calls, %ld faults, %d wrong, %d mprotect errors\n",
            rounds, calls, faults, wrong_calls, protect_errors);
     return wrong_calls + protect_errors;

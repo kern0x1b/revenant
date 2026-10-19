@@ -35,10 +35,7 @@ struct Descriptor {
     [[nodiscard]] std::uint32_t disposition() const;
 };
 
-// Parses the natural-aligned 32-bit descriptor table used by Darwin 8. An
-// empty vector is a valid simple message; nullopt denotes malformed or unknown
-// complex descriptor data.
 [[nodiscard]] std::optional<std::vector<Descriptor>> parse_descriptors(
     std::span<const std::byte> message);
 
-} // namespace shade::mach_transport
+}

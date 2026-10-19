@@ -60,9 +60,6 @@ namespace {
         std::vector<std::byte> result(size);
         put32(result, 0, interface.family);
         put32(result, 4, interface.unit);
-        // XNU's net_event_data carries the driver base name and unit
-        // separately. Consumers reconstruct the BSD interface name as
-        // "<if_name><if_unit>".
         const auto base_name = event_interface_base_name(interface);
         const auto name_length =
             std::min(base_name.size(), interface_name_size - 1U);
@@ -232,7 +229,7 @@ namespace {
         output.insert(output.end(), record.begin(), record.end());
     }
 
-} // namespace
+}
 
 std::optional<std::vector<std::byte>> apple80211_driver::make_network_record(
     const VirtualAccessPoint* access_point, NetworkRecordLayout layout,
@@ -262,8 +259,6 @@ std::optional<std::vector<std::byte>> apple80211_driver::make_network_record(
     put16(
         result, scan_rssi_offset, static_cast<std::uint16_t>(signal_strength));
     put16(result, scan_beacon_interval_offset, 100);
-    // IEEE 802.11 capability bit 0 is ESS. Privacy (bit 4) is set only for
-    // networks whose association requires a key.
     put16(result, scan_capabilities_offset,
         static_cast<std::uint16_t>(
             1U | (access_point->security == WifiSecurity::Open ? 0U : 0x10U)));
@@ -296,10 +291,6 @@ std::vector<std::byte> make_route_interface_list(
             auto destination = interface.ipv4_broadcast;
             if (!destination &&
                 (interface.flags & interface_flag_loopback) != 0) {
-                // XNU's in_ifinit redirects a loopback in_ifaddr's
-                // ifa_dstaddr to ifa_addr. sysctl_iflist exports that pointer
-                // as RTAX_BRD, which Darwin getifaddrs exposes through the
-                // ifa_broadaddr/ifa_dstaddr union.
                 destination = interface.ipv4_address;
             }
             append_record(
@@ -347,8 +338,6 @@ std::vector<std::byte> make_ipv4_network_event_data(
                                    : class_mask;
         const auto network_mask = class_mask & subnet_mask;
 
-        // XNU's ia_{,sub}net{,mask} fields are guest-host-order u_long
-        // values, unlike the surrounding in_addr fields.
         put32(result, network_offset, address & network_mask);
         put32(result, netmask_offset, network_mask);
         put32(result, subnet_offset, address & subnet_mask);
@@ -425,4 +414,4 @@ std::vector<std::byte> make_kernel_event(std::uint32_t identifier,
     return result;
 }
 
-} // namespace shade::darwin::network
+}

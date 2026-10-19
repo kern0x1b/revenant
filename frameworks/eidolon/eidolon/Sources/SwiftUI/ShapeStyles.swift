@@ -132,10 +132,7 @@ public struct Transaction {
     public var animation: Animation?
     public var disablesAnimations: Bool = false
     public var isContinuous: Bool = false
-    /// Whether an interactive dismissal follows the finger's speed when it ends.
     public var tracksVelocity: Bool = false
-    /// The closures added by `addAnimationCompletion(criteria:_:)`; a copy of the transaction holds the same list, so a
-    /// closure added through one copy is the other's, and one that has run has run for every copy.
     var completionList: CompletionList?
     public init() {}
     public init(animation: Animation?) { self.animation = animation }

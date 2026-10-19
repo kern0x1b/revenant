@@ -49,4 +49,4 @@ LiveButtonScheduler::next_deadline() const
                  };
 }
 
-} // namespace shade
+}

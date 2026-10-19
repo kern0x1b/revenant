@@ -45,8 +45,6 @@ func accessibilityScreenFrame(_ rect: CGRect, in view: UIView) -> CGRect {
     return window.convert(view.convert(rect, to: window), to: nil)
 }
 
-// MARK: accessibilityRepresentation
-
 struct RepresentationModifier: NodeModifier {
     let representation: any View
     func makeModifierNode(_ content: any View, _ env: EnvironmentValues) -> Node { RepresentationNode() }
@@ -68,8 +66,6 @@ final class RepresentationNode: ContainerNode {
         children.first?.place(CGRect(x: 0, y: 0, width: size.width, height: size.height))
     }
 }
-
-// MARK: accessibilityChildren
 
 final class _AccessibilityContainerView: UIView {
     var sources: [UIView] = []
@@ -148,8 +144,6 @@ func accessibleViews(_ roots: [UIView]) -> [UIView] {
     return found
 }
 
-// MARK: accessibilitySortPriority
-
 private nonisolated(unsafe) var sortPriorityKey: UInt8 = 0
 
 extension UIView {
@@ -208,8 +202,6 @@ final class _HostRootView: UIView {
         return ordered.firstIndex { $0 === element as AnyObject } ?? NSNotFound
     }
 }
-
-// MARK: accessibilityFocused
 
 private nonisolated(unsafe) var focusHandlerKey: UInt8 = 0
 

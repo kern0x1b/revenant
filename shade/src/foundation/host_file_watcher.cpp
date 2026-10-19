@@ -115,7 +115,7 @@ namespace {
     };
 #endif
 
-} // namespace
+}
 
 HostFileWatcher::HostFileWatcher(
     std::filesystem::path root, std::size_t maximum_pending)
@@ -130,9 +130,6 @@ HostFileWatcher::HostFileWatcher(
     if (notification_descriptor_ < 0)
         return;
     add_watch(root_);
-    // Cover the high-value mutable roots immediately without walking them.
-    // Descriptor-generation validation remains the correctness fallback until
-    // idle registration reaches their descendants.
     constexpr std::array<std::string_view, 4> mutable_roots { "Applications",
         "private/var", "private/var/mobile/Applications",
         "private/var/staging" };
@@ -297,9 +294,6 @@ void HostFileWatcher::add_watch(const std::filesystem::path& directory)
         queue_dirty_subtree(directory);
         return;
     }
-    // Keep the watched directory as a namespace path. Resolving a symlink here
-    // would make an inotify event for the alias indistinguishable from an event
-    // for its target before the catalog can update both records.
     watches_[watch_descriptor] = normalized;
     watched_directories_.insert(normalized);
 #else
@@ -464,9 +458,6 @@ void HostFileWatcher::handle_event(
 
     const auto is_directory = (event.mask & IN_ISDIR) != 0U;
     if (event.mask & (IN_DELETE_SELF | IN_MOVE_SELF)) {
-        // The watch itself was a directory.  IN_DELETE_SELF/IN_MOVE_SELF has no
-        // name payload, so retain the watched directory as an explicit subtree
-        // removal instead of manufacturing a file mutation for its parent.
         queue_structural_event(
             watched_directory, GuestFileMutationKind::SubtreeRemove);
         remove_watch(event.wd);
@@ -681,9 +672,6 @@ HostFileWatchDrain HostFileWatcher::publish_stable(
                     completion = inspect_path(path, mutation, event_sequence,
                         expected_sample, *registry_pointer);
                 } catch (...) {
-                    // A failed maintenance observation remains pending for a
-                    // later bounded retry; it must never strand the path as
-                    // in-flight.
                 }
                 const std::lock_guard lock { state->mutex };
                 state->completions.push_back(std::move(completion));
@@ -717,4 +705,4 @@ HostFileWatchDrain HostFileWatcher::publish_stable(
     return drain;
 }
 
-} // namespace shade
+}

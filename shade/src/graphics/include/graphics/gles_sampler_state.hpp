@@ -64,4 +64,4 @@ struct GlesSamplerState {
     }
 };
 
-} // namespace shade
+}

@@ -95,7 +95,7 @@ namespace {
         return "unknown";
     }
 
-} // namespace
+}
 
 void CompatibilityKernel::dispatch_bsd_aio(Cpu& cpu, std::uint32_t number)
 {
@@ -126,7 +126,6 @@ void CompatibilityKernel::dispatch_bsd_aio(Cpu& cpu, std::uint32_t number)
         const auto control_block =
             read_aio_control_block(memory_, control_block_address);
         if (!control_block) {
-            // XNU reports an aiocb copyin failure as EAGAIN at queue time.
             bsd_error(cpu, darwin::error::would_block);
             return;
         }
@@ -341,7 +340,6 @@ void CompatibilityKernel::dispatch_bsd_aio(Cpu& cpu, std::uint32_t number)
                 return;
             }
         }
-        // A synchronous backend cannot have a matching request still pending.
         bsd_error(cpu, darwin::error::invalid_argument);
         return;
     }
@@ -352,4 +350,4 @@ void CompatibilityKernel::dispatch_bsd_aio(Cpu& cpu, std::uint32_t number)
     }
 }
 
-} // namespace shade
+}

@@ -18,7 +18,7 @@ namespace {
 
     constexpr std::uint64_t hfs_nanoseconds_per_second = 1'000'000'000ULL;
 
-} // namespace
+}
 
 hfs::Timestamp guest_filesystem_timestamp(const VirtualClock& clock)
 {
@@ -79,4 +79,4 @@ std::string format_payload_prefix(std::span<const std::byte> bytes)
     return result;
 }
 
-} // namespace shade::bsd_support
+}

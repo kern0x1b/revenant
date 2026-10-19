@@ -24,7 +24,7 @@ namespace {
                    ~lanes);
     }
 
-} // namespace
+}
 
 void FixedPointTextureSampler::sample(
     std::span<const std::uint32_t> first_row,
@@ -54,4 +54,4 @@ void FixedPointTextureSampler::sample(
     }
 }
 
-} // namespace shade
+}

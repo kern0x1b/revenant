@@ -54,9 +54,6 @@ void CompatibilityKernel::release_process_mach_rights()
     scene_coordinator_->retire_process(process_.pid);
     presentation_tracker_->retire_process(
         process_.pid, surface_store_->publication_watermark());
-    // A blocked receive/wait is a thread-local continuation, not a surviving
-    // Mach right. Drop it with the task so a later PID/processor reuse cannot
-    // consume a stale message or semaphore wakeup.
     pending_mach_receives_.clear();
     pending_semaphore_waits_.clear();
     pending_psynch_waits_.clear();
@@ -66,15 +63,9 @@ void CompatibilityKernel::release_process_mach_rights()
     std::lock_guard mach_lock { shared_state_->mach_mutex };
     auto entries = shared_state_->mach_namespaces.entries(process_.pid);
 
-    // An application can relinquish its receive right before calling exit, so
-    // explicit scene ownership must be retired before ipc_space teardown tries
-    // to infer anything from the remaining port objects.
     graphics_services_input::release_application_process_locked(
         *shared_state_, process_.pid);
 
-    // Tear down names without receive rights first. Notification endpoints in
-    // this task therefore remain alive long enough to absorb cancellation and
-    // send-once notifications generated while the ipc_space is dismantled.
     const auto receive_type =
         xnu::ipc::type_mask(xnu::ipc::Right::Receive);
     std::stable_sort(entries.begin(), entries.end(),
@@ -87,10 +78,6 @@ void CompatibilityKernel::release_process_mach_rights()
         static_cast<void>(mach_support::destroy_port_name_locked(
             *shared_state_, process_.pid, entry.name));
     }
-    // In XNU a task/thread kernel port is terminated when its task dies. This
-    // converts foreign Send rights to DeadName before the PID indexes go away;
-    // simply erasing the indexes would leave apparently live capabilities in
-    // other ipc_spaces.
     mach_support::terminate_exited_task_ports_locked(
         *shared_state_, process_.pid);
     mach_support::terminate_exited_semaphores_locked(
@@ -152,10 +139,6 @@ void CompatibilityKernel::exit_process(
     process_.exit_status = status;
     process_.termination_signal = signal;
     std::uint32_t all_image_info_address { };
-    // Publish the dead identity before tearing down its ports. Mach/graphics
-    // observers share this record and must stop routing work to the PID while
-    // ipc_space termination is in progress. The shared record remains as a
-    // lightweight zombie until its parent consumes it with wait_child().
     {
         std::lock_guard mach_lock { shared_state_->mach_mutex };
         if (auto record = shared_state_->processes.find(process_.pid);
@@ -176,8 +159,6 @@ void CompatibilityKernel::exit_process(
         shared_state_->mark_foreground_transition_cancelled_for_process_locked(
             process_.pid);
     }
-    // The dyld image list lives in this process's memory, which goes away with
-    // it, so the block profile reads it here.
     if (all_image_info_address != 0U &&
         performance_counters().block_profile_enabled()) {
         performance_counters().block_profile().record_images(
@@ -191,10 +172,6 @@ void CompatibilityKernel::exit_process(
     apple80211_hle_.reset(process_.pid);
     release_process_descriptors();
     process_.thread_disk_io_policies.clear();
-    // DisplayState is shared by all task facades. If this process was the
-    // producer of the last scanout, revoke that frame before its local HLE
-    // surfaces and deferred presenter callbacks disappear. A newer foreground
-    // process is left untouched.
     display_state_->clear_if_owner(process_.pid);
     release_process_mach_rights();
     process_.exited = true;
@@ -272,7 +249,7 @@ void CompatibilityKernel::dispatch_bsd_process(Cpu& cpu, std::uint32_t number)
             bsd_success(cpu, 0);
         return;
     }
-    case 0: { // syscall: call number in r0, arguments shifted by one register
+    case 0: {
         const auto indirect_number = registers[0];
         for (std::size_t index = 0; index < 6; ++index) {
             registers[index] = registers[index + 1];
@@ -281,15 +258,15 @@ void CompatibilityKernel::dispatch_bsd_process(Cpu& cpu, std::uint32_t number)
         dispatch_bsd(cpu, indirect_number);
         return;
     }
-    case 1: // exit
+    case 1:
         exit_process(registers[0]);
         bsd_success(cpu, 0);
         cpu.halt(Dynarmic::HaltReason::UserDefined1);
         return;
-    case 2: { // fork
+    case 2: {
         const auto child = fork_handler_ ? fork_handler_(cpu) : std::nullopt;
         if (!child) {
-            bsd_error(cpu, 11); // EAGAIN
+            bsd_error(cpu, 11);
             return;
         }
         performance_counters().record_fork();
@@ -299,19 +276,11 @@ void CompatibilityKernel::dispatch_bsd_process(Cpu& cpu, std::uint32_t number)
         bsd_success(cpu, *child);
         if (scheduler_preemption_query_ &&
             scheduler_preemption_query_(cpu.processor_id())) {
-            // fork publishes a runnable child before the parent resumes in
-            // Guest code. Preserve the parent's current quantum and stop at the
-            // normal semantic-preemption boundary if the child should run
-            // first.
             cpu.request_guest_preemption();
         }
         return;
     }
-    case 66: { // vfork
-        // The child receives a private snapshot rather than temporarily
-        // sharing the parent's memory. This is stricter isolation but keeps
-        // the observable fork/exec ABI while the parent and child are
-        // scheduled.
+    case 66: {
         const auto child = fork_handler_ ? fork_handler_(cpu) : std::nullopt;
         if (!child) {
             bsd_error(cpu, 11);
@@ -328,18 +297,13 @@ void CompatibilityKernel::dispatch_bsd_process(Cpu& cpu, std::uint32_t number)
         }
         return;
     }
-    case 7: { // wait4
+    case 7: {
         const auto target_pid = static_cast<std::int32_t>(registers[0]);
         const auto options = registers[2];
         if (target_pid == 0 || target_pid < -1) {
             bsd_error(cpu, bsd_support::invalid_argument);
             return;
         }
-        // SpringBoard launches an application and then waits for its process
-        // object. That wait is an implementation detail, not a reason to stop
-        // servicing the system event port: Home/Lock must remain interruptible
-        // while Weather/Stocks are still loading. Mirror XNU's EINTR boundary
-        // for an application child and keep the run-loop thread schedulable.
         if (target_pid > 0 &&
             process_image_.ends_with("/SpringBoard.app/SpringBoard")) {
             bool application_child = false;
@@ -357,7 +321,7 @@ void CompatibilityKernel::dispatch_bsd_process(Cpu& cpu, std::uint32_t number)
                 return;
             }
         }
-        if ((options & 1U) != 0) { // WNOHANG
+        if ((options & 1U) != 0) {
             const auto result = wait_child(target_pid, false);
             if (!result.has_child) {
                 bsd_error(cpu, darwin::error::no_child_process);
@@ -390,29 +354,25 @@ void CompatibilityKernel::dispatch_bsd_process(Cpu& cpu, std::uint32_t number)
         cpu.halt(Dynarmic::HaltReason::UserDefined5);
         return;
     }
-    case 20: // getpid
+    case 20:
         bsd_success(cpu, process_.pid);
         return;
-    case 24: // getuid
+    case 24:
         bsd_success(cpu, process_.uid);
         return;
-    case 25: // geteuid
+    case 25:
         bsd_success(cpu, process_.effective_uid);
         return;
-    case 39: // getppid
+    case 39:
         bsd_success(cpu, process_.parent_pid);
         return;
     case darwin::syscall::get_thread_identity:
-        // XNU returns ESRCH when the calling thread has no temporary
-        // credential override. The compatibility kernel has no override
-        // state, so preserve that observable result without touching the
-        // caller-provided output pointers.
         bsd_error(cpu, darwin::error::no_such_process);
         return;
-    case 43: // getegid
+    case 43:
         bsd_success(cpu, process_.effective_gid);
         return;
-    case 47: // getgid
+    case 47:
         bsd_success(cpu, process_.gid);
         return;
     case darwin::syscall::get_process_group:
@@ -478,14 +438,10 @@ void CompatibilityKernel::dispatch_bsd_process(Cpu& cpu, std::uint32_t number)
                 bsd_error(cpu, bsd_support::invalid_argument);
                 return;
             }
-            // This compatibility kernel has no separate Darwin background
-            // thread policy; zero is the native default state.
             priority = 0;
             break;
         case darwin::resource::priority_darwin_process:
             if (target_is_live(who)) {
-                // The firmware uses this query to inspect the process
-                // background policy. The default policy is foreground.
                 priority = 0;
             }
             break;
@@ -500,16 +456,15 @@ void CompatibilityKernel::dispatch_bsd_process(Cpu& cpu, std::uint32_t number)
         bsd_success(cpu, static_cast<std::uint32_t>(*priority));
         return;
     }
-    case 46: { // sigaction
+    case 46: {
         const auto signal = registers[0];
         if (signal == 0 || signal >= signal_actions_.size() || signal == 9 ||
-            signal == 17) { // SIGKILL / SIGSTOP
+            signal == 17) {
             bsd_error(cpu, bsd_support::invalid_argument);
             return;
         }
         auto& action = signal_actions_[signal];
         if (registers[2] != 0) {
-            // The output ABI is struct sigaction: handler, mask, flags.
             if (!memory_.write32(registers[2], action[0]) ||
                 !memory_.write32(registers[2] + 4, action[2]) ||
                 !memory_.write32(registers[2] + 8, action[3])) {
@@ -518,8 +473,6 @@ void CompatibilityKernel::dispatch_bsd_process(Cpu& cpu, std::uint32_t number)
             }
         }
         if (registers[1] != 0) {
-            // The input ABI is struct __sigaction and additionally contains
-            // the userspace signal trampoline.
             for (std::size_t index = 0; index < action.size(); ++index) {
                 const auto value = memory_.read32(
                     registers[1] + static_cast<std::uint32_t>(index * 4U));
@@ -533,8 +486,8 @@ void CompatibilityKernel::dispatch_bsd_process(Cpu& cpu, std::uint32_t number)
         bsd_success(cpu, 0);
         return;
     }
-    case 48: // sigprocmask
-    case darwin::syscall::pthread_sigmask: { // __pthread_sigmask
+    case 48:
+    case darwin::syscall::pthread_sigmask: {
         constexpr std::uint32_t unblockable =
             (1U << (9U - 1U)) | (1U << (17U - 1U));
         auto& signal_mask_ = signal_mask(cpu.processor_id());
@@ -551,13 +504,13 @@ void CompatibilityKernel::dispatch_bsd_process(Cpu& cpu, std::uint32_t number)
             switch (registers[0]) {
             case 1:
                 signal_mask_ |= *requested;
-                break; // SIG_BLOCK
+                break;
             case 2:
                 signal_mask_ &= ~*requested;
-                break; // SIG_UNBLOCK
+                break;
             case 3:
                 signal_mask_ = *requested;
-                break; // SIG_SETMASK
+                break;
             default:
                 bsd_error(cpu, bsd_support::invalid_argument);
                 return;
@@ -567,10 +520,10 @@ void CompatibilityKernel::dispatch_bsd_process(Cpu& cpu, std::uint32_t number)
         bsd_success(cpu, 0);
         return;
     }
-    case 49: { // getlogin
+    case 49: {
         if (registers[1] == 0 ||
             process_.login_name.size() + 1 > registers[1]) {
-            bsd_error(cpu, 34); // ERANGE
+            bsd_error(cpu, 34);
             return;
         }
         std::vector<std::byte> bytes(process_.login_name.size() + 1);
@@ -585,7 +538,7 @@ void CompatibilityKernel::dispatch_bsd_process(Cpu& cpu, std::uint32_t number)
         bsd_success(cpu, 0);
         return;
     }
-    case 50: { // setlogin
+    case 50: {
         const auto name = memory_.read_c_string(registers[0], 256);
         if (!name) {
             bsd_error(cpu, bsd_support::bad_address);
@@ -599,22 +552,22 @@ void CompatibilityKernel::dispatch_bsd_process(Cpu& cpu, std::uint32_t number)
         bsd_success(cpu, 0);
         return;
     }
-    case 55: // reboot
+    case 55:
         output_.write("[kernel] guest reboot request flags=0x" + [&] {
             std::ostringstream value;
             value << std::hex << registers[0];
             return value.str();
         }() + " denied\n");
         bsd_error(
-            cpu, 1); // EPERM until a virtual machine reset controller exists
+            cpu, 1);
         return;
-    case 60: { // umask
+    case 60: {
         const auto previous = process_.file_creation_mask;
         process_.file_creation_mask = registers[0] & 0777U;
         bsd_success(cpu, previous);
         return;
     }
-    case 59: { // execve
+    case 59: {
         const auto path = memory_.read_c_string(registers[0]);
         const auto read_vector = [&](std::uint32_t address)
             -> std::optional<std::vector<std::string>> {
@@ -643,7 +596,7 @@ void CompatibilityKernel::dispatch_bsd_process(Cpu& cpu, std::uint32_t number)
         std::error_code path_error;
         const auto host_path = resolve_guest_path(*path);
         if (!std::filesystem::is_regular_file(host_path, path_error)) {
-            bsd_error(cpu, 2); // ENOENT; execvp will continue its PATH search
+            bsd_error(cpu, 2);
             return;
         }
         std::ostringstream exec_message;
@@ -658,14 +611,14 @@ void CompatibilityKernel::dispatch_bsd_process(Cpu& cpu, std::uint32_t number)
         output_.write(exec_message.str());
         if (!exec_handler_ ||
             !exec_handler_(cpu, *path, *arguments, *environment)) {
-            bsd_error(cpu, 2); // ENOENT
+            bsd_error(cpu, 2);
             return;
         }
         performance_counters().record_exec();
         cpu.halt(Dynarmic::HaltReason::UserDefined6);
         return;
     }
-    case 96: // setpriority
+    case 96:
         if (registers[0] != 0 ||
             (registers[1] != 0 && registers[1] != process_.pid)) {
             bsd_error(cpu, bsd_support::invalid_argument);
@@ -674,8 +627,6 @@ void CompatibilityKernel::dispatch_bsd_process(Cpu& cpu, std::uint32_t number)
                 std::clamp(static_cast<std::int32_t>(registers[2]),
                     darwin::resource::priority_minimum,
                     darwin::resource::priority_maximum);
-            // XNU resetpriority() calls task_importance(-p_nice), whose
-            // task base is BASEPRI_DEFAULT + importance.
             process_.thread_base_priority =
                 xnu::scheduler::default_base_priority - process_.nice_value;
             {
@@ -690,34 +641,20 @@ void CompatibilityKernel::dispatch_bsd_process(Cpu& cpu, std::uint32_t number)
                 task_priority_handler_(process_.thread_base_priority);
                 if (scheduler_preemption_query_ &&
                     scheduler_preemption_query_(cpu.processor_id())) {
-                    // setpriority changes every thread in this task. Let the
-                    // scheduler compare the current thread with all runnable
-                    // candidates before the current HLE dispatch resumes guest
-                    // execution.
                     cpu.request_guest_preemption();
                 }
             }
             bsd_success(cpu, 0);
         }
         return;
-    case 116: { // gettimeofday
+    case 116: {
         const auto wall_time = shared_state_->clock.wall_time();
-        // iPhone OS 1.0's ARM libSystem wrapper preserves the timeval pointer
-        // in r3, invokes syscall 116, then stores the two return registers into
-        // it. Returning zero here makes libc overwrite the result with Unix
-        // epoch 0.
         bsd_success(cpu,
             static_cast<std::uint32_t>(wall_time / 1'000'000'000ULL),
             static_cast<std::uint32_t>((wall_time / 1'000ULL) % 1'000'000ULL));
         return;
     }
-    case darwin::syscall::get_resource_usage: { // getrusage
-        // Darwin's 32-bit user ABI is two {time_t, suseconds_t} pairs
-        // followed by fourteen 32-bit long values: 72 bytes total. The
-        // accounting fields are intentionally zero until the scheduler has a
-        // per-process CPU accounting source; the ABI still requires the
-        // complete structure to be copied out so callers cannot receive
-        // SIGSYS merely while collecting migration or launch statistics.
+    case darwin::syscall::get_resource_usage: {
         if (registers[0] != darwin::resource::rusage_self &&
             registers[0] != darwin::resource::rusage_children) {
             bsd_error(cpu, bsd_support::invalid_argument);
@@ -764,9 +701,6 @@ void CompatibilityKernel::dispatch_bsd_process(Cpu& cpu, std::uint32_t number)
                 static_cast<std::int32_t>(*microseconds));
         }
 
-        // XNU validates both pointers before changing the calendar. The legacy
-        // timezone value is otherwise independent of the firmware's zoneinfo
-        // state, so merely validate it here.
         if (registers[1] != 0) {
             if (registers[1] > std::numeric_limits<std::uint32_t>::max() -
                                    sizeof(std::uint32_t) ||
@@ -779,7 +713,6 @@ void CompatibilityKernel::dispatch_bsd_process(Cpu& cpu, std::uint32_t number)
 
         if (requested_time) {
             auto [seconds, microseconds] = *requested_time;
-            // Match Darwin 8 timevalfix() before its non-negative-time check.
             if (microseconds < 0) {
                 --seconds;
                 microseconds += 1'000'000;
@@ -805,7 +738,7 @@ void CompatibilityKernel::dispatch_bsd_process(Cpu& cpu, std::uint32_t number)
         bsd_success(cpu, 0);
         return;
     }
-    case 147: // setsid
+    case 147:
         process_.process_group = process_.pid;
         process_.session_id = process_.pid;
         bsd_success(cpu, process_.pid);
@@ -883,16 +816,13 @@ void CompatibilityKernel::dispatch_bsd_process(Cpu& cpu, std::uint32_t number)
         return;
     }
     case darwin::syscall::disable_thread_signal:
-        // Darwin 8 ignores the integer argument: the operation permanently
-        // marks the current uthread UT_NO_SIGMASK and returns zero.
         disabled_thread_signals_.insert(cpu.processor_id());
         bsd_success(cpu, 0);
         return;
-    case 333: // __pthread_canceled: cancellation bookkeeping is per guest
-              // thread
+    case 333:
         bsd_success(cpu, 0);
         return;
-    case darwin::syscall::semaphore_wait_signal: { // __semwait_signal
+    case darwin::syscall::semaphore_wait_signal: {
         std::optional<std::uint64_t> timeout_interval;
         if (registers[2] != 0) {
             const bool wide_seconds = shared_state_->darwin_abi.semaphore_wait_abi ==
@@ -901,7 +831,6 @@ void CompatibilityKernel::dispatch_bsd_process(Cpu& cpu, std::uint32_t number)
             auto nanoseconds = registers[wide_seconds ? 6U : 5U];
             if (wide_seconds) {
                 seconds |= static_cast<std::uint64_t>(registers[5]) << 32U;
-                // XNU clamps waits outside mach_timespec's seconds range.
                 if (seconds > std::numeric_limits<std::uint32_t>::max()) {
                     seconds = std::numeric_limits<std::uint32_t>::max();
                     nanoseconds = 0;
@@ -924,10 +853,6 @@ void CompatibilityKernel::dispatch_bsd_process(Cpu& cpu, std::uint32_t number)
         return;
     }
     case darwin::syscall::semaphore_wait_signal_timespec: {
-        // The iPhone OS 3 user ABI keeps the timespec in guest memory rather
-        // than passing tv_sec/tv_nsec as the final two syscall words.  Decode
-        // it at the syscall boundary and reuse the same scheduler-backed
-        // semaphore wait.
         std::optional<std::uint64_t> timeout_interval;
         if (registers[2] != 0) {
             const auto seconds = memory_.read32(registers[4]);
@@ -950,12 +875,10 @@ void CompatibilityKernel::dispatch_bsd_process(Cpu& cpu, std::uint32_t number)
             cpu, registers[0], registers[1], timeout_interval, true);
         return;
     }
-    case 327: // issetugid
+    case 327:
         bsd_success(cpu, 0);
         return;
-    case 355: { // getaudit
-        // Darwin 8 auditinfo: auid, two mask words, terminal port/machine,
-        // and audit session ID (six 32-bit words).
+    case 355: {
         for (std::uint32_t offset = 0; offset < 24; offset += 4) {
             if (!memory_.write32(
                     registers[0] + offset,
@@ -1015,10 +938,6 @@ void CompatibilityKernel::dispatch_bsd_process(Cpu& cpu, std::uint32_t number)
         return;
     }
     case darwin::syscall::pid_hibernate: {
-        // Darwin's embedded ABI currently accepts only -1 here. XNU uses it
-        // to wake the asynchronous memory-freeze worker; it does not suspend
-        // the caller or synchronously change another process. There is no
-        // guest-visible work when the emulator has no freeze backend.
         const auto target_pid = static_cast<std::int32_t>(registers[0]);
         if (target_pid != -1) {
             bsd_error(cpu, darwin::error::permission_denied);
@@ -1036,4 +955,4 @@ void CompatibilityKernel::dispatch_bsd_process(Cpu& cpu, std::uint32_t number)
     }
 }
 
-} // namespace shade
+}

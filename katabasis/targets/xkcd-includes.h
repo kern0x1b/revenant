@@ -16,8 +16,6 @@
 #import <AVFoundation/AVFoundation.h>
 #import <objc/runtime.h>
 #include <stdio.h>
-// libSystem C imports Realm and friends pull in; declaring them lets xlgen bridge them
-// instead of trapping (all present on iOS 6's libSystem).
 #include <pthread.h>
 #include <CommonCrypto/CommonCrypto.h>
 #include <CommonCrypto/CommonCryptor.h>
@@ -28,12 +26,10 @@
 #include <mach-o/arch.h>
 #include <execinfo.h>
 #include <asl.h>
-// libc++/libc++abi's own libSystem calls (wide-char, locale, syslog) so they bridge, not trap.
 #include <syslog.h>
 #include <wchar.h>
 #include <wctype.h>
 #include <xlocale.h>
-// Realm/Core Data/SQLite static-init + runtime surface (all present on iOS 6's libSystem).
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <sys/sysctl.h>

@@ -1,8 +1,5 @@
 import UIKit
 
-// A NavigationStack is a UINavigationController whose pushed screens follow a path of values: NavigationLink(value:)
-// adds a value to the path, the stack pushes the screen that navigationDestination(for:) gives for it, and a tap on the
-// back button removes the value again. The path is the app's own binding when it has one, and the stack's own otherwise.
 final class NavigationStackState {
     var builders: [ObjectIdentifier: (AnyHashable) -> any View] = [:]
     var getPath: () -> [AnyHashable] = { [] }
@@ -122,7 +119,6 @@ final class NavigationStackNode: LayoutNode {
             state.entries.append((value, controller))
             navigation.pushViewController(controller, animated: true)
         }
-        // the screens follow the state of the views that made them
         for entry in state.entries {
             guard let build = state.builders[ObjectIdentifier(type(of: entry.value.base))] else { continue }
             entry.controller.setRootView(build(entry.value), env: entry.controller.baseEnv)

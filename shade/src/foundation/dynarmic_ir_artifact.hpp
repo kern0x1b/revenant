@@ -22,4 +22,4 @@ namespace shade {
 [[nodiscard]] std::optional<Dynarmic::IR::Block> deserialize_dynarmic_ir(
     std::span<const std::byte> bytes);
 
-} // namespace shade
+}

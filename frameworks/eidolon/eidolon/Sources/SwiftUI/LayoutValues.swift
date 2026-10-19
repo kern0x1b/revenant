@@ -39,8 +39,6 @@ extension LayoutSubview {
 
 protocol LayoutContainer {}
 
-// A container value is written through a key path into these values, so the key that lands in the storage
-// is the one that key path's setter uses, and a subview reads it back with that same key.
 public protocol ContainerValueKey {
     associatedtype Value
     static var defaultValue: Value { get }
@@ -63,8 +61,6 @@ public struct ContainerValues {
 }
 
 extension ContainerValues {
-    /// The values a subview carries for the layout that contains it: every `.containerValue` from the
-    /// subview up, stopping at the container layout itself.
     static func collect(from node: LayoutNode) -> ContainerValues {
         var collected = ContainerValues()
         var current: Node? = node

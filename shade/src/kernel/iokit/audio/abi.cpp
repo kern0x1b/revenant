@@ -85,7 +85,7 @@ namespace {
         },
 };
 
-} // namespace
+}
 
 std::uint32_t IOKitAudioAbi::stream_memory_type(
     std::uint32_t stream_id) const
@@ -106,4 +106,4 @@ const IOKitAudioAbi& IOKitAudioAbi::io_audio2()
     return io_audio2_abi;
 }
 
-} // namespace shade::kernel_iokit::audio
+}

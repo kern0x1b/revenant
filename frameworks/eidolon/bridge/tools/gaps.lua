@@ -1,14 +1,5 @@
--- gaps.lua: the rows of the 26.2 surface that ours.lua finds no declaration for.
---
---     xmake l gaps.lua [ours.tsv] [surface.tsv] [NAME]
---
--- A row is `Type#member`. An enum's case counts as declared, and so does a type we only alias - both because the
--- declaration is there, whichever way it is written. A type we genuinely lack stays on the list, and the tool is
--- checked against one: a name that is in Apple's surface and in no source of ours.
-
 local text = import("lib.text", {rootdir = path.join(os.scriptdir(), "..", ".."), anonymous = true})
 
--- the lines of a file as Python's iteration gives them: a final newline ends the last line and adds none
 local function lines_of(content)
     local lines = text.split(content, "\n")
     if lines[#lines] == "" then
@@ -17,7 +8,6 @@ local function lines_of(content)
     return lines
 end
 
--- surf.lua writes three columns and no header: owner, kind, the declaration as text. Other shapes are skipped.
 local function surface(file)
     local rows = {}
     for _, line in ipairs(lines_of(io.readfile(file))) do
@@ -29,7 +19,6 @@ local function surface(file)
     return rows
 end
 
--- ours.lua writes four columns; any other shape is an error, as the Python's unpacking was
 local function ours(file)
     local declared = {}
     for number, line in ipairs(lines_of(io.readfile(file))) do
@@ -43,7 +32,6 @@ local function ours(file)
         declared[owner] = declared[owner] or {}
         declared[owner][kind] = declared[owner][kind] or {}
         declared[owner][kind][name] = true
-        -- a type declared at file scope names itself
         declared[""] = declared[""] or {}
         declared[""][kind] = declared[""][kind] or {}
         declared[""][kind][name] = true
@@ -66,7 +54,6 @@ function main(...)
         local base = text.partition(row.api, "(")
         local found
         if row.kind == "type" or row.kind == "init" or row.kind == "subscript" then
-            -- as written: the owner has some declaration of this kind. The name is not looked up.
             found = names[row.kind] ~= nil
         else
             found = (names["var"] or {})[base] or (names["func"] or {})[base] or (names["const"] or {})[base]
@@ -79,7 +66,6 @@ function main(...)
     for _, row in ipairs(gaps) do
         print(row)
     end
-    -- the negative: a name Apple's surface carries and no source of ours has must stay on the list
     local kept = 0
     for _, row in ipairs(gaps) do
         if text.startswith(row, negative_name .. "#") then

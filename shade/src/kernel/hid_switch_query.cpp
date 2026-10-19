@@ -19,8 +19,6 @@ namespace {
     constexpr std::uint32_t keyboard_usage_page = keyboard_event << 16U;
     constexpr std::uint32_t keyboard_usage = keyboard_usage_page + 1U;
     constexpr std::uint32_t keyboard_down = keyboard_usage_page + 2U;
-    // The Hall sensor is represented by the embedded HID keyboard usage
-    // page 0xff, usage 10. An unattached magnetic cover leaves it open.
     constexpr std::uint32_t embedded_usage_page = 0xffU;
     constexpr std::uint32_t hall_sensor_usage = 10U;
     constexpr auto get_integer = "_IOHIDEventGetIntegerValue";
@@ -94,7 +92,7 @@ namespace {
         std::uint32_t matching_;
     };
 
-} // namespace
+}
 
 void register_hid_switch_queries(UserlandHleRegistry& registry)
 {
@@ -114,4 +112,4 @@ void register_hid_switch_queries(UserlandHleRegistry& registry)
         });
 }
 
-} // namespace shade
+}

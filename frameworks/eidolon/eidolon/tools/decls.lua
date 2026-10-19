@@ -1,12 +1,3 @@
--- decls.lua: the declarations of the given types in Apple's SDK 26.2 interface, one per line.
---
---     xmake l decls.lua TYPE [TYPE...]
---     xmake l decls.lua --view TEXT
---     xmake l decls.lua --grep TEXT
---
--- The 26.2 interface is the only written-down shape of a 17+ declaration (the corpus carries names, not types).
--- Attribute lines, bodies and accessor noise are dropped so a type's whole API fits on a screen.
-
 local text = import("lib.text", {rootdir = path.join(os.scriptdir(), "..", ".."), anonymous = true})
 
 local function sdk_path()
@@ -17,8 +8,6 @@ local function sdk_path()
     return path.join(os.getenv("HOME"), "Git", "projects", "ios", "charon", ".agent-work", "sdk-26.2", "iPhoneOS26.2.sdk")
 end
 
--- KEEP = ^\s*(public |@_?availability|@MainActor|@Sendable|@preconcurrency|@ViewBuilder|@frozen|@inlinable|static |
---             mutating |nonisolated )*(func|var|let|init|subscript|typealias|associatedtype|case)\b
 local KEEP_PREFIXES = {"public ", "@availability", "@_availability", "@MainActor", "@Sendable", "@preconcurrency",
     "@ViewBuilder", "@frozen", "@inlinable", "static ", "mutating ", "nonisolated "}
 local KEEP_KEYWORDS = {"func", "var", "let", "init", "subscript", "typealias", "associatedtype", "case"}
@@ -45,8 +34,6 @@ local function keep(line)
     return false
 end
 
--- SKIP = ^\s*(get|set|_read|_modify|return|\{|\}|#if|#endif|@_Concurrency|@_transparent|@usableFromInline|
---             @_opaqueReturnTypeOf)
 local SKIP_PREFIXES = {"get", "set", "_read", "_modify", "return", "{", "}", "#if", "#endif", "@_Concurrency",
     "@_transparent", "@usableFromInline", "@_opaqueReturnTypeOf"}
 
@@ -60,8 +47,6 @@ local function skip(line)
     return false
 end
 
--- Every top-level block of an interface: its head (the attribute lines and the declaration line, joined) and its body
--- (the lines to the brace that closes it). A line that starts with a space, a tab or a brace is inside something.
 local function blocks(file)
     local lines = text.split(io.readfile(file), "\n")
     local out = {}
@@ -100,7 +85,6 @@ local function blocks(file)
     return out
 end
 
--- re.search(r'extension (SwiftUI\.)?(View|some SwiftUI\.View)\b', head)
 local function view_extension(head)
     local from = 1
     while true do
@@ -125,7 +109,6 @@ local function view_extension(head)
     end
 end
 
--- re.search(r'(?:struct|class|enum|protocol|extension)\s+([A-Za-z_][\w.]*)', head): the whole name, or nil
 local DECL_KINDS = {"struct", "class", "enum", "protocol", "extension"}
 
 local function declared_name(head)

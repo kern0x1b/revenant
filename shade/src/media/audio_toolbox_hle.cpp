@@ -20,7 +20,7 @@ namespace {
         "/AudioToolbox.framework/AudioToolbox"
     };
 
-} // namespace
+}
 
 AudioToolboxHle::AudioToolboxHle(UserlandHleRegistry& registry)
 {
@@ -40,10 +40,7 @@ void AudioToolboxHle::play_system_sound(UserlandHleCall& call)
     call.output().line(
         "[audio] system-sound pid=" + std::to_string(call.process_id()) +
         " id=" + std::to_string(sound_id) + " service=native");
-    // The firmware service owns the system-sound registry and resource
-    // selection. Keeping this boundary native avoids duplicating either IDs or
-    // paths in the emulator as new system sounds appear.
     call.resume_original();
 }
 
-} // namespace shade
+}

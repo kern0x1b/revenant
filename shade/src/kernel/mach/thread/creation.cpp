@@ -96,4 +96,4 @@ CompatibilityKernel::create_guest_thread(
     return CreatedGuestThread { *processor, port_name };
 }
 
-} // namespace shade
+}

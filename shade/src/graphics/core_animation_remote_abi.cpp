@@ -30,11 +30,6 @@ namespace {
         "_CARenderServerStart",
     };
 
-    // The first ARMv7 CoreAnimation client kept the transaction encoder but
-    // exposed the render-server bootstrap as GetServerPort instead of the
-    // later RPC-range pair. The service port is still resolved from Mach
-    // bootstrap at runtime, so this remains a capability probe rather than a
-    // firmware or application selector.
     constexpr std::string_view early_render_server_port_symbol {
         "_CARenderServerGetServerPort"
     };
@@ -49,8 +44,6 @@ namespace {
     bool adds_immediate(std::uint32_t instruction,
         std::uint32_t source_register, std::uint32_t destination_register)
     {
-        // ARM data-processing immediate ADD, ignoring the condition and
-        // operand2.
         constexpr std::uint32_t operation_and_register_mask = 0x0ffff000U;
         constexpr std::uint32_t add_immediate = 0x02800000U;
         const auto expected = add_immediate | (source_register << 16U) |
@@ -61,11 +54,6 @@ namespace {
     std::optional<std::uint32_t> detect_inline_transaction_message(
         const MachOImage& image, std::uint32_t function)
     {
-        // Both the inline and OOL paths call one message initializer. The
-        // encoder keeps the OOL selector as a boolean register and constructs
-        // the message id as `protocol base + transaction opcode + is_ool`.
-        // Decode those two adjacent additions from firmware code instead of
-        // embedding the number.
         constexpr std::uint32_t selector_register = 8U;
         constexpr std::uint32_t message_register = 3U;
         constexpr std::uint32_t maximum_function_prefix = 512U;
@@ -93,10 +81,6 @@ namespace {
                     return std::nullopt;
                 }
                 const auto identifier = protocol_base + opcode;
-                // Private user-space RPC families live outside the low kernel
-                // MIG ranges. This also prevents an unrelated pair of
-                // arithmetic instructions from being accepted as a transaction
-                // protocol.
                 if (identifier >= 0x8000U && identifier < 0x100000U)
                     return identifier;
                 return std::nullopt;
@@ -105,7 +89,7 @@ namespace {
         return std::nullopt;
     }
 
-} // namespace
+}
 
 bool CoreAnimationRemoteAbi::is_transaction_message(
     std::uint32_t identifier) const
@@ -136,11 +120,6 @@ std::optional<CoreAnimationRemoteAbi> CoreAnimationRemoteAbi::detect(
         };
     }
 
-    // The Thumb-2 encoder used by early ARMv7 UIKit builds does not expose the
-    // transaction selector as the ARM add/add pair above. The same image
-    // exports both render-server entry points, so bind its remote scene
-    // rendezvous to the service object resolved from bootstrap rather than
-    // guessing an opcode from one application or OS build.
     const auto has_render_server_protocol =
         std::all_of(render_server_symbols.begin(), render_server_symbols.end(),
             [&image](const auto symbol_name) {
@@ -160,4 +139,4 @@ std::optional<CoreAnimationRemoteAbi> CoreAnimationRemoteAbi::detect(
     return std::nullopt;
 }
 
-} // namespace shade
+}

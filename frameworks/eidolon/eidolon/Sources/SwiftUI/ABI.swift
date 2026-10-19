@@ -1,10 +1,6 @@
 import UIKit
 import CoreGraphics
 
-// Types that carry the shape of Apple's SwiftUI interface. Their contents are ours; only the names,
-// the argument labels and the order of protocol requirements have to match, because an application
-// compiled against Apple's SwiftUI imports exactly these symbols.
-
 public struct _GraphValue<Value> {
     let value: Value
     public init(_ value: Value) { self.value = value }
@@ -93,7 +89,6 @@ public protocol AlignmentID {
 }
 
 extension AlignmentID {
-    // The explicit values of the children are averaged: the n-th value moves the running mean by its share.
     public static func _combineExplicit(childValue: CGFloat, _ n: Int, into parentValue: inout CGFloat?) {
         if let current = parentValue { parentValue = current + (childValue - current) / CGFloat(n) } else { parentValue = childValue }
     }

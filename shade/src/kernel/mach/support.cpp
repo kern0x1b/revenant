@@ -218,14 +218,14 @@ namespace mach_support {
     {
         switch (disposition) {
         case 16:
-            return xnu::ipc::Right::Receive; // MOVE_RECEIVE
-        case 17: // MOVE_SEND
-        case 19: // COPY_SEND
+            return xnu::ipc::Right::Receive;
+        case 17:
+        case 19:
         case 20:
-            return xnu::ipc::Right::Send; // MAKE_SEND
-        case 18: // MOVE_SEND_ONCE
+            return xnu::ipc::Right::Send;
+        case 18:
         case 21:
-            return xnu::ipc::Right::SendOnce; // MAKE_SEND_ONCE
+            return xnu::ipc::Right::SendOnce;
         default:
             return std::nullopt;
         }
@@ -236,16 +236,16 @@ namespace mach_support {
     {
         switch (disposition) {
         case 16:
-            return xnu::ipc::Right::Receive; // MOVE_RECEIVE
+            return xnu::ipc::Right::Receive;
         case 17:
-            return xnu::ipc::Right::Send; // MOVE_SEND
+            return xnu::ipc::Right::Send;
         case 18:
-            return xnu::ipc::Right::SendOnce; // MOVE_SEND_ONCE
+            return xnu::ipc::Right::SendOnce;
         case 19:
-            return xnu::ipc::Right::Send; // COPY_SEND
-        case 20: // MAKE_SEND
+            return xnu::ipc::Right::Send;
+        case 20:
         case 21:
-            return xnu::ipc::Right::Receive; // MAKE_SEND_ONCE
+            return xnu::ipc::Right::Receive;
         default:
             return std::nullopt;
         }
@@ -255,11 +255,6 @@ namespace mach_support {
         const KernelSharedState& state, std::uint32_t caller,
         std::uint32_t task_name)
     {
-        // A task name is a capability, not merely an object identifier.  XNU's
-        // task/semaphore traps require a send right in the caller's ipc_space;
-        // accepting a receive or dead-name entry here lets an unrelated port be
-        // used as an owner and leaves teardown metadata attached to the wrong
-        // PID.
         const auto task_object = resolve_name_with_right(
             state, caller, task_name, xnu::ipc::Right::Send);
         if (!task_object)
@@ -356,9 +351,6 @@ namespace mach_support {
         const KernelSharedState& state, std::uint32_t sender,
         std::uint32_t name)
     {
-        // Kernel-originated notification messages store global object
-        // identifiers directly. Every user-originated message must cross an
-        // ipc_space lookup.
         if (sender == 0)
             return name;
         return state.mach_namespaces.resolve(sender, name);
@@ -392,10 +384,6 @@ namespace mach_support {
             port_object->make_send_count < request->second.sync) {
             return false;
         }
-        // A notification request can outlive the task that supplied its
-        // send-once right. XNU drops such a request when the notify port is
-        // dead; do not recreate an unowned queue merely to hold an
-        // undeliverable message.
         if (!state.mach_port_objects.contains(request->second.notify_object)) {
             state.mach_notifications.erase(request);
             return false;
@@ -403,13 +391,13 @@ namespace mach_support {
 
         KernelSharedState::MachMessage message;
         message.bytes.resize(36);
-        write_little_word(message.bytes, 0, 18); // MOVE_SEND_ONCE
+        write_little_word(message.bytes, 0, 18);
         write_little_word(
             message.bytes, 4, static_cast<std::uint32_t>(message.bytes.size()));
         write_little_word(message.bytes, 8, request->second.notify_object);
         write_little_word(message.bytes, 20, mach_notify_no_senders);
-        write_little_word(message.bytes, 24, 0); // native NDR
-        write_little_word(message.bytes, 28, 1); // little-endian NDR
+        write_little_word(message.bytes, 24, 0);
+        write_little_word(message.bytes, 28, 1);
         write_little_word(message.bytes, 32, port_object->make_send_count);
         message.destination = request->second.notify_object;
         const auto destination = message.destination;
@@ -426,7 +414,7 @@ namespace mach_support {
         }
         KernelSharedState::MachMessage message;
         message.bytes.resize(36);
-        write_little_word(message.bytes, 0, 18); // MOVE_SEND_ONCE
+        write_little_word(message.bytes, 0, 18);
         write_little_word(
             message.bytes, 4, static_cast<std::uint32_t>(message.bytes.size()));
         write_little_word(message.bytes, 8, notify_object);
@@ -446,7 +434,7 @@ namespace mach_support {
         }
         KernelSharedState::MachMessage message;
         message.bytes.resize(36);
-        write_little_word(message.bytes, 0, 18); // MOVE_SEND_ONCE
+        write_little_word(message.bytes, 0, 18);
         write_little_word(
             message.bytes, 4, static_cast<std::uint32_t>(message.bytes.size()));
         write_little_word(message.bytes, 8, notify_object);
@@ -466,7 +454,7 @@ namespace mach_support {
         }
         KernelSharedState::MachMessage message;
         message.bytes.resize(24);
-        write_little_word(message.bytes, 0, 18); // MOVE_SEND_ONCE
+        write_little_word(message.bytes, 0, 18);
         write_little_word(
             message.bytes, 4, static_cast<std::uint32_t>(message.bytes.size()));
         write_little_word(message.bytes, 8, object);
@@ -488,13 +476,10 @@ namespace mach_support {
             message.bytes, 4, static_cast<std::uint32_t>(message.bytes.size()));
         write_little_word(message.bytes, 8, notify_object);
         write_little_word(message.bytes, 20, mach_notify_port_destroyed);
-        write_little_word(message.bytes, 24, 1); // one port descriptor
+        write_little_word(message.bytes, 24, 1);
         write_little_word(message.bytes, 28, receive_object);
-        write_little_word(message.bytes, 36, 0x00100000U); // MOVE_RECEIVE
+        write_little_word(message.bytes, 36, 0x00100000U);
         message.destination = notify_object;
-        // Keep the transferred receive right in the semantic sidecar as well as
-        // in the wire descriptor.  Queue discard must terminate this right
-        // instead of losing it when the notification endpoint disappears.
         message.port_transfers.push_back(
             KernelSharedState::MachMessage::PortTransfer { 28U, receive_object,
                 std::nullopt, receive_object, xnu::ipc::Right::Receive,
@@ -511,9 +496,6 @@ namespace mach_support {
     {
         if (!state.mach_ports_being_removed.insert(object).second)
             return;
-        // A receive may be asleep on this object without any queued message.
-        // Make the scheduler revisit its cached namespace capability on the
-        // next poll.
         state.note_mach_queue_topology_change_locked();
         state.mach_send_possible_armed_destinations.erase(object);
         struct RemovalGuard {
@@ -532,8 +514,6 @@ namespace mach_support {
             for (const auto& message : discarded) {
                 discard_mach_message_rights_locked(state, message);
             }
-            // A send-once notification aimed back at the dying object is itself
-            // undeliverable and must not recreate the receive queue.
             state.mach_queues.erase(object);
         }
         if (const auto surface =
@@ -552,8 +532,6 @@ namespace mach_support {
         std::erase_if(state.audit_session_port_objects,
             [object](const auto& session) { return session.second == object; });
         static_cast<void>(state.mach_port_objects.erase(object));
-        // Keep an in-flight count until every queued message carrying this
-        // object is delivered or discarded.
         if (const auto inflight = state.mach_inflight_send_rights.find(object);
             inflight != state.mach_inflight_send_rights.end() &&
             inflight->second == 0) {
@@ -571,9 +549,6 @@ namespace mach_support {
                 ++task;
             }
         }
-        // A task special-port table stores raw global objects rather than
-        // task-local names. Remove both entries owned by this task object and
-        // references from surviving tasks when the backing ipc_port dies.
         for (auto special = state.task_special_ports.begin();
             special != state.task_special_ports.end();) {
             std::erase_if(special->second,
@@ -604,20 +579,12 @@ namespace mach_support {
                     action.port_object = xnu::ipc::null_name;
             }
         }
-        // Kernel-held special-port references cannot outlive their backing
-        // port. In-flight message holds are tracked separately and are
-        // deliberately retained until their queue sidecar is delivered or
-        // discarded.
         state.mach_kernel_send_rights.erase(object);
         state.mach_semaphores.erase(object);
         state.mach_timers.erase(object);
         state.mach_memory_entries.erase(object);
         state.mach_fileports.erase(object);
         state.iokit_iterators.erase(object);
-        // Every IOServiceClose and receive-right teardown converges here.
-        // Retire display timer registrations before erasing the generic
-        // connection so a closed user client cannot keep scheduling VSync
-        // callbacks indefinitely.
         kernel_iokit::display::close_connection_locked(state, object);
         state.iokit_connections.erase(object);
         state.iokit_audio_connections.erase(object);
@@ -659,10 +626,6 @@ namespace mach_support {
             kernel_hold->second != 0) {
             return;
         }
-        // Erase the backing entry before queue teardown (see the recursion
-        // guard in remove_port_object_locked). Shared page mappings retain
-        // their own GuestPageBacking references, so reclaiming the named port
-        // is harmless to an already-established vm_map.
         state.mach_memory_entries.erase(object);
         remove_port_object_locked(state, object);
     }
@@ -729,18 +692,12 @@ namespace mach_support {
             const auto semaphore = state.mach_semaphores.find(object);
             if (semaphore == state.mach_semaphores.end())
                 continue;
-            // semaphore_destroy on task teardown wakes every blocked thread
-            // with KERN_TERMINATED, just as XNU's task-owned semaphore port
-            // destruction.
             for (const auto waiter : semaphore->second.waiters)
                 state.semaphore_terminations.insert(waiter);
             semaphore->second.waiters.clear();
             terminate_receive_object_locked(state, object);
         }
 
-        // A process may have been waiting on a semaphore owned by another task.
-        // Remove that waiter identity and any already-queued wake result so a
-        // PID reuse cannot wake the wrong thread later.
         std::erase_if(state.semaphore_wakeups,
             [pid](const auto& waiter) { return waiter.first == pid; });
         std::erase_if(state.semaphore_terminations,
@@ -755,9 +712,6 @@ namespace mach_support {
     void cleanup_exited_process_metadata_locked(
         KernelSharedState& state, std::uint32_t pid)
     {
-        // terminate_exited_task_ports_locked normally removes these entries via
-        // remove_port_object_locked. The explicit erases make cleanup
-        // idempotent for partially initialized/failing tasks as well.
         std::vector<std::uint32_t> task_objects;
         for (const auto& [object, owner] : state.task_port_pids) {
             if (owner == pid)
@@ -782,14 +736,6 @@ namespace mach_support {
             [pid](const auto& entry) { return entry.second == pid; });
         std::erase_if(state.task_name_port_pids,
             [pid](const auto& entry) { return entry.second == pid; });
-        // Ordinary notification requests are owned by the target
-        // ipc_entry/port, not by the task that supplied the send-once right. Do
-        // not cancel them merely because that supplying task exits; XNU keeps
-        // the kernel-held send-once alive until the target event or port
-        // teardown.  Dead-name requests are different: their ipc_entry belongs
-        // to this task's space. Run the normal cancellation path so a surviving
-        // notify port receives MACH_NOTIFY_PORT_DELETED instead of silently
-        // losing its send-once right.
         std::vector<std::pair<std::uint32_t, std::uint32_t>> dead_name_requests;
         for (const auto& [key, request] : state.mach_dead_name_notifications) {
             static_cast<void>(request);
@@ -799,9 +745,6 @@ namespace mach_support {
         for (const auto& [task, name] : dead_name_requests)
             cancel_dead_name_notification_locked(state, task, name);
 
-        // Bootstrap request/retry records are task-local observer state, not
-        // Mach rights. Drop both sides on exit so a recycled PID cannot inherit
-        // a stale service request or wake a retry belonging to its predecessor.
         for (auto pending = state.pending_bootstrap_service_requests.begin();
             pending != state.pending_bootstrap_service_requests.end();) {
             std::erase_if(pending->second, [pid](const auto& request) {
@@ -816,11 +759,6 @@ namespace mach_support {
         }
         state.pending_bootstrap_retries.erase(pid);
 
-        // The ordinary namespace walk removes the backing objects through their
-        // final Send/Receive names. Cover partially initialized calls as well:
-        // an owner PID must not survive in IOKit/timer metadata after its
-        // ipc_space is gone, otherwise a reused PID can inherit callbacks from
-        // the old task.
         std::vector<std::uint32_t> owned_objects;
         for (const auto& [object, timer] : state.mach_timers) {
             if (timer.owner_pid == pid)
@@ -882,11 +820,6 @@ namespace mach_support {
             kernel_hold->second != 0) {
             return;
         }
-        // These objects model kernel-owned IOKit ports. Their receive right is
-        // not present in a guest ipc_space, so ordinary task teardown can only
-        // observe the final send right disappearing. Match IOKit's no-senders
-        // lifetime and retire the backing object once no task or in-flight
-        // message references it.
         remove_port_object_locked(state, object);
     }
 
@@ -919,9 +852,6 @@ namespace mach_support {
             }
             static_cast<void>(state.remove_mach_port_set_member_from_all_locked(
                 entry->object));
-            // XNU ipc_port_clear_receiver discards receiver-local state when
-            // MOVE_RECEIVE puts the port in transit. The next receiver may
-            // install its own context/guard without inheriting the old one.
             state.mach_port_contexts.erase(entry->object);
             static_cast<void>(
                 state.mach_port_objects.clear_receiver(entry->object));
@@ -961,17 +891,11 @@ namespace mach_support {
             if (enqueue_port_destroyed_notification_locked(
                     state, destroyed_request->second.notify_object, object)) {
                 state.mach_notifications.erase(destroyed_request);
-                // The port remains active without a receiver until the
-                // MOVE_RECEIVE descriptor is copied out by the notification
-                // receiver.
                 state.mach_port_contexts.erase(object);
                 static_cast<void>(
                     state.mach_port_objects.clear_receiver(object));
                 return;
             }
-            // A dead notification endpoint cannot consume the receive right.
-            // Drop the request and continue with ordinary ipc_right_terminate
-            // semantics.
             state.mach_notifications.erase(destroyed_request);
         }
         state.mach_notifications.erase(destroyed_key);
@@ -985,7 +909,6 @@ namespace mach_support {
             }
             const auto task = request->first.first;
             const auto name = request->first.second;
-            // XNU adds one dead-name uref for every generated notification.
             static_cast<void>(state.mach_namespaces.modify_references(
                 task, name, xnu::ipc::Right::DeadName, 1));
             enqueue_dead_name_notification_locked(
@@ -1029,10 +952,6 @@ namespace mach_support {
             return;
         }
         state.mach_kernel_send_rights.erase(held);
-        // The final kernel-held Send reference participates in no-senders just
-        // like the final guest ipc_entry reference. Transient named entries and
-        // IOKit ports may now be reclaimed, while ordinary service ports remain
-        // owned by their explicit receive/send rights.
         static_cast<void>(
             enqueue_no_senders_notification_locked(state, object));
         release_unreferenced_memory_entry_locked(state, object);
@@ -1157,10 +1076,6 @@ namespace mach_support {
                 return kern_invalid_value;
             static_cast<void>(
                 state.mach_namespaces.remove_type(task, name, mask));
-            // A receive name may temporarily be composite with a send-once
-            // right when it is also used as a notification endpoint.  Releasing
-            // only that send-once right does not delete the name, so its
-            // dead-name request must remain registered.
             if (!state.mach_namespaces.contains(task, name)) {
                 cancel_dead_name_notification_locked(state, task, name);
             }
@@ -1332,6 +1247,6 @@ namespace mach_support {
         return result;
     }
 
-} // namespace mach_support
+}
 
-} // namespace shade
+}

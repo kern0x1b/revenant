@@ -56,7 +56,6 @@ int main(void)
     result = control(address, VM_PURGABLE_SET_STATE, &state);
     check("non-volatile again", result == KERN_SUCCESS && state == VM_PURGABLE_VOLATILE, "previous state");
 
-    // The words clients send: an ordering, a behaviour and a group beside the state.
     const int words[] = {
         VM_PURGABLE_VOLATILE | VM_PURGABLE_ORDERING_OBSOLETE,
         VM_PURGABLE_VOLATILE | VM_PURGABLE_BEHAVIOR_LIFO,
@@ -73,7 +72,6 @@ int main(void)
         control(address, VM_PURGABLE_SET_STATE, &state);
     }
 
-    // The previous state comes back without the flags, and a flag does not stay on the memory.
     state = VM_PURGABLE_VOLATILE | VM_VOLATILE_GROUP_5;
     control(address, VM_PURGABLE_SET_STATE, &state);
     state = VM_PURGABLE_VOLATILE | VM_PURGABLE_BEHAVIOR_LIFO;
@@ -86,7 +84,6 @@ int main(void)
     result = control(address, VM_PURGABLE_SET_STATE, &state);
     check("deny", result == KERN_SUCCESS && state == VM_PURGABLE_NONVOLATILE, "set deny");
 
-    // A bit outside VM_PURGABLE_ALL_MASKS is refused and changes nothing.
     state = VM_PURGABLE_NONVOLATILE;
     control(address, VM_PURGABLE_SET_STATE, &state);
     state = VM_PURGABLE_VOLATILE | (1 << 16);

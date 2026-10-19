@@ -1,34 +1,14 @@
--- ours.lua: the members our module declares, per type, from eidolon/Sources/SwiftUI/*.swift.
---
---     xmake l ours.lua > ours.tsv
---
--- One line per declaration: owner, kind, name, file. A source-level stand-in for the digester dump, used while the
--- module is still building.
---
--- Two things it gets right that it did not before, and both cost a review:
---   * an enum's `case` is a member in every reading - it is written under the enum's name, and Apple declares it as a
---     `case` or a `static`, so it is recorded as all three;
---   * a `typealias` is a declaration of the name it binds, and the thing it binds counts as declared too, so a type we
---     only alias is not reported as one we lack.
---
--- Every regular expression of the Python this replaces is kept above its Lua in a comment; the search is written out
--- as the loop that finds the same match.
-
 local text = import("lib.text", {rootdir = path.join(os.scriptdir(), "..", ".."), anonymous = true})
 local braces = import("lib.braces", {rootdir = path.join(os.scriptdir(), "..", ".."), anonymous = true})
 
--- the modules a name may be written with, and which the owner keeps no part of
 local MODULES = {Swift = true, SwiftUI = true, SwiftUICore = true, Foundation = true, UIKit = true, Combine = true}
 
 local KINDS = {"struct", "class", "enum", "protocol", "typealias", "actor"}
 
--- (?:public |internal |private |fileprivate |open |final |@frozen |indirect )*
 local PREFIXES = {"public ", "internal ", "private ", "fileprivate ", "open ", "final ", "@frozen ", "indirect "}
 
--- the lines a member walk does not read: a brace, an accessor, and the words a body is written in
 local SKIP = {["{"] = true, ["}"] = true, get = true, set = true, ["get set"] = true, willSet = true, didSet = true}
 
--- re.match(r'(?:PREFIXES)*KIND\s+(\w+)', s): the kind and the name a line declares at its start, or nil
 local function type_head(s)
     local pos = 1
     local moved = true
@@ -55,13 +35,11 @@ local function type_head(s)
     return nil
 end
 
--- re.match(r'extension\s+([\w.]+)', s): the whole extended name, or nil
 local function extension_name(s)
     local _, space = string.find(s, "^extension%s+")
     return space and string.match(s, "^[%w_%.]+", space + 1) or nil
 end
 
--- the owner an extension of `extended` is filed under: the whole name, without a module in front of it
 local function owner_of(extended)
     local head, rest = string.match(extended, "^([^%.]+)%.(.*)$")
     if head and MODULES[head] then
@@ -70,8 +48,6 @@ local function owner_of(extended)
     return extended
 end
 
--- re.findall(r'\bcase ([CLASS]+)$', s), CLASS given as the body of a Lua set: the run after the keyword. The first
--- "case " at a word boundary whose rest is all in the class is the only match, since the rest runs to the end.
 local function case_runs(s, class)
     for _, at in ipairs(text.positions(s, "case ")) do
         if text.boundary(s, at) then
@@ -84,7 +60,6 @@ local function case_runs(s, class)
     return {}
 end
 
--- re.findall(r'\bstatic (?:let|var|func)\s+(\w+)', s): every name, left to right, no match overlapping another
 local function static_members(s)
     local names = {}
     local from = 1
@@ -112,7 +87,6 @@ local function static_members(s)
     end
 end
 
--- re.search(KIND + r'\s+(\w+)', s): the first name a kind keyword is followed by, with no word boundary before it
 local function kind_name(s)
     for at = 1, #s do
         for _, kind in ipairs(KINDS) do
@@ -128,7 +102,6 @@ local function kind_name(s)
     return nil
 end
 
--- re.search(KIND + r'\s+(\w+)\s*=\s*(\w+)', s): the name the alias binds, which is the second name
 local function alias_target(s)
     for at = 1, #s do
         for _, kind in ipairs(KINDS) do
@@ -148,8 +121,6 @@ local function alias_target(s)
     return nil
 end
 
--- re.search(r'\bextension\s+([\w.]+)\s*:\s*(\w+)', s), with the protocol list of the second pattern: the extended name
--- and the list after the colon, or nil. The first pattern needs a word character after the colon and the spaces.
 local function conformance(s)
     for _, at in ipairs(text.positions(s, "extension")) do
         if text.boundary(s, at) then
@@ -171,7 +142,6 @@ local function conformance(s)
     return nil
 end
 
--- the declarations of one interface-free file, appended to out as {owner, kind, name, file}
 local function scan(file, out)
     local base = path.filename(file)
     local add = function(owner, kind, name)
@@ -187,8 +157,6 @@ local function scan(file, out)
             if kind then
                 owner = name
                 add(owner, "type", name)
-                -- a one-line type body - `enum X { case a, b }` - is all on this line, so its members are read here
-                -- and not at depth one, which it never reaches
                 local open = string.find(s, "{", 1, true)
                 if open and string.find(string.sub(s, open + 1), "}", 1, true) then
                     local close = nil
@@ -202,7 +170,6 @@ local function scan(file, out)
                         from = at + 1
                     end
                     local inline = string.sub(s, open + 1, close - 1)
-                    -- re.findall(r'\bcase ([\w,` ]+)$', inline.strip())
                     for _, run in ipairs(case_runs(text.strip(inline), "%w_,` ")) do
                         for _, part in ipairs(text.split(run, ",")) do
                             if text.strip(part) ~= "" then
@@ -231,8 +198,6 @@ local function scan(file, out)
                 end
             end
         elseif extension_name(s) then
-            -- An `extension` line opens a new section wherever it stands, and the walk reaches it at whatever depth
-            -- the file has drifted to - TextModifiers.swift:168 is one.
             owner = owner_of(extension_name(s))
         elseif owner and owner ~= "" and s ~= "" and not text.startswith(s, "//") and not SKIP[s] then
             local body = s
@@ -251,8 +216,6 @@ local function scan(file, out)
             elseif text.name_after(body, "let ") then
                 add(owner, "var", text.name_after(body, "let "))
             elseif text.name_after(body, "case ") then
-                -- Apple's declares a case as a `case` or as a `static`, so it counts as either, and a case list on
-                -- one line is every name in it, not only the first
                 for _, run in ipairs(case_runs(text.strip(body), "%w_, ")) do
                     for _, part in ipairs(text.split(run, ",")) do
                         local name_in_case = text.strip(part)
@@ -264,9 +227,6 @@ local function scan(file, out)
                     end
                 end
             elseif conformed then
-                -- a conformance declares what the compiler synthesises from it, and no line of ours shows those
-                -- members: Hashable is hash(into:) and hashValue, Equatable is ==
-                -- the whole extended name without its module: a member of `Anchor.Source` belongs to `Anchor.Source`
                 owner = owner_of(conformed)
                 if string.find(protocols, "Hashable", 1, true) then
                     add(owner, "func", "hash")
@@ -293,7 +253,6 @@ local function scan(file, out)
     end
 end
 
--- every declaration of the module's sources, in file order, each file in sorted order
 function collect(root)
     local files = os.files(path.join(root, "eidolon", "Sources", "SwiftUI", "*.swift"))
     table.sort(files)

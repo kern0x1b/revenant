@@ -18,9 +18,6 @@
 
 namespace shade {
 
-// Replays a complete live-control gesture against host steady time. Keeping
-// this separate from command parsing makes multi-point gestures independent of
-// terminal read chunking and guest scheduling speed.
 class LiveTouchScheduler {
 public:
     void schedule(std::span<const LiveTouchEvent> gesture);
@@ -38,4 +35,4 @@ private:
     std::deque<Event> events_;
 };
 
-} // namespace shade
+}

@@ -42,7 +42,7 @@ static int gHostSlot = -1;
 static BOOL gLog;
 
 static pthread_mutex_t gPoolMutex = PTHREAD_MUTEX_INITIALIZER;
-static NSMutableDictionary *gIdleConnections;   /* "host:port" -> connections, oldest first */
+static NSMutableDictionary *gIdleConnections;
 static NSMutableDictionary *gSessions;
 
 static NSString *headerValue(NSDictionary *headers, NSString *name)

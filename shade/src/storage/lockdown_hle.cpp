@@ -90,7 +90,7 @@ namespace {
         }
     }
 
-} // namespace
+}
 
 void register_lockdown_hle(UserlandHleRegistry& registry,
     std::optional<bool> activated, LockdownCapabilities profile)
@@ -113,9 +113,6 @@ void register_lockdown_hle(UserlandHleRegistry& registry,
                 copy_brick_state(call, activated);
             });
     }
-    // The convenience APIs can call the internal transport directly instead
-    // of going through lockdown_copy_value. Expose the same device state at
-    // both public query boundaries.
     registry.register_function(std::string { lockdown_image },
         "_lockdown_copy_activationState",
         [activated = *activated](UserlandHleCall& call) {
@@ -131,9 +128,6 @@ void register_lockdown_hle(UserlandHleRegistry& registry,
             }
             if (!is_lockdown_query(
                     call, activation_state_key, "ActivationState")) {
-                // A process can query unrelated Lockdown keys before the
-                // activation and brick state. Keep this boundary installed for
-                // later queries.
                 call.resume_original_persistently();
                 return;
             }
@@ -141,4 +135,4 @@ void register_lockdown_hle(UserlandHleRegistry& registry,
         });
 }
 
-} // namespace shade
+}

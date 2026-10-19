@@ -27,7 +27,7 @@ namespace {
     constexpr std::uint32_t name_too_long = 63;
     constexpr std::string_view descriptor_kind { "posix-semaphore" };
 
-} // namespace
+}
 
 void CompatibilityKernel::dispatch_bsd_posix_semaphore(
     Cpu& cpu, std::uint32_t number)
@@ -125,8 +125,6 @@ void CompatibilityKernel::dispatch_bsd_posix_semaphore(
         return;
     }
 
-    // This entry point is a deliberate ENOSYS stub in the matching XNU
-    // generation. Preserve that contract independently of its arguments.
     if (number == darwin::syscall::posix_semaphore_get_value) {
         trace_unknown(cpu, "POSIX semaphore syscall", number);
         bsd_error(cpu, bsd_support::not_implemented);
@@ -143,9 +141,6 @@ void CompatibilityKernel::dispatch_bsd_posix_semaphore(
     const auto semaphore_object = descriptor_entry->second;
 
     if (number == darwin::syscall::posix_semaphore_wait) {
-        // Darwin represents sem_t as the descriptor returned by sem_open().
-        // Reuse the same scheduler-backed Mach semaphore that XNU's psem
-        // implementation calls internally so waits block instead of polling.
         wait_on_semaphore_object(cpu, semaphore_object, std::nullopt,
             std::nullopt, true, descriptor);
         return;
@@ -193,4 +188,4 @@ void CompatibilityKernel::dispatch_bsd_posix_semaphore(
     bsd_error(cpu, bsd_support::not_implemented);
 }
 
-} // namespace shade
+}

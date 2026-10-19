@@ -18,4 +18,4 @@ DarwinKernelIdentity::DarwinKernelIdentity(
 {
 }
 
-} // namespace shade
+}

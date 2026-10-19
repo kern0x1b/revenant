@@ -27,7 +27,7 @@ namespace {
         "_mbxEnableSurfaceHashMutex",
     };
 
-} // namespace
+}
 
 void register_mbx_connect_hle(UserlandHleRegistry& registry)
 {
@@ -38,4 +38,4 @@ void register_mbx_connect_hle(UserlandHleRegistry& registry)
     }
 }
 
-} // namespace shade
+}

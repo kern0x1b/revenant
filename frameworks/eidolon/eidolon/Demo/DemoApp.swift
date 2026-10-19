@@ -144,11 +144,6 @@ func loadBackports() {
     probe("backports: UISwipeActionsConfiguration \(NSClassFromString("UISwipeActionsConfiguration") != nil ? "present" : "absent")")
 }
 
-/// What the run renders: the scenarios, one of them only, and whether each is drawn as an image. A key
-/// of the bundle's own Info.plist says it, which is how the emulator's image says it - the snapshot
-/// bundle is the same program built as another application, and xmake emulate launch starts that one, and
-/// holds the guest until this process is gone (until-exit). /var/charon says it on a phone, where the
-/// files are put there by hand and the application stays up afterwards. nil is no snapshot run.
 let snapshotRun: (only: String?, images: Bool, fromBundle: Bool)? = {
     let fromBundle = Bundle.main.object(forInfoDictionaryKey: "EidolonSnapshots") != nil
     guard fromBundle || FileManager.default.fileExists(atPath: "/var/charon/snapshots.on") else {
@@ -162,14 +157,12 @@ let snapshotRun: (only: String?, images: Bool, fromBundle: Bool)? = {
     return (name?.isEmpty == false ? name : nil, images, fromBundle)
 }()
 
-// /var/charon/gesture names a scenario whose real touches are run once it is on screen (a phone only).
 func runDeviceGesture(_ name: String) {
     probe("swipe bridge: \(_Probe.swipeBridgeState())")
     probe("table recognisers: \(_Probe.tableRecognizers(in: UIApplication.shared.keyWindow ?? UIView()))")
     guard gesture_ready() else { probe("gesture: no HID client"); return }
     switch name {
     case "swipe-real":
-        // a drag from the right edge to the left over the first row opens its trailing actions; a tap on the first action runs it
         let width = UIScreen.main.bounds.size.width
         gesture_drag({ CGPoint(x: width - 20, y: 42) }, { CGPoint(x: width - 230, y: 42) }, 12, 0.6)
         gesture_step(6.0) { probe("gesture: opened") }
@@ -186,7 +179,6 @@ struct DemoApp: App {
 
     var body: some Scene {
         WindowGroup {
-            // /var/charon/show names a scenario to keep on screen, so that a picture of the real screen can be taken
             if let name = try? String(contentsOfFile: "/var/charon/show", encoding: .utf8),
                let scenario = snapshotCases().first(where: { $0.name == name.trimmingCharacters(in: .whitespacesAndNewlines) }) {
                 AnyView(scenario.view).onAppear {

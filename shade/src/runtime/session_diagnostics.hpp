@@ -22,8 +22,6 @@ struct CpuRunResult;
 namespace runtime_detail {
 struct Runtime;
 
-// Queried at a guest-safe boundary; no background polling or live code-cache
-// inspection is needed to explain process/thread and display state.
 class SessionDiagnostics {
 public:
     SessionDiagnostics(Runtime& initial,
@@ -47,5 +45,5 @@ private:
     Output& output_;
 };
 
-} // namespace runtime_detail
-} // namespace shade
+}
+}

@@ -41,16 +41,9 @@ namespace {
     constexpr std::uint32_t graphics_mapping_search_base = 0x1d000000U;
     constexpr std::uint32_t maximum_mapping_size = 512U * 1024U * 1024U;
 
-    // These are the memory selectors used by the SGX535 GLEngine/driver pair.
-    // They are part of the accelerator user-client ABI, not an application
-    // rule.
     constexpr std::uint32_t device_memory_type = 0U;
     constexpr std::uint32_t shared_memory_type = 2U;
     constexpr std::uint32_t map_flags = 1U;
-    // The shared-context path writes a 0x4000-byte 16-bit table immediately
-    // after the selector-4 reply.  A zero-sized IOConnectMapMemory request is
-    // an in/out request for this firmware-owned arena, so expose the smallest
-    // extent required by the ABI rather than a single guard page.
     constexpr std::uint32_t minimum_shared_mapping_size = 0x4000U;
     constexpr std::uint32_t shared_context_reply_size =
         3U * sizeof(std::uint32_t);
@@ -228,10 +221,6 @@ namespace {
         }
 
         std::uint32_t mapped_address = 0;
-        // IOConnectMapMemory's size argument is in/out.  The SGX shared arena
-        // is requested with size zero and the user client returns its actual
-        // extent; reporting the request back would make the firmware treat a
-        // valid mapping as an empty arena.
         std::uint32_t exposed_size = *mapped_size;
         {
             std::lock_guard lock { state.mach_mutex };
@@ -376,10 +365,6 @@ namespace {
             if (!is_graphics_connection_locked(
                     state, process, connection_object))
                 return std::nullopt;
-            // IOConnectAddClient names the shared connection with a task-local
-            // Mach name. Resolve it before recording the relationship; the
-            // accelerator does not expose a second service object for this
-            // handshake.
             if (const auto client_object =
                     state.mach_namespaces.resolve(process.pid, client_name);
                 client_object &&
@@ -392,7 +377,7 @@ namespace {
             message_id, iokit_abi::success);
     }
 
-} // namespace
+}
 
 bool matches_service(std::span<const std::byte> matching)
 {
@@ -483,11 +468,6 @@ std::optional<MethodResult> dispatch_connect_method(AddressSpace& memory,
             return MethodResult { iokit_abi::bad_argument, { }, { } };
         }
 
-        // Static analysis of IMGSGX535GLDriver shows the reply as three words:
-        // word 1 is the writable 0x4000-byte table and word 2 is an opaque
-        // connection-local object that is dereferenced at offset zero and +12.
-        // Keep both inside the connection's shared mapping.  This is a guest
-        // address, never a host pointer or a device-specific fake object.
         const auto address = mapping->address;
         const std::array<std::uint32_t, 3> words { 0U, address, address };
         std::vector<std::byte> result(shared_context_reply_size);
@@ -515,9 +495,6 @@ std::optional<MethodResult> dispatch_connect_method(AddressSpace& memory,
         connection.shared_created = true;
         return MethodResult { iokit_abi::success, { }, { } };
     case Selector::InitializeContext:
-        // The shared connection uses the same selector for its 80-byte
-        // allocation request.  It returns the same shared-arena descriptor as
-        // the context-side form.
         if (scalar_input.empty() && inband_input.size() == 80U &&
             inband_output_capacity == shared_context_reply_size &&
             connection.shared_created) {
@@ -608,4 +585,4 @@ void close_connection(AddressSpace& memory, KernelSharedState& state,
     }
 }
 
-} // namespace shade::kernel_iokit::graphics
+}

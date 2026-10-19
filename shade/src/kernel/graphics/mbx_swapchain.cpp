@@ -31,11 +31,6 @@ void Mbx2dHle::initialize_destination(UserlandHleCall& call, RenderState& state)
     if (initialized_destinations_.contains(surface))
         return;
 
-    // CoreGraphics can rasterize static LayerKit content into a newly-created
-    // CoreSurface before MBX2D binds it as the render destination.  Keep that
-    // CPU-rendered backing store; replacing it with the previous scanout would
-    // erase layers such as the lock-screen bottom bar before the first GPU
-    // dirty update arrives.
     const auto existing = read_region(
         *destination, 0, 0, destination->width, destination->height, call);
     if (existing && std::any_of(existing->begin(), existing->end(),
@@ -113,12 +108,6 @@ void Mbx2dHle::prepare_destination_for_frame(UserlandHleCall& call,
     }
     const auto width = damage.right - damage.left;
     const auto height = damage.bottom - damage.top;
-    // LayerKit retains unchanged sibling layers in the swap backing. Extend
-    // invalidation across old and new bounds while the same large source moves,
-    // but not when it contracts inside its old bounds: the exposed area has
-    // already been composed from retained siblings in the current pass.
-    // Clearing that area here would replace those pixels with black after they
-    // were drawn. A replacement source likewise starts a new scene generation.
     bool cleared { };
     if (width > 0 && height > 0 && host_graphics_->accelerated() &&
         destination->host_surface && destination->backing &&
@@ -150,4 +139,4 @@ void Mbx2dHle::prepare_destination_for_frame(UserlandHleCall& call,
     }
 }
 
-} // namespace shade
+}

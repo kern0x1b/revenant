@@ -25,7 +25,7 @@ namespace {
         return index < names.size() ? names.begin()[index] : "unknown";
     }
 
-} // namespace
+}
 
 void inspect_abi(const std::optional<std::filesystem::path>& rootfs,
     const std::optional<std::string>& ios_build, Output& output)
@@ -100,4 +100,4 @@ void inspect_abi(const std::optional<std::filesystem::path>& rootfs,
     output.write(text.str());
 }
 
-} // namespace shade
+}

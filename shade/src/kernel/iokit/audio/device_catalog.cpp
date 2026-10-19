@@ -25,8 +25,6 @@ namespace {
     }
 
     constexpr std::uint32_t linear_pcm_format = four_cc('l', 'p', 'c', 'm');
-    // kAudioDeviceTransportTypeBuiltIn.  The value is a four-character code
-    // represented in the same big-endian form used by CoreAudio properties.
     constexpr std::uint32_t built_in_transport_type =
         four_cc('b', 'l', 't', 'n');
     constexpr std::uint32_t linear_pcm_flags = 0x0cU;
@@ -72,10 +70,6 @@ namespace {
     constexpr std::array input_gain_range { IOAudio2ControlRangeDescription {
         0xfffffff340000000ULL, 64U, 0U, 0x00000000c0000000ULL } };
 
-    // Output elements identify codec endpoints, not PCM stream channels:
-    // headphones, line out, receiver and speaker.  The native HAL discovers
-    // each endpoint through its volume/mute controls, including the built-in
-    // outputs that remain available when no external jack is connected.
     constexpr std::array<IOAudio2ControlDescription, 17> codec_controls { {
         { 3U, boolean_control_base_class, jack_control_class, output_scope, 0U,
             0U, true, { }, { } },
@@ -182,10 +176,6 @@ namespace {
     constexpr std::array baseband_formats { baseband_media_format,
         baseband_telephony_format };
 
-    // The modem path is a distinct IOAudio2 endpoint. VirtualAudio turns this
-    // endpoint into firmware-owned uplink/downlink and receiver/speaker ports.
-    // It begins in the media-rate format and can negotiate the narrow-band call
-    // format through the ordinary IOAudio2 stream-format selector.
     constexpr std::array baseband_streams {
         IOAudio2StreamDescription {
             .identifier = 1,
@@ -207,11 +197,6 @@ namespace {
         },
     };
 
-    // The iPhone 4S devices below are what its drivers publish on iOS 6.1.3,
-    // read from the device's registry with IORegistryEntryCreateCFProperties
-    // (see emulator-lab/docs/ios-6.1.3-audio-and-launchd.md).  Their I2S
-    // frames hold two 32-bit slots: a 16-bit sample takes a slot, packed only
-    // when two channels fill the frame, and a 20- or 24-bit one takes two.
     constexpr IOAudio2StreamFormatDescription i2s_format(
         std::uint32_t sample_rate, std::uint32_t channels,
         std::uint32_t bits_per_channel)
@@ -233,7 +218,6 @@ namespace {
     constexpr std::array<std::uint32_t, 9> i2s_sample_rates { 8000U, 11025U,
         12000U, 16000U, 22050U, 24000U, 32000U, 44100U, 48000U };
 
-    // Every rate at 16, 20 and 24 bits, as the codec and Voice offer them.
     constexpr auto i2s_formats(std::uint32_t channels)
     {
         std::array<IOAudio2StreamFormatDescription,
@@ -247,9 +231,6 @@ namespace {
         return formats;
     }
 
-    // Voice is the application processor's side of a call: AppleSecondaryAudio
-    // on the codec's I2S bus (IOAudio2Device "Voice"). From 6.1.3,
-    // VirtualAudio opens the route only after finding its input stream.
     constexpr auto voice_formats = i2s_formats(2U);
 
     constexpr std::uint32_t voice_io_buffer_frame_size = 3072U;
@@ -313,8 +294,6 @@ namespace {
             voice_dsp, false, { }, voice_clock_sources },
     };
 
-    // The codec is a Cirrus CS42L63 (AppleEmbeddedAudioDevice "Codec"): a
-    // mono input and a stereo output, each at every rate in 16, 20 or 24 bits.
     constexpr std::uint32_t iphone_4s_io_buffer_frame_size = 16384U;
     constexpr auto iphone_4s_codec_input_formats = i2s_formats(1U);
     constexpr auto iphone_4s_codec_output_formats = i2s_formats(2U);
@@ -340,8 +319,6 @@ namespace {
         },
     };
 
-    // Output elements 1 to 4 are the endpoints: two with a 2 dB and a 1 dB
-    // segment, two in half-dB steps.  Element 0 is the master volume.
     constexpr std::array iphone_4s_master_volume_range {
         IOAudio2ControlRangeDescription {
             0xffffffc200000000ULL, 62U, 0U, 0x0000000100000000ULL },
@@ -364,7 +341,6 @@ namespace {
         IOAudio2ControlRangeDescription {
             0xffffffa400000000ULL, 312U, 0U, 0x0000000080000000ULL },
     };
-    // The read-only 'atsc' levels carry one fixed value in a stepless range.
     constexpr std::array iphone_4s_output_3_atsc_range {
         IOAudio2ControlRangeDescription {
             0x00000001b3333333ULL, 0U, 0U, 0U },
@@ -492,8 +468,6 @@ namespace {
             { }, { }, iphone_4s_fm2r_properties },
     };
 
-    // The modem's audio (AppleBasebandAudio "Baseband"): 44.1 kHz stereo,
-    // with mono at 8 kHz and mono or stereo at 32, 44.1 and 48 kHz.
     constexpr std::array iphone_4s_baseband_formats {
         i2s_format(8000U, 1U, 16U),
         i2s_format(32000U, 2U, 16U),
@@ -525,8 +499,6 @@ namespace {
         },
     };
 
-    // The call path between the modem and the DSP (AppleSecondaryAudio
-    // "Baseband Voice"): mono at 8 or 16 kHz in 16, 20 or 24 bits.
     constexpr std::array iphone_4s_baseband_voice_formats {
         i2s_format(8000U, 1U, 16U),
         i2s_format(8000U, 1U, 20U),
@@ -580,8 +552,6 @@ namespace {
             iphone_4s_baseband_voice_clock_sources },
     };
 
-    // The voice DSP (HighlandParkAudioDevice "HighlandPark", no name): mono
-    // 16-bit at every rate, with its processing modes as selectors.
     constexpr auto iphone_4s_highland_park_formats = [] {
         std::array<IOAudio2StreamFormatDescription, i2s_sample_rates.size()>
             formats { };
@@ -765,8 +735,6 @@ namespace {
             iphone_4s_highland_park_agc_properties },
     };
 
-    // The dock's digital audio out (AppleUSBMike "USB Audio Output"): one
-    // stereo 16-bit output at every rate, non-mixable.
     constexpr std::uint32_t iphone_4s_usb_io_buffer_frame_size = 14112U;
     constexpr IOAudio2StreamFormatDescription usb_output_format(
         std::uint32_t sample_rate)
@@ -916,7 +884,7 @@ namespace {
         return device_catalog;
     }
 
-} // namespace
+}
 
 std::span<const IOAudio2DeviceDescription> IOAudio2DeviceCatalog::devices(
     AudioHardwareProfile profile)
@@ -933,4 +901,4 @@ const IOAudio2DeviceDescription* IOAudio2DeviceCatalog::find(
     return device == devices.end() ? nullptr : &*device;
 }
 
-} // namespace shade::kernel_iokit::audio
+}

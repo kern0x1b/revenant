@@ -125,7 +125,7 @@ namespace {
                    [](std::byte byte) { return byte != std::byte { 0 }; });
     }
 
-} // namespace
+}
 
 std::vector<std::byte> make_virtual_udp_ancillary(std::uint32_t family,
     const VirtualUdpDatagram& datagram,
@@ -315,9 +315,6 @@ VirtualUdpStatus VirtualUdpNetwork::send(VirtualUdpSocket& socket,
         const bool wildcard =
             wildcard_address(target->bound_address_, target->family_);
         if (multicast) {
-            // Darwin permits a wildcard-bound multicast receiver. Membership is
-            // still tracked, while accepting wildcard bindings also covers the
-            // early mDNS setup sequence before its interface join is issued.
             if (!wildcard && !target->multicast_groups_.contains(group))
                 continue;
         } else if (!wildcard && !same_ip(target->bound_address_,
@@ -495,4 +492,4 @@ void VirtualUdpSocket::make_defunct()
     multicast_groups_.clear();
 }
 
-} // namespace shade::bsd
+}

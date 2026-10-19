@@ -12,15 +12,12 @@
 
 namespace shade {
 
-// A prepared firmware asset, independent of SDL and the guest compositor.
 class BootLogo {
 public:
-    // Center native pixels on a black panel. Alpha is composited onto black;
-    // oversized images are clipped rather than distorted or enlarged.
     [[nodiscard]] static std::vector<std::uint32_t> load(
         const std::filesystem::path& path, DisplayGeometry panel);
     [[nodiscard]] static std::vector<std::uint32_t> placeholder(
         DisplayGeometry panel);
 };
 
-} // namespace shade
+}

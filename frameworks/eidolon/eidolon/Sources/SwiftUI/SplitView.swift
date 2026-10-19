@@ -19,8 +19,6 @@ public struct NavigationSplitViewVisibility: Equatable, Codable {
     }
 }
 
-/// What a style is told about the split view it draws, and the view it draws for it. The release's own
-/// columns are the same whichever style an app asks for, so the body is the columns as they are.
 public protocol NavigationSplitViewStyle {
     associatedtype Body: View
     typealias Configuration = NavigationSplitViewStyleConfiguration

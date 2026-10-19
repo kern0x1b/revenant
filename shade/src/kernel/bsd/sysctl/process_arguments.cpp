@@ -64,7 +64,7 @@ namespace {
         return result;
     }
 
-} // namespace
+}
 
 std::vector<std::byte> encode_process_arguments(
     std::string_view executable_path, std::span<const std::string> arguments,
@@ -82,4 +82,4 @@ std::vector<std::byte> encode_process_arguments2(
         executable_path, arguments, environment, true);
 }
 
-} // namespace shade::darwin::sysctl
+}

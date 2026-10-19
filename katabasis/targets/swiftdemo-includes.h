@@ -1,5 +1,3 @@
-// swiftdemo-includes.h -- swift/demo-arm64 with libswiftCore lifted as a guest image. The surface
-// is libswiftCore's own libSystem/libobjc imports (dyld_info -imports) beyond the common set.
 #include "common-includes.h"
 #include <math.h>
 #include <execinfo.h>

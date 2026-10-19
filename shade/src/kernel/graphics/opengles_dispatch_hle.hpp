@@ -20,8 +20,6 @@ class OpenGlesHle;
 class UserlandHleCall;
 class UserlandHleRegistry;
 
-// GLI is the C driver boundary beneath the firmware's EAGL object lifecycle.
-// This adapter binds its context-first table to the existing GLES state model.
 class OpenGlesDispatchHle {
 public:
     OpenGlesDispatchHle(OpenGlesHle& owner, UserlandHleRegistry& registry);
@@ -54,4 +52,4 @@ private:
     std::uint32_t pixel_format_ { };
 };
 
-} // namespace shade
+}

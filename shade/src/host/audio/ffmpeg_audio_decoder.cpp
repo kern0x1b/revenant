@@ -64,7 +64,7 @@ namespace {
     };
 #endif
 
-} // namespace
+}
 
 struct FfmpegAudioDecoder::Impl {
     mutable std::mutex mutex;
@@ -250,4 +250,4 @@ std::string FfmpegAudioDecoder::last_error() const
     return impl_->error;
 }
 
-} // namespace shade
+}

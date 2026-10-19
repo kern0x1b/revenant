@@ -119,7 +119,7 @@ namespace {
         return (size + alignment - 1U) & ~(alignment - 1U);
     }
 
-} // namespace
+}
 
 bool CompatibilityKernel::bpf_descriptor_readable(std::uint32_t fd) const
 {
@@ -647,4 +647,4 @@ bool CompatibilityKernel::ioctl_bpf_device(Cpu& cpu, std::uint32_t fd)
     }
 }
 
-} // namespace shade
+}

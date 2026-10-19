@@ -43,8 +43,6 @@ namespace {
 
     SoftwareSpanScratch& span_scratch()
     {
-        // These synchronous spans cannot reenter guest execution. Reuse only
-        // storage, on the executing host thread; every input is read afresh.
         thread_local SoftwareSpanScratch scratch;
         return scratch;
     }
@@ -60,8 +58,6 @@ namespace {
             return false;
         const auto output = static_cast<std::uint64_t>(call.argument(0));
         const auto bytes = count * sizeof(std::uint32_t);
-        // Exact in-place blending is safe after reading both operands. Other
-        // overlapping spans retain the firmware's sequential store behavior.
         for (const auto input : { call.argument(1), call.argument(2) }) {
             if (input != output && input < output + bytes &&
                 output < static_cast<std::uint64_t>(input) + bytes) {
@@ -109,9 +105,6 @@ namespace {
             coordinates[3] != 0U) {
             return false;
         }
-        // Horizontal spans only need one or two source rows. Other affine
-        // directions retain the firmware sampler instead of copying an image
-        // for each span. No persistent texture cache can hide guest writes.
         const auto maximum_x = std::bit_cast<std::int32_t>(image[4]);
         const auto maximum_y = std::bit_cast<std::int32_t>(image[5]);
         if (maximum_x < 0 || maximum_y < 0)
@@ -161,7 +154,7 @@ namespace {
             call.argument(2), std::as_bytes(std::span { result }));
     }
 
-} // namespace
+}
 
 void register_core_animation_software_hle(UserlandHleRegistry& registry)
 {
@@ -191,4 +184,4 @@ void register_core_animation_software_hle(UserlandHleRegistry& registry)
     }
 }
 
-} // namespace shade
+}

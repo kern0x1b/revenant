@@ -27,8 +27,6 @@ struct SessionAudio {
     std::string decoder_name { "pcm-caf-only" };
 };
 
-// Host services are supplied by the embedding frontend. No native window,
-// audio, terminal descriptor or operating-system SDK crosses this boundary.
 class SessionHost {
 public:
     virtual ~SessionHost() = default;
@@ -43,4 +41,4 @@ public:
     memory_budget_snapshot() const = 0;
 };
 
-} // namespace shade
+}

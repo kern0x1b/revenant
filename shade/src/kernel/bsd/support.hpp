@@ -40,4 +40,4 @@ inline constexpr std::size_t maximum_io = 16U * 1024U * 1024U;
 [[nodiscard]] std::string format_payload_prefix(
     std::span<const std::byte> bytes);
 
-} // namespace shade::bsd_support
+}

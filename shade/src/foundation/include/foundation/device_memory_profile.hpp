@@ -10,12 +10,8 @@ namespace shade {
 
 struct DeviceMemoryProfile {
     std::uint64_t ram_bytes;
-    // Nominal flash capacity for volume geometry. The guest sees this device
-    // property, never the host filesystem's capacity.
     std::uint64_t storage_bytes;
-    // Guest-visible memory after platform-reserved carve-outs. Zero follows
-    // ram_bytes when the model has no separate memory-size boundary.
     std::uint64_t usable_ram_bytes { };
 };
 
-} // namespace shade
+}

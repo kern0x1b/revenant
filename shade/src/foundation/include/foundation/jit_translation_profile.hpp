@@ -27,32 +27,15 @@
 
 namespace shade {
 
-// Keep one prior working set plus the next run's bounded activation/recent
-// sample. This prevents a long boot or launch from replacing every learned
-// interaction while the store still applies a global byte limit across
-// processes.
 inline constexpr std::size_t jit_translation_profile_maximum_locations =
     262'144;
 
-// A recorder belongs to one JIT executor. Its arrays are allocated with the
-// executor, so ordinary demand translation never allocates or contends on the
-// profile's merge mutex. The hash table is deliberately larger than the
-// descriptor array so a full recorder still has an empty probe slot.
-// Hold one complete sustained foreground burst between Guest safe points.
-// Validation and profile merging are intentionally absent from Cpu::run, so a
-// full recorder must not force synchronous work onto an interactive slice.
-// The bounded executor-local storage costs about 3 MiB. Half preserves the
-// activation prefix and two rotating quarter-size banks retain the newest
-// unique interaction tail after a sustained run exceeds the recorder.
 inline constexpr std::size_t jit_translation_profile_recorder_capacity =
     131'072;
 inline constexpr std::size_t jit_translation_profile_recorder_prefix_capacity =
     jit_translation_profile_recorder_capacity / 2U;
 inline constexpr std::size_t jit_translation_profile_recorder_recent_capacity =
     jit_translation_profile_recorder_capacity / 4U;
-// A native slab is filled in two useful tiers: retain the deterministic image
-// activation path, then spend the remaining capacity on the newest observed
-// interaction before considering older history.
 inline constexpr std::size_t
     jit_translation_profile_activation_prediction_capacity =
         jit_translation_profile_recorder_prefix_capacity;
@@ -77,8 +60,6 @@ enum class JitTranslationProfileRecordResult : std::uint8_t {
     Ignored,
 };
 
-// Fixed-storage, executor-local hot-path recorder. The returned spans remain
-// valid until reset() and are consumed only at a guest safe point.
 class JitTranslationProfileRecorder {
 public:
     JitTranslationProfileRecorder() noexcept = default;
@@ -91,8 +72,6 @@ public:
 
     [[nodiscard]] JitTranslationProfileRecordResult record(
         std::uint64_t location_descriptor) noexcept;
-    // Safe-point snapshot order is activation prefix, older recent bank, then
-    // newest bank. Recording itself remains allocation-free and lock-free.
     [[nodiscard]] std::vector<std::uint64_t> snapshot() const;
     [[nodiscard]] std::size_t size() const noexcept
     {
@@ -146,9 +125,6 @@ private:
 };
 
 struct JitTranslationProfileStats {
-    // The legacy names remain in the structure for callers compiled against
-    // the Stage 4.2 interface. Reports use the explicit names below so a
-    // disk load is never confused with descriptors recorded during this run.
     std::uint64_t recorded { };
     std::uint64_t recorded_descriptors { };
     std::uint64_t newly_recorded_descriptors { };
@@ -202,11 +178,7 @@ struct JitTranslationProfileStats {
 };
 
 struct JitTranslationProfilePrediction {
-    // Activation first, newest interaction second, then older history. Every
-    // live profile descriptor appears exactly once.
     std::vector<std::uint64_t> ordered_locations;
-    // Frozen newest-first tail used for bounded recovery after range
-    // invalidations without reversing the tiered plan above.
     std::vector<std::uint64_t> recent_locations;
 };
 
@@ -216,30 +188,17 @@ struct JitTranslationProfilePredictionLimits {
     std::size_t historical_locations { };
 };
 
-// A process-image profile contains only complete A32 location descriptors that
-// previously reached successful host-code emission. It does not own or share
-// generated machine code, callbacks, page tables, or guest memory.
 class JitTranslationProfile {
 public:
     JitTranslationProfile() = default;
     explicit JitTranslationProfile(
         std::vector<std::uint64_t> location_descriptors);
 
-    // Profiling is an optional bounded working-set optimization and must
-    // never interrupt guest translation if host memory is constrained.
     void record(std::uint64_t location_descriptor) noexcept;
-    // Merge a recorder batch at a Guest safe point. The bounded profile is a
-    // recency-ordered working set: newly demanded locations displace the
-    // oldest hints once it is full. Recorder-local duplicate and overflow
-    // counts are supplied so all capacity decisions remain visible without
-    // adding hot-path atomics.
     void merge(std::span<const std::uint64_t> location_descriptors,
         std::uint64_t recorder_deduplicated = 0,
         std::uint64_t recorder_dropped_capacity = 0,
         std::size_t activation_prefix_locations = 0) noexcept;
-    // A hint can become invalid when a prior run's slid image occupied the same
-    // executable address. Discarding is advisory and takes effect when the
-    // profile is next saved; guest execution never depends on the hint.
     void discard(std::uint64_t location_descriptor) noexcept;
     [[nodiscard]] std::vector<std::uint64_t> snapshot() const;
     [[nodiscard]] JitTranslationProfilePrediction snapshot_prediction() const;
@@ -247,19 +206,12 @@ public:
         JitTranslationProfilePredictionLimits limits) const;
     [[nodiscard]] std::pair<std::vector<std::uint64_t>, std::size_t>
     snapshot_range(std::size_t offset, std::size_t maximum) const;
-    // Offset zero is the most recently observed descriptor. This is the order
-    // used for prediction; snapshot_range retains storage order for persistence
-    // and diagnostics.
     [[nodiscard]] std::pair<std::vector<std::uint64_t>, std::size_t>
     snapshot_recent_range(std::size_t offset, std::size_t maximum) const;
-    // Portable scans advance across locations already confirmed in the live
-    // artifact catalog without re-enqueuing them after every profile revision.
     [[nodiscard]] std::pair<std::vector<std::uint64_t>, std::size_t>
     snapshot_recent_missing_portable_range(
         std::size_t offset, std::size_t maximum) const;
     [[nodiscard]] std::size_t storage_size() const noexcept;
-    // Changes whenever the ordered working set changes. Consumers use this
-    // to restart bounded scans without coupling profile mutation to a queue.
     [[nodiscard]] std::uint64_t revision() const noexcept
     {
         return revision_.load(std::memory_order_acquire);
@@ -342,11 +294,6 @@ private:
     std::unordered_set<std::uint64_t> profile_portable_artifact_locations_;
 };
 
-// Profiles are host cache hints stored outside the guest root filesystem.
-// Files contain descriptors, never generated host machine code. The exact
-// executable content identity, rather than a path or mtime, selects a file.
-// Invalid, stale, or truncated files are ignored and replaced after a clean
-// simulator shutdown.
 class JitTranslationProfileStore {
 public:
     explicit JitTranslationProfileStore(
@@ -374,4 +321,4 @@ private:
     bool save_enabled_ { true };
 };
 
-} // namespace shade
+}

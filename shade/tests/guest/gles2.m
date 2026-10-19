@@ -68,7 +68,6 @@ static void testReadPixels(void)
     expectRead("glReadPixels returns the cleared colour", 0, 0, 255, 128, 0, 255);
     expectRead("glReadPixels reads the far corner", side - 1, side - 1, 255, 128, 0, 255);
 
-    // Rows count up from the lower edge: clear only rows 0 and 1, then look at both ends.
     clearTo(0.0f, 0.0f, 1.0f, 1.0f);
     glEnable(GL_SCISSOR_TEST);
     glScissor(0, 0, side, 2);
@@ -79,7 +78,6 @@ static void testReadPixels(void)
     expectRead("glReadPixels row 2 is above it", 3, 2, 0, 0, 255, 255);
     expectRead("glReadPixels the top row is the upper edge", 3, side - 1, 0, 0, 255, 255);
 
-    // A pack alignment of 8 starts the second row of a 3 pixel wide read at byte 16, not 12.
     uint8_t padded[64];
     memset(padded, 0x55, sizeof padded);
     glPixelStorei(GL_PACK_ALIGNMENT, 8);
@@ -94,7 +92,6 @@ static void testReadPixels(void)
              padded[12]);
     check("glReadPixels honours the pack alignment", rows && gap, why);
 
-    // The part of a rectangle outside the framebuffer is left as it was.
     clearTo(0.0f, 1.0f, 0.0f, 1.0f);
     uint8_t edge[4 * 4 * 4];
     memset(edge, 0x55, sizeof edge);
@@ -112,8 +109,6 @@ static void testReadPixels(void)
     check("glReadPixels refuses a format it cannot give", glGetError() == GL_INVALID_OPERATION,
           "no GL_INVALID_OPERATION");
 }
-
-// Shaders ----------------------------------------------------------------------------------------
 
 static const char *plainVertex =
     "attribute vec4 position;\n"
@@ -139,7 +134,6 @@ static GLuint compile(GLenum type, const char *source, char *log, size_t logSize
     return shader;
 }
 
-// A linked program, or 0 with the reason in log.
 static GLuint build(const char *vertexSource, const char *fragmentSource, char *log, size_t logSize)
 {
     GLuint vertex = compile(GL_VERTEX_SHADER, vertexSource, log, logSize);
@@ -169,7 +163,6 @@ static void drawQuad(GLuint program)
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 }
 
-// The pixel at (x, y), with the OpenGL error checked, against a colour within two steps.
 static void expectDrawn(const char *name, int x, int y, int r, int g, int b, int a)
 {
     uint8_t got[4] = {9, 9, 9, 9};
@@ -200,7 +193,6 @@ static GLuint texture2x2(const uint8_t texels[16])
     return texture;
 }
 
-// unit written count times, in a new allocation.
 static char *repeated(const char *unit, int count)
 {
     size_t length = strlen(unit);
@@ -211,7 +203,6 @@ static char *repeated(const char *unit, int count)
     return result;
 }
 
-// text followed by more, in a new allocation; text is freed.
 static char *appended(char *text, const char *more)
 {
     size_t length = strlen(text), extra = strlen(more);
@@ -234,8 +225,6 @@ static void testCompiling(void)
         "precision mediump float;\nvarying vec3 p;\nvoid main() { gl_FragColor = vec4(p, 1.0); }\n", log, sizeof log);
     check("a varying declared with another type does not link", program == 0 && log[0] != 0, "linked or no log");
 
-    // The vertex shader writes one float where the fragment shader reads four, and arrays of
-    // other lengths: a link error, never a read or write past what the vertex shader wrote.
     program = build("attribute vec4 position;\nvarying float p;\nvoid main() { gl_Position = position; p = 1.0; }\n",
         "precision mediump float;\nvarying vec4 p;\nvoid main() { gl_FragColor = p; }\n", log, sizeof log);
     check("a varying float read as a vec4 does not link", program == 0 && strstr(log, "'p'") != NULL, log);
@@ -252,7 +241,6 @@ static void testCompiling(void)
         "precision mediump float;\nvarying vec2 p;\nvarying vec4 q;\nvoid main() { gl_FragColor = q + vec4(p, 0.0, 0.0); }\n", log, sizeof log);
     check("one varying of two missing does not link and the log names it", program == 0 && strstr(log, "'q'") != NULL, log);
 
-    // A program that did not link cannot be used, and drawing with the one before it is an error.
     {
         GLuint vertex = compile(GL_VERTEX_SHADER, plainVertex, NULL, 0);
         GLuint fragment = compile(GL_FRAGMENT_SHADER,
@@ -279,8 +267,6 @@ static void testCompiling(void)
         "precision mediump float;\nvarying vec2 p;\nvoid main() { gl_FragColor = vec4(p, 0.0, 1.0); }\n", log, sizeof log);
     check("a program whose shaders agree links", program != 0, log);
 
-    // The variables of a function take their place on a stack of 1024 values: a shader that asks
-    // for more is refused where it declares them (it used to write past the host's stack at run).
     static const char *fits = "precision mediump float;\nvoid main() {\n float a[256]; float b[256]; float c[256]; float d[256];\n"
         " d[255] = 1.0; gl_FragColor = vec4(d[255]);\n}\n";
     static const char *tooMuch = "precision mediump float;\nvoid main() {\n float a[256]; float b[256]; float c[256]; float d[256]; float e[256];\n"
@@ -295,9 +281,6 @@ static void testCompiling(void)
         "void main() { gl_Position = position * f(); }\n", log, sizeof log);
     check("so do the variables of a function main calls", shader == 0 && strstr(log, "'f'") != NULL, log);
 
-    // Macros that expand into more than the compiler will hold (sixteen copies of the macro
-    // before it, eight deep: 16^8 tokens from a few hundred bytes) are refused, quickly, with
-    // the reason in the log; macros a shader really uses expand.
     char *bomb = repeated("#define A0 x x x x x x x x x x x x x x x x\n", 1);
     for (int level = 1; level <= 7; level++) {
         char line[512], unit[64];
@@ -332,8 +315,6 @@ static void testCompiling(void)
         "void main() { float x = 0.0;\n C C C C C C C C\n gl_FragColor = vec4(x / 128.0); }\n", log, sizeof log);
     check("macros three deep expand", shader != 0, log);
 
-    // #define takes the word after the keyword as the name: macros named by letters of "define" are
-    // ordinary macros, and the shader draws their values.
     program = build(plainVertex,
         "precision mediump float;\n#define e 0.5\n#define n 1.0\nvarying vec2 p;\n"
         "void main() { gl_FragColor = vec4(e, n, 0.0, 1.0); }\n", log, sizeof log);
@@ -344,8 +325,6 @@ static void testCompiling(void)
         expectDrawn("and draw the values they stand for", 1, 1, 128, 255, 0, 255);
     }
 
-    // Function-like macros are C++'s (GLSL ES 1.00 section 3.4): a call expands to its body with the
-    // arguments in place, and a call with the wrong number of arguments does not compile.
     program = build(plainVertex,
         "precision mediump float;\n#define twice(x) (x * 2.0)\n#define pair(a, b) (a + b)\nvarying vec2 p;\n"
         "void main() { gl_FragColor = vec4(twice(0.25), pair(0.25, 0.25), 0.0, 1.0); }\n", log, sizeof log);
@@ -359,8 +338,6 @@ static void testCompiling(void)
         "precision mediump float;\n#define pair(a, b) (a + b)\nvoid main() { gl_FragColor = vec4(pair(1.0)); }\n", log, sizeof log);
     check("a function-like macro called with too few arguments does not compile", shader == 0 && strstr(log, "takes 2 arguments, not 1") != NULL, log);
 
-    // A non-void function that ends without return has an undefined value (GLSL ES 1.00 section 6.1).
-    // This compiler returns zero: it is not the value of a call the body made last.
     program = build(plainVertex,
         "precision mediump float;\nfloat half_() { return 0.5; }\nfloat falls() { half_(); }\nvarying vec2 p;\n"
         "void main() { gl_FragColor = vec4(falls(), 0.0, 0.0, 1.0); }\n", log, sizeof log);
@@ -371,9 +348,6 @@ static void testCompiling(void)
         expectDrawn("and returns zero, not the value a call in it returned", 1, 1, 0, 0, 0, 255);
     }
 
-    // An out or inout argument must be a variable the callee can write (GLSL ES 1.00 sections 5.8 and
-    // 6.1.1): a uniform, a built-in that is read-only, a literal and a call's result are refused where
-    // the call is compiled, and a local is accepted.
     shader = compile(GL_FRAGMENT_SHADER,
         "precision mediump float;\nuniform vec4 u;\nvoid w(out vec4 o) { o = vec4(1.0); }\n"
         "void main() { w(u); gl_FragColor = u; }\n", log, sizeof log);
@@ -392,8 +366,6 @@ static void testCompiling(void)
         log, sizeof log);
     check("an out argument that is a local compiles", shader != 0, log);
 
-    // How deep a shader may nest is bounded: a guest's GL thread has a small stack, and a few
-    // thousand parentheses, blocks or terms used to run it out (the emulator crashed).
     static const struct { const char *name; const char *open, *middle, *close; int count; const char *log; } nested[] = {
         { "parentheses", "(", "1.0", ")", 4000, "too deeply" },
         { "braces", "{", "", "}", 4000, "too deeply" },
@@ -423,9 +395,6 @@ static void testCompiling(void)
         " { { { { { { { { { { float x = sin(sin(sin(sin(sin(sin(1.0)))))); } } } } } } } } } }\n}\n", log, sizeof log);
     check("twenty parentheses and ten blocks compile", shader != 0, log);
 
-    // The globals of a shader (uniforms, varyings and plain globals; an array counts its length)
-    // take at most 4096 values: every instance holds a copy, and a guest can declare thousands of
-    // arrays of 256 in a few kilobytes.
     char *globals = repeated("precision mediump float;\n", 1);
     for (int i = 0; i < 15; i++) {
         char line[64];
@@ -448,7 +417,6 @@ static void testCompiling(void)
         shader == 0 && strstr(log, "global variables") != NULL, log);
     free(globals);
 
-    // glShaderSource takes at most 256 KiB of source.
     char *big = repeated("// a comment line that adds up to more than the source a shader may have\n", 4000);
     shader = glCreateShader(GL_FRAGMENT_SHADER);
     const char *bigSource = big;
@@ -464,7 +432,6 @@ static void testDrawing(void)
     glClearColor(0, 0, 0, 0);
     glClear(GL_COLOR_BUFFER_BIT);
 
-    // A uniform of each shape: glUniform4f, glUniform3f, glUniform2f, glUniform1f, glUniform4fv.
     GLuint program = build(plainVertex,
         "precision mediump float;\n"
         "uniform vec4 base;\nuniform vec3 add3;\nuniform vec2 add2;\nuniform float scale;\nuniform vec4 more[2];\n"
@@ -481,11 +448,8 @@ static void testDrawing(void)
     const GLfloat more[8] = {9, 9, 9, 9, 0.0f, 0.0f, 0.0f, 0.25f};
     glUniform4fv(glGetUniformLocation(program, "more"), 2, more);
     drawQuad(program);
-    // (0.1 + 0.1 + 0.2, 0.1 + 0.2 + 0.1, 0.1 + 0.3, 0.5 + 0.25) * 2
     expectDrawn("uniforms of every shape reach the shader", 3, 3, 204, 204, 204, 255);
 
-    // Varyings are interpolated: the centre of pixel (x, y) is ((x + 0.5) / 8, (y + 0.5) / 8), and the
-    // rows count up from the lower edge.
     program = build(plainVertex,
         "precision mediump float;\nvarying vec2 p;\nvoid main() { gl_FragColor = vec4(p, 0.0, 1.0); }\n", log, sizeof log);
     drawQuad(program);
@@ -494,7 +458,6 @@ static void testDrawing(void)
     expectDrawn("a varying is interpolated across the triangles, upper left", 0, side - 1, 16, 239, 0, 255);
     expectDrawn("a varying is interpolated across the triangles, middle", 4, 2, 144, 80, 0, 255);
 
-    // Discard leaves what was there.
     clearTo(0.0f, 0.0f, 1.0f, 1.0f);
     program = build(plainVertex,
         "precision mediump float;\nvarying vec2 p;\nvoid main() { if (p.x < 0.5) discard; gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0); }\n",
@@ -503,7 +466,6 @@ static void testDrawing(void)
     expectDrawn("a discarded fragment leaves the pixel as it was", 1, 4, 0, 0, 255, 255);
     expectDrawn("a fragment that is kept is drawn", 6, 4, 255, 0, 0, 255);
 
-    // A texture, read through a matrix as Core Image reads one: the rows of a texture start at its lower edge.
     const uint8_t texels[16] = {255, 0, 0, 255,  0, 255, 0, 255,  0, 0, 255, 255,  255, 255, 255, 255};
     GLuint texture = texture2x2(texels);
     GLuint sampler = build(plainVertex,
@@ -516,7 +478,6 @@ static void testDrawing(void)
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, texture);
     glUniform1i(glGetUniformLocation(sampler, "image"), 0);
-    // Row vector times matrix: the identity, written column by column.
     const GLfloat identity[9] = {1, 0, 0, 0, 1, 0, 0, 0, 1};
     glUniformMatrix3fv(glGetUniformLocation(sampler, "transform"), 1, GL_FALSE, identity);
     drawQuad(sampler);
@@ -525,14 +486,11 @@ static void testDrawing(void)
     expectDrawn("a texture is read, third texel at the upper left", 1, 6, 0, 0, 255, 255);
     expectDrawn("a texture is read, fourth texel at the upper right", 6, 6, 255, 255, 255, 255);
 
-    // The matrix is applied as a row vector, so a translation sits in the first two columns' third row:
-    // this one moves the lookup half a texture to the right.
     const GLfloat shift[9] = {1, 0, 0.5f, 0, 1, 0, 0, 0, 1};
     glUniformMatrix3fv(glGetUniformLocation(sampler, "transform"), 1, GL_FALSE, shift);
     drawQuad(sampler);
     expectDrawn("a matrix applied to a row vector moves the lookup", 1, 1, 0, 255, 0, 255);
 
-    // A source with alpha is read with its alpha, not as opaque or as zero.
     const uint8_t half[16] = {128, 0, 0, 128,  128, 0, 0, 128,  128, 0, 0, 128,  128, 0, 0, 128};
     GLuint halfTexture = texture2x2(half);
     glBindTexture(GL_TEXTURE_2D, halfTexture);
@@ -541,7 +499,6 @@ static void testDrawing(void)
     drawQuad(sampler);
     expectDrawn("a half-alpha texel is read as drawn", 3, 3, 128, 0, 0, 128);
 
-    // Premultiplied source over an opaque blue background.
     clearTo(0.0f, 0.0f, 1.0f, 1.0f);
     glEnable(GL_BLEND);
     glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
@@ -549,7 +506,6 @@ static void testDrawing(void)
     glDisable(GL_BLEND);
     expectDrawn("blending with ONE, ONE_MINUS_SRC_ALPHA", 3, 3, 128, 0, 127, 255);
 
-    // A pass that draws to a texture, and a second that reads it.
     GLuint target = 0, targetFramebuffer = 0;
     glGenTextures(1, &target);
     glBindTexture(GL_TEXTURE_2D, target);
@@ -572,7 +528,6 @@ static void testDrawing(void)
     drawQuad(sampler);
     expectDrawn("a texture drawn by one pass is read by the next", 7, 0, 239, 0, 16, 255);
 
-    // The location glBindAttribLocation chose is the one the array is read from.
     GLuint moved = glCreateProgram();
     GLuint v = compile(GL_VERTEX_SHADER, plainVertex, NULL, 0);
     GLuint f = compile(GL_FRAGMENT_SHADER, "precision mediump float;\nvarying vec2 p;\nvoid main() { gl_FragColor = vec4(0.0, 1.0, 0.0, 1.0); }\n", NULL, 0);
@@ -588,16 +543,12 @@ static void testDrawing(void)
     glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
     expectDrawn("and it is read from there", 3, 3, 0, 255, 0, 255);
 
-    // Calls that do not fit the uniform.
     glGetError();
     check("an unknown uniform has no location", glGetUniformLocation(program, "nothing") == -1, "found one");
     glUseProgram(uniformProgram);
     glUniform1f(glGetUniformLocation(uniformProgram, "add2"), 1.0f);
     check("glUniform1f on a vec2 is refused", glGetError() == GL_INVALID_OPERATION, "no GL_INVALID_OPERATION");
 
-    // A shader may spend 4 million steps (loop iterations, calls) in one invocation and 200
-    // million in all the invocations of one draw. This one spends 3.9 million at each of the 64
-    // pixels: the draw is stopped part way, fails, and draws nothing; the next draw works.
     GLuint spin = build(plainVertex,
         "precision mediump float;\nvoid main() {\n float s = 0.0;\n"
         " for (int i = 0; i < 3900000; i++) { s += 1.0; }\n gl_FragColor = vec4(0.0, s, 0.0, 1.0);\n}\n",

@@ -17,7 +17,7 @@ std::string Leaf(const std::string &path) {
   return slash == std::string::npos ? path : path.substr(slash + 1);
 }
 
-}  // namespace
+}
 
 bool GuestExports::Add(const Image &image, bool bridge, std::string &error) {
   if (!image.install_name().empty()) {
@@ -29,7 +29,6 @@ bool GuestExports::Add(const Image &image, bool bridge, std::string &error) {
     }
   }
   for (auto &[name, vmaddr] : image.exports()) {
-    // A class two guest images both define is told apart by the library a bind names; a bind with none gets the first.
     if (name.rfind("_OBJC_CLASS_$_", 0) != 0) {
       continue;
     }
@@ -103,7 +102,6 @@ std::optional<uint64_t> GuestExports::Find(const std::string &library, const std
       }
     }
   } else if (reported_.insert(library).second) {
-    // What a library is by its file name is a guess xlate does not act on; it only says the guess is available.
     const Image *alike = nullptr;
     for (auto image : images_) {
       if (!image->install_name().empty() && Leaf(image->install_name()) == Leaf(library)) {
@@ -115,7 +113,6 @@ std::optional<uint64_t> GuestExports::Find(const std::string &library, const std
                    << alike->install_name() << ". If it stands for that library, say so with --replaces " << library << "="
                    << alike->path() << "; its symbols are taken from the host\n";
     } else if (!IsSystemPath(library)) {
-      // Right for a framework the build does not lift, wrong for a library a guest image is under another spelling.
       llvm::errs() << "xlate: a bind names " << library << ", which is no guest image and no system library; "
                    << "its symbols are taken from the host\n";
     }
@@ -128,4 +125,4 @@ std::optional<uint64_t> GuestExports::Find(const std::string &library, const std
   return std::nullopt;
 }
 
-}  // namespace xlate
+}

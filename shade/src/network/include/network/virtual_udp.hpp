@@ -49,9 +49,6 @@ struct VirtualUdpAncillaryOptions {
 
 class VirtualUdpSocket;
 
-// Shared in-memory UDP fabric for the isolated network policy. It models the
-// BSD socket data plane without opening a host socket, so multicast services
-// such as mDNS remain usable in a sandbox and between guest processes.
 class VirtualUdpNetwork final
     : public std::enable_shared_from_this<VirtualUdpNetwork> {
 public:
@@ -123,4 +120,4 @@ private:
     std::atomic_bool defunct_ { false };
 };
 
-} // namespace shade::bsd
+}

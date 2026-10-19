@@ -1,10 +1,3 @@
--- Helpers for tests/run.sh's Claude login, replacing three inline python3 snippets:
---   xmake l tests/credentials.lua store FILE      keychain JSON on stdin -> FILE holds only claudeAiOauth
---   xmake l tests/credentials.lua left FILE       whole seconds until the access token expires (truncated toward 0)
---   xmake l tests/credentials.lua leaked FILE DIR  each file under DIR that holds the access or refresh token of FILE
--- Differences from the Python: the time is taken in whole seconds (os.time), not with fractions, so "left" can be one
--- second off at the boundary; and the file list comes from find, which takes the same paths os.walk did, but in sorted
--- order. The JSON text is re-encoded by xmake, so its spacing and key order are not those of json.dump.
 import("core.base.json")
 
 local function fail(message)

@@ -1,7 +1,5 @@
 import CoreGraphics
 
-// The timing curves of the newer animations. Apple's values are three cubic Béziers and three circular
-// arcs, measured against the framework of macOS 27 to nine decimals (.agent-work/host/spring.out).
 public struct UnitCurve: Hashable {
     enum Kind: Hashable {
         case linear
@@ -37,11 +35,9 @@ public struct UnitCurve: Hashable {
         }
     }
 
-    // A quarter circle of radius one, from (0,0) to (1,1): the arc a quarter turn of a wheel traces.
     static func arc(_ t: Double) -> Double { 1 - (1 - t * t).squareRoot() }
     static func arcSlope(_ t: Double) -> Double { t / (1 - t * t).squareRoot() }
 
-    // The point of the curve at a progress, for the circular ones: the arc's own parameter.
     private func circular(_ t: Double) -> Double {
         switch kind {
         case .circularIn: return UnitCurve.arc(t)
@@ -72,15 +68,12 @@ public struct UnitCurve: Hashable {
         case .linear: return 1
         case .circularIn, .circularOut, .circularInOut: return circularSlope(progress)
         case .bezier:
-            // At either end the curve's own parameter is the end itself, where the slope of a Bézier
-            // is a limit; it is taken from just inside.
             let u = progress <= 0 ? 1e-7 : (progress >= 1 ? 1 - 1e-7 : parameter(progress))
             let (dx, dy) = slope(u)
             return dx == 0 ? 0 : dy / dx
         }
     }
 
-    // The Bézier's own parameter for a progress: the x of a Bézier is not its parameter.
     private func parameter(_ x: Double) -> Double {
         guard case .bezier(let x1, _, let x2, _) = kind else { return x }
         if x <= 0 { return 0 }

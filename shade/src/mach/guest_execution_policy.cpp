@@ -22,7 +22,7 @@ namespace {
         std::chrono::duration_cast<std::chrono::nanoseconds>(
             std::chrono::microseconds { 100 });
 
-} // namespace
+}
 
 GuestExecutionPolicy::GuestExecutionPolicy(
     std::chrono::nanoseconds response_period)
@@ -59,9 +59,6 @@ std::chrono::nanoseconds GuestExecutionPolicy::budget(
         scheduler.runnable_count_at_or_above_priority(
             scheduling_info->scheduled_priority);
     if (equal_or_higher_competitors != 0U) {
-        // Complete one round of equal-priority host cooperation inside one
-        // response period. As contention grows, each share converges on the
-        // established low-latency initial budget.
         const auto contender_count = equal_or_higher_competitors + 1U;
         policy_cap = std::min(policy_cap,
             std::max(initial_budget_,
@@ -70,9 +67,6 @@ std::chrono::nanoseconds GuestExecutionPolicy::budget(
     }
     if (scheduler.highest_runnable_priority() >
         scheduling_info->scheduled_priority) {
-        // A client preference can temporarily select below the XNU queue head.
-        // Return quickly so the higher-priority guest thread can win the next
-        // ordinary scheduler selection.
         policy_cap = initial_budget_;
     }
     if (request.latency_sensitive)
@@ -94,9 +88,6 @@ std::chrono::nanoseconds GuestExecutionPolicy::budget(
             result = minimum_budget_;
             return;
         }
-        // The cooperative stop is checked at translated-block boundaries. Keep
-        // the measured translation overrun as headroom, but spend the rest of
-        // the available interval instead of unconditionally discarding half.
         result = std::min(
             result, std::max(minimum_budget_, *delay - deadline_guard));
     };
@@ -141,4 +132,4 @@ void GuestExecutionPolicy::forget_process(std::uint32_t process_id)
     });
 }
 
-} // namespace shade
+}

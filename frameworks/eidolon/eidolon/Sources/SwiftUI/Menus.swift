@@ -29,7 +29,6 @@ struct _MenuButton: View, PrimitiveView {
     let label: any View
     let content: any View
     func makeNode(_ env: EnvironmentValues) -> Node {
-        // a plain text label is the titled button of iOS 6; anything else (an icon, a Label) is drawn as it is
         if label is Text { let n = MenuNode(borderless: env.menuBorderless); n.update(self, env); return n }
         let n = MenuLabelNode(); n.update(self, env); return n
     }
@@ -70,7 +69,6 @@ func menuItemsWithRoles(_ view: any View) -> [(title: String, action: () -> Void
     return found
 }
 
-// The action sheet a menu opens; a destructive item is the red one, as in a confirmation dialog.
 func presentMenu(_ items: [(title: String, action: () -> Void, destructive: Bool)], _ delegate: SheetDelegate, in host: UIViewController?) {
     guard let host else { return }
     let sheet = UIActionSheet()
@@ -228,8 +226,6 @@ extension View {
     }
 }
 
-// What a view can be copied or cut as: the pasteboard of this release holds a string, a URL or an image, and a payload of
-// any type is written as its description, which is what a sheet of a custom view can offer.
 func copyToPasteboard<T>(_ payload: [T]) {
     if let url = payload.compactMap({ $0 as? URL }).first {
         UIPasteboard.general.url = url
@@ -240,12 +236,8 @@ func copyToPasteboard<T>(_ payload: [T]) {
     }
 }
 
-// What a payload is copied as: the pasteboard of this release takes a string, a URL or an image, and a payload of any
-// other type is written as its own description, one item per line.
 func pasteboardText<T>(_ payload: [T]) -> String { payload.map { "\($0)" }.joined(separator: "\n") }
 
-// What the share sheet of the release is given: its items are what an activity of this release can take - a string, a
-// URL, an image - and a payload of any other type is offered as its own description, the way the pasteboard takes one.
 func activityItems<T>(_ payload: [T]) -> [Any] {
     payload.map { value -> Any in
         if value is String || value is URL || value is UIImage { return value }
@@ -257,14 +249,11 @@ func clearPasteboard() {
     UIPasteboard.general.items = []
 }
 
-// A menu of this release is an action sheet, and the sheet the release shows is the one this function puts up: the
-// titles and what each of them does, kept where a test can read them.
 func showReleaseMenu(_ entries: [(String, () -> Void)], in view: UIView?) {
     guard !entries.isEmpty else { return }
     let keeper = ContextMenuKeeper.shared
     keeper.delegate.actions = entries.map { $0.1 }
     ContextMenuKeeper.shown = entries.map { $0.0 }
-    // the menu is what the engine did even where there is no window to put the sheet in front of
     guard let view else { return }
     let sheet = UIActionSheet()
     sheet.delegate = keeper.delegate

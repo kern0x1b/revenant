@@ -75,13 +75,10 @@ extension DatePicker: DatePickerLike {
     var pickedMaximum: Date? { maximum }
 }
 
-// A date in a field, as a grouped-table cell of iOS 6 shows one: the text right-aligned, grey and
-// bordered, and the wheel under it while it is being changed.
 struct _DateField: View {
     @Binding var date: Date
     var components: DatePickerComponents
 
-    // the field shows what the picker shows: the time alone, the date alone, or both
     private var style: Text.DateStyle {
         if components == .hourAndMinute { return .time }
         if components.contains(.hourAndMinute) { return .date }
@@ -100,8 +97,6 @@ struct _DateField: View {
     }
 }
 
-// The same field with the two steppers of iOS 6's segmented control beside it, which walk the date by
-// one unit of what the picker shows.
 struct _DateStepperField: View {
     @Binding var date: Date
     var components: DatePickerComponents
@@ -124,7 +119,6 @@ struct _DateStepperField: View {
     }
 }
 
-// iOS 6 has the wheel only, so the label sits above it, as SwiftUI puts it for the wheel style.
 final class DatePickerNode: ContainerNode {
     let target = ControlTarget()
     let picker = UIDatePicker()

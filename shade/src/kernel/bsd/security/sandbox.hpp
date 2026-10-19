@@ -27,5 +27,5 @@ enum class CallResult {
     AddressSpace& memory, DarwinSandboxAbi abi, std::uint32_t operation,
     std::uint32_t argument);
 
-} // namespace bsd::sandbox
-} // namespace shade
+}
+}

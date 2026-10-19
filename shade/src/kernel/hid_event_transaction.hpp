@@ -24,4 +24,4 @@ public:
         std::function<void()> completion);
 };
 
-} // namespace shade
+}

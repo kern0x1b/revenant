@@ -13,11 +13,7 @@
 
 namespace shade {
 
-// `all_image_info_address` is the guest's dyld_all_image_infos (32-bit layout:
-// version, infoArrayCount, infoArray, ...). Each info is { imageLoadAddress,
-// imageFilePath, imageFileModDate }. An image whose path cannot be read is
-// skipped; an image whose Mach-O header cannot be read keeps text_size 0.
 [[nodiscard]] GuestImageTable read_guest_image_table(
     const AddressSpace& memory, std::uint32_t all_image_info_address);
 
-} // namespace shade
+}

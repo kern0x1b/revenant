@@ -24,15 +24,8 @@ struct LayerKitApplicationPlacement {
     bool operator==(const LayerKitApplicationPlacement&) const = default;
 };
 
-// Early LayerKit clients can publish a fully populated window tree, then set
-// the render context to a detached, empty wrapper layer. Real iPhone OS 2.x
-// reconnects that wrapper during the same transaction. Track the transaction
-// shape so the compatibility kernel can select the already-committed wrapper
-// when the detached root arrives without a cached presentation object. The
-// wrapper must be preserved so the client context remains structurally intact.
 class LayerKitRootCompatibility {
 public:
-    // Returns true when this starts a new remote scene generation.
     bool set_layer_id(std::uint32_t context, std::uint32_t layer_id);
 
     [[nodiscard]] std::optional<LayerKitApplicationPlacement>
@@ -61,4 +54,4 @@ private:
     std::map<std::uint32_t, ContextState> contexts_;
 };
 
-} // namespace shade
+}

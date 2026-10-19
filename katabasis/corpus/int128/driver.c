@@ -5,8 +5,6 @@
 #define __modti3 xl_modti3
 #include "../../runtime/int128.c"
 
-// Reads "op a_hi a_lo b_hi b_lo" lines (op is one of u, U, d, m: unsigned quotient, unsigned remainder,
-// signed quotient, signed remainder; the words in hex) and prints the 128-bit result as 32 hex digits.
 int main(void) {
   char op;
   unsigned long long ah, al, bh, bl;

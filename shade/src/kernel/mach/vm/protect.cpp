@@ -38,7 +38,7 @@ namespace {
         return result;
     }
 
-} // namespace
+}
 
 bool CompatibilityKernel::dispatch_mach_vm_protect_message(
     Cpu& cpu, const MachMessageRequest& request)
@@ -83,4 +83,4 @@ bool CompatibilityKernel::dispatch_mach_vm_protect_message(
     return true;
 }
 
-} // namespace shade
+}

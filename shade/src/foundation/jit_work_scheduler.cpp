@@ -37,7 +37,7 @@ namespace {
         ++schedule.skipped[static_cast<std::size_t>(reason)];
     }
 
-} // namespace
+}
 
 bool JitWorkScheduler::observation_due(
     const JitWorkObservationGateRequest& request) noexcept
@@ -64,8 +64,6 @@ bool JitWorkScheduler::observation_due(
             observation_gate_activation_pending_;
     const auto work_changed = request.work_generation !=
                               observation_gate_work_generation_;
-    // A held image has only a bounded preparation window, so refill its
-    // independent translation lanes at the smallest coalescing cadence.
     const auto period =
         request.activation_pending
             ? minimum_coalesce_period
@@ -94,12 +92,6 @@ JitWorkSchedule JitWorkScheduler::schedule(
     const auto transition = find_first([](const JitWorkCandidate& candidate) {
         return candidate.foreground_transition_destination;
     });
-    // A pending foreground transition is demand-only. Even independent
-    // Portable workers share host cores, memory bandwidth and the artifact
-    // store with the Guest, while Native prediction additionally publishes
-    // into the demand slab. Defer every speculative candidate until the
-    // transition reaches a terminal state rather than attempting to infer
-    // spare frame time from an incomplete animation.
     if (transition != nullptr) {
         note_skip(result, JitWorkScheduleSkip::GuestBusy);
         return result;
@@ -181,11 +173,6 @@ JitWorkSchedule JitWorkScheduler::schedule(
             note_skip(result, JitWorkScheduleSkip::NoWork);
             return;
         }
-        // Native prediction publishes into the same slab and invalidates the
-        // same dispatch structures as demand translation. A generic
-        // prediction target remains idle-only. The active/scanout path uses
-        // InteractiveNative, whose core policy requires an interaction quiet
-        // period, no realtime dependency and bounded deadline slack.
         const auto live_image_native =
             work_class == JitWorkClass::InteractiveNative;
         if (target == JitScheduledTarget::NativeCode &&
@@ -317,4 +304,4 @@ JitWorkSchedule JitWorkScheduler::schedule(
     return result;
 }
 
-} // namespace shade
+}

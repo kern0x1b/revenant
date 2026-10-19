@@ -49,7 +49,6 @@ struct GlesRasterTextureUnit {
 };
 
 struct GlesRasterState {
-    // Separates per-context texture namespaces from a shared render target.
     std::uint64_t resource_owner { };
     std::int32_t viewport_x { };
     std::int32_t viewport_y { };
@@ -70,18 +69,11 @@ struct GlesRasterState {
     float line_width { 1.0F };
     bool cull_enabled { };
     bool render_target_inverted_vertical { };
-    // Local GLES framebuffer textures are consumed by the firmware as
-    // premultiplied source-over images. Keep this target-local so imported
-    // CoreSurface scanout layers retain their existing alpha semantics.
     bool render_target_premultiplied { };
 };
 
 [[nodiscard]] std::uint32_t premultiply_argb(std::uint32_t pixel);
 
-// Samples level 0 of the texture a unit names at (s, t) with the texture's
-// own wrap and filter modes; gradient is the derivative of (s, t) per pixel
-// in x then y, which picks the minification or magnification filter. Returns
-// opaque white where the unit has no complete texture.
 [[nodiscard]] std::uint32_t sample_raster_texture(const GlesRasterState& state,
     const GlesRasterTextureUnit& unit, float s, float t,
     const std::array<float, 4>& gradient);
@@ -96,4 +88,4 @@ public:
         const GlesRasterState& state);
 };
 
-} // namespace shade
+}

@@ -44,7 +44,7 @@ namespace {
         }
     }
 
-} // namespace
+}
 
 bool Descriptor::deallocate() const
 {
@@ -97,4 +97,4 @@ std::optional<std::vector<Descriptor>> parse_descriptors(
     return descriptors;
 }
 
-} // namespace shade::mach_transport
+}

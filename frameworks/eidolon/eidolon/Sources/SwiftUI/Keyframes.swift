@@ -1,10 +1,6 @@
 import UIKit
 import CoreGraphics
 
-// MARK: the keyframes themselves
-
-/// One step of a keyframed animation: where the value is at the end of it, how long it takes to get
-/// there, and how it travels.
 public struct _ResolvedKeyframe<Value> {
     var to: Value
     public var duration: Double
@@ -23,11 +19,7 @@ public struct _ResolvedKeyframe<Value> {
     }
 }
 
-/// A whole keyframe track, resolved: the steps, where the animation starts and how fast.
 public struct _ResolvedKeyframes<Value> {
-    // Apple's _ResolvedKeyframes is an empty struct: the track the port resolves into it is its own
-    // reading, and the test that measures a track reads it, so the names it answers are SPI of the
-    // tests' group, not public API.
     @_spi(Probe) public var keyframes: [_ResolvedKeyframe<Value>]
     @_spi(Probe) public var initialValue: Value
     @_spi(Probe) public var initialVelocity: Value?
@@ -38,10 +30,8 @@ public struct _ResolvedKeyframes<Value> {
         self.initialVelocity = initialVelocity
     }
 
-    /// How long the whole track takes.
     public var duration: Double { keyframes.reduce(0) { $0 + $1.duration } }
 
-    /// Where the track is at a moment, as a share of the way it has to travel.
     @_spi(Probe) public func progress(at time: Double) -> Double {
         guard duration > 0 else { return 1 }
         var passed = 0.0
@@ -63,16 +53,12 @@ public struct _ResolvedKeyframes<Value> {
         }
     }
 
-    /// The value at a moment. A keyframe's value is the value at that point of the track, so each
-    /// step travels from the value before it to its own.
     public func value(at time: Double) -> Value where Value: Animatable {
         keyframed(self, at: time)
     }
 }
 
-/// One keyframe's own data, resolved: how far the value has to go and how long it takes.
 public struct _ResolvedKeyframeTrackContent<Value> {
-    // as on _ResolvedKeyframes: the port's own reading of one keyframe, which only the module reads
     var to: Value
     public var duration: Double
     var timing: _ResolvedKeyframe<Value>.Timing
@@ -89,8 +75,6 @@ public struct _ResolvedKeyframeTrackContent<Value> {
     }
 }
 
-/// The value a keyframed animation has reached at a moment: each keyframe travels from the value
-/// before it to its own, along its own curve, and the last one leaves the value where it wrote it.
 func keyframed<V: Animatable>(_ track: _ResolvedKeyframes<V>, at elapsed: Double) -> V {
     var from = track.initialValue
     var time = elapsed
@@ -110,8 +94,6 @@ func keyframed<V: Animatable>(_ track: _ResolvedKeyframes<V>, at elapsed: Double
     }
     return from
 }
-
-// MARK: the protocols an app writes
 
 public protocol Keyframes<Value> {
     associatedtype Value = Body.Value
@@ -133,7 +115,6 @@ public protocol KeyframeTrackContent<Value> {
     associatedtype Body: KeyframeTrackContent where Body.Value == Value
     @KeyframeTrackContentBuilder<Value> var body: Body { get }
     func _resolve(into resolved: inout _ResolvedKeyframeTrackContent<Value>)
-    /// Every keyframe this content stands for, in the order they are written.
     func _steps() -> [_ResolvedKeyframeTrackContent<Value>]
 }
 
@@ -141,12 +122,7 @@ extension KeyframeTrackContent {
     public func _steps() -> [_ResolvedKeyframeTrackContent<Value>] { body._steps() }
 }
 
-// MARK: the four kinds of keyframe
-
 public struct CubicKeyframe<Value>: KeyframeTrackContent where Value: Animatable {
-    // Apple's CubicKeyframe carries an initialiser and `_resolve` and nothing else: the values a
-    // keyframe holds are the port's own, and are internal so that no member of an Apple type carries a
-    // name Apple's 26.2 interface does not use.
     var to: Value
     var duration: Double
     var startVelocity: Value?
@@ -225,7 +201,6 @@ extension SpringKeyframe {
     }
 }
 
-/// A keyframe with no duration of its own: the value is there from the moment it is reached.
 public struct MoveKeyframe<Value>: KeyframeTrackContent where Value: Animatable {
     var to: Value
 
@@ -241,8 +216,6 @@ public struct MoveKeyframe<Value>: KeyframeTrackContent where Value: Animatable 
 extension MoveKeyframe {
     public func _steps() -> [_ResolvedKeyframeTrackContent<Value>] { [_ResolvedKeyframeTrackContent(to: to, duration: 0)] }
 }
-
-// MARK: the track a builder makes
 
 public struct KeyframeTrack<Root, Value, Content>: Keyframes where Value: Animatable, Content: KeyframeTrackContent, Content.Value == Value {
     public var content: Content
@@ -268,8 +241,6 @@ public struct KeyframeTrack<Root, Value, Content>: Keyframes where Value: Animat
         resolved = _ResolvedKeyframes(keyframes: list, initialValue: initialValue, initialVelocity: initialVelocity)
     }
 }
-
-// MARK: the builders
 
 @_functionBuilder
 public struct KeyframesBuilder<Value> {
@@ -324,7 +295,6 @@ public struct KeyframeTrackContentBuilder<Value> where Value: Animatable {
 }
 
 public extension KeyframeTrackContentBuilder {
-    /// One of two branches of a keyframe track, the way `if`/`else` makes one.
     struct Conditional<Value, First, Second>: KeyframeTrackContent where Value: Animatable, First: KeyframeTrackContent, Second: KeyframeTrackContent, First.Value == Value, Second.Value == Value {
         var steps: [_ResolvedKeyframeTrackContent<Value>]
         public typealias Body = Conditional<Value, First, Second>
@@ -334,7 +304,6 @@ public extension KeyframeTrackContentBuilder {
 }
 
 public extension KeyframesBuilder {
-    /// One of two branches of a keyframe track, the way `if`/`else` makes one.
     struct Conditional<Value, First, Second>: KeyframeTrackContent where Value: Animatable, First: KeyframeTrackContent, Second: KeyframeTrackContent, First.Value == Value, Second.Value == Value {
         var steps: [_ResolvedKeyframeTrackContent<Value>]
         public typealias Body = Conditional<Value, First, Second>
@@ -343,9 +312,6 @@ public extension KeyframesBuilder {
     }
 }
 
-/// The steps of a keyframe track, in the order they are written. The port's own accumulator: the
-/// builders hand their keyframes to one of these, and Apple has no such type - a `KeyframeTrackContent`
-/// is what a keyframe conforms to.
 struct KeyframeTrackSteps<Value>: KeyframeTrackContent where Value: Animatable {
     public var steps: [_ResolvedKeyframeTrackContent<Value>]
     public typealias Body = KeyframeTrackSteps<Value>
@@ -375,4 +341,3 @@ struct KeyframesPair<Value, First, Second>: Keyframes where Value: Animatable, F
         resolved = tail
     }
 }
-

@@ -30,8 +30,6 @@ enum class JitProfileMode : std::uint8_t {
 
 enum class JitCatalogWarmingMode : std::uint8_t { NoEnqueue };
 
-// Frontends parse syntax; the session owns execution and resource policies.
-// Optional limits distinguish explicit overrides from adaptive defaults.
 struct BootOptions {
     std::filesystem::path rootfs;
     std::filesystem::path host_cache;
@@ -48,9 +46,6 @@ struct BootOptions {
     bool quiet_output { };
     bool control_enabled { };
     bool disable_scheduler_preemption { };
-    // The guest's clock runs this many times slower than the host's, so a
-    // host that cannot emulate the device in real time still meets the
-    // guest's own watchdogs and RPC deadlines.
     double time_scale { 1.0 };
     bool jit_observer_only { };
     bool report_performance { };
@@ -60,8 +55,6 @@ struct BootOptions {
     std::optional<std::size_t> jit_cache_budget_bytes;
     std::size_t artifact_memory_bytes { 64U * 1024U * 1024U };
     std::optional<std::size_t> artifact_disk_bytes;
-    // History recording and predictive compilation are explicit experiments;
-    // ordinary demand execution does not consume the saved location list.
     JitProfileMode jit_profile_mode { JitProfileMode::Off };
     JitCatalogWarmingMode jit_catalog_warming {
         JitCatalogWarmingMode::NoEnqueue
@@ -80,4 +73,4 @@ struct BootOptions {
 [[nodiscard]] std::filesystem::path default_host_cache_directory(
     const std::filesystem::path& rootfs);
 
-} // namespace shade
+}

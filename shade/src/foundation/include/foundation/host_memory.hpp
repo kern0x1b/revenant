@@ -53,4 +53,4 @@ enum class HostMemoryPressureLevel : std::uint8_t {
 [[nodiscard]] std::string_view host_memory_pressure_name(
     const HostMemoryBudgetSnapshot& memory);
 
-} // namespace shade
+}

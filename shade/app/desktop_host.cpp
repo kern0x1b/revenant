@@ -64,4 +64,4 @@ HostMemoryBudgetSnapshot DesktopHost::memory_budget_snapshot() const
     return host_memory_budget_snapshot();
 }
 
-} // namespace shade
+}

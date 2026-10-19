@@ -42,9 +42,6 @@ namespace {
     constexpr std::uint32_t map_reply_size = 44U;
     constexpr std::uint32_t mig_reply_identifier_delta = 100U;
     constexpr std::uint32_t hid_mapping_search_base = 0x1f000000U;
-    // IODataQueue's notification source uses memory type zero on this
-    // firmware generation. It is the driver's queue mapping, not a graphics
-    // shared-memory selector.
     constexpr std::uint32_t hid_memory_type = 0U;
     constexpr std::uint32_t hid_map_options = 1U;
     constexpr std::uint32_t hid_queue_size = 0x1000U;
@@ -447,7 +444,7 @@ namespace {
             message_id, unmapped ? iokit_abi::success : iokit_abi::bad_argument);
     }
 
-} // namespace
+}
 
 bool matches_service(std::span<const std::byte> matching)
 {
@@ -504,10 +501,6 @@ std::optional<MethodResult> dispatch_connect_method(KernelSharedState& state,
     if (!is_hid_connection_locked(state, process, connection_object))
         return std::nullopt;
 
-    // MultitouchSupport uses the two driver-control selectors below for the
-    // stock SPI endpoint: selector 0 on the direct path and selector 0x15
-    // when the endpoint has the request gate enabled. The virtual queue is
-    // mapped separately; no guest-facing event format is fabricated here.
     if (selector == 0U || selector == 0x15U) {
         if (scalar_input.size() != 1U || scalar_input.front() != 1U ||
             !inband_input.empty() || inband_output_capacity != 0U ||
@@ -573,4 +566,4 @@ void close_connection(AddressSpace& memory, KernelSharedState& state,
     }
 }
 
-} // namespace shade::kernel_iokit::hid
+}

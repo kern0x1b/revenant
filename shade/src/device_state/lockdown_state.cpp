@@ -200,7 +200,7 @@ namespace {
             encoded_value);
     }
 
-} // namespace
+}
 
 std::optional<LockdownActivation> parse_lockdown_activation(
     std::string_view value)
@@ -218,12 +218,6 @@ LockdownCapabilities detect_lockdown_capabilities(
     const std::filesystem::path& rootfs, ArmArchitectureVersion architecture)
 {
     LockdownCapabilities profile;
-    // Early prototype firmware can own a different UI process and legitimately
-    // omit SpringBoard altogether.  The profile fields below are optional
-    // capabilities discovered from the image; absence of that capability must
-    // not make an otherwise bootable root filesystem fail before its loader has
-    // started.  Keep the default profile (registration state only) for such
-    // firmware, while retaining strict Mach-O parsing when the image exists.
     const auto image_path = rootfs / springboard_path;
     std::error_code status_error;
     if (!std::filesystem::is_regular_file(image_path, status_error) ||
@@ -288,23 +282,12 @@ LockdownStateUpdate apply_lockdown_state(
     upsert(
         xml, activation_acknowledged_key, activated ? "<true/>" : "<false/>");
     if (profile.registration_state) {
-        // This is cellular-network registration history, not device
-        // activation. The default offline modem has never registered; a real
-        // or replayed baseband remains free to update the firmware-owned key.
-        // SpringBoard stores and parses this value as a decimal CFString.
         upsert(xml, springboard_registered_key, "<string>0</string>");
     }
     if (profile.brick_state) {
-        // Later Lockdown profiles persist the repair-mode bit independently
-        // of ActivationState. Keep both sides of that firmware-owned state in
-        // agreement; the runtime query adapter remains authoritative after
-        // boot if the emulated baseband refreshes its cache.
         upsert(
             xml, persisted_brick_state_key, activated ? "<false/>" : "<true/>");
     }
-    // lockdownd publishes its effective state through this persisted cache.
-    // Keep it in sync with the requested device profile so a prior offline
-    // baseband boot cannot override --activation on the next launch.
     upsert(xml, cached_activation_state_key,
         activated ? "<string>Activated</string>"
                   : "<string>Unactivated</string>");
@@ -316,4 +299,4 @@ LockdownStateUpdate apply_lockdown_state(
 #endif
 }
 
-} // namespace shade
+}

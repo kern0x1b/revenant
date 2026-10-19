@@ -26,8 +26,6 @@ class Output;
 class UserlandHleCall;
 class UserlandHleRegistry;
 
-// CoreAudio's firmware HAL remains in the guest. This adapter supplies the
-// one physical output device that an emulator has in place of iPhone hardware.
 class CoreAudioHle {
 public:
     struct ScheduledIoProc {
@@ -131,12 +129,9 @@ private:
     std::map<std::uint32_t, float> device_volumes_;
     std::map<std::uint64_t, std::uint32_t> hardware_control_states_;
     std::map<std::uint32_t, IoProcRegistration> io_procs_;
-    // Native HAL IOProc IDs are opaque per-process objects. They are kept
-    // separate from the legacy one-proc-per-process compatibility path so
-    // older firmware continues to use its existing adapter unchanged.
     std::map<std::uint32_t, IoProcRegistration> native_io_procs_;
     std::uint32_t next_native_io_proc_id_ { 0x70000000U };
     std::vector<std::size_t> retired_io_proc_threads_;
 };
 
-} // namespace shade
+}

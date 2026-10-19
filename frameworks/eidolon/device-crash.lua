@@ -1,17 +1,8 @@
--- device-crash.lua: the last EidolonDemo crash report of a phone, short: exception type, the crashed frames of the app,
--- symbolicated against eidolon/out/EidolonDemo.app.
---
---     xmake l device-crash.lua [REPORT.plist]
---
--- Fetch the report first: charon --root $DEVICE_ROOT device fetch <report> .agent-work/runs/device-crash/crash.plist
--- The report is read with plutil, which reads the plist the phone wrote.
-
 local text = import("lib.text", {rootdir = os.scriptdir(), anonymous = true})
 
 local DEFAULT_REPORT = path.join(".agent-work", "runs", "device-crash", "crash.plist")
 local BINARY = path.join("eidolon", "out", "EidolonDemo.app", "EidolonDemo")
 
--- the standard output of a command, with a failure read as no output, as the Python's stdout of a failed run was
 local function output_of(program, args)
     local quoted = {"-c", '"$0" "$@" 2>/dev/null || true'}
     quoted[#quoted + 1] = program
@@ -21,7 +12,6 @@ local function output_of(program, args)
     return os.iorunv("/bin/sh", quoted)
 end
 
--- the number of entries of a sorted list that are <= key (bisect_right)
 local function bisect_right(list, key)
     local lo, hi = 1, #list
     while lo <= hi do
@@ -39,8 +29,6 @@ local function hex_value(s)
     return tonumber(string.gsub(s, "^0x", ""), 16)
 end
 
--- re.search(r'\s(0x[0-9a-f]+) - .*\+EidolonDemo', report): the address the match starts with, or nil. The `.*` stays on
--- its line, and the whitespace may be the newline before the line.
 local function app_base(report)
     local from = 1
     while true do
@@ -85,7 +73,6 @@ function main(...)
         os.exit(1)
     end
 
-    -- nm -n: "address type name" per symbol, in address order; a line that does not start with a hex address is no symbol
     local symbols = {}
     for _, line in ipairs(text.split(output_of("nm", {"-n", BINARY}), "\n")) do
         local parts = {}
@@ -118,7 +105,6 @@ function main(...)
                 os.exit(1)
             end
             local count = bisect_right(symbols, frame - base + 0x4000)
-            -- a count of zero is Python's symbols[-1]: the last symbol
             local index = count > 0 and count or #symbols
             local demangled = text.strip(output_of("xcrun", {"swift-demangle", "--simplified", symbols[index][2]}))
             print("   " .. string.sub(demangled, 1, 140))
@@ -126,7 +112,6 @@ function main(...)
     end
 
     print("crashed thread top:")
-    -- report.split('Thread 0 Crashed:')[1].split('Thread 1')[0]: the text between the first and the second marker
     local between = text.split(report, "Thread 0 Crashed:")
     if between[2] == nil then
         io.stderr:write("the report has no Thread 0 Crashed section\n")

@@ -55,4 +55,4 @@ bool CompatibilityKernel::dispatch_bsd_filesystem_persistence(
     return true;
 }
 
-} // namespace shade
+}

@@ -30,7 +30,7 @@ namespace {
         std::longjmp(error->jump, 1);
     }
 
-} // namespace
+}
 
 std::optional<std::vector<std::byte>> encode_jpeg_argb(
     std::span<const std::uint32_t> pixels, std::uint32_t width,
@@ -90,4 +90,4 @@ std::optional<std::vector<std::byte>> encode_jpeg_argb(
     return result;
 }
 
-} // namespace shade
+}

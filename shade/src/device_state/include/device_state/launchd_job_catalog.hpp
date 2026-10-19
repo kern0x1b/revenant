@@ -15,9 +15,6 @@
 
 namespace shade {
 
-// Read-only view of launchd's firmware-owned provider declarations. It keeps
-// bootstrap ownership derived from Program/ProgramArguments and MachServices
-// instead of assigning service identities in the compatibility kernel.
 class LaunchdJobCatalog {
 public:
     [[nodiscard]] static LaunchdJobCatalog load(
@@ -32,4 +29,4 @@ private:
         services_by_executable_;
 };
 
-} // namespace shade
+}

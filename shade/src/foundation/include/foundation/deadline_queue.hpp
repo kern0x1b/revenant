@@ -15,11 +15,6 @@
 
 namespace shade {
 
-// Indexed deadline storage for scheduler-owned event sources. Updating one
-// source removes its previous value in O(log n), while the earliest deadline
-// is available in O(1). The queue is deliberately clock-agnostic: Guest
-// absolute time and host steady-clock time can use the same structure without
-// mixing their units.
 template <typename Key, typename Deadline, typename KeyCompare = std::less<Key>>
 class DeadlineQueue {
 public:
@@ -85,4 +80,4 @@ private:
     DeadlineIndex order_;
 };
 
-} // namespace shade
+}

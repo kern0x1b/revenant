@@ -353,7 +353,7 @@ namespace {
         return true;
     }
 
-} // namespace
+}
 
 std::size_t JitTranslationProfileRecorder::hash(
     std::uint64_t location_descriptor) noexcept
@@ -515,9 +515,6 @@ void JitTranslationProfile::merge(
     try {
         const std::lock_guard lock { mutex_ };
 
-        // Build the replacement off to the side so allocation failure leaves
-        // the current profile intact. Recorder batches are already unique,
-        // but merge() is public and still validates arbitrary callers.
         std::vector<std::uint64_t> recent_locations;
         recent_locations.reserve(std::min(location_descriptors.size(),
             jit_translation_profile_maximum_locations));
@@ -636,7 +633,6 @@ void JitTranslationProfile::discard(std::uint64_t location_descriptor) noexcept
         known_locations_.erase(location_descriptor);
         revision_.fetch_add(1U, std::memory_order_release);
     } catch (...) {
-        // Invalidating a host optimization hint must not affect the guest.
     }
 }
 
@@ -925,7 +921,6 @@ void JitTranslationProfile::note_profile_portable_artifact_ready(
     try {
         profile_portable_artifact_locations_.insert(location_descriptor);
     } catch (...) {
-        // Attribution is advisory and must never break translation.
     }
 }
 void JitTranslationProfile::note_native_preimport_attempted() noexcept
@@ -1041,9 +1036,6 @@ std::shared_ptr<JitTranslationProfile> JitTranslationProfileStore::profile_for(
         return entry->second;
     }
 
-    // A process can encounter more images than the persistent profile budget.
-    // Keep execution working with an ephemeral profile instead of allowing the
-    // profile map or its save set to grow without bound.
     if (profiles_.size() >= jit_translation_profile_maximum_profiles) {
         return std::make_shared<JitTranslationProfile>();
     }
@@ -1162,7 +1154,6 @@ void JitTranslationProfileStore::save() noexcept
         static_cast<void>(save_profile_index(
             data_directory_, profile_access_order_, known_profile_bytes_));
     } catch (...) {
-        // A cache write must not change simulator shutdown semantics.
     }
 }
 
@@ -1238,4 +1229,4 @@ JitTranslationProfileStats JitTranslationProfileStore::stats() const noexcept
     return result;
 }
 
-} // namespace shade
+}

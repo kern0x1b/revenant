@@ -73,7 +73,7 @@ namespace {
         };
     }
 
-} // namespace
+}
 
 bool CompatibilityKernel::dispatch_bsd_filesystem_timestamps(
     Cpu& cpu, std::uint32_t number)
@@ -168,4 +168,4 @@ bool CompatibilityKernel::dispatch_bsd_filesystem_timestamps(
     return true;
 }
 
-} // namespace shade
+}

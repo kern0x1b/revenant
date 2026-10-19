@@ -54,10 +54,6 @@ bool CompatibilityKernel::dispatch_mach_thread_lifecycle_message(
         kernel_result = darwin::mach::success;
         if (resumes && scheduler_preemption_query_ &&
             scheduler_preemption_query_(cpu.processor_id())) {
-            // A resume can make a higher-priority thread runnable while the
-            // caller is still executing in this CPU's HLE dispatch. Request the
-            // same AST boundary as thread creation/policy changes; the current
-            // quantum is preserved when the scheduler requeues the caller.
             cpu.request_guest_preemption();
         }
     }
@@ -162,4 +158,4 @@ bool CompatibilityKernel::dispatch_mach_thread_lifecycle_message(
     return true;
 }
 
-} // namespace shade
+}

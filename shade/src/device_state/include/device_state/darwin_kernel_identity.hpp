@@ -19,10 +19,9 @@ struct DarwinKernelIdentity {
     std::string name;
     std::string operating_system_type { "Darwin" };
     std::string operating_system_release;
-    // kern.osrevision is the BSD compatibility revision, not a Darwin release.
     std::uint32_t operating_system_revision { 199506 };
     std::string version;
     std::string build_version;
 };
 
-} // namespace shade
+}

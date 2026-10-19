@@ -36,7 +36,7 @@ namespace {
                signal == terminal_input || signal == terminal_output;
     }
 
-} // namespace
+}
 
 std::uint32_t CompatibilityKernel::deliver_signal(std::uint32_t signal)
 {
@@ -61,9 +61,6 @@ std::uint32_t CompatibilityKernel::deliver_signal(std::uint32_t signal)
         return changed;
     };
 
-    // POSIX job control resumes a stopped task even when SIGCONT is ignored,
-    // caught, or masked. Handler disposition is evaluated only after the
-    // independent scheduler hold has been released.
     if (signal == darwin::signal::resume &&
         transition_job_control_stop(false)) {
         output_.write(
@@ -84,8 +81,6 @@ std::uint32_t CompatibilityKernel::deliver_signal(std::uint32_t signal)
         return 0;
     }
     if (!unmaskable && handler != darwin::signal::default_action) {
-        // A thread runs the handler on its way back to user mode
-        // (deliver_pending_signals).
         pending_signals_ |= 1U << (signal - 1U);
         output_.write(
             "[signal] caught-pending pid=" + std::to_string(process_.pid) +
@@ -96,13 +91,11 @@ std::uint32_t CompatibilityKernel::deliver_signal(std::uint32_t signal)
         }
         return 0;
     }
-    // A signal sent to the process waits only while every thread blocks it.
     const auto bit = 1U << (signal - 1U);
     const bool blocked_everywhere = !thread_signal_masks_.empty() &&
         std::all_of(thread_signal_masks_.begin(), thread_signal_masks_.end(),
             [bit](const auto& thread) { return (thread.second & bit) != 0U; });
     if (!unmaskable && blocked_everywhere) {
-        // Blocked: it waits until a mask lets it through.
         pending_signals_ |= 1U << (signal - 1U);
         output_.write(
             "[signal] masked-pending pid=" + std::to_string(process_.pid) +
@@ -135,7 +128,7 @@ void CompatibilityKernel::dispatch_bsd_signal(Cpu& cpu, std::uint32_t number)
         dispatch_sigaltstack(cpu);
         return;
     }
-    if (number == 111U) { // sigsuspend
+    if (number == 111U) {
         constexpr std::uint32_t unblockable =
             (1U << (darwin::signal::kill - 1U)) |
             (1U << (darwin::signal::stop - 1U));
@@ -163,16 +156,11 @@ void CompatibilityKernel::dispatch_bsd_signal(Cpu& cpu, std::uint32_t number)
             if (object)
                 target = mach_support::find_thread_owner(*shared_state_, *object);
         }
-        // pthread_t is represented by the target thread's send right. POSIX
-        // limits pthread_kill to threads in the caller's process; signal zero
-        // performs only this liveness check.
         if (!target || target->first != process_.pid) {
             bsd_error(cpu, darwin::error::no_such_process);
             return;
         }
         if (signal != 0) {
-            // pthread_kill directs the signal at one thread: only it takes a
-            // caught or blocked one; a default action is the process's.
             const auto slot = static_cast<std::size_t>(target->second);
             const auto handler = signal_actions_[signal][0];
             const bool caught = handler != darwin::signal::default_action &&
@@ -255,8 +243,6 @@ void CompatibilityKernel::dispatch_bsd_signal(Cpu& cpu, std::uint32_t number)
         }
         if (target_pid != process_.pid &&
             (signal == darwin::signal::kill || signal == 15U)) {
-            // Which process ended another one is the first thing a failed run
-            // asks, and a guest that is killed leaves no other trace.
             output_.write("[signal] sent pid=" +
                 std::to_string(process_.pid) + " target=" +
                 std::to_string(target_pid) + " signal=" +
@@ -300,4 +286,4 @@ void CompatibilityKernel::dispatch_bsd_signal(Cpu& cpu, std::uint32_t number)
     }
 }
 
-} // namespace shade
+}

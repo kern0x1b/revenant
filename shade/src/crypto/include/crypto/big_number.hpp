@@ -12,7 +12,6 @@
 
 namespace shade {
 
-// Unsigned, little-endian integers. The caller owns the fixed-width result.
 class BigNumberArithmetic {
 public:
     [[nodiscard]] static bool greatest_common_divisor(
@@ -23,4 +22,4 @@ public:
         std::span<std::byte> result);
 };
 
-} // namespace shade
+}

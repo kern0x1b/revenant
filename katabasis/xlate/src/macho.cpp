@@ -206,12 +206,6 @@ bool Image::Parse(std::string &error) {
   return ParseExports(error);
 }
 
-// Data-in-code entries mark byte ranges inside __text that are data, not instructions --
-// almost always compiler jump tables (DICE_KIND_JUMP_TABLE*). Those are already handled: the
-// lifter stops at the indirect branch that precedes a table (no static fallthrough into it) and
-// JumpTables recovers the targets, so the table bytes are never decoded as code. Earlier the
-// mere presence of any data-in-code aborted the whole translation; instead accept it and only
-// warn about raw-data islands (DICE_KIND_DATA), which a fallthrough path could still misdecode.
 bool Image::ParseDataInCode(const MachOObjectFile::LoadCommandInfo &lc) {
   auto command = object_->getLinkeditDataLoadCommand(lc);
   auto data = object_->getData();
@@ -226,9 +220,6 @@ bool Image::ParseDataInCode(const MachOObjectFile::LoadCommandInfo &lc) {
     if (kind == MachO::DICE_KIND_DATA) {
       ++raw;
     }
-    // data_in_code_entry.offset is a file offset from the start of the Mach-O header, not from
-    // any one segment or section -- find the segment it falls in (there are only a handful) and
-    // rebase it the same way ReadBytes/SectionAt already address everything else, by vmaddr.
     for (auto &segment : segments_) {
       if (file_offset >= segment.fileoff && file_offset < segment.fileoff + segment.filesize) {
         data_in_code_.push_back({segment.vmaddr + (file_offset - segment.fileoff), length});
@@ -335,7 +326,6 @@ bool Image::ParseFixups(std::string &error) {
     error = path_ + ": " + toString(std::move(err));
     return false;
   }
-  // The weak bind table coalesces a name across every image and carries no library ordinal.
   auto add_binds = [&](auto range, bool named) -> bool {
     for (auto &entry : range) {
       Bind bind;
@@ -414,4 +404,4 @@ bool Image::ParseExports(std::string &error) {
   return true;
 }
 
-}  // namespace xlate
+}

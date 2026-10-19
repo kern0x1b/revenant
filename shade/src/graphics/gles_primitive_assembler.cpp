@@ -103,7 +103,7 @@ namespace {
         return true;
     }
 
-} // namespace
+}
 
 std::span<const GlesRasterVertex> GlesPrimitiveBatch::vertices() const
 {
@@ -181,4 +181,4 @@ std::optional<GlesPrimitiveBatch> GlesPrimitiveAssembler::assemble(
     return batch;
 }
 
-} // namespace shade
+}

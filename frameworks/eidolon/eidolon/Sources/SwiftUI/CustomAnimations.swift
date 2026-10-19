@@ -1,14 +1,11 @@
 import UIKit
 import CoreGraphics
 
-// MARK: what a custom animation is given to work with
-
 public protocol AnimationStateKey {
     associatedtype Value
     static var defaultValue: Value { get }
 }
 
-/// The scratch pad a custom animation may keep values in while it runs.
 public struct AnimationState<Value> {
     private var storage: [ObjectIdentifier: Any] = [:]
 
@@ -20,7 +17,6 @@ public struct AnimationState<Value> {
     }
 }
 
-/// What a custom animation is told: where it stands, whether it is over, and the environment.
 public struct AnimationContext<Value> where Value: VectorArithmetic {
     public var state: AnimationState<Value>
     public var isLogicallyComplete: Bool
@@ -45,19 +41,12 @@ public struct AnimationContext<Value> where Value: VectorArithmetic {
     }
 }
 
-/// An animation of one's own: the three questions SwiftUI asks of it.
 public protocol CustomAnimation: Hashable {
-    /// Where the value is at a moment, or nil to leave it to SwiftUI.
     func animate<V: VectorArithmetic>(value: V, time: Double, context: inout AnimationContext<V>) -> V?
-    /// How fast the value is moving there, or nil when it is not moving.
     func velocity<V: VectorArithmetic>(value: V, time: Double, context: AnimationContext<V>) -> V?
-    /// Whether this animation may take over from another one that is already running.
     func shouldMerge<V: VectorArithmetic>(previous: Animation, value: V, time: Double, context: inout AnimationContext<V>) -> Bool
 }
 
-/// A custom animation held in a value of its own: an `Animation` compares and hashes by it, and an
-/// existential does neither by itself. The port's own box — the port's name for what an
-/// `any CustomAnimation` is stored in, and not an SDK type.
 struct CustomAnimationBox: Hashable {
     let base: any CustomAnimation
 
@@ -68,7 +57,6 @@ struct CustomAnimationBox: Hashable {
 }
 
 extension Animation {
-    /// An animation that computes its own values, rather than naming a curve or a spring.
     public init<A: CustomAnimation>(_ base: A) {
         curve = .linear
         duration = 0
@@ -77,9 +65,6 @@ extension Animation {
 
     public var base: (any CustomAnimation)? { custom?.base }
 
-    // A custom animation under `.speed`, `.delay`, `.logicallyComplete` or a repeat is asked for the time those make of the one it is
-    // given, answers no velocity and does not merge, whatever it would say itself, as Apple's does (every call made on it, even a speed of
-    // one, a layer around it: `host/springcmp.swift` records what a custom animation is asked under each).
     public func animate<V: VectorArithmetic>(value: V, time: Double, context: inout AnimationContext<V>) -> V? {
         custom?.base.animate(value: value, time: retiming.baseTime(at: time), context: &context)
     }
@@ -107,21 +92,15 @@ extension Animation: CustomStringConvertible, CustomDebugStringConvertible, Cust
     }
 }
 
-// MARK: when an animation counts as finished
-
 public struct AnimationCompletionCriteria: Hashable {
     var isRemoved: Bool
     public static let logicallyComplete = AnimationCompletionCriteria(isRemoved: false)
     public static let removed = AnimationCompletionCriteria(isRemoved: true)
 }
 
-/// One closure added by `Transaction.addAnimationCompletion`: it runs once, whichever copy of the transaction it was added
-/// to or used through, and however many times the transaction is used.
 final class CompletionToken {
     let criteria: AnimationCompletionCriteria
     private var action: (() -> Void)?
-    /// An animation holds it: the change in a transaction's body that took it for that animation's end, so the transaction
-    /// going away does not run it.
     var claimed = false
 
     init(criteria: AnimationCompletionCriteria, action: @escaping () -> Void) {
@@ -136,9 +115,6 @@ final class CompletionToken {
     }
 }
 
-/// The closures of a transaction and its copies. Apple's framework runs the closures a transaction still holds, that no
-/// animation took, when the last copy of it goes away: the ones that wait for the animation of a logically complete
-/// view, newest first, then the ones that wait for its removal, newest first (macOS 27, `.agent-work/runs/7-dup/h.swift`).
 final class CompletionList {
     var tokens: [CompletionToken] = []
 
@@ -150,8 +126,6 @@ final class CompletionList {
 }
 
 extension Transaction {
-    /// A closure to run when the animations of this transaction are over. SwiftUI calls it once the
-    /// animation has logically finished, or once the view is gone, whichever the criteria ask for.
     public mutating func addAnimationCompletion(criteria: AnimationCompletionCriteria = .logicallyComplete, _ completion: @escaping () -> Void) {
         let token = CompletionToken(criteria: criteria, action: completion)
         let list = completionList ?? CompletionList()

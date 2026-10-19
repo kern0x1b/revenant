@@ -56,4 +56,4 @@ void KernelSharedState::notify_send_possible_locked(std::uint32_t destination)
     }
 }
 
-} // namespace shade
+}

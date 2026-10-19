@@ -28,10 +28,6 @@
 
 namespace shade {
 
-// Offline work is ordered by observed lifecycle usefulness. Entries still
-// remain advisory: an executor compiles them only after their exact file
-// generation is mapped executable in that process. These are generic runtime
-// roles, not executable, App, page, device or firmware identities.
 enum class JitPrecompilePhase : std::uint8_t {
     Bootstrap,
     Scanout,
@@ -77,10 +73,6 @@ struct JitPrecompileBatchResult {
     std::uint64_t deadline_stops { };
 };
 
-// Queue memory is attributed to the source carried by each entry.  The
-// container estimates are explanatory working-set estimates, not allocator
-// or OS RSS measurements.  The *_peak fields are lifecycle peaks for this
-// CpuExecutionPool, not a sum across runtimes.
 struct JitPrecompileSourceMemoryStats {
     std::size_t queued_entries { };
     std::size_t pending_entries { };
@@ -103,9 +95,6 @@ struct JitPrecompileSourceMemoryStats {
 };
 
 struct JitPrecompileMemoryStats {
-    // One record for each JitPrecompileSource.  Index with the enum's
-    // underlying value; profile_queue_entries below is retained as a
-    // DemandProfile-only compatibility alias.
     std::array<JitPrecompileSourceMemoryStats, jit_precompile_source_count>
         by_source { };
     std::size_t profile_queue_entries { };
@@ -116,18 +105,11 @@ struct JitPrecompileMemoryStats {
     std::size_t inflight_entries { };
     std::size_t deferred_entries { };
     std::size_t completed_entries { };
-    // These are estimates of the owning containers, not allocator or OS RSS
-    // measurements.  Bucket, node, and deque-block overhead are kept
-    // separate so profile and catalog queues cannot be mistaken for native
-    // code or for one another.
     std::size_t estimated_queue_entry_bytes { };
     std::size_t queue_bucket_bytes { };
     std::size_t queue_node_bytes { };
     std::size_t queue_block_bytes { };
     std::size_t profile_recorder_bytes { };
-    // Frozen prior-image descriptors are retained so a shared code-cache
-    // generation change can replay prediction without consulting a profile
-    // that the current process is concurrently training.
     std::size_t native_profile_prediction_bytes { };
     std::size_t native_preimport_tracker_bytes { };
     std::size_t profile_queue_entries_peak { };
@@ -158,13 +140,8 @@ struct CpuRunResult {
     std::optional<MemoryFault> fault;
     std::optional<std::uint32_t> debug_breakpoint;
     std::string exception;
-    // Host-only cooperative boundary marker. UserDefined2 remains the
-    // Dynarmic halt bit for compatibility, but this flag distinguishes a
-    // host slice boundary from a guest AST/deferred-SVC stop.
     bool host_yielded { };
     std::uint64_t host_yield_checks { };
-    // The architectural exception behind `exception`, and the address of the
-    // instruction that raised it, for a kernel that turns it into a signal.
     std::optional<Dynarmic::A32::Exception> exception_kind;
     std::uint32_t exception_pc { };
 };
@@ -199,9 +176,6 @@ public:
     Cpu& operator=(const Cpu&) = delete;
 
     CpuRunResult run(std::uint64_t ticks, std::size_t execution_slot = 0);
-    // The guest scheduler uses a bounded host slice so a non-preemptible JIT
-    // run returns often enough to service other runnable threads and display
-    // deadlines. Direct callers retain the ordinary run-to-budget contract.
     CpuRunResult run_cooperatively(
         std::uint64_t ticks, std::size_t execution_slot = 0);
     CpuRunResult run_cooperatively(std::uint64_t ticks,
@@ -217,16 +191,10 @@ public:
     void invalidate_cache_range(std::uint32_t address, std::size_t length);
     void invalidate_cache_ranges(
         std::span<const CacheInvalidationRange> ranges);
-    // Kernel-side traps that touch an invalid guest range use the same
-    // Dynarmic memory-abort result as an ordinary load/store fault. When the
-    // trap is dispatched outside a running executor, this also records the
-    // fatal halt boundary for the scheduler's deferred-SVC path.
     void raise_memory_fault(
         std::uint32_t address, std::size_t size, MemoryPermission access);
     void clear_halt();
     void halt(Dynarmic::HaltReason reason = Dynarmic::HaltReason::UserDefined1);
-    // Record and request an XNU AST/preemption boundary. This remains
-    // separate from host cooperative yielding and deferred SVC halts.
     void request_guest_preemption();
     [[nodiscard]] Dynarmic::HaltReason consume_requested_halt_reason();
 
@@ -244,16 +212,12 @@ public:
     void set_cthread_self(std::optional<std::uint32_t> value);
     void set_svc_handler(SvcHandler handler);
     void set_svc_dispatch_mode(SvcDispatchMode mode);
-    // The guest thread the next runs of this CPU execute for. Only the block
-    // profile reads it (its chain rows name the thread).
     void set_guest_thread(std::uint32_t thread);
     void set_memory_write_watchpoint(
         std::uint32_t address, MemoryWriteHandler handler);
     void set_debug_breakpoints_enabled(bool enabled);
     void set_translation_profile(std::shared_ptr<JitTranslationProfile> profile,
         bool record = true, bool precompile = true);
-    // The scheduler calls this when a different guest thread is dispatched on
-    // the same serialized virtual processor.
     void clear_exclusive_state(std::size_t execution_slot = 0);
 
 private:
@@ -285,9 +249,6 @@ public:
     CpuCluster(std::size_t processor_count, AddressSpace& memory);
     CpuCluster(std::size_t initial_processor_count,
         std::size_t maximum_processor_count, AddressSpace& memory);
-    // A serial guest scheduler can host many thread register contexts on one
-    // emulated processor. Keeping those counts separate avoids making every
-    // exclusive store scan all possible thread slots.
     CpuCluster(std::size_t initial_processor_count,
         std::size_t maximum_processor_count, AddressSpace& memory,
         bool serialized_execution);
@@ -297,9 +258,6 @@ public:
     CpuCluster(std::size_t initial_processor_count,
         std::size_t maximum_processor_count, AddressSpace& memory,
         std::size_t execution_slot_count, const ArmCpuModel& cpu_model);
-    // Boot-created processes can share a Dynarmic monitor so LDREX/STREX
-    // reservations at the same Guest address observe cross-process writes.
-    // Each cluster receives a disjoint processor-id range in that monitor.
     CpuCluster(std::size_t initial_processor_count,
         std::size_t maximum_processor_count, AddressSpace& memory,
         std::size_t execution_slot_count, const ArmCpuModel& cpu_model,
@@ -321,14 +279,8 @@ public:
     [[nodiscard]] std::optional<std::size_t> add_cpu();
     void set_process_id(std::uint32_t process_id);
     void set_jit_code_cache_size(std::size_t bytes);
-    // Construct the primary Dynarmic executor without running Guest code.
-    // Spawned foreground processes use this from a Host worker while their
-    // initial Guest thread remains suspended, keeping the non-preemptible
-    // constructor off the interactive scheduler thread.
     void prepare_primary_execution_resource();
     [[nodiscard]] std::size_t precompile_lane_count() const noexcept;
-    // Publish demand-recorder changes into the simulator-wide O(1) work
-    // signal without requiring the frontend to scan runtime executors.
     void set_jit_work_signal(
         std::shared_ptr<JitWorkObservationSignal> signal);
     [[nodiscard]] std::uint64_t jit_code_cache_bytes();
@@ -337,18 +289,9 @@ public:
     void set_translation_profile(std::shared_ptr<JitTranslationProfile> profile,
         JitPrecompilePhase phase = JitPrecompilePhase::Opportunistic,
         bool record = true, bool precompile = true);
-    // Append descriptors merged by the safe-point recorder since the last
-    // profile assignment. This is called only from an idle/precompile
-    // scheduler boundary and remains bounded by the profile queue capacity.
     void refresh_translation_profile();
-    // A loader has published additional fixed executable mappings. Requeue
-    // only profile entries that were deferred for unavailable Guest memory;
-    // this safe-point operation does not flush the live demand recorder.
     void retry_deferred_translation_profile();
     [[nodiscard]] JitPrecompileMemoryStats precompile_memory_stats() const;
-    // Boot-critical processes mark every executable artifact they actually
-    // consume, naturally covering dyld and the mapped dependency closure
-    // without putting process paths into artifact identity.
     void set_jit_artifact_retention(JitArtifactRetention retention);
     void add_precompile_entries(
         const std::vector<std::uint64_t>& location_descriptors,
@@ -362,14 +305,7 @@ public:
         JitPrecompileTarget target = JitPrecompileTarget::NativeCode,
         PrecompileStopCondition stop_condition = { },
         std::optional<JitPrecompileSource> source = std::nullopt);
-    // Stop queued precompilation and wait only for this cluster's active
-    // precompile call to reach a Dynarmic block boundary.
     void quiesce_precompilation();
-    // A dead guest task keeps its small register context until the parent
-    // reaps the process, but no longer needs executable host code. Detach the
-    // shared execution pool so its JIT caches can be destroyed off the
-    // scheduler thread while the Cpu objects remain available as a zombie
-    // task record.
     [[nodiscard]] std::shared_ptr<CpuExecutionPool>
     release_execution_resources();
     [[nodiscard]] bool has_execution_resources() const
@@ -393,4 +329,4 @@ private:
     std::vector<std::unique_ptr<Cpu>> cpus_;
 };
 
-} // namespace shade
+}

@@ -184,7 +184,7 @@ ClassData ReadData(const Reader &reader, uint64_t ro, std::vector<std::string> &
   return data;
 }
 
-}  // namespace
+}
 
 ObjCImage AnalyzeObjC(const Image &image) {
   ObjCImage objc;
@@ -218,8 +218,6 @@ ObjCImage AnalyzeObjC(const Image &image) {
       }
     }
     objc.clsrolist_count = ros.size();
-    // A class object holds its ro, tagged in the low bits, at +32; nothing but the object's own data word points at
-    // a class_ro_t of this list, so every slot that does marks one object.
     std::set<uint64_t> objects, owned;
     std::map<uint64_t, uint64_t> object_ro;
     for (auto &section : image.sections()) {
@@ -237,8 +235,6 @@ ObjCImage AnalyzeObjC(const Image &image) {
         }
       }
     }
-    // A class and its metaclass are both listed: a class object's isa must be its metaclass, one of the listed objects. (A
-    // metaclass's isa is the root metaclass -- bound, or the metaclass of a root class of the image itself.)
     for (uint64_t object : objects) {
       auto isa = reader.Read(object);
       bool meta = reader.U32(object_ro[object]) & 1;
@@ -410,13 +406,9 @@ void WriteData(llvm::json::OStream &json, const char *key, const ClassData &data
   });
 }
 
-}  // namespace
+}
 
 bool SplitGuestLayoutClasses(std::vector<ObjCImage> &objc, std::string &error) {
-  // The superclass one step up from a __objc_classlist class the walk below reaches: found by address, in whichever of the
-  // two tables __objc_classlist and __objc_clsrolist give it. A clsrolist-only ancestor has no ObjCClass of its own
-  // (__objc_classlist never named it), so without this the walk could not see past one and treated it the same as a host
-  // ancestor (review of f248398): silently kept the classlist descendant at host layout instead of moving it.
   std::map<uint64_t, Pointer> superclass_of;
   for (auto &image : objc) {
     for (auto &cls : image.classes) {
@@ -426,10 +418,6 @@ bool SplitGuestLayoutClasses(std::vector<ObjCImage> &objc, std::string &error) {
       superclass_of[address] = superclass;
     }
   }
-  // A Swift class is the guest's own when every class above it is: the chain ends at a class with no superclass, in the
-  // guest's own image, and never reaches a host class. An ancestor found only via __objc_clsrolist keeps the guest's own
-  // layout unconditionally (it is never subject to the classlist rewrite in the first place, being outside
-  // __objc_classlist to begin with), so the walk passes through one to whatever is above it rather than stopping there.
   auto guest_only = [&](const ObjCClass &start) {
     const Pointer *superclass = &start.superclass;
     for (int depth = 0; depth < 256; ++depth) {
@@ -486,9 +474,6 @@ bool SplitGuestLayoutClasses(std::vector<ObjCImage> &objc, std::string &error) {
   return true;
 }
 
-// A bind to a symbol that another guest image defines is not a host import: it is that image's own
-// class object, at the address the export table gives (libswiftCore's _SwiftObject under an app's
-// Swift classes).
 void ResolveGuestImports(std::vector<ObjCImage> &objc, const GuestExports &exports) {
   auto resolve = [&](Pointer &pointer) {
     if (pointer.kind != Pointer::Import) {
@@ -599,4 +584,4 @@ void WriteManifest(llvm::raw_ostream &os, const std::vector<const Image *> &imag
   });
 }
 
-}  // namespace xlate
+}

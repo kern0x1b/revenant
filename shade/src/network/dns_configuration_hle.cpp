@@ -25,14 +25,9 @@ namespace {
 
     constexpr std::string_view responder_image { "/usr/sbin/mDNSResponder" };
 
-    // Darwin 8 ARM32 dnsinfo.h layouts. dns_configuration_copy normally expands
-    // configd's serialized DNS state into these pointer-rich structures.
     constexpr std::uint32_t config_size = 40;
     constexpr std::uint32_t resolver_pointer_offset = config_size;
     constexpr std::uint32_t resolver_offset = resolver_pointer_offset + 4U;
-    // iPhoneOS 1.0 uses the post-Tiger resolver layout: interface/scoped fields
-    // precede the original dnsinfo members.  The firmware reads n_nameserver at
-    // +8, nameserver at +12, port at +20, and search_order at +60.
     constexpr std::uint32_t resolver_size = 96;
     constexpr std::uint32_t nameserver_pointer_offset =
         resolver_offset + resolver_size;
@@ -58,7 +53,7 @@ namespace {
         }
     }
 
-} // namespace
+}
 
 void register_dns_configuration_hle(UserlandHleRegistry& registry)
 {
@@ -71,7 +66,7 @@ void register_dns_configuration_hle(UserlandHleRegistry& registry)
             }
 
             std::vector<std::byte> bytes(allocation_size);
-            write_u32(bytes, 0, 1); // dns_config_t::n_resolver
+            write_u32(bytes, 0, 1);
             write_u32(bytes, 4, base + resolver_pointer_offset);
             write_u32(bytes, resolver_pointer_offset, base + resolver_offset);
 
@@ -83,8 +78,6 @@ void register_dns_configuration_hle(UserlandHleRegistry& registry)
             write_u32(
                 bytes, nameserver_pointer_offset, base + nameserver_offset);
 
-            // sockaddr_in { sin_len, sin_family, sin_port, sin_addr } for the
-            // simulator's DNS proxy at 10.0.2.3:53.
             bytes[nameserver_offset] = std::byte { 16 };
             bytes[nameserver_offset + 1U] = std::byte { 2 };
             bytes[nameserver_offset + 2U] = std::byte { 0 };
@@ -102,9 +95,8 @@ void register_dns_configuration_hle(UserlandHleRegistry& registry)
         });
     registry.register_function(std::string { responder_image },
         "_dns_configuration_free", [](UserlandHleCall& call) {
-            // HLE data pages live for the process address-space lifetime.
             call.set_return(0);
         });
 }
 
-} // namespace shade
+}

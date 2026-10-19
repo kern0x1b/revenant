@@ -83,4 +83,4 @@ Dynarmic::VAddr GuestExclusiveAddressResolver::resolve_callback(
         processor_id, address);
 }
 
-} // namespace shade
+}

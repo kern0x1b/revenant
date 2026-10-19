@@ -25,7 +25,7 @@ namespace {
     constexpr std::size_t command_header_size = 4;
     constexpr std::size_t maximum_command_size = 259;
 
-} // namespace
+}
 
 darwin::tty::Arm32Attributes State::attributes() const
 {
@@ -99,11 +99,6 @@ void State::consume_h4_byte(std::byte value)
                            command_[2] == std::byte { 0xfc } &&
                            parameter_length >= 11;
     if (csr_bccmd) {
-        // CSR BCCMD replies use a vendor event rather than Command Complete.
-        // Mirror the request envelope, turn REQ into RESP, and report an
-        // unknown variable. The guest retains ownership of policy and exits its
-        // command path immediately instead of waiting for a controller that is
-        // absent.
         std::vector<std::byte> response(3U + parameter_length);
         response[0] = h4_event_packet;
         response[1] = vendor_event;
@@ -119,8 +114,6 @@ void State::consume_h4_byte(std::byte value)
         receive_queue_.insert(
             receive_queue_.end(), response.begin(), response.end());
     } else {
-        // H4 Command Complete: one command packet may continue, original
-        // opcode, and a standard HCI Hardware Failure status.
         const std::array response { h4_event_packet, command_complete_event,
             std::byte { 0x04 }, std::byte { 0x01 }, command_[1], command_[2],
             hardware_failure_status };
@@ -132,9 +125,7 @@ void State::consume_h4_byte(std::byte value)
 
 bool is_path(std::string_view candidate)
 {
-    // This is the stable hardware ABI exposed by the device family, not a
-    // process or firmware-version check.
     return candidate == "/dev/cu.bluetooth";
 }
 
-} // namespace shade::bsd::offline_serial_device
+}

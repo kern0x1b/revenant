@@ -30,7 +30,7 @@ namespace {
         return relative;
     }
 
-} // namespace
+}
 
 std::filesystem::path RootfsPathResolver::resolve(std::string_view guest_path,
     const std::filesystem::path& guest_working_directory,
@@ -80,4 +80,4 @@ std::filesystem::path RootfsPathResolver::resolve(std::string_view guest_path,
     return relative.empty() ? rootfs_ : rootfs_ / relative;
 }
 
-} // namespace shade
+}

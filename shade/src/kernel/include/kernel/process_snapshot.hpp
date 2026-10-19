@@ -11,8 +11,6 @@
 
 namespace shade {
 
-// A copied observation of the guest process table. Clients never receive a
-// mutable process record or hold a kernel lock while formatting diagnostics.
 struct ProcessSnapshot {
     std::uint32_t pid { };
     std::uint32_t parent_pid { };
@@ -25,4 +23,4 @@ struct ProcessSnapshot {
     std::uint32_t termination_signal { };
 };
 
-} // namespace shade
+}

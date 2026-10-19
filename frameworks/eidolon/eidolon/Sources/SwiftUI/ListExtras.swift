@@ -51,7 +51,6 @@ struct _EditButtonBody: View, PrimitiveView {
     func makeNode(_ env: EnvironmentValues) -> Node { let n = EditButtonNode(); n.update(self, env); return n }
 }
 
-// Where "is the screen being edited" lives: the \.editMode binding when the app gives one, the screen itself otherwise.
 struct EditingAccess {
     let get: () -> Bool
     let set: (Bool) -> Void
@@ -292,8 +291,6 @@ extension View {
     }
 
     public func listRowSeparator(_ visibility: Visibility, edges: VerticalEdge.Set = .all) -> some View {
-        // a UITableView of this release draws its hairline under the row and none above it, so the top edge of the
-        // argument asks for nothing that is not already so
         if !edges.contains(.bottom) { _Unsupported.note("listRowSeparator(edges:)", "a table of iOS 6 draws no line above a row, so a request for the top edge alone is what the release already does") }
         return _ModifiedView(content: self, modifier: RowTraitModifier(apply: { $0.separator = visibility }))
     }

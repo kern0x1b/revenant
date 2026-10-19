@@ -23,15 +23,13 @@ void IOAudio2PropertyNotifications::publish(std::uint32_t object_id,
 void IOAudio2PropertyNotifications::control_value_changed(
     std::uint32_t control_id, std::uint32_t value) const
 {
-    send(control_id, 0x6376616cU, value, 0, 0); // cval
+    send(control_id, 0x6376616cU, value, 0, 0);
 }
 
 void IOAudio2PropertyNotifications::send(std::uint32_t object_id,
     std::uint32_t kind, std::uint32_t value, std::uint32_t scope,
     std::uint32_t element) const
 {
-    // IOAudio2 sends a Mach header, the registration reference and count,
-    // followed by 32-byte notifications (object, kind, property address).
     constexpr std::size_t body = darwin::mig_wire::message_header_size;
     constexpr std::size_t record = body + 8;
     for (const auto& [connection_object, connection] :
@@ -68,4 +66,4 @@ void IOAudio2PropertyNotifications::send(std::uint32_t object_id,
     }
 }
 
-} // namespace shade::kernel_iokit::audio
+}

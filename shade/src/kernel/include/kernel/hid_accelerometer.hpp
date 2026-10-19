@@ -24,8 +24,6 @@ public:
     {
         if (!next_sample_ || now < *next_sample_)
             return std::nullopt;
-        // Missed samples are not replayed in a burst. The virtual chassis is
-        // upright and at rest; firmware owns filtering and orientation policy.
         next_sample_ = now + sample_period;
         return HidEventQueue::Event {
             HidEventQueue::Acceleration { 0.0F, -1.0F, 0.0F }, now
@@ -33,10 +31,8 @@ public:
     }
 
 private:
-    // A low-rate hardware stream also serves clients that have not requested
-    // a service-specific report interval. This is guest monotonic time in ns.
     static constexpr std::uint64_t sample_period = 100'000'000U;
     std::optional<std::uint64_t> next_sample_;
 };
 
-} // namespace shade
+}

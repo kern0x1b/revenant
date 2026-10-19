@@ -48,8 +48,6 @@ bool CompatibilityKernel::dispatch_bsd_process_policy(
             return true;
         }
         auto& record = target->second;
-        // Embedded XNU permits the real/effective owner or root to control a
-        // process. Credentials belong to the guest, never the host user.
         if (resolved_pid != process_.pid && process_.effective_uid != 0U &&
             process_.uid != 0U &&
             process_.effective_uid != record.effective_uid &&
@@ -127,4 +125,4 @@ bool CompatibilityKernel::dispatch_bsd_process_policy(
     return true;
 }
 
-} // namespace shade
+}

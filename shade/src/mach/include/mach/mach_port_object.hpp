@@ -24,26 +24,14 @@ inline constexpr std::uint32_t small_queue_limit = 16;
 inline constexpr std::uint32_t framework_queue_limit = 64;
 inline constexpr std::uint32_t large_queue_limit = 1024;
 inline constexpr std::uint32_t default_queue_limit = basic_queue_limit;
-// Public xnu defines 16 as MACH_PORT_QLIMIT_MAX, but the iPhone OS 1.0
-// firmware's unmodified CoreFoundation/configd clients request 64 and 1024
-// during normal startup. This matches the later Apple BASIC/SMALL/LARGE split
-// and is an observable target-device kernel ABI difference.
 inline constexpr std::uint32_t maximum_queue_limit = large_queue_limit;
 
 struct PortObject {
-    // Zero denotes the kernel ipc_space or an active port whose receive right
-    // is temporarily in transit. This is never a task-local Mach name.
     TaskIdentity receive_owner { };
-    // Preserve the receiver's identity across MOVE_RECEIVE. A user port in
-    // transit also has a zero receive_owner, but it must remain routable to its
-    // eventual user-space server; only ports created in the kernel ipc_space
-    // are kernel objects serviced by the in-kernel MIG demux.
     bool kernel_owned { };
     std::uint32_t make_send_count { };
     std::uint32_t sequence_number { };
     std::uint32_t queue_limit { default_queue_limit };
-    // Receive rights prepared for transfer do not attribute queued-message
-    // importance to their temporary holder.
     bool temporary_owner { };
     std::optional<std::uint64_t> guard { };
     bool strict_guard { };
@@ -177,4 +165,4 @@ private:
     std::map<PortObjectId, PortObject> objects_;
 };
 
-} // namespace shade::xnu::ipc
+}

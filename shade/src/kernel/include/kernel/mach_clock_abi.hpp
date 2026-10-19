@@ -14,7 +14,6 @@
 
 namespace shade::darwin::mach::clock {
 
-// XNU osfmk/mach/clock_types.h and kern/syscall_sw.c.
 constexpr std::uint32_t sleep_trap = 62;
 constexpr std::uint32_t null_clock_name = 0;
 constexpr std::uint32_t system_clock_id = 0;
@@ -30,8 +29,6 @@ constexpr std::uint32_t alarm_current_resolution_flavor = 3;
 constexpr std::uint32_t alarm_minimum_resolution_flavor = 4;
 constexpr std::uint32_t alarm_maximum_resolution_flavor = 5;
 constexpr std::uint32_t attribute_word_count = 1;
-// VirtualClock advances in deterministic nanoseconds; ordinary execution
-// samples it in one-microsecond quanta.
 constexpr std::uint32_t virtual_resolution_nanoseconds = 1'000;
 
-} // namespace shade::darwin::mach::clock
+}

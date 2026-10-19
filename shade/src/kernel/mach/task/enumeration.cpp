@@ -47,7 +47,7 @@ namespace {
         return true;
     }
 
-} // namespace
+}
 
 bool CompatibilityKernel::dispatch_mach_task_enumeration_message(
     Cpu& cpu, const MachMessageRequest& request)
@@ -169,4 +169,4 @@ bool CompatibilityKernel::dispatch_mach_task_enumeration_message(
     return true;
 }
 
-} // namespace shade
+}

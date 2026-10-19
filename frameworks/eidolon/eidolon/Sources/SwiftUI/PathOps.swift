@@ -59,7 +59,6 @@ extension Path {
         return Path(source.copy(strokingWithWidth: style.lineWidth, lineCap: style.lineCap, lineJoin: style.lineJoin, miterLimit: style.miterLimit))
     }
 
-    // The path as straight pieces: a curve becomes enough short lines that the eye cannot tell.
     fileprivate func polylines() -> [Polyline] {
         var result: [Polyline] = []
         var current: [CGPoint] = []
@@ -109,7 +108,6 @@ extension Path {
         return result
     }
 
-    // The part of the path between two fractions of its total length, the lengths of all subpaths counted together.
     public func trimmedPath(from: CGFloat, to: CGFloat) -> Path {
         let lines = polylines()
         let total = lines.reduce(CGFloat(0)) { $0 + $1.length }

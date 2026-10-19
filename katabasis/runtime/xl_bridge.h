@@ -40,12 +40,9 @@ struct xl_variadic_shim {
     void (*handler)(State *);
 };
 
-// A selector whose SDK declarations disagree on signature across classes (e.g. -timestamp is
-// NSDate* on CLLocation but NSTimeInterval on UIEvent). Each distinct signature gets its own
-// bridge; the runtime dispatches on the receiver's actual method type encoding.
 struct xl_selector_variant {
     const char *selector;
-    const char *encoding;  // ObjC type encoding, digits (offsets) stripped
+    const char *encoding;
     uint32_t guest;
 };
 
@@ -81,11 +78,6 @@ static inline uint64_t xl_narrow_unsigned(uint64_t value, uint64_t host_max, uin
     return value;
 }
 
-// A guest pointer is 64-bit and a host pointer 32-bit, but C code also passes small negative
-// sentinel "pointers" -- (void *)-1 (MAP_FAILED, SIG_ERR, RTLD_NEXT), RTLD_DEFAULT (-2), SEM_FAILED,
-// ... -- which are sign-extended to 0xffff...ffNN on arm64 and are 0xffffffNN on armv7. Treat the
-// top 256 values as sentinels in both directions so they keep their identity across the bridge;
-// no real 32-bit user address lives there, so this cannot mask a genuine truncation.
 static inline uintptr_t xl_narrow_pointer(uint64_t value, const char *symbol, unsigned index)
 {
     if (value >> 32) {
@@ -127,11 +119,8 @@ void xl_format_marshal(struct xl_format *format, const char *text, void *object,
 void xl_format_marshal_valist(struct xl_format *format, const char *text, void *object, uint64_t guest_valist, const char *symbol);
 void xl_format_release(struct xl_format *format);
 
-// Shims for libc functions absent on the target release (the *at family is not on iOS 6). The
-// bridge generator routes the guest call here instead of the missing libSystem symbol.
 int xl_shim_openat(int dirfd, const char *path, int flags, int mode);
 
-// Typed memory operations (iOS 16+): drop the type-id hint and call the plain allocator.
 void xl_errno_trace(const char *name, int64_t result, uint64_t first_argument, uint64_t second_argument);
 double xl_shim_exp10(double x);
 int xl_shim_sqlite3_prepare_v3(sqlite3 *db, const char *sql, int n, unsigned int flags, sqlite3_stmt **stmt, const char **tail);

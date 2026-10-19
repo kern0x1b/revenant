@@ -54,7 +54,6 @@
 namespace shade {
 namespace {
 
-    // The armv7 shared region of the releases this emulator boots.
     constexpr std::uint32_t shared_region_first_address = 0x20000000U;
     constexpr std::uint32_t shared_region_end_address = 0x40000000U;
 
@@ -87,10 +86,6 @@ namespace {
 
     [[nodiscard]] bool jit_sync_disk_lookup_enabled() noexcept
     {
-        // Guest demand admission is memory/hotset-only by default. A
-        // synchronous disk payload is reserved for explicit experiments and
-        // background-style acceptance runs; it must never extend the normal CPU
-        // slice.
         static const bool enabled =
             jit_env_flag("SHADE_JIT_ALLOW_SYNC_DISK_LOOKUP") &&
             !jit_env_flag("SHADE_JIT_MEMORY_ONLY_LOOKUP");
@@ -100,9 +95,6 @@ namespace {
     [[nodiscard]] std::uint64_t demand_probe_fingerprint(
         const JitArtifactKey& key) noexcept
     {
-        // Workspace collision tests can force two deliberately different keys
-        // to share the diagnostic filter. The full key comparison below remains
-        // the correctness check; this hook is never enabled in normal runs.
         static const bool force_test_collision =
             jit_env_flag("SHADE_TEST_DEMAND_PROBE_FINGERPRINT_COLLISION");
         if (force_test_collision)
@@ -160,22 +152,12 @@ namespace {
     constexpr std::size_t jit_profile_precompile_queue_entry_capacity =
         jit_profile_precompile_target_queue_entry_capacity *
         jit_precompile_target_count;
-    // A cache-generation recovery revisits only the most recent interaction
-    // tail even though the recorder retains an entire sustained startup.
     constexpr std::size_t jit_profile_recency_recovery_location_capacity =
         32'768U;
-    // Catalog warming is an optional background hint. Keep its per-runtime
-    // admission bounded so a large catalog cannot turn an explicit experiment
-    // into a resident queue of every entry point in the image set.
     constexpr std::size_t jit_catalog_precompile_queue_entry_capacity = 512U;
     constexpr std::size_t jit_completed_precompile_entry_capacity = 2048U;
     static_assert(sizeof(void*) == sizeof(std::uint64_t));
 
-    // Queue memory statistics are published while the queue mutex is held, then
-    // read by observers without taking that mutex or walking any queue
-    // container. A short seqlock keeps the fixed-size payload coherent while
-    // all payload values remain atomic, so readers never race with a
-    // state-change publisher.
     class AtomicJitPrecompileMemorySnapshot {
     public:
         static constexpr std::size_t top_value_count = 29U;
@@ -461,10 +443,6 @@ namespace {
     [[nodiscard]] std::uint64_t logical_committed_code_bytes(
         std::uint64_t used_bytes) noexcept
     {
-        // Linux Dynarmic maps the complete slab in one anonymous mapping and
-        // does not expose a page-commit counter.  Count the emitted code range
-        // rounded to host pages as logical committed code; physical residency
-        // remains the separately sampled process RSS.
         if (used_bytes == 0U)
             return 0U;
         const auto remainder = used_bytes % host_code_page_size;
@@ -475,9 +453,6 @@ namespace {
     constexpr std::uint32_t jit_artifact_hle_abi_version = 1U;
     constexpr std::uint32_t jit_artifact_backend_abi_version = 2U;
     constexpr std::uint64_t jit_artifact_codegen_options = 1U;
-    // Layout identity no longer contains host vnode metadata. Keep old records
-    // safely unusable even if a caller happens to reconstruct the same key
-    // shape.
     constexpr std::uint32_t jit_artifact_format_version = 8U;
 
 #ifndef DYNARMIC_BUILD_FINGERPRINT
@@ -486,10 +461,6 @@ namespace {
 
     constexpr std::uint64_t jit_artifact_dynarmic_build_fingerprint =
         DYNARMIC_BUILD_FINGERPRINT;
-    // A zero fingerprint means the dependency producer could not be identified
-    // (for example, when Dynarmic is supplied without its Git metadata).  Such
-    // a key cannot establish producer compatibility, so it must never authorize
-    // a persistent IR import.
     constexpr bool jit_artifact_producer_fingerprint_available =
         jit_artifact_dynarmic_build_fingerprint != 0U;
 
@@ -516,10 +487,6 @@ namespace {
             std::uint64_t result = 0;
 #if (defined(__GNUC__) || defined(__clang__)) &&                               \
     (defined(__x86_64__) || defined(_M_X64))
-            // Keep these bit positions aligned with Dynarmic's X64 HostFeature
-            // enum. Its emitter selects different instructions for these
-            // capabilities, so the portable-IR key must distinguish them even
-            // though the artifact itself is not native host code.
             __builtin_cpu_init();
             if (__builtin_cpu_supports("ssse3"))
                 result |= std::uint64_t { 1 } << 0U;
@@ -576,17 +543,10 @@ namespace {
 #if defined(__x86_64__) || defined(_M_X64)
         return true;
 #else
-        // Dynarmic's ARM64 A32 emitter currently rejects Interpret terminals;
-        // keep portable IR as a publish-only diagnostic/cache format until that
-        // backend can validate and emit every imported terminal safely.
         return false;
 #endif
     }
 
-    // Under the block profile a run must return to the dispatcher after every
-    // block, because the dispatcher is where a run's remaining ticks are
-    // checked. Block linking, the return stack buffer and the fast dispatcher
-    // would let a run go on through a block. Code emitted with them differs.
     [[nodiscard]] Dynarmic::OptimizationFlag jit_optimizations()
     {
         if (!performance_counters().block_profile_enabled())
@@ -597,10 +557,6 @@ namespace {
                    Dynarmic::OptimizationFlag::FastDispatch);
     }
 
-    // The artifact key does not carry the optimization flags. An artifact
-    // compiled with block linking must not be loaded under the profile, and a
-    // block compiled without it must not be published for a run without it, so
-    // the profiled run uses no artifact store at all.
     [[nodiscard]] std::shared_ptr<JitArtifactStore> artifact_store_for_run(
         std::shared_ptr<JitArtifactStore> store)
     {
@@ -609,7 +565,7 @@ namespace {
             : std::move(store);
     }
 
-} // namespace
+}
 
 class JitCallbacks final : public Dynarmic::A32::UserCallbacks {
 public:
@@ -658,9 +614,6 @@ public:
     {
         if (ir.block.CycleCount() == 0) {
             performance_counters().record_translation_block();
-            // The dyld shared cache is the same read-only code at the same
-            // addresses in every process, so its blocks are the ones every
-            // process translates again.
             if (address >= shared_region_first_address &&
                 address < shared_region_end_address) {
                 performance_counters().record_translation_block_shared_region();
@@ -679,10 +632,6 @@ public:
                 translation_code_pages_.push_back(page);
             }
         }
-        // This fork's translator continues normal decoding when the hook
-        // returns true. Returning false is reserved for a hook that already
-        // emitted an IR terminal. (The comment in UserCallbacks currently says
-        // the opposite.)
         return true;
     }
 
@@ -698,7 +647,6 @@ public:
         const Dynarmic::IR::Block& block) noexcept override
     {
         if (performance_counters().block_profile_enabled()) {
-            // The emitted code charges this cycle count when the block ends.
             const auto terminal = block.GetTerminal();
             TranslatedBlock translated { block.CycleCount(), BlockEnd::Other };
             if (boost::get<Dynarmic::IR::Term::LinkBlock>(&terminal))
@@ -802,10 +750,6 @@ public:
         return artifact_store_ && artifact_store_->size() != 0U;
     }
 
-    // Preparation is deliberately separate from the Dynarmic miss callback:
-    // store lookup, dependency validation, and IR deserialization all happen
-    // before Jit::Run. The miss callback only consumes this executor-local
-    // slot after NativeCodeSlab::find_block has failed.
     JitDemandArtifactStageResult stage_demand_artifact(
         std::uint64_t location_descriptor, std::uint64_t slab_generation,
         const JitArtifactKey& key)
@@ -1072,8 +1016,6 @@ public:
         return true;
     }
 
-    // Called by Dynarmic only after NativeCodeSlab::find_block misses. This
-    // function does not access the store and does not allocate or lock.
     [[nodiscard]] Dynarmic::IR::Block* take_demand_artifact(
         std::uint64_t location_descriptor,
         std::uint64_t slab_generation) noexcept
@@ -1291,11 +1233,6 @@ private:
                         std::chrono::duration_cast<std::chrono::nanoseconds>(
                             host_yield_slow_translation_threshold)
                             .count()));
-        // Ordinary guest execution is latency-sensitive. Artifact production
-        // remains reserved for an explicit precompile request, but a complete
-        // descriptor is retained in fixed executor-local storage for a later
-        // safe-point profile merge. No store lookup, IR serialization, or
-        // profile lock is allowed on this callback path.
         if (!portable_generation_location_ && !explicit_artifact_publication_) {
             if (translation_recorder_) {
                 static_cast<void>(
@@ -1454,11 +1391,6 @@ public:
         }
         if (owner_->svc_handler_) {
             owner_->svc_handler_(*owner_, immediate);
-            // Immediate HLE executes inside Dynarmic's callback and can spend
-            // far longer in host wall time than the surrounding Guest block
-            // accounts in instruction ticks.  Re-check the existing host-only
-            // cooperation deadline at this safe syscall boundary so the outer
-            // scheduler can service an equal-priority runnable peer.
             maybe_check_host_yield(0, true);
         } else {
             jit_->HaltExecution(Dynarmic::HaltReason::UserDefined2);
@@ -1469,10 +1401,6 @@ public:
         std::uint32_t pc, Dynarmic::A32::Exception exception) override
     {
         if (exception == Dynarmic::A32::Exception::Yield) {
-            // ARM YIELD is a scheduler hint, not a guest fault.  The
-            // translator has already advanced the guest PC before invoking
-            // this callback, so route it through the existing explicit guest
-            // yield boundary and let XNU choose the next runnable thread.
             jit_->HaltExecution(Dynarmic::HaltReason::UserDefined8);
             return;
         }
@@ -1507,9 +1435,6 @@ public:
         }
         if (exception == Dynarmic::A32::Exception::UndefinedInstruction &&
             is_trap_instruction(pc)) {
-            // The permanently undefined encoding dyld and libSystem use to
-            // abort ("trap") is a breakpoint to Darwin, not an illegal
-            // instruction: the process dies of SIGTRAP.
             exception = Dynarmic::A32::Exception::Breakpoint;
         }
         std::ostringstream message;
@@ -1545,8 +1470,6 @@ public:
         maybe_check_host_yield(ticks, slice_ticks_remaining_ == 0U);
     }
     std::uint64_t GetTicksRemaining() override { return ticks_remaining_; }
-    // The JIT call budget (ticks_remaining_) and the scheduler slice budget
-    // differ only under the block profile, which calls the JIT once per block.
     void begin_jit_call(std::uint64_t max_ticks)
     {
         ticks_remaining_ = std::min(max_ticks, slice_ticks_remaining_);
@@ -1637,13 +1560,6 @@ public:
             translation_recorder_->set_work_signal(jit_work_signal_);
     }
 
-    // Drain only after Dynarmic has returned to a host safe point. The hot
-    // callback records raw descriptors into fixed executor-local storage.
-    // Validation and merging are deliberately kept here rather than in the
-    // translation callback. Cpu::run does not drain this recorder; an explicit
-    // idle refresh, image transition, or executor destruction supplies the
-    // safe point and keeps mutable code out of persistent profiles without
-    // charging every interactive slice.
     void flush_translation_profile_recorder() noexcept
     {
         if (!translation_recorder_)
@@ -1860,8 +1776,6 @@ private:
             key.cpu_model = jit_artifact_cpu_model(cpu_model_);
             key.timing_model_version = 1U;
             key.guest_ticks_per_second = cpu_model_.ticks_per_second();
-            // The effective Guest mapping is already part of layout_identity;
-            // no Mach-O slide is available at this generic CPU boundary.
             key.image_slide = 0U;
             key.hle_abi_version = jit_artifact_hle_abi_version;
             key.backend_abi_version = jit_artifact_backend_abi_version;
@@ -1919,15 +1833,12 @@ private:
                 }
                 data.normalized_ir = *serialized;
             } else if (translation_block != nullptr) {
-                // Retain a readable fallback for legacy callback users, but
-                // it is intentionally not importable as portable IR.
                 data.normalized_ir = normalized_ir(*translation_block);
             }
             data.translation_nanoseconds = translation_nanoseconds;
             return artifact_store_->publish(std::move(*key), std::move(data),
                        artifact_retention_) != nullptr;
         } catch (...) {
-            // Artifact persistence must never make guest execution fail.
             return false;
         }
     }
@@ -2042,9 +1953,6 @@ private:
         ticks_remaining_ = 0;
         slice_ticks_remaining_ = 0;
         if (jit_ != nullptr) {
-            // UserDefined2 is the existing scheduler AST boundary. It keeps
-            // the current XNU quantum and therefore does not model a guest
-            // yield or alter any kernel-visible ABI state.
             jit_->HaltExecution(Dynarmic::HaltReason::UserDefined2);
         }
     }
@@ -2093,11 +2001,6 @@ private:
     std::shared_ptr<JitNativePreimportTracker> native_preimport_tracker_;
 };
 
-// The iPhone ARM user ABI uses CP15 thread-pointer registers in addition to
-// the older cthread_self fast trap. Dynarmic deliberately leaves CP15 to its
-// client, so model only the architecturally visible user-thread and barrier
-// subset here. Memory is coherent in AddressSpace; cache/barrier operations
-// therefore need no host-side work, but must remain legal instructions.
 class ArmSystemControlCoprocessor final : public Dynarmic::A32::Coprocessor {
 public:
     using CoprocReg = Dynarmic::A32::CoprocReg;
@@ -2125,17 +2028,10 @@ public:
             return std::monostate { };
         }
 
-        // The guest ARM cache maintenance instructions are no-ops for the
-        // coherent host-backed memory model.  Keeping them as callbacks also
-        // avoids Dynarmic compiling an illegal-instruction assertion.
         if (CRn == CoprocReg::C7 || CRn == CoprocReg::C8) {
             return Callback { &noop, nullptr };
         }
 
-        // TPIDRURW/TPIDRPRW are the writable per-thread pointers used by the
-        // Darwin ARM pthread ABI.  The simulator keeps one logical pointer,
-        // shared with the legacy cthread_self fast trap, so old and new
-        // firmware observe the same thread context.
         if (CRn == CoprocReg::C13 && CRm == CoprocReg::C0 &&
             (opc2 == 2 || opc2 == 7)) {
             return Callback { &write_thread_pointer, &callbacks_ };
@@ -2293,8 +2189,6 @@ public:
 
     ~JitExecutor()
     {
-        // Deregister the executor from the shared slab before invalidating
-        // link cells that retired native code could otherwise still read.
         callbacks_->flush_translation_profile_recorder();
         const bool had_jit = static_cast<bool>(jit_);
         jit_.reset();
@@ -2342,8 +2236,6 @@ public:
         diagnostics.checkpoint(PerfLatencyKind::CpuRunLoadState);
         const auto effective_host_slice_budget =
             std::max(host_slice_budget, std::chrono::nanoseconds::zero());
-        // Under the block profile the JIT is called once per block; the slice
-        // keeps its whole budget (see the JIT call below).
         const auto profiling_blocks =
             performance_counters().block_profile_enabled();
         callbacks_->begin(single_step ? 1 : ticks,
@@ -2365,13 +2257,6 @@ public:
                 ? host_execution_budget_.next(effective_host_slice_budget)
                 : 0U;
             const auto jit_started = std::chrono::steady_clock::now();
-            // The JIT call. Under the block profile it returns after every
-            // block, so the loop calls it once per block and records each
-            // block at its own start (the profile's per-block attribution).
-            // The slice is still one slice: the loop ends where one unprofiled
-            // call ends (slice ticks spent, a host yield, the native block
-            // budget, or a halt for another reason), so the scheduler sees the
-            // same run with the same ticks and the same halt.
             const auto profiling_calls = profiling_blocks && !single_step;
             decltype(jit_->GetHostExecutionBudgetResult()) native_budget_result { };
             std::uint32_t native_blocks_executed { };
@@ -2388,13 +2273,7 @@ public:
                     const Dynarmic::A32::LocationDescriptor block_descriptor {
                         Dynarmic::IR::LocationDescriptor { block_location }
                     };
-                    // LR at the block's start: for an entry block, the return
-                    // address of the call that reached it (the block profile's
-                    // caller column).
                     block_caller = jit_->Regs()[14];
-                    // The block's guest stack at its start, walked now: the
-                    // registers are the block's, and the walk reads the guest
-                    // memory it will use.
                     block_stack = attribute_run_stack(block_descriptor.PC());
                     block_chain = capture_run_chain(block_descriptor.PC());
                 }
@@ -2424,8 +2303,6 @@ public:
                         block_descriptor.PC(), block_descriptor.TFlag(),
                         std::move(block_chain), block_ticks);
                 }
-                // Run() returns no halt bit when the call's ticks are spent
-                // (Step is set only by the single-step entry).
                 const auto halted_for_ticks = reason == Dynarmic::HaltReason {} ||
                                               reason == Dynarmic::HaltReason::Step;
                 if (!profiling_calls || !halted_for_ticks ||
@@ -2493,9 +2370,6 @@ public:
             diagnostics.checkpoint(PerfLatencyKind::CpuRunSaveState);
             record_code_cache_usage();
             performance_counters().record_cpu_execution(result.ticks_consumed);
-            // Profile validation and merging never run in an executing Guest
-            // slice. The fixed recorder spans a complete profile and is
-            // drained only by an explicit quiet/image-transition safe point.
             diagnostics.checkpoint(PerfLatencyKind::CpuRunCacheAccounting);
             return result;
         } catch (...) {
@@ -2517,10 +2391,6 @@ public:
 
     void clear_halt()
     {
-        // Clearing Dynarmic's AST must also retire the matching request
-        // bookkeeping. Otherwise a wake that is consumed while servicing a
-        // Mach event can leave the next run looking like a continuation of
-        // the old preemption request.
         guest_preemption_requested_ = false;
         guest_preemption_requested_at_.reset();
         if (jit_) {
@@ -2825,12 +2695,6 @@ private:
     };
 
     struct DemandArtifactProbe {
-        // The cheap tuple is a validity stamp, not an artifact identity. A
-        // RX mapping's content/layout can change independently of this pool's
-        // invalidation request, so the address-space content stamp is part of
-        // the cheap validity tuple. The complete key is still compared before
-        // a probe is accepted; the fingerprint below is diagnostic only and
-        // never participates in that decision.
         JitArtifactKey key;
         std::uint64_t key_fingerprint { };
         std::uint64_t publication_generation { };
@@ -2979,10 +2843,6 @@ private:
         if (result == JitDemandArtifactStageResult::Staged) {
             transient_backoff.reset();
         } else {
-            // The former always-installed Dynarmic provider reported a miss
-            // for every translated block. Preserve one demand-attempt miss at
-            // the preparation boundary without putting that callback back on
-            // the ordinary translation path.
             performance_counters().record_jit_demand_artifact_probe(false);
         }
         if (result == JitDemandArtifactStageResult::TransientFailure) {
@@ -2991,9 +2851,6 @@ private:
         }
         constexpr std::size_t maximum_demand_artifact_probes = 4096U;
         if (probe == demand_artifact_probes_.end()) {
-            // Keep a bounded FIFO/clock-like admission order. Unlike the old
-            // whole-table clear, this preserves useful negative probes while
-            // evicting one entry in O(1) when the cap is reached.
             if (demand_artifact_probes_.size() >=
                 maximum_demand_artifact_probes) {
                 const auto victim = demand_artifact_probe_order_.front();
@@ -3065,26 +2922,16 @@ private:
         observe_shared_invalidation_epoch();
         const auto slab_generation =
             execution_context_->native_code_slab()->generation();
-        // Publish the safe-boundary snapshot without taking the slab mutex
-        // from the precompile queue. This also covers internal slab
-        // generation transitions that are not guest invalidation events.
         if (execution_context_->observe_slab_generation(slab_generation)) {
             performance_counters().record_jit_slab_generation_transition(
                 execution_context_->process_id());
         }
         if (observed_slab_generation_ == 0U) {
-            // The slab starts at generation one. Each executor observes the
-            // shared slab lazily, so its first observation is initialization,
-            // not an invalidation. Clearing the pool-wide preimport tracker
-            // here would erase valid imports made by an earlier executor.
             observed_slab_generation_ = slab_generation;
             return;
         }
         if (slab_generation == observed_slab_generation_)
             return;
-        // Capacity transitions are internal to the shared slab and do not
-        // publish a guest invalidation epoch. Retire probes when a
-        // precompile operation reaches this slower, serialized boundary.
         artifact_probes_.clear();
         clear_demand_artifact_probes();
         if (native_preimport_tracker_)
@@ -3204,9 +3051,6 @@ private:
 
     void load_state(Cpu& cpu)
     {
-        // Serialized scopes may select direct private accesses. Parallel
-        // lanes use checked tables so scalar loads cannot race checked stores.
-        // Rebind at every run boundary, reusing emitted code and page guards.
         if (auto** read_table = callbacks_->jit_read_page_table()) {
             execution_context_->link(read_page_table_link_cell_,
                 static_cast<std::uint64_t>(
@@ -3300,9 +3144,6 @@ private:
         }
     }
 
-    // The stack attribution of a profiled run that starts at `pc`. The image
-    // list is read again only when dyld's image count has changed, so the
-    // walk's classification of our images follows the list as it grows.
     StackAttribution attribute_run_stack(std::uint32_t pc)
     {
         const auto info = performance_counters().block_profile().image_info_address(
@@ -3311,9 +3152,6 @@ private:
             ? std::nullopt
             : memory_.read32(info + 4U, MemoryPermission::Read);
         if (count && *count != own_image_count_) {
-            // The list read here is also the one the profile maps against:
-            // a process that never exits through the kernel (pid 1, which ends
-            // the run) has no exit-time list, and the last refresh is its list.
             const auto images = read_guest_image_table(memory_, info);
             performance_counters().block_profile().record_images(
                 static_cast<std::uint32_t>(process_id_), images);
@@ -3324,7 +3162,6 @@ private:
             own_image_ranges_, guest_word_reader());
     }
 
-    // The run's guest stack, every frame, for the block profile's chain rows.
     std::vector<std::uint32_t> capture_run_chain(std::uint32_t pc)
     {
         return capture_stack_chain(pc, jit_->Regs()[14], jit_->Regs()[7],
@@ -3374,9 +3211,6 @@ private:
             return link_cell_bytes;
         constexpr auto fast_dispatch_table_bytes =
             fast_dispatch_table_size * fast_dispatch_entry_bytes;
-        // A32JitState includes the executor's RSB arrays.  The link cells are
-        // allocated by the shared ExecutionContext but their payload is still
-        // executor-local mutable state and is counted here exactly once.
         return link_cell_bytes + sizeof(Dynarmic::Backend::X64::A32JitState) +
                fast_dispatch_table_bytes;
     }
@@ -3503,11 +3337,6 @@ class CpuExecutionPool {
 
     struct DeferredPrecompileEntry {
         JitPrecompilePhase phase { JitPrecompilePhase::Opportunistic };
-        // CacheFull is retryable only after a new invalidation event. The
-        // epoch is an atomic, non-blocking signal; reading the slab generation
-        // while holding the queue mutex can wait for an active executor.
-        // Ordinary Deferred entries leave this empty and are retried when the
-        // profile is refreshed or the mapping is re-added.
         std::optional<std::uint64_t> cache_full_invalidation_epoch;
     };
 
@@ -3554,11 +3383,6 @@ public:
                 "precompile_lane_count must be at least one"
             };
         }
-        // Translation and native emission have independent Dynarmic mutable
-        // state. Lanes publish into the same synchronized NativeCodeSlab, but
-        // never take a Guest executor's execution mutex. Reusing the first
-        // monitor slot is safe because these executors never run Guest code or
-        // perform exclusive-memory operations.
         precompile_executors_.reserve(precompile_lane_count);
         precompile_executor_busy_.resize(precompile_lane_count, false);
         for (std::size_t lane = 0; lane < precompile_lane_count; ++lane) {
@@ -3591,10 +3415,6 @@ public:
     ~CpuExecutionPool()
     {
         quiesce_precompilation();
-        // Clear the executors before dropping the shared accounting record.
-        // Their destructors publish zero for their local slots; the final
-        // release then removes the one shared slab entry without leaving a
-        // stale reservation behind.
         precompile_executors_.clear();
         executors_.clear();
         performance_counters().release_jit_memory_context(
@@ -3611,8 +3431,6 @@ public:
     void clear_exclusive_state(std::size_t slot)
     {
         executor(slot).clear_exclusive_state();
-        // Only a single-executor pool can prove that no other virtual
-        // processor still owns a reservation in this address space.
         if (executors_.size() == 1U)
             memory_.clear_exclusive_access_tracking();
     }
@@ -3637,12 +3455,6 @@ public:
 
     [[nodiscard]] std::uint64_t code_cache_used()
     {
-        // All executors in this pool publish into one NativeCodeSlab.  Jit's
-        // CodeCacheUsed therefore reports the same process-wide byte count
-        // from every slot; summing it would multiply one allocation by the
-        // number of guest CPUs.  Read each slot only until an initialized
-        // shared slab reports a non-zero value, without creating a JIT merely
-        // to obtain the accounting sample.
         for (auto& executor : executors_) {
             const auto used = executor->code_cache_used();
             if (used != 0U)
@@ -3658,17 +3470,9 @@ public:
 
     void clear_cache()
     {
-        // A fork/exec child owns a fresh execution context and often reaches
-        // exec before translating any Guest block. Avoid advancing the slab
-        // generation for an empty context; callers that have emitted code
-        // still take the normal full invalidation path below.
         if (code_cache_used() == 0U)
             return;
         static_cast<void>(execution_context_->request_cache_clear());
-        // CpuCluster cache clears are issued at a Guest-safe host boundary
-        // (exec/debug image replacement) after prediction work is quiesced.
-        // Resolve that explicit transition now so the replacement profile is
-        // installed against the new slab generation, not the retired one.
         execution_context_->native_code_slab()->service_pending_invalidation();
         const auto slab_generation =
             execution_context_->native_code_slab()->generation();
@@ -3745,11 +3549,6 @@ public:
         JitPrecompilePhase phase, bool record, bool precompile)
     {
         quiesce_precompilation();
-        // Native prediction is about the previous process image. Freeze that
-        // order before current-process recording starts mutating the persistent
-        // profile. Demand translations in this image are already native and
-        // should train the next image, not continuously reset this image's
-        // warmup scan.
         JitTranslationProfilePrediction native_prediction;
         if (precompile && profile) {
             const auto limits =
@@ -3814,30 +3613,18 @@ public:
 
     void refresh_translation_profile()
     {
-        // Profile merging is a safe-point operation, never part of Cpu::run.
-        // The executor lock only serializes a bounded recorder hand-off; the
-        // potentially expensive stability checks remain in the independent
-        // precompile executor.
         for (auto& executor : executors_)
             executor->flush_translation_profile();
         const std::lock_guard queue_lock { precompile_queue_mutex_ };
         if (precompile_quiescing_ || !translation_profile_ ||
             !profile_precompile_enabled_)
             return;
-        // Ordinary Deferred entries are retried only on this explicit profile
-        // refresh. CacheFull entries remain parked until a new invalidation
-        // event promotes them without waiting on the slab mutex.
         promote_retryable_deferred_entries_locked(
             JitPrecompileSource::DemandProfile);
         const auto native_target =
             static_cast<std::size_t>(JitPrecompileTarget::NativeCode);
         const auto invalidation_epoch =
             execution_context_->cache_invalidation_epoch();
-        // A fresh image consumes its frozen plan once in first-use order. At a
-        // later Guest-quiet boundary, coalesce every intervening range
-        // invalidation into one bounded newest-first pass over the recent
-        // interaction tail. This restores long-lived UI working sets without
-        // restarting all 64K hints for every local executable-page change.
         if (profile_location_cursors_[native_target] >=
                 native_profile_locations_.size() &&
             !native_profile_recency_locations_.empty() &&
@@ -4057,9 +3844,6 @@ public:
                     remove_inflight_entry_locked(precompile_entry);
                     owned_inflight_entries.erase(precompile_entry);
                     if (cancelled) {
-                        // The block may have finished after the epoch changed.
-                        // It belongs to the old work generation and must not be
-                        // published into the replacement profile's sets.
                         decrement_profile_queue_entries_locked(
                             precompile_entry);
                     } else if (disposition ==
@@ -4175,11 +3959,6 @@ public:
         {
             const std::lock_guard queue_lock { precompile_queue_mutex_ };
             precompile_quiescing_ = true;
-            // Quiesce is also the public image-reset boundary. Keep profile
-            // recording independent, but do not let a later phase query
-            // reconstruct cancelled prediction work from the frozen plan.
-            // set_translation_profile() explicitly restores this setting for
-            // the replacement image after quiescence completes.
             profile_precompile_enabled_ = false;
             update_memory_peaks_locked();
             if (++precompile_cancellation_generation_ == 0U)
@@ -4242,9 +4021,6 @@ private:
     [[nodiscard]] static std::size_t estimate_unordered_nodes(
         const Container& container) noexcept
     {
-        // libstdc++ and libc++ both allocate a link plus the value in each
-        // node.  The extra pointer is deliberately conservative; this is an
-        // explanatory estimate, never an assertion about allocator RSS.
         return container.size() *
                (sizeof(typename Container::value_type) + 2U * sizeof(void*));
     }
@@ -4316,9 +4092,6 @@ private:
         result.inflight_entries = sum(inflight_by_source);
         result.deferred_entries = sum(deferred_by_source);
         result.completed_entries = sum(completed_by_source);
-        // The deque topology is intentionally estimated from O(1) logical
-        // counts. A stats sample must never walk every pending node merely to
-        // account for its blocks.
         result.queue_block_bytes =
             estimate_deque_blocks_for_count<PrecompileEntry>(
                 result.pending_entries);
@@ -4801,10 +4574,6 @@ private:
                 current.profile_generation &&
             native_profile_scan_generation_.slab_generation == 0U &&
             current.slab_generation != 0U) {
-            // A profile can be installed before any executor has constructed
-            // the shared slab. Its first published generation establishes the
-            // baseline; it does not retire blocks and must not rewind a plan
-            // that another prediction lane is already consuming.
             native_profile_scan_generation_.slab_generation =
                 current.slab_generation;
             native_profile_scan_generation_.cache_invalidation_epoch =
@@ -4817,13 +4586,6 @@ private:
                 current.profile_generation &&
             native_profile_scan_generation_.slab_generation != 0U &&
             current.slab_generation != 0U) {
-            // The image and its explicit-clear epoch did not change, so only
-            // Dynarmic's linear slab capacity could have advanced the native
-            // generation. Replaying the complete prediction into the empty
-            // slab would immediately consume its demand reserve and can form
-            // a clear/replay/retranslate loop. The currently executing Guest
-            // is already repopulating its real working set; retire optional
-            // prediction for this image generation and train the next launch.
             profile_location_cursors_[static_cast<std::size_t>(
                 JitPrecompileTarget::NativeCode)] =
                 native_profile_locations_.size();
@@ -4895,12 +4657,6 @@ private:
             }
         } else if (translation_profile_phase_ ==
                    JitPrecompilePhase::InteractiveActivation) {
-            // A live foreground transition can begin only after dyld has
-            // published its shared-cache mappings. Consume the learned
-            // activation prefix so independent Portable workers run ahead of
-            // demand, rather than starting at the recent interaction tail
-            // used for offline maintenance. This path remains useful even
-            // when the native slab has no speculative capacity.
             auto snapshot = profile->snapshot_range(profile_location_cursor,
                 std::min(jit_profile_precompile_batch_size,
                     available_entries));
@@ -4910,9 +4666,6 @@ private:
             auto& observed_revision = observed_profile_revisions_[target_index];
             const auto profile_revision = profile->revision();
             if (observed_revision != profile_revision) {
-                // Portable persistence follows the live recency set. Native
-                // prediction above deliberately remains frozen to the prior
-                // process image.
                 profile_location_cursor = 0U;
                 observed_revision = profile_revision;
             }
@@ -4941,11 +4694,6 @@ private:
     void promote_cache_full_entries_locked(
         std::optional<JitPrecompileSource> source = std::nullopt)
     {
-        // Readmission policy is deliberately bounded: ordinary Deferred work
-        // returns only on an explicit profile refresh or re-add, while
-        // CacheFull work returns only after a newer cache-invalidation epoch
-        // and the next scheduler phase query. Profile/image switches instead
-        // quiesce, cancel the old generation, and discard its queues.
         if (deferred_precompile_entries_.empty())
             return;
         const auto current_epoch =
@@ -5206,9 +4954,6 @@ void Cpu::raise_memory_fault(
         active_executor_->raise_memory_fault(address, size, access);
         return;
     }
-    // A deferred SVC is dispatched after the executor has returned, so there
-    // is no Dynarmic callback object available to carry MemoryFault. Preserve
-    // the scheduler-visible fatal boundary in that case.
     halt(Dynarmic::HaltReason::UserDefined4);
 }
 void Cpu::clear_halt()
@@ -5342,9 +5087,6 @@ void Cpu::clear_exclusive_state(std::size_t execution_slot)
     if (!execution_pool_) {
         return;
     }
-    // The local state gates STREX. The next LDREX overwrites this serialized
-    // processor's single global slot, so clearing the local state is enough
-    // and avoids taking the global monitor lock on every context switch.
     execution_pool_->clear_exclusive_state(execution_slot);
 }
 
@@ -5442,9 +5184,6 @@ CpuCluster::CpuCluster(std::size_t initial_processor_count,
         monitor.SetAddressResolver(
             &GuestExclusiveAddressResolver::resolve_callback,
             address_resolver_.get());
-        // Parallel execution selects the checked-write table. A scheduler
-        // serialized slice may reuse the guarded private-write table because
-        // no other guest lane can race the LDREX page-revocation hook.
         if (monitor_processor_count_ > 1)
             memory.set_parallel_access(true);
     }
@@ -5629,4 +5368,4 @@ std::vector<CpuRunResult> CpuCluster::run_parallel(std::uint64_t ticks_per_cpu)
     return results;
 }
 
-} // namespace shade
+}

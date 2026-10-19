@@ -31,7 +31,6 @@ namespace {
     constexpr std::size_t maximum_shader_strings = 64U;
     constexpr std::size_t maximum_uniform_floats = 4096U;
 
-    // Writes as much of an info log as capacity holds, and its length.
     bool write_log(UserlandHleCall& call, std::string_view text,
         std::uint32_t capacity, std::uint32_t length, std::uint32_t output)
     {
@@ -52,7 +51,6 @@ namespace {
             output + static_cast<std::uint32_t>(count), 0U);
     }
 
-    // What glGet*iv answers for INFO_LOG_LENGTH: the log and its terminator.
     std::uint32_t log_length(std::string_view text)
     {
         return static_cast<std::uint32_t>(text.size() + 1U);
@@ -120,7 +118,7 @@ namespace {
                    : fallback;
     }
 
-} // namespace
+}
 
 std::optional<OpenGlesHle::ProgrammableDrawState>
 OpenGlesHle::programmable_draw_state(const ContextState& context) const
@@ -416,8 +414,6 @@ void OpenGlesHle::register_programmable_gles(UserlandHleRegistry& registry)
     add("_glEnableVertexAttribArray", set_attribute_enabled);
     add("_glDisableVertexAttribArray", set_attribute_enabled);
 
-    // The glUniform calls come in three shapes: the values as arguments, as a
-    // vector of them, or as matrices.
     enum class UniformForm { Scalars, Vector, Matrix };
     const auto interpreted_program = [this](UserlandHleCall& call) {
         const auto* context = current_context(call);
@@ -493,8 +489,6 @@ void OpenGlesHle::register_programmable_gles(UserlandHleRegistry& registry)
             break;
         }
     };
-    // A program that runs in the interpreter takes every form; the others keep
-    // the few calls their adapter used, and the rest stay no-ops.
     const auto add_uniform = [&](std::string symbol,
                                  GlesProgramState::UniformKind kind,
                                  std::size_t components, UniformForm form,
@@ -707,4 +701,4 @@ void OpenGlesHle::register_programmable_gles(UserlandHleRegistry& registry)
     });
 }
 
-} // namespace shade
+}

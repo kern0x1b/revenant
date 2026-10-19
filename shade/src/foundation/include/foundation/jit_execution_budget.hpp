@@ -12,10 +12,6 @@
 
 namespace shade {
 
-// Converts a wall-time cooperation target into a one-shot native-block
-// budget. The estimate is executor-local because translation density and
-// generated block size differ substantially between Guest processes and
-// execution lanes.
 class JitHostExecutionBudget {
 public:
     [[nodiscard]] std::uint32_t next(
@@ -30,10 +26,6 @@ public:
     }
 
 private:
-    // The initial estimate is deliberately translation-aware. During a cold
-    // run it yields close to a 2 ms boundary; cached native execution then
-    // raises the budget from measurements instead of paying cold-path cost
-    // forever.
     static constexpr std::uint64_t initial_nanoseconds_per_block = 15'000U;
     static constexpr std::uint32_t maximum_blocks = 262'144U;
     static constexpr std::uint32_t target_utilization_numerator = 7U;
@@ -44,4 +36,4 @@ private:
     };
 };
 
-} // namespace shade
+}

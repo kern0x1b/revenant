@@ -42,11 +42,8 @@ struct DarwinKernelConfiguration {
 [[nodiscard]] std::span<const DarwinConfigurationEntry> darwin_configurations();
 [[nodiscard]] std::string_view darwin_abi_source_name(DarwinAbiSource source);
 
-// Resolve once per session and pass the immutable configuration to its
-// processes. An explicit iOS build overrides firmware metadata for both
-// the reported kernel identity and ABI selection.
 [[nodiscard]] DarwinKernelConfiguration resolve_darwin_configuration(
     const std::filesystem::path& rootfs,
     std::optional<std::string_view> ios_build = std::nullopt);
 
-} // namespace shade
+}

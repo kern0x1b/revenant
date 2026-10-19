@@ -5,7 +5,6 @@ func check(_ condition: Bool, _ what: String) { if !condition { print("FAIL \(wh
 struct Row: Identifiable, Comparable { let id: Int; let name: String
     static func < (a: Row, b: Row) -> Bool { a.name < b.name } }
 
-// A ForEach of rows feeds a table's row builder, and the row value is the element's own type.
 func forEachRowsFeedATable() {
     let rows = [Row(id: 0, name: "a")]
     let table = Table(of: Row.self) {
@@ -16,7 +15,6 @@ func forEachRowsFeedATable() {
     _ = table
 }
 
-// the row value a ForEach of TableRow carries is the element's own type, not Never
 func elementIsTheRow<Each: TableRowContent>(_ each: Each.Type) where Each.TableRowValue == Row {}
 
 func groupPassesTheRowValueThrough() {
@@ -33,7 +31,6 @@ func aGroupOfColumnsIsColumnContent() {
     _ = column
 }
 
-// the sorted forms: the binding is the app's own and the table reads it
 func sortedForms() {
     let nameKey = \Row.name
     var order: [KeyPathComparator<Row>] = []
@@ -54,10 +51,6 @@ func sortedForms() {
     _ = (overRows, overData, selected)
 }
 
-// the order a header tap writes is the table's own: it is driven through Table's behaviour, which the
-// engine tests exercise, and is not public API here.
-
-// an editable list: the rows are written against the element's own binding
 func editableList(_ items: Binding<[Row]>) {
     let withId = List(items, editActions: .delete, id: \.id) { $row in
         Text($row.wrappedValue.name)

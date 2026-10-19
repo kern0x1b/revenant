@@ -22,9 +22,6 @@ enum class VmInheritance : std::uint8_t {
     None = 2,
 };
 
-// Compact, non-overlapping vm_map-style metadata. Callers retain their own
-// synchronization; this class only owns mapping, protection, and fork
-// inheritance intervals.
 class VmMap {
 public:
     struct MappingRegion {
@@ -65,4 +62,4 @@ private:
     std::map<std::uint32_t, Region> regions_;
 };
 
-} // namespace shade
+}

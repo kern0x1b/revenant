@@ -23,7 +23,7 @@ namespace {
         "___SCNetworkInterfaceCopyAll_IONetworkInterface"
     };
 
-} // namespace
+}
 
 SystemConfigurationHle::SystemConfigurationHle(UserlandHleRegistry& registry)
 {
@@ -38,11 +38,8 @@ void SystemConfigurationHle::begin_interface_discovery(UserlandHleCall& call)
 {
     if (!call.call_guest_function(
             interface_discovery_helper, [](UserlandHleCall&) { })) {
-        // Older SystemConfiguration images may not expose the split-out helper;
-        // preserve their original implementation when the native fast path is
-        // unavailable.
         call.resume_original_persistently();
     }
 }
 
-} // namespace shade
+}

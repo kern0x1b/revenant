@@ -101,10 +101,6 @@ namespace {
 
     void write_png(const std::filesystem::path& path, const DisplayFrame& frame)
     {
-        // A DisplayFrame is a physical scanout, not another compositing layer.
-        // Its RGB channels already contain the completed guest composition;
-        // any retained framebuffer alpha is internal coverage metadata and
-        // must not make screenshots depend on the host viewer background.
         std::vector<std::uint8_t> rgb;
         rgb.reserve(frame.pixels.size() * 3U);
         for (const auto pixel : frame.pixels) {
@@ -131,7 +127,7 @@ namespace {
         png_image_free(&image);
     }
 
-} // namespace
+}
 
 FrameFilePresenter::FrameFilePresenter(std::filesystem::path path)
     : path_ { std::move(path) }
@@ -213,4 +209,4 @@ bool FrameFilePresenter::enabled() const noexcept
     return enabled_.load(std::memory_order_relaxed);
 }
 
-} // namespace shade
+}

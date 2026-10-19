@@ -1,8 +1,6 @@
 import UIKit
 import CoreGraphics
 
-// What a presented screen asked to be painted in, and the node that carries it: the modifier is applied inside the content
-// of the sheet, so the sheet finds the value by the same walk a list finds the traits of a row by.
 struct PresentationBackgroundModifier: NodeModifier {
     let color: UIColor?
     func makeModifierNode(_ content: any View, _ env: EnvironmentValues) -> Node { PresentationBackgroundNode() }
@@ -63,10 +61,6 @@ final class SheetNode: Node {
                 set: { _ in })
             controller.setRootView(sheet.content(), env: inner)
             presented = controller
-            // The content of a sheet may ask for the background of the screen it is shown on. The content belongs to the
-            // screen, so it is the screen's own tree that is asked, and the screen is asked for its view first so that the
-            // content is in it: a sheet presented where there is no window to present it in is still the screen the
-            // engine put up.
             let screen = controller.view
             if let background = presentationBackground(of: controller.root) { screen?.backgroundColor = background }
             host.present(controller, animated: true, completion: nil)

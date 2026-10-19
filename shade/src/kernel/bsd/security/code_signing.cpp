@@ -58,8 +58,6 @@ void CompatibilityKernel::dispatch_bsd_code_signing(Cpu& cpu, bool require_audit
             bsd_error(cpu, darwin::error::invalid_argument);
             return;
         }
-        // Share the Mach-O payload already used by the AMFI user client.
-        // Signature enforcement and signature status are not synthesized here.
         payload = target->second.code_signature_entitlements;
     }
     if (capacity < header_size) {
@@ -79,8 +77,6 @@ void CompatibilityKernel::dispatch_bsd_code_signing(Cpu& cpu, bool require_audit
             header[offset + byte] =
                 static_cast<std::byte>(value >> ((3U - byte) * 8U));
     };
-    // XNU returns eight zero bytes when no entitlements exist. A size probe
-    // returns a zero magic and the required big-endian blob length with ERANGE.
     if (!payload.empty()) {
         encode(0U, short_buffer ? 0U : entitlement_magic);
         encode(4U, size);
@@ -99,4 +95,4 @@ void CompatibilityKernel::dispatch_bsd_code_signing(Cpu& cpu, bool require_audit
     bsd_success(cpu, 0U);
 }
 
-} // namespace shade
+}

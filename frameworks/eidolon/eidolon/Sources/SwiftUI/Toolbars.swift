@@ -58,7 +58,6 @@ struct BarEntry {
     let view: any View
 }
 
-// A view builder's result is a tree of tuples, groups and conditionals; a bar item is each leaf of it.
 func barLeaves(_ view: any View) -> [any View] {
     if view is EmptyView { return [] }
     if let group = view as? GroupView, !(view is EnvironmentGroupView), !(view is ToolbarItemLikeView) {
@@ -114,7 +113,6 @@ final class BarButtonTarget: NSObject {
     @objc func fire() { action() }
 }
 
-// A bar item that is not a plain text button is a small hosting controller of its own, sized to its content.
 final class BarItemHost: _HostingViewController {
     override func loadView() {
         let v = _HostRootView(frame: .zero)
@@ -190,7 +188,6 @@ final class BarItemsNode: Node {
         let flexible = { UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil) }
         if !status.isEmpty { bottom += [flexible()] + status + [flexible()] }
         let navigation = host.navigationItem
-        // UIKit numbers right items from the edge inwards; SwiftUI lists them from left to right.
         let rightOrdered = Array(right.reversed())
         if (navigation.leftBarButtonItems ?? []) != left { navigation.leftBarButtonItems = left.isEmpty ? nil : left }
         navigation.leftItemsSupplementBackButton = true
@@ -214,7 +211,6 @@ final class BarItemsNode: Node {
     }
 
     func makeItem(_ original: any View, _ slot: BarSlot, _ env: EnvironmentValues) -> UIBarButtonItem {
-        // .disabled on a plain button is the bar item's own isEnabled, so the button keeps the look of a bar button
         var view = original
         var enabled = true
         while let modified = view as? ModifiedViewLike, let effect = modified.modifierValue as? EffectModifier, effect.effect.onlyInteraction {
@@ -247,7 +243,6 @@ final class BarItemsNode: Node {
             slot.title = nil
             slot.item = nil
         }
-        // the bars of iOS 6 are dark, so what is drawn on them is white unless it says otherwise
         var barEnv = env
         barEnv.foregroundColor = .white
         barEnv.tint = .white

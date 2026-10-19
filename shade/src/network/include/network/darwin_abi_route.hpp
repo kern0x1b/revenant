@@ -50,23 +50,14 @@ struct DarwinAbiRoute {
     DarwinAbiEpoch maximum_epoch { DarwinAbiEpoch::Unknown };
 };
 
-// The disk-policy ABI assigns iopolicysys to a slot reserved as nosys by
-// the legacy ABI. The call number cannot identify which contract is active,
-// so this route needs an explicit ABI capability. The dispatcher accepts only
-// the audited three-word disk shape; extended iotypes and policies are rejected.
 inline constexpr DarwinAbiRoute legacy_iopolicysys_route {
     DarwinAbiDomain::BsdSyscall, 322U, DarwinAbiCompatibility::VersionSensitive,
     DarwinAbiEpoch::IphoneOs2, DarwinAbiEpoch::Later
 };
 
-// The compatibility kernel historically made writable ARM heap pages
-// executable after the i-cache fast trap so the first-generation UIKit
-// trampoline path could run without an explicit mprotect.  XNU's cache trap
-// itself does not change VM permissions, so keep this emulator-only behavior
-// as an explicit epoch-bounded route instead of exposing it to later guests.
 inline constexpr DarwinAbiRoute arm_cache_trap_execute_route {
     DarwinAbiDomain::ArmFastTrap,
-    0U, // ARM fast-trap sub-operation: instruction_cache_invalidate
+    0U,
     DarwinAbiCompatibility::VersionSensitive, DarwinAbiEpoch::IphoneOs1,
     DarwinAbiEpoch::IphoneOs1
 };
@@ -78,12 +69,8 @@ inline constexpr DarwinAbiRoute arm_cache_trap_execute_route {
     case DarwinAbiCompatibility::Additive:
         return true;
     case DarwinAbiCompatibility::ShapeDispatched:
-        // The route is epoch-independent, but its caller must validate the
-        // argument shape before dispatching the implementation-specific ABI.
         return true;
     case DarwinAbiCompatibility::VersionSensitive:
-        // Unknown builds must never opt into an ambiguous version-sensitive
-        // collision, even if a future route happens to use Unknown as a bound.
         if (epoch == DarwinAbiEpoch::Unknown)
             return false;
         return static_cast<std::uint8_t>(epoch) >=
@@ -96,4 +83,4 @@ inline constexpr DarwinAbiRoute arm_cache_trap_execute_route {
     return false;
 }
 
-} // namespace shade
+}

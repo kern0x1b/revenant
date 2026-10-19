@@ -31,9 +31,6 @@ namespace {
 
     constexpr std::uint32_t request_size = 68U;
     constexpr std::uint32_t success_reply_size = 56U;
-    // XNU also publishes the same ARM32 memory-entry wire contract through
-    // its mach_vm subsystem. Its routine number is relative to the 4800
-    // mach_vm base rather than the vm_map subsystem's generated IDs.
     constexpr std::uint32_t mach_vm_make_memory_entry_identifier = 4817U;
     constexpr std::uint32_t kern_invalid_argument = 4U;
     constexpr std::uint32_t kern_invalid_value = 18U;
@@ -52,7 +49,7 @@ namespace {
         return static_cast<std::uint32_t>((size + mask) & ~mask);
     }
 
-} // namespace
+}
 
 bool CompatibilityKernel::dispatch_mach_vm_memory_entry_message(
     Cpu& cpu, const MachMessageRequest& request)
@@ -220,4 +217,4 @@ bool CompatibilityKernel::dispatch_mach_vm_memory_entry_message(
     return true;
 }
 
-} // namespace shade
+}

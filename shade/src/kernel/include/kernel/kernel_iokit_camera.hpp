@@ -54,9 +54,6 @@ namespace kernel_iokit::camera {
     [[nodiscard]] std::optional<std::string_view> matching_accelerator_service(
         std::span<const std::byte> matching);
 
-    // The caller holds KernelSharedState::mach_mutex. The platform expert is
-    // supplied by the registry owner so this hardware module does not duplicate
-    // the guest registry hierarchy.
     [[nodiscard]] std::uint32_t ensure_sensor_service_locked(
         KernelSharedState& state, std::uint32_t platform_expert_object);
     [[nodiscard]] std::uint32_t ensure_accelerator_service_locked(
@@ -70,7 +67,6 @@ namespace kernel_iokit::camera {
         std::uint32_t receive_size, std::uint32_t connection_object,
         std::uint32_t local_port);
 
-    // The caller holds KernelSharedState::mach_mutex.
     [[nodiscard]] std::optional<std::uint64_t> next_capture_deadline_locked(
         const KernelSharedState& state);
     void service_due_captures(KernelSharedState& state,
@@ -87,5 +83,5 @@ namespace kernel_iokit::camera {
         std::span<const std::byte> inband_input,
         std::uint32_t scalar_output_capacity);
 
-} // namespace kernel_iokit::camera
-} // namespace shade
+}
+}

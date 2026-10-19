@@ -1,5 +1,3 @@
-// surftool: the public surface of a .swiftinterface, read with swift-syntax's SwiftParser.
-//   surftool INTERFACE... > surface.tsv      lines: owner \t member \t labels \t kind
 import SwiftParser
 import SwiftSyntax
 import Foundation
@@ -14,15 +12,12 @@ final class Walker: SyntaxVisitor {
 
     private var owner: String { stack.joined(separator: ".") }
 
-    /// A type names itself too, by the path it is nested in: empty for a top-level one.
     private func record(type: String) {
         out.append([stack.dropLast().joined(separator: "."), type, "", "type"].joined(separator: "\t"))
     }
     private var enclosing: String? { stack.isEmpty ? nil : owner }
 
     override func visit(_ node: ExtensionDeclSyntax) -> SyntaxVisitorContinueKind {
-        // `extension SwiftUI.Foo {` and `extension SwiftUI.Foo where Self == SwiftUI.Bar {`: the extended
-        // type is the owner of the members, and a `where Self ==` names a type the graph omits entirely
         let base = node.extendedType.trimmedDescription
             .replacingOccurrences(of: "SwiftUI.", with: "")
             .replacingOccurrences(of: "SwiftUICore.", with: "")
@@ -80,8 +75,6 @@ final class Walker: SyntaxVisitor {
     }
     override func visitPost(_ node: ProtocolDeclSyntax) { _ = stack.popLast() }
     override func visit(_ node: TypeAliasDeclSyntax) -> SyntaxVisitorContinueKind {
-        // a typealias names a type too, and a top-level one has an empty owner: CGFloat, CGPoint and
-        // CGRect are typealiases of the SDK, and the gate compares those names
         out.append([enclosing ?? "", node.name.text, "", "typealias"].joined(separator: "\t"))
         return .skipChildren
     }
@@ -125,9 +118,6 @@ final class Walker: SyntaxVisitor {
     }
 }
 
-// The oracle is every module SwiftUI reaches, which is what its `@_exported import` lines say and not
-// a list written here: reading them and following them is the difference between the gate knowing that
-// `CGAffineTransform` is Apple's and guessing it.
 func exportedModules(in text: String) -> [String] {
     var names: [String] = []
     for line in text.split(separator: "\n") {
@@ -145,9 +135,6 @@ var queue = Array(arguments.dropFirst())
 var seen = Set<String>()
 
 while let path = queue.popLast() {
-    // the module is the directory an interface sits in, not the interface's own name: two
-    // interfaces of one module (two architectures) are the same module, and keying on the file
-    // skipped the second of the two entry points
     let name = URL(fileURLWithPath: path).deletingLastPathComponent().lastPathComponent
     guard seen.insert(name).inserted else { continue }
     let url = URL(fileURLWithPath: path)
@@ -158,8 +145,6 @@ while let path = queue.popLast() {
             let found = FileManager.default
                 .enumerator(atPath: sdkRoot) as? FileManager.DirectoryEnumerator
             var matches: [String] = []
-            // the filter belongs in the body: putting it in the while condition stops the walk at
-            // the first path that does not match
             while let relative = found?.nextObject() as? String {
                 if relative.hasSuffix("/\(module).swiftmodule") { matches.append(relative) }
             }

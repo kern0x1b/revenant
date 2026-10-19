@@ -226,7 +226,7 @@ namespace {
         case EHOSTUNREACH:
             return darwin_error_host_unreachable;
         default:
-            return 5; // EIO for host errors without a Darwin 8 equivalent.
+            return 5;
         }
     }
 
@@ -307,10 +307,6 @@ namespace {
             error = darwin_error_invalid_argument;
             return std::nullopt;
         }
-        // XNU's getsockaddr() overwrites sa_len with the syscall-supplied
-        // length after copying the user buffer. The span already represents
-        // that length, so an uninitialized or stale user sa_len byte must not
-        // reject an otherwise valid sockaddr.
         const auto declared_length = bytes.size();
         const auto family = std::to_integer<std::uint8_t>(bytes[1]);
 
@@ -448,7 +444,7 @@ namespace {
         return output;
     }
 
-} // namespace
+}
 
 std::optional<HostNetworkPolicy> parse_host_network_policy(
     std::string_view value)
@@ -517,9 +513,9 @@ HostSocketCreateResult HostSocket::create(HostNetworkPolicy policy,
     if (family < 0)
         return { { }, darwin_error_address_family_unsupported };
     if (type < 0)
-        return { { }, 44 }; // ESOCKTNOSUPPORT
+        return { { }, 44 };
     if (protocol != 0 && protocol != IPPROTO_TCP && protocol != IPPROTO_UDP) {
-        return { { }, 43 }; // EPROTONOSUPPORT
+        return { { }, 43 };
     }
     const auto descriptor = ::socket(family, type, static_cast<int>(protocol));
     if (descriptor < 0)
@@ -880,7 +876,7 @@ HostSocketResult HostSocket::set_option(std::uint32_t darwin_level,
         (darwin_option == darwin::network::ip_type_of_service ||
             darwin_option == darwin::network::ip_time_to_live)) {
         if (value.empty())
-            return darwin_error_result(22); // EINVAL
+            return darwin_error_result(22);
         const auto host_option =
             darwin_option == darwin::network::ip_type_of_service ? IP_TOS
                                                                  : IP_TTL;
@@ -891,7 +887,7 @@ HostSocketResult HostSocket::set_option(std::uint32_t darwin_level,
         (darwin_option == darwin::network::ip_multicast_ttl ||
             darwin_option == darwin::network::ip_multicast_loop)) {
         if (value.empty())
-            return darwin_error_result(22); // EINVAL
+            return darwin_error_result(22);
         const auto byte_value = static_cast<unsigned char>(integer_value);
         const auto host_option =
             darwin_option == darwin::network::ip_multicast_ttl
@@ -903,12 +899,12 @@ HostSocketResult HostSocket::set_option(std::uint32_t darwin_level,
     if (darwin_level == darwin::network::protocol_ip &&
         darwin_option == darwin::network::ip_multicast_interface) {
         if (value.size() < sizeof(in_addr)) {
-            return darwin_error_result(22); // EINVAL
+            return darwin_error_result(22);
         }
         const auto interface =
             selected_interface(AF_INET, guest_ipv4_loopback(0));
         if (!interface || !interface->has_ipv4_address) {
-            return darwin_error_result(49); // EADDRNOTAVAIL
+            return darwin_error_result(49);
         }
         return set_host_option(IPPROTO_IP, IP_MULTICAST_IF,
             &interface->ipv4_address, sizeof(interface->ipv4_address));
@@ -917,7 +913,7 @@ HostSocketResult HostSocket::set_option(std::uint32_t darwin_level,
         (darwin_option == darwin::network::ip_add_membership ||
             darwin_option == darwin::network::ip_drop_membership)) {
         if (value.size() < darwin::network::ipv4_membership_size) {
-            return darwin_error_result(22); // EINVAL
+            return darwin_error_result(22);
         }
         ip_mreq membership { };
         std::memcpy(&membership.imr_multiaddr, value.data(),
@@ -925,7 +921,7 @@ HostSocketResult HostSocket::set_option(std::uint32_t darwin_level,
         const auto interface =
             selected_interface(AF_INET, guest_ipv4_loopback(sizeof(in_addr)));
         if (!interface || !interface->has_ipv4_address) {
-            return darwin_error_result(49); // EADDRNOTAVAIL
+            return darwin_error_result(49);
         }
         membership.imr_interface = interface->ipv4_address;
         const auto host_option =
@@ -966,7 +962,7 @@ HostSocketResult HostSocket::set_option(std::uint32_t darwin_level,
     if (darwin_level == darwin::network::protocol_ipv6 &&
         darwin_option == darwin::network::ipv6_only) {
         if (value.empty())
-            return darwin_error_result(22); // EINVAL
+            return darwin_error_result(22);
         return set_host_option(
             IPPROTO_IPV6, IPV6_V6ONLY, &integer_value, sizeof(integer_value));
     }
@@ -975,7 +971,7 @@ HostSocketResult HostSocket::set_option(std::uint32_t darwin_level,
             darwin_option == darwin::network::ipv6_multicast_hops ||
             darwin_option == darwin::network::ipv6_multicast_loop)) {
         if (value.empty())
-            return darwin_error_result(22); // EINVAL
+            return darwin_error_result(22);
         const auto host_option =
             darwin_option == darwin::network::ipv6_unicast_hops
                 ? IPV6_UNICAST_HOPS
@@ -989,10 +985,10 @@ HostSocketResult HostSocket::set_option(std::uint32_t darwin_level,
         darwin_option == darwin::network::ipv6_multicast_interface) {
         const auto guest_index = read_u32(value);
         if (!guest_index)
-            return darwin_error_result(22); // EINVAL
+            return darwin_error_result(22);
         const auto interface = selected_interface(AF_INET6, *guest_index == 1);
         if (!interface)
-            return darwin_error_result(49); // EADDRNOTAVAIL
+            return darwin_error_result(49);
         const auto host_index = interface->index;
         return set_host_option(
             IPPROTO_IPV6, IPV6_MULTICAST_IF, &host_index, sizeof(host_index));
@@ -1001,14 +997,14 @@ HostSocketResult HostSocket::set_option(std::uint32_t darwin_level,
         (darwin_option == darwin::network::ipv6_join_group ||
             darwin_option == darwin::network::ipv6_leave_group)) {
         if (value.size() < darwin::network::ipv6_membership_size) {
-            return darwin_error_result(22); // EINVAL
+            return darwin_error_result(22);
         }
         const auto guest_index = read_u32(value.subspan(16));
         if (!guest_index)
-            return darwin_error_result(22); // EINVAL
+            return darwin_error_result(22);
         const auto interface = selected_interface(AF_INET6, *guest_index == 1);
         if (!interface)
-            return darwin_error_result(49); // EADDRNOTAVAIL
+            return darwin_error_result(49);
         ipv6_mreq membership { };
         std::memcpy(&membership.ipv6mr_multiaddr, value.data(),
             sizeof(membership.ipv6mr_multiaddr));
@@ -1095,8 +1091,6 @@ HostSocketResult HostSocket::shutdown(std::uint32_t how)
 
 bool HostSocket::readable() const
 {
-    // Linux projects POLLHUP on a never-connected TCP stream. XNU does not
-    // consider that initial connection-required state readable.
     if (darwin_type_ == darwin_socket_stream &&
         stream_state_.load(std::memory_order_relaxed) == StreamState::Initial) {
         return false;
@@ -1118,4 +1112,4 @@ bool HostSocket::writable() const
            (descriptor.revents & (POLLOUT | POLLHUP | POLLERR)) != 0;
 }
 
-} // namespace shade
+}

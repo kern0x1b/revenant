@@ -91,4 +91,4 @@ namespace shade {
     return "unknown";
 }
 
-} // namespace shade
+}

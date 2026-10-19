@@ -17,9 +17,6 @@
 
 namespace shade::hfs {
 
-// Guest-visible HFS volumes discovered from the firmware's own fstab. This
-// keeps partition identity in the filesystem layer and avoids leaking host
-// filesystem geometry through statfs/getattrlist.
 class VolumeLayout {
 public:
     VolumeLayout(std::filesystem::path rootfs, std::uint64_t storage_bytes);
@@ -38,4 +35,4 @@ private:
     std::vector<VolumeMetadata> volumes_;
 };
 
-} // namespace shade::hfs
+}

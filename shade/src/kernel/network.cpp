@@ -41,7 +41,7 @@ namespace {
     constexpr std::uint32_t einval = 22;
     constexpr std::uint32_t enotconn = 57;
 
-} // namespace
+}
 
 namespace kernel_network {
     darwin::network::InterfaceSnapshot make_interface_snapshot(
@@ -72,7 +72,7 @@ namespace kernel_network {
         }
         return result;
     }
-} // namespace kernel_network
+}
 
 void CompatibilityKernel::set_host_network_policy(HostNetworkPolicy policy)
 {
@@ -81,23 +81,14 @@ void CompatibilityKernel::set_host_network_policy(HostNetworkPolicy policy)
     bool availability_changed = false;
     {
         std::lock_guard mach_lock { shared_state_->mach_mutex };
-        // The policy gates host socket reachability, not guest hardware.
-        // Isolated devices retain their virtual 802.11 controller and local
-        // network state while BSD internet sockets remain host-inaccessible.
         availability_changed =
             shared_state_->wifi_service_available != service_available;
         shared_state_->wifi_service_available = service_available;
     }
-    // Every forked process receives its own kernel facade and host socket
-    // policy, but the radio is one shared device. Reapplying an unchanged host
-    // capability must not undo a guest Wi-Fi or airplane-mode decision.
     if (!availability_changed)
         return;
 
     const auto before = wifi_state_->snapshot();
-    // Publishing a usable backend powers the radio. Association is restored
-    // only when the guest data partition already marks a visible network as
-    // preferred; a fresh device remains idle until its first native join.
     const auto power_changed = wifi_state_->set_power(service_available);
     if (power_changed) {
         const auto after = wifi_state_->snapshot();
@@ -555,7 +546,7 @@ bool CompatibilityKernel::receive_socket_message(
         for (const auto& transfer : transfers) {
             const auto imported = import_descriptor(transfer);
             if (!imported) {
-                bsd_error(cpu, 24); // EMFILE
+                bsd_error(cpu, 24);
                 return true;
             }
             received_fds.push_back(*imported);
@@ -769,8 +760,6 @@ bool CompatibilityKernel::receive_socket_bytes(Cpu& cpu, std::uint32_t fd,
             shared_state_->socket_pair_ancillary[endpoint->second.pair][side];
         while (!ancillary.empty() &&
                ancillary.front().byte_offset < lifetime->read_offsets[side]) {
-            // read/recv without a control buffer consumes and discards rights
-            // attached to bytes in that range, matching SOCK_STREAM semantics.
             ancillary.pop_front();
         }
     }
@@ -818,9 +807,6 @@ bool CompatibilityKernel::complete_unix_accept(Cpu& cpu,
         const auto descriptor = virtual_descriptors_.find(listener_fd);
         if (descriptor != virtual_descriptors_.end() &&
             kernel_network::is_isolated_stream_descriptor(descriptor->second)) {
-            // No route can produce a peer while isolated. A blocking accept
-            // therefore remains asleep, just as it would on an empty local
-            // listener, instead of failing merely because no HostSocket exists.
             return false;
         }
         bsd_error(cpu, einval);
@@ -832,7 +818,7 @@ bool CompatibilityKernel::complete_unix_accept(Cpu& cpu,
         return false;
     const auto accepted_fd = allocate_file_descriptor();
     if (!accepted_fd) {
-        bsd_error(cpu, 24); // EMFILE
+        bsd_error(cpu, 24);
         return true;
     }
     auto accepted_endpoint =
@@ -1236,8 +1222,6 @@ bool CompatibilityKernel::descriptor_readable(std::uint32_t fd) const
     if (const auto descriptor = virtual_descriptors_.find(fd);
         descriptor != virtual_descriptors_.end() &&
         descriptor->second == "random") {
-        // Entropy character devices always have bytes available. OpenSSL's
-        // RAND_poll probes them with select(2) before issuing read(2).
         return true;
     }
     if (const auto event_stream = wifi_driver_event_streams_.find(fd);
@@ -1358,8 +1342,6 @@ bool CompatibilityKernel::descriptor_requires_host_poll(std::uint32_t fd) const
 bool CompatibilityKernel::descriptor_requires_host_poll(std::uint32_t fd,
     std::unordered_set<std::uint32_t>& visited) const
 {
-    // A descriptor cycle is invalid Guest state, but treating it as host
-    // sensitive preserves forward progress without recursively polling it.
     if (!visited.insert(fd).second)
         return true;
     if (const auto duplicate = duplicated_descriptors_.find(fd);
@@ -1405,8 +1387,6 @@ bool CompatibilityKernel::descriptor_valid(std::uint32_t fd) const
 std::uint16_t CompatibilityKernel::descriptor_poll_revents(
     std::int32_t fd, std::uint16_t events) const
 {
-    // A negative pollfd is an explicitly ignored entry. It does not produce
-    // POLLNVAL, matching Darwin's poll(2) ABI.
     if (fd < 0)
         return 0;
     const auto descriptor = static_cast<std::uint32_t>(fd);
@@ -1487,9 +1467,6 @@ std::optional<std::uint32_t> CompatibilityKernel::ready_mach_kevent_name(
         return ready;
     }
 
-    // Do not publish a negative result if a producer changed the queue while
-    // the namespace/port-set lookup was in progress. A later enqueue after the
-    // second snapshot also advances the generation and invalidates this value.
     if (shared_state_->mach_queue_generation_snapshot() == generation_before) {
         registration.empty_mach_queue_generation = generation_before;
     }
@@ -1555,7 +1532,7 @@ std::optional<std::uint32_t> CompatibilityKernel::socket_pending_byte_count(
             descriptor->second == "socketpair")) {
         return 0;
     }
-    darwin_error = 25; // ENOTTY
+    darwin_error = 25;
     return std::nullopt;
 }
 
@@ -1683,14 +1660,6 @@ std::optional<std::uint32_t> CompatibilityKernel::collect_ready_kevents(
                     listener->second->pending_endpoints.size());
             }
         }
-        // Process readiness is already edge-consumed by its observed
-        // generations. Comparing only `data` can collapse distinct process
-        // events (for example NOTE_EXEC data=1 followed by signal-1 exit).
-        // EVFILT_MACHPORT's readiness probe does not consume the message. XNU
-        // keeps its wait-queue-backed knote active while any member queue is
-        // nonempty, even with EV_CLEAR; the client drains messages separately
-        // through mach_msg. Re-evaluate it on every kevent call so a busy port
-        // set cannot strand messages behind the first reported member.
         if (clears_after_delivery &&
             registration->filter != darwin::kqueue::filter_process &&
             registration->filter != darwin::kqueue::filter_timer &&
@@ -1754,12 +1723,6 @@ std::optional<std::uint32_t> CompatibilityKernel::collect_ready_kevents(
             registration = queue->second.erase(registration);
         } else {
             if (registration->filter == darwin::kqueue::filter_process) {
-                // A later process edge can arrive after readiness was
-                // evaluated but before the event has been copied out. Only
-                // acknowledge generations represented by this delivery, and
-                // use the values captured by that evaluation. Re-reading and
-                // copying every current generation here can consume an edge
-                // that was never returned to the guest.
                 if ((filter_flags & darwin::kqueue::process_note_exec) != 0U) {
                     registration->process_exec_generation =
                         process_exec_generation_at_evaluation;
@@ -1788,4 +1751,4 @@ void CompatibilityKernel::detach_kevents_for_descriptor(std::uint32_t fd)
     }
 }
 
-} // namespace shade
+}

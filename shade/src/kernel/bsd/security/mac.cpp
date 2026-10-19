@@ -65,13 +65,11 @@ bool CompatibilityKernel::dispatch_bsd_security(Cpu& cpu, std::uint32_t number)
         }
     }
 
-    // Preserve ENOSYS for policy operations whose ABI or state is not
-    // represented by an emulated provider.
     output_.write("[security] unsupported mac_syscall pid=" +
                   std::to_string(process_.pid) + " policy=" + *policy +
                   " call=" + std::to_string(registers[1]) + "\n");
-    bsd_error(cpu, bsd_support::not_implemented); // ENOSYS
+    bsd_error(cpu, bsd_support::not_implemented);
     return true;
 }
 
-} // namespace shade
+}

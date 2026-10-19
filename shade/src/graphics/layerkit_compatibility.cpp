@@ -19,16 +19,12 @@ namespace {
     constexpr std::uint32_t complete_object_flag = 0x01000000U;
     constexpr std::uint32_t sublayers_commit_flag = 2U;
 
-} // namespace
+}
 
 bool LayerKitRootCompatibility::set_layer_id(
     std::uint32_t context, std::uint32_t layer_id)
 {
     auto& state = contexts_[context];
-    // SpringBoard reuses one remote render context and one detached root ID
-    // across application launches. Once a transaction has been redirected,
-    // setting even the same ID starts a new application generation and must
-    // discard the previous wrapper graph.
     if (state.layer_id != layer_id || state.redirected) {
         state = ContextState { };
         state.layer_id = layer_id;
@@ -74,14 +70,7 @@ LayerKitRootCompatibility::application_window_placement(std::uint32_t context,
             static_cast<float>(std::numeric_limits<std::int32_t>::max())) {
         return std::nullopt;
     }
-    // Only the render context's current root represents the remotely hosted App
-    // scene. Full-width navigation/table children have their own shorter local
-    // bounds; treating those as scenes adds their height deficit a second time.
-    // Normalize both observed root transaction shapes from viewport geometry.
     const auto final_y = y + inset - current_top;
-    // UIKit already converts the absolute UIWindow origin. Touch routing must
-    // invert only the extra movement performed here, while screen_origin_y is
-    // retained separately for SpringBoard's exit-snapshot preparation.
     return LayerKitApplicationPlacement { std::bit_cast<std::uint32_t>(final_y),
         0.0F, final_y - y, final_y - layer_height * 0.5F };
 }
@@ -116,8 +105,6 @@ std::optional<std::uint32_t> LayerKitRootCompatibility::observe_commit(
         return std::nullopt;
     }
 
-    // Clients either publish an incomplete wrapper around one complete UIWindow
-    // root, or make the wrapper itself the unique top-level complete layer.
     if (state.attached_window_wrapper == 0U) {
         std::uint32_t candidate { };
         for (const auto layer : state.complete_layers) {
@@ -142,4 +129,4 @@ std::optional<std::uint32_t> LayerKitRootCompatibility::observe_commit(
     return state.attached_window_wrapper;
 }
 
-} // namespace shade
+}

@@ -8,8 +8,6 @@
 
 namespace shade::kernel_iokit {
 
-// Registry contract for the built-in panel's integer brightness control.
-// Native IOHIDDisplay owns brightness curves and session properties.
 class BacklightControl {
 public:
     [[nodiscard]] static bool matches(std::span<const std::byte> matching);
@@ -19,4 +17,4 @@ public:
         std::span<const std::byte> data);
 };
 
-} // namespace shade::kernel_iokit
+}

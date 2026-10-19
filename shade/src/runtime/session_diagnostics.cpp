@@ -49,7 +49,7 @@ std::string_view state_name(XnuThreadState state)
     return "unknown";
 }
 
-} // namespace
+}
 
 SessionDiagnostics::SessionDiagnostics(Runtime& initial,
     const std::vector<std::unique_ptr<Runtime>>& runtimes,
@@ -319,4 +319,4 @@ void SessionDiagnostics::stopped(std::uint32_t stopped_pid,
     output_.line(message.str());
 }
 
-} // namespace shade::runtime_detail
+}

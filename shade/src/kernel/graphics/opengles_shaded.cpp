@@ -21,7 +21,7 @@ namespace {
 
     constexpr std::size_t maximum_shader_traces = 16U;
 
-} // namespace
+}
 
 std::optional<OpenGlesHle::ShadedDraw> OpenGlesHle::shade_vertices(
     UserlandHleCall& call, const ContextState& context,
@@ -71,7 +71,6 @@ std::optional<OpenGlesHle::ShadedDraw> OpenGlesHle::shade_vertices(
     result.vertices.reserve(indices.size());
     for (const auto index : indices) {
         for (const auto& attribute : attributes) {
-            // An attribute no array supplies reads (0, 0, 0, 1).
             std::array<float, 4> raw { 0.0F, 0.0F, 0.0F, 1.0F };
             const auto array = context.generic_arrays.find(attribute.location);
             if (array != context.generic_arrays.end() && array->second.enabled &&
@@ -117,8 +116,6 @@ bool OpenGlesHle::rasterize_shaded(UserlandHleCall& call,
     const auto trace = [&](const std::string& reason) {
         trace_shader_failure(call, "shader draw failed: " + reason);
     };
-    // The shaders read the textures' CPU images and the target's current
-    // pixels, so work the GPU still holds is brought back first.
     for (const auto& unit : state.texture_units) {
         if (unit.enabled &&
             !resources_.synchronize_texture_to_cpu(unit.texture, 0U, *renderer_)) {
@@ -144,4 +141,4 @@ bool OpenGlesHle::rasterize_shaded(UserlandHleCall& call,
     return true;
 }
 
-} // namespace shade
+}

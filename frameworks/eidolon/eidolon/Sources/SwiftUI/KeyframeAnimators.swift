@@ -1,8 +1,6 @@
 import UIKit
 import CoreGraphics
 
-// MARK: KeyframeAnimator
-
 public struct KeyframeAnimator<Value: Animatable, KeyframePath: Keyframes, Content: View>: View, PrimitiveView where Value == KeyframePath.Value {
     public typealias Body = Never
     public var body: Never { neverBody(Self.self) }
@@ -37,8 +35,6 @@ public struct KeyframeAnimator<Value: Animatable, KeyframePath: Keyframes, Conte
     }
 }
 
-/// Whether two triggers are the same value, whatever its type: SwiftUI only asks that a trigger
-/// changed, and an `Equatable` of any type can be compared through the engine's own comparison.
 func sameTrigger(_ a: Any?, _ b: Any?) -> Bool {
     guard let a, let b else { return a == nil && b == nil }
     if let equatable = a as? any Equatable { return equatableEqual(equatable, b) }
@@ -73,8 +69,6 @@ final class KeyframeAnimatorNode<Value: Animatable, KeyframePath: Keyframes, Con
         content = adopt(reconcile(content, described.content(current), env))
     }
 
-    /// One leg of the animation: from where the value is now to the value the keyframes are written
-    /// for. A repeating animation runs the legs one after another, as long as it is on screen.
     private func startLeg() {
         animator?.stop()
         guard let described = animatorView else { return }
@@ -118,8 +112,6 @@ final class KeyframeAnimatorNode<Value: Animatable, KeyframePath: Keyframes, Con
         animator = nil
     }
 }
-
-// MARK: PhaseAnimator
 
 public struct PhaseAnimator<Phase: Equatable, Content: View>: View, PrimitiveView {
     public typealias Body = Never
@@ -184,8 +176,6 @@ final class PhaseAnimatorNode: ContainerNode {
         content = adopt(reconcile(content, described.phaseContent(index), env))
     }
 
-    /// Stay in a phase for as long as that phase's own animation runs, then go to the next one; a
-    /// change of the trigger starts again at the first phase.
     private func enter(_ phase: Int, _ described: PhaseAnimatorLike) {
         animator?.stop()
         index = phase

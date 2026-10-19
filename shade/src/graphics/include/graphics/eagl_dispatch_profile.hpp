@@ -14,13 +14,8 @@
 
 namespace shade {
 
-// The ARM32 GLI ABI keeps an opaque context followed by a function table.
-// Resolve slots from the firmware's public wrappers instead of assuming that
-// an entry has the same index across driver revisions.
 class EaglContextFirstArm32Profile {
 public:
-    // The native GLI dispatch-size query selects the ABI, independently of
-    // firmware release names and of the host renderer's capabilities.
     [[nodiscard]] static std::optional<EaglContextFirstArm32Profile>
         from_dispatch_bytes(std::uint32_t bytes);
     [[nodiscard]] std::uint32_t dispatch_bytes() const { return dispatch_bytes_; }
@@ -37,4 +32,4 @@ private:
     std::uint32_t dispatch_bytes_;
 };
 
-} // namespace shade
+}

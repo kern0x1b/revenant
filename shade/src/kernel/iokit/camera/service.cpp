@@ -196,7 +196,7 @@ namespace {
         return pixels;
     }
 
-} // namespace
+}
 
 bool matches_sensor_service(std::span<const std::byte> matching)
 {
@@ -568,4 +568,4 @@ void close_connection_locked(
         state.iokit_camera_capture_requests.end());
 }
 
-} // namespace shade::kernel_iokit::camera
+}

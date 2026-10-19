@@ -25,7 +25,6 @@ public struct EnvironmentValues {
     public var textCase: Text.Case?
     var buttonStyle: ((ButtonStyleConfiguration) -> any View)?
     var primitiveButtonStyle: ((PrimitiveButtonStyleConfiguration, Bool) -> any View)?
-    /// Whether the style is one of the port's own, which draw the label and leave the tap to the node (Apple's built-in styles trigger by themselves).
     var primitiveTriggersOnTap = false
     var datePickerBody: ((DatePickerStyleConfiguration) -> AnyView)?
     var controlGroupPalette = false
@@ -223,7 +222,6 @@ final class CompositeNode: Node {
     override func mountContents() { child?.mount() }
     func invalidate() { Updates.schedule(self) }
 
-    // What body reads from an @Observable object is what this node depends on: the first change to any of it re-renders the node.
     nonisolated(unsafe) static var tracksObservation = true
 
     func trackedBody<V: View>(_ view: V) -> any View {
@@ -314,10 +312,6 @@ func runtimeFields(_ type: Any.Type) -> [PropertyField] {
     return fields
 }
 
-// The fields of a view are found by the runtime's own reflection entry points, which carry no promise of stability.
-// They are checked once against Swift's layout rules; if they disagree, the offsets are read from the struct's type
-// metadata (whose field offset vector is part of Swift's ABI) and the types from a Mirror of the value. A type that
-// cannot be read that way stops the app with a message, rather than being written to at a wrong offset.
 enum FieldReflection {
     private struct Sample { var flag: UInt8; var number: Int; var real: Double; var pair: (UInt8, Int16); var text: String }
 
@@ -338,7 +332,6 @@ enum FieldReflection {
         return metadataOffsets(Sample.self) == expected.compactMap { $0.0 }
     }
 
-    // A struct's metadata is its kind, its descriptor, then (at a word offset the descriptor names) a vector of 32-bit offsets.
     static func metadataOffsets(_ type: Any.Type) -> [Int]? {
         let word = MemoryLayout<Int>.size
         let metadata = unsafeBitCast(type, to: UnsafeRawPointer.self)
@@ -363,7 +356,6 @@ enum FieldReflection {
 
 func installFields(_ type: Any.Type, _ base: UnsafeMutableRawPointer, _ node: CompositeNode, _ keyBase: Int, _ sample: Any? = nil) {
     for field in propertyFields(type, sample: sample) {
-        // a nested value is read from the same sample by its own Mirror only when the fallback is on
         let nested: Any? = sample == nil ? nil : childValue(of: sample!, at: field.offset, type: type)
         switch field.kind {
         case .installer(let installer):
@@ -377,7 +369,6 @@ func installFields(_ type: Any.Type, _ base: UnsafeMutableRawPointer, _ node: Co
     }
 }
 
-// The value of the field that starts at `offset`, found in a Mirror of the sample by the same offsets.
 func childValue(of sample: Any, at offset: Int, type: Any.Type) -> Any? {
     guard let offsets = FieldReflection.metadataOffsets(type) else { return nil }
     for (child, position) in zip(Mirror(reflecting: sample).children, offsets) where position == offset { return child.value }
@@ -402,14 +393,8 @@ enum Updates {
     static var scheduled = false
     static var pendingAnimation: Animation?
     static var animationForFlush: Animation?
-    /// The closures `Transaction.addAnimationCompletion` left while a transaction's body is running.
     static var pendingCompletions: [CompletionToken] = []
-    /// The same closures once a change in that body has scheduled a flush: the body is over by the time the flush runs,
-    /// and the transaction with it, so they are taken at the change.
     static var completionsForFlush: [CompletionToken] = []
-    /// Every closure added to a transaction, in the order it was added, until it has run: the ones no change took for an
-    /// animation (nothing in the body of withTransaction rendered, or the transaction was never used) run at the next turn,
-    /// as Apple's do, whether or not anything animates. A transaction that is gone before the turn has run them already.
     static var completionsExpected: [WeakCompletion] = []
     static var hosts: [WeakHost] = []
     static var flushCount = 0
@@ -425,7 +410,6 @@ enum Updates {
         DispatchQueue.main.async { flush() }
     }
 
-    /// A closure was added to a transaction: it runs at the next turn unless a change takes it for an animation first.
     static func expect(_ token: CompletionToken) {
         completionsExpected.append(WeakCompletion(token: token))
         guard !scheduled else { return }
@@ -457,10 +441,7 @@ enum Updates {
         LayoutCounters.mountTime += CFAbsoluteTimeGetCurrent() - mountStart
         animationForFlush = nil
         if let animation {
-            // Only the screens that changed animate their layout; the others are none of this animation's business.
             let changed = hosts.compactMap { $0.host }.filter { host in rendered.contains { $0.env.host === host } }
-            // Nothing here is interactive, so a view that is removed is over at the same moment its
-            // animation is: both criteria of a completion are called when the animation finishes.
             animation.run({ for host in changed { host.view.layoutIfNeeded() } }, completion: completions.isEmpty ? nil : { _ in
                 for completion in completions { completion.run() }
             })

@@ -75,7 +75,6 @@ final class NavigationLinkNode: ContainerNode {
         let l = view as! NavigationLinkLike
         destination = l.linkDestination
         active = l.linkActive
-        // outside a list a link is tinted like a button
         let accent = Color(env.foregroundColor ?? env.tint ?? UIColor(red: 0.2, green: 0.45, blue: 0.85, alpha: 1))
         content = adopt(reconcile(content, env.list == nil ? AnyView(l.linkLabel).foregroundColor(accent) : l.linkLabel, env))
         if env.list == nil && !tapInstalled {

@@ -17,9 +17,6 @@
 
 namespace shade {
 
-// Converts GLES primitive topologies that need host-independent emulation to
-// triangles. Keeping this above the render backends gives Vulkan and software
-// identical line-width and attribute-interpolation behavior.
 class GlesPrimitiveBatch {
 public:
     [[nodiscard]] std::span<const GlesRasterVertex> vertices() const;
@@ -44,4 +41,4 @@ public:
         const GlesRasterState& state);
 };
 
-} // namespace shade
+}

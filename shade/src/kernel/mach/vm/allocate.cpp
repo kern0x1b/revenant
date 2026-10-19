@@ -25,14 +25,11 @@
 namespace shade {
 namespace {
 
-    // XNU publishes the pointer-sized vm_map interface at 3800 and also
-    // exposes its mach_vm compatibility subsystem at 4800. On ARM32 the
-    // mach_vm_allocate client uses the same 32-bit wire fields as vm_allocate.
     constexpr std::uint32_t mach_vm_allocate_identifier = 4800U;
     constexpr std::uint32_t request_size = 44U;
     constexpr std::uint32_t reply_size = 40U;
 
-} // namespace
+}
 
 bool CompatibilityKernel::dispatch_mach_vm_allocate_message(
     Cpu& cpu, const MachMessageRequest& request)
@@ -95,4 +92,4 @@ bool CompatibilityKernel::dispatch_mach_vm_allocate_message(
     return true;
 }
 
-} // namespace shade
+}

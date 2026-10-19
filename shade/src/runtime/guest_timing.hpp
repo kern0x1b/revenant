@@ -70,4 +70,4 @@ private:
     return whole_ticks + fractional_ticks;
 }
 
-} // namespace shade::runtime_detail
+}

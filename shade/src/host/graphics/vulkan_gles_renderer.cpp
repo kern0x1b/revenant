@@ -657,10 +657,6 @@ std::vector<std::uint32_t> compile_shader(std::string_view source,
         std::string renderer_name_;
         std::filesystem::path pipeline_cache_path_;
         mutable std::mutex mutex_;
-        // Non-zero only while a native presenter owns mutex_ and has committed
-        // to submit every command recorded before releasing it. Encoder::submit
-        // may then use that guaranteed queue boundary instead of blocking a
-        // Guest thread on presentation work.
         std::atomic<std::uint32_t> presentation_submissions_pending_ { };
         std::atomic<PerfFallbackReason> last_failure_reason_ {
             PerfFallbackReason::None
@@ -855,11 +851,6 @@ std::vector<std::uint32_t> compile_shader(std::string_view source,
 
         bool submit(PerfSubmitReason reason) override
         {
-            // Native presentation serializes the same global command stream and
-            // always submits it before releasing renderer_.mutex_. If it
-            // already owns that lock, waiting here can pin the only Guest CPU
-            // for an entire host-present interval even though presentation will
-            // satisfy this non-blocking flush itself.
             if (renderer_.presentation_submissions_pending_.load(
                     std::memory_order_acquire) != 0) {
                 return true;
@@ -1025,8 +1016,6 @@ std::vector<std::uint32_t> compile_shader(std::string_view source,
                                      ")";
                     break;
                 }
-                // A compatible higher-priority device is sufficient. Avoid
-                // initializing window-system support in unused ICDs.
                 if (physical_device_ != VK_NULL_HANDLE)
                     break;
             }
@@ -1433,9 +1422,6 @@ std::vector<std::uint32_t> compile_shader(std::string_view source,
         info.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
         info.preTransform = capabilities.currentTransform;
         info.compositeAlpha = composite_alpha;
-        // FIFO preserves every queued image until its display turn. MAILBOX may
-        // replace an older queued image with a newer one, which violates the
-        // emulator's no-dropped-animation-frame presentation contract.
         info.presentMode = VK_PRESENT_MODE_FIFO_KHR;
         info.clipped = VK_TRUE;
         info.oldSwapchain = presentation_swapchain_;
@@ -1829,7 +1815,6 @@ std::vector<std::uint32_t> compile_shader(std::string_view source,
         info.addressModeV = wrap(state.wrap_t);
         info.addressModeW = VK_SAMPLER_ADDRESS_MODE_CLAMP_TO_EDGE;
         info.maxAnisotropy = 1.0F;
-        // The resource upload path currently publishes level zero only.
         info.maxLod = 0.0F;
         VkSampler sampler { };
         require_success(vkCreateSampler(device_, &info, nullptr, &sampler),
@@ -1859,9 +1844,6 @@ std::vector<std::uint32_t> compile_shader(std::string_view source,
             found->second.image.height == height) {
             return found->second;
         }
-        // Recorded draws may still reference the old image and framebuffer.
-        // Submission includes a fence wait, so only retire them after the
-        // command buffer can no longer access either object.
         if (found != targets_.end() &&
             found->second.image.image != VK_NULL_HANDLE) {
             if (command_recording_)
@@ -2344,8 +2326,6 @@ std::vector<std::uint32_t> compile_shader(std::string_view source,
         blend.dstColorBlendFactor =
             key.blend_enabled ? *destination : VK_BLEND_FACTOR_ZERO;
         blend.colorBlendOp = VK_BLEND_OP_ADD;
-        // The reference renderer preserves Porter-Duff alpha for the two
-        // LayerKit blend modes instead of multiplying source alpha twice.
         const auto constant_alpha_crossfade =
             key.blend_source == constant_alpha_blend_factor &&
             key.blend_destination == one_minus_constant_alpha_blend_factor;
@@ -2742,18 +2722,11 @@ std::vector<std::uint32_t> compile_shader(std::string_view source,
         if (!has_target && !has_texture) {
             return;
         }
-        // Recorded descriptors and render passes can still reference both maps.
-        // Submit once and wait once before retiring the complete process batch.
         try {
             if (command_recording_)
                 submit_commands(false, PerfSubmitReason::ResourceLifetime);
             wait_for_all_slots();
         } catch (...) {
-            // Resource release is reached from process teardown and OpenGLES
-            // reset paths, both of which are noexcept from the guest's point of
-            // view. Leave the owner entries for the renderer-wide destructor
-            // after recording has been discarded rather than terminating the
-            // emulator while unwinding an exiting task.
             last_failure_reason_.store(
                 PerfFallbackReason::BackendFailure, std::memory_order_relaxed);
             static_cast<void>(vkDeviceWaitIdle(device_));
@@ -2784,9 +2757,6 @@ std::vector<std::uint32_t> compile_shader(std::string_view source,
     HostGraphicsDevice::PresentResult VulkanGlesRenderer::present_target(
         Target& target)
     {
-        // A presentation attempt is also a command-stream flush, even when the
-        // host swapchain is temporarily unavailable. Encoder::submit relies on
-        // this boundary while presentation owns the renderer mutex.
         submit_commands(false, PerfSubmitReason::Presentation);
         if (presentation_swapchain_ == VK_NULL_HANDLE ||
             presentation_images_.empty()) {
@@ -2794,9 +2764,6 @@ std::vector<std::uint32_t> compile_shader(std::string_view source,
                 std::memory_order_relaxed);
             return PresentResult::Failed;
         }
-        // DZN and other translation layers may retain a presented image beyond
-        // the render fence. Keep presentation in the next ring slot so
-        // compositor and presentation semaphore lifetimes cannot alias.
         auto* slot = &command_slot();
         wait_for_slot(*slot);
 
@@ -2950,8 +2917,6 @@ std::vector<std::uint32_t> compile_shader(std::string_view source,
                 last_failure_reason_.store(PerfFallbackReason::BackendFailure,
                     std::memory_order_relaxed);
             }
-            // VK_SUBOPTIMAL_KHR still accepted this frame. Report that outcome
-            // even if preparing the next swapchain fails.
             return result == VK_SUCCESS || result == VK_SUBOPTIMAL_KHR
                        ? PresentResult::Queued
                        : PresentResult::Failed;
@@ -2979,7 +2944,6 @@ std::vector<std::uint32_t> compile_shader(std::string_view source,
             cpu_generation == gpu_generation) {
             return target;
         }
-        // A stale CPU shadow must never overwrite a newer native image.
         if (cpu_generation < gpu_generation ||
             cpu_frame.width != descriptor.width ||
             cpu_frame.height != descriptor.height ||
@@ -3101,10 +3065,6 @@ std::vector<std::uint32_t> compile_shader(std::string_view source,
         target.layout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
         target.cpu_generation = cpu_generation;
         target.valid = true;
-        // A partial CPU upload preserves newer GPU pixels outside the uploaded
-        // rectangle. Keep their conservative damage so a later CPU map can
-        // still refresh the shadow; a full upload makes the CPU frame
-        // authoritative.
         if (full_upload)
             target.dirty.reset();
         return target;
@@ -4180,10 +4140,6 @@ std::vector<std::uint32_t> compile_shader(std::string_view source,
                             VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
                     }
 
-                    // Exact whole-resource copies remain the cheapest transfer.
-                    // For partial copies, use a nearest blit: translated Vulkan
-                    // drivers can otherwise expose source-image tiling
-                    // artifacts when the resources have different extents.
                     const auto whole_resource_copy =
                         source_rectangle.x == 0 && source_rectangle.y == 0 &&
                         destination_rectangle.x == 0 &&
@@ -4430,8 +4386,6 @@ std::vector<std::uint32_t> compile_shader(std::string_view source,
                 auto& target = prepare_host_surface(*surface, cpu_frame,
                     cpu_generation, gpu_generation, std::move(cpu_damage));
                 if (!target.valid) {
-                    // Preserve the submission guarantee published above even if
-                    // this particular surface cannot be presented.
                     submit_commands(false, PerfSubmitReason::Presentation);
                     return PresentResult::Failed;
                 }
@@ -4487,9 +4441,6 @@ std::vector<std::uint32_t> compile_shader(std::string_view source,
         GlesRenderTargetKey target, std::span<const GlesRasterVertex> vertices,
         std::uint32_t mode, const GlesRasterState& state)
     {
-        // CPU readback takes HostSurface before the renderer mutex.  Resolve
-        // the inverse dependency here before serializing Vulkan state so
-        // texture selection cannot deadlock a concurrent readback.
         std::optional<SurfacePreparation> target_surface_preparation;
         if (frame.host_surface && frame.host_surface->key() == target) {
             target_surface_preparation =
@@ -4725,9 +4676,6 @@ std::vector<std::uint32_t> compile_shader(std::string_view source,
                 key.owner = level ? state.resource_owner : 0;
                 key.rectangle = unit.rectangle;
                 if (level && level->host_surface) {
-                    // CoreSurface is the pixel resource. GLES texture names are
-                    // transient views and older firmware routinely deletes and
-                    // recreates those names while retaining the same surface.
                     key.surface = level->host_surface->key();
                     key.uses_surface = true;
                 } else {
@@ -4790,9 +4738,6 @@ std::vector<std::uint32_t> compile_shader(std::string_view source,
                             oldest = candidate;
                         }
                     }
-                    // Textures needed by this draw are allowed to exceed the
-                    // budget temporarily; there is no correct eviction
-                    // candidate.
                     if (oldest == texture_cache_.end())
                         break;
                     texture_cache_bytes_ -= std::min(texture_cache_bytes_,
@@ -4845,9 +4790,6 @@ std::vector<std::uint32_t> compile_shader(std::string_view source,
             ensure_buffer(command_slot().staging,
                 std::max(staging_end, minimum_staging_arena_bytes),
                 VK_BUFFER_USAGE_TRANSFER_SRC_BIT);
-            // The staging-capacity check may submit the current batch and
-            // rotate to another command slot. Allocate per-slot draw buffers
-            // only after that final rotation decision.
             ensure_buffer(command_slot().vertex,
                 std::max(vertex_bytes, minimum_vertex_arena_bytes),
                 VK_BUFFER_USAGE_VERTEX_BUFFER_BIT);
@@ -5131,7 +5073,7 @@ std::vector<std::uint32_t> compile_shader(std::string_view source,
         }
     }
 
-} // namespace
+}
 
 std::unique_ptr<GlesRenderer> create_vulkan_gles_renderer(
     const std::filesystem::path& pipeline_cache,
@@ -5159,4 +5101,4 @@ std::unique_ptr<GlesRenderer> create_vulkan_gles_renderer(
     }
 }
 
-} // namespace shade
+}

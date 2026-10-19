@@ -84,9 +84,6 @@ namespace {
         "_kCFTypeDictionaryValueCallBacks"
     };
     constexpr std::string_view cf_release { "_CFRelease" };
-    // These are exported CF objects rather than callable entry points. Keep the
-    // data and function dependencies separate so shared-cache mappings publish
-    // __DATA exports without treating their bytes as executable code.
     constexpr std::array<std::string_view, 6> core_telephony_data_exports {
         "_kCTRegistrationStatusNotRegistered",
         "_kCTRegistrationNetworkSelectionModeDisabled",
@@ -106,20 +103,10 @@ namespace {
     constexpr std::uint32_t dialing_call_state { 2U };
     constexpr std::uint32_t disconnected_call_state { 4U };
     constexpr std::size_t maximum_dialed_number_bytes { 256U };
-    // The offline transport has no modem to become ready. Report ENODEV in
-    // CoreTelephony's POSIX error domain so firmware can use its native
-    // no-equipment fallback instead of repeatedly sleeping on EAGAIN.
     constexpr std::uint32_t equipment_info_unavailable_error { 19U };
 
-    // SpringBoard's private registration enum predates the public CoreTelephony
-    // status objects. On the offline path, value 3 selects the firmware's
-    // localized No Service view on the iPhoneOS 1.x-3.x SpringBoard builds in
-    // this matrix; it is a UI state, not a modem or AT reply.
     constexpr std::uint32_t offline_springboard_registration_status { 3U };
 
-    // These APIs have scalar return values in iPhoneOS 1.0. An offline handset
-    // has no data attachment, active data context, signal, airplane mode, or
-    // calls.
     constexpr std::array<std::string_view, 4> offline_scalar_queries {
         "_CTRegistrationGetDataAttached",
         "_CTRegistrationGetDataContextActive",
@@ -127,8 +114,6 @@ namespace {
         "_CTGetCurrentCallCount",
     };
 
-    // These direct queries return retained CF objects. With no registered
-    // carrier there is no operator or service-provider name to expose.
     constexpr std::array<std::string_view, 4> offline_direct_string_queries {
         "_CTRegistrationCopyAbbreviatedOperatorName",
         "_CTRegistrationCopyOperatorName",
@@ -136,9 +121,6 @@ namespace {
         "_CTSettingCopyMyPhoneNumber",
     };
 
-    // These server queries normally write a retained CFString through
-    // argument 2. The offline profile has no CommCenter-backed values, so
-    // terminate the queries at this HLE boundary.
     constexpr std::array<std::string_view, 6> offline_server_string_queries {
         "__CTServerConnectionCopyFirmwareVersion",
         "__CTServerConnectionCopySIMIdentity",
@@ -219,10 +201,6 @@ namespace {
                 call.argument(notification_argument) == *notification)
                 return true;
         }
-        // CFNotificationCenter and CTTelephonyCenter use the same constant
-        // CFString, but a framework's imported pointer can be relocated per
-        // task. Compare the constant's bytes as a fallback so the profile
-        // remains independent of a particular shared-region slide.
         const auto object = call.argument(notification_argument);
         const auto data = call.memory().read32(object + 8U);
         const auto length = call.memory().read32(object + 12U);
@@ -304,9 +282,6 @@ namespace {
             std::uint32_t dial_identifier { };
             std::uint32_t sequence { };
             std::uint32_t address { };
-            // Preserve the server source verbatim. A null value is valid when
-            // the firmware's telephony center has no live CommCenter transport,
-            // and still selects its native UUID-map/object-reuse path.
             std::uint32_t source { };
         } record;
     };
@@ -333,12 +308,12 @@ namespace {
 
         const auto call_stack = caller_stack - call_argument_bytes;
         const std::array<std::uint32_t, call_argument_words> arguments {
-            0x694c5349U, // Fourth CFUUID word.
-            record.address, // Dialed address.
-            empty, // No network-provided display name.
-            0U, // Start time is unknown while dialing.
-            0U, // Connected duration.
-            record.sequence, // Stable call identifier.
+            0x694c5349U,
+            record.address,
+            empty,
+            0U,
+            0U,
+            record.sequence,
             call_state,
             record.dial_identifier,
         };
@@ -564,7 +539,7 @@ namespace {
         return_server_success(call, result);
     }
 
-} // namespace
+}
 
 void register_core_telephony_hle(UserlandHleRegistry& registry)
 {
@@ -595,14 +570,6 @@ void register_core_telephony_hle(UserlandHleRegistry& registry,
         registry.register_guest_function(
             std::string { core_foundation_image }, std::string { symbol });
     }
-    // Every stock UI process shares one offline compatibility backend. Match
-    // the application directory instead of maintaining a bundle whitelist,
-    // while allowing CommCenter and other system daemons to keep their native
-    // internal object lifecycles.
-    // Without CommCenter, the stock method would keep the status controller in
-    // its pre-check-in state and pass nil into SBStatusBarNoServiceView. Report
-    // the already-implemented offline CoreTelephony boundary as checked in so
-    // SpringBoard chooses and localizes its own NO_SERVICE/SEARCHING string.
     registry.register_objc_instance_method(std::string { springboard_image },
         "SBStatusBarController", "telephonyControllerCheckedIn",
         "-[SBStatusBarController telephonyControllerCheckedIn]",
@@ -618,18 +585,10 @@ void register_core_telephony_hle(UserlandHleRegistry& registry,
             }
             call.resume_original_persistently();
         });
-    // SBTelephonyManager registers this observer before it has any SIM or
-    // service state. A silent transport is not evidence that a physical radio
-    // died, so suppress only that firmware-owned observer in the offline
-    // device profile. Other telephony notifications and every explicit
-    // virtual/replay transport keep their native registration path.
     registry.register_function(std::string { core_telephony_image },
         std::string { telephony_center_add_observer },
         [offline_transport](UserlandHleCall& call) {
             if (offline_transport && is_offline_ui_client(call) &&
-                // This firmware's private CoreTelephony wrapper receives
-                // (center, observer, callback, name, context), so the name is
-                // in r3 (confirmed by its native argument shuffle).
                 is_radio_dead_notification(call, 3U)) {
                 call.output().line(
                     "[telephony] offline radio-dead observer suppressed pid=" +
@@ -637,19 +596,12 @@ void register_core_telephony_hle(UserlandHleRegistry& registry,
                 call.set_return(0);
                 return;
             }
-            // Keep the boundary installed for later registrations in this
-            // process. SpringBoard registers a group of telephony
-            // notifications during SBTelephonyManager initialization; a
-            // one-shot resume would let the later radio-dead registration
-            // bypass the offline transport policy.
             call.resume_original_persistently();
         });
     registry.register_function(std::string { core_foundation_image },
         std::string { notification_center_add_observer },
         [offline_transport](UserlandHleCall& call) {
             if (offline_transport && is_offline_ui_client(call) &&
-                // CFNotificationCenterAddObserver(center, observer,
-                // callback, name, object, behavior) places it in r3.
                 is_radio_dead_notification(call, 3U)) {
                 call.output().line(
                     "[telephony] offline radio-dead observer suppressed pid=" +
@@ -657,15 +609,9 @@ void register_core_telephony_hle(UserlandHleRegistry& registry,
                 call.set_return(0);
                 return;
             }
-            // Keep the boundary installed for later Darwin notification
-            // registrations in this process; only the offline radio-dead
-            // notification is consumed above.
             call.resume_original_persistently();
         });
 
-    // Preserve the firmware's CTCall CFRuntime object and MobilePhone flow.
-    // Only adapt the missing baseband service reply into the same call-info
-    // record that a real CommCenter response would have produced.
     const auto offline_calls = std::make_shared<OfflineCallState>();
     registry.register_function(std::string { core_telephony_image },
         "__CTServerConnectionCreateCall",
@@ -833,10 +779,6 @@ void register_core_telephony_hle(UserlandHleRegistry& registry,
     registry.register_function(std::string { core_telephony_image },
         "_CTSIMSupportGetSIMStatus",
         [offline_transport](UserlandHleCall& call) {
-            // The offline transport intentionally has no modem, but stock
-            // SpringBoard turns NotInserted into a blocking modal. Expose the
-            // simulator's logical SIM-ready capability instead; explicit
-            // replay/virtual transports continue through their native path.
             if (offline_transport) {
                 return_firmware_object(call, offline_sim_status_export, true);
             }
@@ -860,8 +802,6 @@ void register_core_telephony_hle(UserlandHleRegistry& registry,
                 call.resume_original();
                 return;
             }
-            // An unregistered offline radio has no selected access technology.
-            // Use the firmware's own constant, also for daemon audio clients.
             return_server_value(call,
                 exported_object(
                     call, "_kCTRegistrationRadioAccessTechnologyUnknown"),
@@ -874,11 +814,6 @@ void register_core_telephony_hle(UserlandHleRegistry& registry,
                 call.resume_original();
                 return;
             }
-            // An offline transport cannot enter emergency callback mode.
-            // This is a known inactive state, not an equipment lookup failure:
-            // clients use it when refreshing their idle timers, and a server
-            // error would trigger connection recovery on every input event.
-            // The native status output is a Boolean byte, not a CF object.
             if (call.argument(2) != 0)
                 static_cast<void>(call.memory().write8(call.argument(2), 0));
             return_server_success(call, call.argument(0));
@@ -890,8 +825,6 @@ void register_core_telephony_hle(UserlandHleRegistry& registry,
                 call.resume_original();
                 return;
             }
-            // The native API returns a retained dictionary and a byte-sized
-            // availability flag. An offline modem cannot supply either.
             if (call.argument(3) != 0) {
                 static_cast<void>(
                     call.memory().write8(call.argument(3), 0));
@@ -899,9 +832,6 @@ void register_core_telephony_hle(UserlandHleRegistry& registry,
             return_server_failure(call, call.argument(0), call.argument(2),
                 equipment_info_unavailable_error);
         });
-    // These queries require physical modem/SIM data. The offline transport
-    // cannot provide it, including to system services starting before
-    // CommCenter. Let each native client handle the missing hardware result.
     for (const auto symbol : {
              "__CTServerConnectionCopyMobileEquipmentInfo",
              "__CTServerConnectionCopyAudioVocoderInfo",
@@ -931,8 +861,6 @@ void register_core_telephony_hle(UserlandHleRegistry& registry,
             call.resume_original();
         });
 
-    // The offline adapter supplies service results directly, so registration
-    // cannot produce remote CommCenter updates and is a successful no-op.
     for (const auto symbol : {
              "__CTServerConnectionRegisterForNotification",
              "__CTServerConnectionUnregisterForNotification",
@@ -946,12 +874,9 @@ void register_core_telephony_hle(UserlandHleRegistry& registry,
     registry.register_function(std::string { core_telephony_image },
         "__CTServerConnectionNetworkTimeUpdatesAllowed",
         [](UserlandHleCall& call) { return_server_boolean(call, false); });
-    // Automatic carrier selection eventually dereferences the connection's
-    // CommCenter CFMachPort. Baseband transport is intentionally parked, so
-    // terminate the request at the user-space CoreTelephony boundary.
     registry.register_function(std::string { core_telephony_image },
         "__CTServerConnectionSelectNetwork",
         [](UserlandHleCall& call) { return_server_success(call); });
 }
 
-} // namespace shade
+}

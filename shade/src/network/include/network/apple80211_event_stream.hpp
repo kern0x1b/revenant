@@ -22,10 +22,6 @@ enum class EventStreamFormat : std::uint8_t {
     FramedRecords,
 };
 
-// /dev/airport changed from a 16-bit event mask to framed records while
-// retaining the same device path.  The fixed buffer size used by the native
-// reader is the protocol negotiation boundary, so each open description
-// selects its format on the first read and keeps it thereafter.
 class EventStream {
 public:
     void enqueue(std::uint32_t event);
@@ -48,4 +44,4 @@ private:
     std::size_t record_event_count_ { };
 };
 
-} // namespace shade::darwin::network::apple80211_driver
+}

@@ -15,10 +15,6 @@
 
 namespace shade::surface_transport {
 
-// Firmware-facing user-space surface transports.  Selection follows the
-// private symbol family exported by the loaded framework, never an OS build,
-// application, or page.  Both profiles publish the same SurfaceStore backing
-// while preserving their own client-object layout for native firmware code.
 enum class Kind : std::uint8_t {
     CoreSurfaceClientBuffer,
     IOSurfaceClient,
@@ -68,9 +64,6 @@ inline constexpr ClientAbi core_surface_client_buffer {
         "_kCoreSurfaceBufferPixelFormat", "_kCoreSurfaceBufferOffset" },
 };
 
-// iPhoneOS builds with a separate IOSurface framework keep a 1,216-byte
-// private client object.  CoreSurface remains a native compatibility wrapper
-// and forwards into this symbol family.
 inline constexpr ClientAbi io_surface_client {
     .name = "io-surface-client",
     .image_suffix = "/IOSurface.framework/IOSurface",
@@ -93,8 +86,6 @@ inline constexpr ClientAbi io_surface_client {
         "_kIOSurfaceOffset" },
 };
 
-// The extended metadata transport retains the public CFRuntime wrapper and
-// reference header, but expands both the metadata prefix and client storage.
 inline constexpr ClientAbi io_surface_client_extended_metadata = [] {
     auto profile = io_surface_client;
     profile.name = "io-surface-client-extended-metadata";
@@ -110,9 +101,6 @@ inline constexpr ClientAbi io_surface_client_extended_metadata = [] {
     return profile;
 }();
 
-// Decode only a leaf word accessor returning r0 from [r0 + immediate].
-// Both audited instruction forms return directly, without a prologue or
-// additional computation. Other functions cannot identify a client layout.
 [[nodiscard]] constexpr std::optional<std::uint32_t> accessor_offset(
     std::span<const std::byte> code)
 {
@@ -155,4 +143,4 @@ inline constexpr ClientAbi io_surface_client_extended_metadata = [] {
     return core_surface_client_buffer;
 }
 
-} // namespace shade::surface_transport
+}

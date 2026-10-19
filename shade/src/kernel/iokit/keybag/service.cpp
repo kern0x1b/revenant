@@ -30,14 +30,7 @@ namespace {
     constexpr std::uint32_t copy_keybag_uuid_selector = 23U;
     constexpr std::uint32_t load_blastable_bytes_selector = 5U;
     constexpr std::uint32_t store_blastable_bytes_selector = 6U;
-    // MobileKeyBag treats device state 3 as an unlocked device with no
-    // passcode. State 0 means a passcode exists but the device is currently
-    // unlocked, so returning zero for a fresh virtual data volume incorrectly
-    // sends the firmware through passcode entry.
     constexpr std::uint64_t device_lock_state_no_passcode = 3U;
-    // AppleKeyStoreGetLockState bit 2 records that the selected bag has been
-    // unlocked since boot. A no-passcode virtual system bag is always in that
-    // state.
     constexpr std::uint64_t keybag_unlocked_since_boot = 1U << 2U;
 
     bool matches_class(std::span<const std::byte> matching,
@@ -81,7 +74,7 @@ namespace {
             state.keybag_device_tree_options_service);
     }
 
-} // namespace
+}
 
 bool matches_service(std::span<const std::byte> matching)
 {
@@ -155,13 +148,6 @@ std::optional<MethodResult> dispatch_connect_method(KernelSharedState& state,
         inband_output_capacity == 0U) {
         return MethodResult { iokit_abi::success, { }, { } };
     }
-    // The kernel key store owns the live system-bag handle. User space only
-    // falls back to deserializing /private/var/keybags/systembag.kb when the
-    // kernel reports that no handle exists; on a restored data volume without
-    // that persistence file, keybagd treats the fallback failure as fatal and
-    // requests a reboot. Lazily provision the virtual kernel handle so the
-    // firmware can follow its normal already-loaded path without synthesizing
-    // or modifying guest keybag files.
     if (selector == get_system_keybag_selector && scalar_input.empty() &&
         inband_input.empty() && scalar_output_capacity >= 1U &&
         inband_output_capacity == 0U) {
@@ -204,10 +190,6 @@ std::optional<MethodResult> dispatch_connect_method(KernelSharedState& state,
         if (scalar_input.size() != 1U || !inband_input.empty() ||
             scalar_output_capacity != 0U || inband_output_capacity < uuid_size)
             return MethodResult { iokit_abi::bad_argument, { }, { } };
-        // Handles allocated by this store are positive. Zero aliases the
-        // system bag; unregistered special bags and unknown handles do not
-        // exist. Native MobileKeyBag distinguishes absence from unsupported
-        // UUID export and can safely skip cleanup of an unregistered bag.
         const auto handle = scalar_input.front();
         const bool known = handle == 0U ||
                            handle == state.system_keybag_handle ||
@@ -215,9 +197,6 @@ std::optional<MethodResult> dispatch_connect_method(KernelSharedState& state,
         if (!known)
             return MethodResult { iokit_abi::not_found, { }, { } };
     }
-    // AppleKeyStore's symmetric system-bag ABI uses selectors 10/11 for
-    // authenticated wrapping/unwrapping. The no-passcode model already exposes
-    // unlocked class keys; retain firmware ownership of keychain records.
     if ((selector == 10U || selector == 11U) && state.key_store) {
         if (scalar_input.size() != 2U || scalar_output_capacity != 0U ||
             scalar_input[1] < 1U || scalar_input[1] > 11U ||
@@ -234,10 +213,6 @@ std::optional<MethodResult> dispatch_connect_method(KernelSharedState& state,
             return MethodResult { iokit_abi::bad_argument, { }, { } };
         return MethodResult { iokit_abi::success, { }, std::move(*result) };
     }
-    // Keep the remaining endpoint honest while the firmware-era method
-    // contract is being filled in: this exposes selector and argument shape
-    // through the normal IOKit result without fabricating a key or lock-state
-    // transition.
     return MethodResult { iokit_abi::unsupported, { }, { } };
 }
 
@@ -280,4 +255,4 @@ std::optional<MethodResult> dispatch_effaceable_storage_connect_method(
     return MethodResult { iokit_abi::unsupported, { }, { } };
 }
 
-} // namespace shade::kernel_iokit::keybag
+}

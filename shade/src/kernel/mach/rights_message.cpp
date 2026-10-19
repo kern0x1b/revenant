@@ -70,7 +70,7 @@ bool CompatibilityKernel::dispatch_mach_rights_message(
                         message_address + static_cast<std::uint32_t>(
                                               index * sizeof(std::uint32_t)),
                         reply[index])) {
-                    registers[0] = 0x10004008U; // MACH_RCV_INVALID_DATA
+                    registers[0] = 0x10004008U;
                     return false;
                 }
             }
@@ -79,7 +79,7 @@ bool CompatibilityKernel::dispatch_mach_rights_message(
         };
 
         if (registers[3] < simple_reply_size) {
-            registers[0] = 0x10004008U; // MACH_RCV_INVALID_DATA
+            registers[0] = 0x10004008U;
             return true;
         }
 
@@ -227,8 +227,6 @@ bool CompatibilityKernel::dispatch_mach_rights_message(
                 mig_message_id(
                     xnu::mig::thread_act::Routine::thread_policy)) &&
         registers[3] >= 36) {
-        // mach_port_deallocate / mach_port_insert_right / semaphore_destroy /
-        // thread_policy
         std::uint32_t kernel_result = 0;
         if (*message_id ==
             mig_message_id(
@@ -243,7 +241,7 @@ bool CompatibilityKernel::dispatch_mach_rights_message(
             const auto task = target_task_for_port(
                 *shared_state_, process_.pid, *remote_port);
             if (!task) {
-                kernel_result = 4; // KERN_INVALID_ARGUMENT
+                kernel_result = 4;
             } else if (name == xnu::ipc::null_name ||
                        name == xnu::ipc::dead_name) {
                 kernel_result = 0;
@@ -251,7 +249,7 @@ bool CompatibilityKernel::dispatch_mach_rights_message(
                 const auto entry =
                     shared_state_->mach_namespaces.lookup(*task, name);
                 if (!entry) {
-                    kernel_result = 15; // KERN_INVALID_NAME
+                    kernel_result = 15;
                 } else {
                     const auto has = [&](xnu::ipc::Right right) {
                         return (entry->type & xnu::ipc::type_mask(right)) !=
@@ -272,9 +270,7 @@ bool CompatibilityKernel::dispatch_mach_rights_message(
                     }
                 }
                 if (kernel_result == 18 || kernel_result == 19) {
-                    // ipc_right_dealloc reports a wrong kind of right for
-                    // this interface, not a delta-validation error.
-                    kernel_result = 17; // KERN_INVALID_RIGHT
+                    kernel_result = 17;
                 }
             }
         } else if (*message_id ==
@@ -323,10 +319,6 @@ bool CompatibilityKernel::dispatch_mach_rights_message(
                         ? shared_state_->mach_semaphores.find(*semaphore_object)
                         : shared_state_->mach_semaphores.end();
 
-                // semaphore_consume_ref_t is a MOVE_SEND descriptor. Its send
-                // right is consumed by message transport even when the kernel
-                // operation fails; this direct kernel-server path performs that
-                // transport step here.
                 if (semaphore_object) {
                     static_cast<void>(
                         consume_moved_right_locked(*shared_state_, process_.pid,
@@ -421,18 +413,11 @@ bool CompatibilityKernel::dispatch_mach_rights_message(
                 kernel_result = darwin::mach::invalid_argument;
             } else if (scheduler_preemption_query_ &&
                        scheduler_preemption_query_(cpu.processor_id())) {
-                // Legacy thread_policy can change a runnable candidate's
-                // priority or realtime deadline. Check the complete scheduler
-                // ordering before the current HLE dispatch returns to guest
-                // code.
                 cpu.request_guest_preemption();
             }
         } else if (*message_id ==
                    mig_message_id(
                        xnu::mig::task::Routine::task_set_special_port)) {
-            // task_set_special_port operates on the task named by the
-            // destination port, which is commonly a newly forked child,
-            // not on launchd's own task.
             const auto& special_arguments =
                 xnu::mig::task::task_set_special_port_arguments;
             const auto which = memory_
@@ -468,12 +453,12 @@ bool CompatibilityKernel::dispatch_mach_rights_message(
                           port_name, *transferred_right)
                     : std::nullopt;
             if (!task_object || !target) {
-                kernel_result = 4; // KERN_INVALID_ARGUMENT
+                kernel_result = 4;
             } else if (!port || (port_name != xnu::ipc::null_name &&
                                     (!transferred_right ||
                                         *transferred_right !=
                                             xnu::ipc::Right::Send))) {
-                kernel_result = 20; // KERN_INVALID_CAPABILITY
+                kernel_result = 20;
             } else {
                 const auto previous =
                     shared_state_->task_special_ports.find(*task_object);
@@ -492,14 +477,10 @@ bool CompatibilityKernel::dispatch_mach_rights_message(
                         process_.pid, port_name, *transferred_right, true);
                 }
                 if (!consumed) {
-                    kernel_result = 17; // KERN_INVALID_RIGHT
+                    kernel_result = 17;
                 } else {
                     if (*port != 0U &&
                         (!previous_port || *previous_port != *port)) {
-                        // task_set_special_port takes a kernel-owned Send
-                        // reference. For MOVE_SEND the guest reference was
-                        // consumed above; for COPY_SEND it remains in the
-                        // caller's ipc_space.
                         retain_kernel_send_right_locked(*shared_state_, *port);
                     }
                     if (*port == 0U) {
@@ -579,8 +560,6 @@ bool CompatibilityKernel::dispatch_mach_rights_message(
             *message_id ==
                 mig_message_id(xnu::mig::task::Routine::semaphore_create)) &&
         registers[3] >= 40) {
-        // host_get_io_master, host_get_clock_service,
-        // task_get_special_port, and semaphore_create return a port.
         const auto which =
             *message_id ==
                     mig_message_id(
@@ -629,10 +608,6 @@ bool CompatibilityKernel::dispatch_mach_rights_message(
                     .value_or(0xffffffffU));
             if (policy <= 7 && initial_value >= 0) {
                 std::lock_guard mach_lock { shared_state_->mach_mutex };
-                // semaphore_create(task, ...) charges the semaphore to the
-                // named task, not necessarily to the caller. Keep the owner
-                // identity in sync with XNU so task teardown can terminate
-                // exactly its objects.
                 const auto owner = target_task_for_port(
                     *shared_state_, process_.pid, *remote_port);
                 if (owner) {
@@ -691,10 +666,6 @@ bool CompatibilityKernel::dispatch_mach_rights_message(
                             special->second)) {
                         port = special->second;
                     } else {
-                        // A task may have exited after installing a raw
-                        // special-port metadata entry. Never copy out a
-                        // capability for that dead object; remove the stale
-                        // slot while the Mach lock is held.
                         task->second.erase(special);
                         if (task->second.empty())
                             shared_state_->task_special_ports.erase(task);
@@ -719,16 +690,16 @@ bool CompatibilityKernel::dispatch_mach_rights_message(
             process_.bootstrap_port = port;
         }
         const std::array<std::uint32_t, 10> reply {
-            0x80000012U, // complex + MOVE_SEND_ONCE
+            0x80000012U,
             40,
             *local_port,
             0,
             0,
             *message_id + 100,
-            1, // one descriptor
-            port, // port descriptor name
+            1,
+            port,
             0,
-            0x00110000U, // MOVE_SEND disposition, port descriptor
+            0x00110000U,
         };
         for (std::size_t index = 0; index < reply.size(); ++index) {
             if (!memory_.write32(
@@ -744,4 +715,4 @@ bool CompatibilityKernel::dispatch_mach_rights_message(
     return false;
 }
 
-} // namespace shade
+}

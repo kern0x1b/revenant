@@ -39,10 +39,6 @@ public protocol PrimitiveButtonStyle {
     @ViewBuilder func makeBody(configuration: Configuration) -> Body
 }
 
-/// The port's own protocol for a primitive button style that wants to see the press. Apple's
-/// `PrimitiveButtonStyle` cannot ask for it — its configuration carries no `isPressed`, and a property
-/// wrapper on a style never resolves here, because the style is captured in a closure the reconciler does
-/// not walk — so the built-in styles adopt this and the node calls it when a style has it.
 protocol PressedButtonStyle {
     func pressedBody(configuration: PrimitiveButtonStyleConfiguration, pressed: Bool) -> any View
 }
@@ -55,12 +51,6 @@ public struct ButtonRole: Equatable {
     public static let close = ButtonRole(name: "close")
 }
 
-/// The glass of a button on iOS 26: how thick it is and how much of the background it lets through.
-/// iOS 6 has no live blur, so the thickness is what the fill is drawn with.
-/// The glass of a button on iOS 26: three settings and nothing else, as the interface declares it
-/// (`SwiftUICore.swiftinterface:32551` — `regular`, `clear`, `identity`, `Equatable`, no stored
-/// property and no initialiser). iOS 6 has no live blur, so a glass button is the release's own button
-/// drawn translucent, and `GlassEffect` below is the port's own measurement of that drawing.
 public struct Glass: Equatable {
     enum Kind: Equatable { case regular, clear, identity }
     let kind: Kind
@@ -70,8 +60,6 @@ public struct Glass: Equatable {
     public static var identity: Glass { Glass(.identity) }
 }
 
-/// How translucent a glass button is drawn, which is the port's own: iOS 6 has no blur to measure, so
-/// the thickness is the alpha the fill is painted with and the flags say what else the paint does.
 struct GlassEffect {
     enum Thickness { case regular, thick }
     var thickness: Thickness = .regular
@@ -114,9 +102,6 @@ public struct BorderedProminentButtonStyle: PrimitiveButtonStyle, PressedButtonS
     }
 }
 
-// The rest of the styles SwiftUI names for a button, drawn with what iOS 6 has: its title bar draws a bare
-// blue word, a link is blue and underlined, and a card is the rounded button of the release without the
-// fill gradient. Glass and the accessory bar have nothing to correspond to and say so in the journal.
 public struct LinkButtonStyle: PrimitiveButtonStyle, PressedButtonStyle {
 
     public init() {}
@@ -223,8 +208,6 @@ extension PrimitiveButtonStyle where Self == AccessoryBarActionButtonStyle {
     public static var accessoryBarAction: AccessoryBarActionButtonStyle { AccessoryBarActionButtonStyle() }
 }
 
-// A button as iOS 6 draws one: a vertical gradient, a lighter gloss over its upper half, a dark edge and lettering with a
-// small shadow. The bordered style is the grey rounded-rect button of the system, the prominent one the blue of a Done button.
 struct _BorderedChrome: View {
     let label: any View
     let prominent: Bool
@@ -396,8 +379,6 @@ public struct ProjectionTransform: Equatable {
 }
 
 
-// Apple's spelling of makeBody for the styles that also take the press, and the forwarding the node
-// calls: a style written the Apple way still gets its body, with the press the node has.
 extension DefaultButtonStyle {
     public func makeBody(configuration: PrimitiveButtonStyleConfiguration) -> some View { makeBody(configuration: configuration, pressed: false) }
     func pressedBody(configuration: PrimitiveButtonStyleConfiguration, pressed: Bool) -> any View { AnyView(makeBody(configuration: configuration, pressed: pressed)) }

@@ -28,12 +28,10 @@ namespace {
     [[nodiscard]] bool package_extension_order(
         const std::string& left, const std::string& right)
     {
-        // Match XNU's extension_cmp ordering. The order is not observable to
-        // callers, but retaining it keeps later HFS package lookups faithful.
         return left.size() < right.size();
     }
 
-} // namespace
+}
 
 bool CompatibilityKernel::dispatch_bsd_filesystem_control(
     Cpu& cpu, std::uint32_t number)
@@ -138,4 +136,4 @@ bool CompatibilityKernel::dispatch_bsd_filesystem_control(
     return true;
 }
 
-} // namespace shade
+}

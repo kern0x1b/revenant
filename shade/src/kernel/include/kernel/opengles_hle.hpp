@@ -40,9 +40,6 @@ class OpenGlesDispatchHle;
 class SurfaceStore;
 struct KernelSharedState;
 
-// High-level implementation of the public iPhoneOS 1.0 OpenGLES framework
-// ABI. It deliberately models EGL/GLES state rather than the PowerVR MBX
-// kernel command stream used by Apple's original implementation.
 class OpenGlesHle {
 public:
     OpenGlesHle(UserlandHleRegistry& registry,
@@ -157,9 +154,6 @@ private:
         std::array<ContextState::ArrayPointer, gles_abi::texture_unit_count>
             texture_arrays;
         GlesMatrix vertex_matrix;
-        // Legacy Apple shaders encode a per-unit affine texture transform as
-        // (scale.x, scale.y, offset.x, offset.y) in texmatN. Some drivers use
-        // the older scale-only texscaleN spelling.
         std::array<std::array<float, 4>, gles_abi::texture_unit_count>
             texture_transforms = [] {
                 std::array<std::array<float, 4>, gles_abi::texture_unit_count> transforms;
@@ -206,12 +200,9 @@ private:
         const ProgrammableDrawState* programmable = nullptr) const;
     [[nodiscard]] std::optional<ProgrammableDrawState> programmable_draw_state(
         const ContextState& context) const;
-    // The vertices a draw call names, in order.
     [[nodiscard]] std::optional<std::vector<std::uint32_t>>
     collect_vertex_indices(UserlandHleCall& call, const ContextState& context,
         bool indexed, std::int32_t first, std::int32_t count);
-    // A draw of a program that runs in the interpreter: its vertex shader's
-    // results and the fragment shader to shade the triangles with.
     struct ShadedDraw {
         std::vector<GlesShadedVertex> vertices;
         std::vector<GlesShadedVarying> varyings;
@@ -298,4 +289,4 @@ private:
     std::shared_ptr<SceneCoordinator> scene_coordinator_;
 };
 
-} // namespace shade
+}

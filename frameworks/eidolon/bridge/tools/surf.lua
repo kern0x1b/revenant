@@ -1,19 +1,8 @@
--- surf.lua: the 26.2 SwiftUI + SwiftUICore surface for the types this band owns, one line per declaration.
---
---     xmake l surf.lua TYPES-FILE > surface-26.2.tsv
---
--- Reads the SDK's own `.swiftinterface` files - SwiftUI and SwiftUICore, the two halves Apple split the surface between -
--- from $APPLE_26_SDK, which defaults to the charon SDK 26.2 checkout under $HOME. Braces are counted the way ours.lua
--- counts them, by lib/braces.lua, so a depth means the same thing on both sides. gaps.lua then says what of it this
--- tree does not declare.
-
 local text = import("lib.text", {rootdir = path.join(os.scriptdir(), "..", ".."), anonymous = true})
 local owners = import("lib.owners", {rootdir = path.join(os.scriptdir(), "..", ".."), anonymous = true})
 
 local KEYWORDS = {"struct", "class", "enum", "protocol", "actor", "typealias"}
 
--- the first name a type keyword is followed by, the keyword standing on a word boundary:
---     \b(?:struct|class|enum|protocol|actor|typealias)\s+(\w+)
 local function type_name(body)
     for at = 1, #body do
         if text.boundary(body, at) then
@@ -31,8 +20,6 @@ local function type_name(body)
     return nil
 end
 
--- the declaration a body line holds, the patterns in the order the Python tried them, first match wins:
---     \bsubscript\b, \binit\b, \bfunc (\w+), \bvar (\w+), \bcase (\w+), the type keywords
 local function declaration(body)
     if text.has_word(body, "subscript") then
         return "subscript", "subscript"
@@ -61,7 +48,6 @@ end
 
 local function scan(file, want, out, seen)
     local lines = text.split(io.readfile(file), "\n")
-    -- the @attribute line above the declaration: the one the last @-line set, and "" when none
     local pending = ""
     for _, row in ipairs(owners.walk(lines)) do
         local s = text.strip(row.line)
@@ -72,8 +58,6 @@ local function scan(file, want, out, seen)
                 pending = s
             end
         else
-            -- a type of ours, or a type nested in one: matched on the first component, and the owner keeps the whole
-            -- path, so a member of `Image.ResizingMode` is never filed under `Image`
             local first = text.partition(row.owner, ".")
             if want[first] then
                 if string.find(pending, "@available%(iOS,%s*unavailable") then

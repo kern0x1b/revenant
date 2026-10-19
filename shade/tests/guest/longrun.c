@@ -1,5 +1,3 @@
-// longrun.c: stays for the given number of seconds, printing when it starts and ends, so a
-// runner started with it shows what the rest of the boot does while a test is still running.
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>

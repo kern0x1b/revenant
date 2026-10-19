@@ -35,7 +35,7 @@ namespace {
         destination.insert(destination.end(), source.begin(), source.end());
     }
 
-} // namespace
+}
 
 DarwinPsynchRuntime::QueueKey DarwinPsynchRuntime::queue_key(
     std::uint32_t process_id, std::uint32_t address, std::uint32_t flags,
@@ -122,9 +122,6 @@ DarwinPsynchRuntime::WakeOutcome DarwinPsynchRuntime::drop_mutex_locked(
                                        candidate.sequence == next_sequence;
                             });
     if (waiter == queue.waiters.end() && !queue.waiters.empty()) {
-        // The guest sequence can advance past an interrupted waiter. XNU
-        // redrives that case by sequence; selecting the oldest remaining
-        // waiter preserves progress without granting more than one mutex.
         waiter = queue.waiters.begin();
     }
     if (waiter != queue.waiters.end()) {
@@ -224,8 +221,6 @@ DarwinPsynchRuntime::WakeOutcome DarwinPsynchRuntime::signal_condition(
                    sequence_not_after(signal_sequence, candidate.sequence);
         });
     if (waiter == queue.waiters.end() && target) {
-        // Darwin converts a failed directed signal into a bounded broadcast to
-        // avoid starving a waiter whose thread port raced its queue insertion.
         waiter = std::find_if(queue.waiters.begin(), queue.waiters.end(),
             [&](const auto& candidate) {
                 return candidate.kind == DarwinPsynchWaitKind::Condition &&
@@ -515,4 +510,4 @@ void DarwinPsynchRuntime::clear_process(std::uint32_t process_id)
     }
 }
 
-} // namespace shade
+}

@@ -28,7 +28,7 @@ namespace {
         } };
     }
 
-} // namespace
+}
 
 WifiState::WifiState()
     : WifiState { default_access_points() }
@@ -147,9 +147,6 @@ bool WifiState::associate_locked(std::string_view ssid, bool remember)
     associated_index_ =
         static_cast<std::size_t>(std::distance(access_points_.begin(), found));
     link_state_ = WifiLinkState::Associated;
-    // The virtual network is always locally available. DHCP completion is
-    // deterministic so the 2007 SystemConfiguration client does not depend on
-    // host Wi-Fi hardware or timing.
     ipv4_ = default_ipv4_configuration();
     link_state_ = WifiLinkState::Configured;
     return true;
@@ -187,4 +184,4 @@ WifiIpv4Configuration WifiState::default_ipv4_configuration()
     return result;
 }
 
-} // namespace shade
+}

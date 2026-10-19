@@ -24,4 +24,4 @@ namespace shade::surface_transport {
                : core_surface_client_buffer;
 }
 
-} // namespace shade::surface_transport
+}

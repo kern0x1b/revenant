@@ -1,14 +1,3 @@
-// smc.c: guest regression test for translated code that is rewritten while it may be running.
-//
-// 1. Two views of one page: a file is mapped twice, once writable and once
-//    executable. Code written through the first view and invalidated through
-//    the second must be what the second view runs, however often it changes.
-// 2. Rewriting from a signal handler: the handler patches the function it
-//    interrupted the caller of, calls it, and returns; the caller then runs the
-//    new code, and a handler that ends by taking execute permission away and
-//    giving it back leaves nothing stale behind.
-//
-// Prints one line per part and exits with the number of failures.
 #include <libkern/OSCacheControl.h>
 #include <fcntl.h>
 #include <signal.h>
@@ -21,7 +10,6 @@
 
 typedef int (*value_fn)(void);
 
-// ARM: mov r0, #N ; bx lr
 static void store_value(volatile uint32_t *code, int value)
 {
     code[0] = 0xe3a00000U | (uint32_t)value;

@@ -35,7 +35,7 @@ std::string message_of(Kind kind)
         { kind, 1, pc, address });
 }
 
-} // namespace
+}
 
 int main()
 {

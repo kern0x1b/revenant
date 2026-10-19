@@ -19,9 +19,6 @@ enum class JitWorkActivityKind : std::uint8_t {
     Worker,
 };
 
-// One simulator-core change signal shared by every runtime. Demand recorders
-// publish directly to it, while frontend lifecycle adapters hold activities.
-// Sampling is O(1) regardless of the number of Guest processes or executors.
 class JitWorkObservationSignal final
     : public std::enable_shared_from_this<JitWorkObservationSignal> {
 public:
@@ -104,4 +101,4 @@ private:
     std::atomic_size_t worker_count_ { };
 };
 
-} // namespace shade
+}

@@ -51,10 +51,6 @@ struct HostFileWatchStats {
     std::uint64_t confirmed_changes { };
 };
 
-// A bounded, serialized host filesystem watcher. Notifications are only dirty
-// hints: a file is published after two matching descriptor observations with
-// a stable generation and content identity. All confirmed changes enter the
-// same GuestFileGenerationRegistry used by guest VFS operations.
 class HostFileWatcher {
 public:
     explicit HostFileWatcher(
@@ -64,18 +60,12 @@ public:
     HostFileWatcher(const HostFileWatcher&) = delete;
     HostFileWatcher& operator=(const HostFileWatcher&) = delete;
 
-    // Polls the non-blocking notification queue and returns immediately.
     void poll();
 
-    // Installs recursive watches incrementally. The caller supplies an entry
-    // budget and a strict wall-clock budget. The caller should run this only
-    // after the first frame in idle/background maintenance windows.
     void advance_registration(std::size_t maximum_entries = 256,
         std::chrono::steady_clock::duration budget = std::chrono::milliseconds {
             1 });
 
-    // Publishes only stable paths. Dirty subtrees from an overflow are drained
-    // only when requested by an idle/background caller.
     [[nodiscard]] HostFileWatchDrain publish_stable(
         HostResourceController& host_resources,
         GuestFileGenerationRegistry& registry, std::size_t maximum_events = 64,
@@ -168,4 +158,4 @@ private:
     bool overflow_ { false };
 };
 
-} // namespace shade
+}

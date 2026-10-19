@@ -22,7 +22,7 @@ namespace {
         return end > start && end <= address_space_end;
     }
 
-} // namespace
+}
 
 void VmMap::split_at(std::uint64_t point)
 {
@@ -195,4 +195,4 @@ std::size_t VmMap::page_count(std::uint32_t page_size) const
     return static_cast<std::size_t>(count);
 }
 
-} // namespace shade
+}

@@ -124,11 +124,6 @@ static void reachability_callback(
 
 static void run_loop_until_callback(volatile int* result)
 {
-    // SCDynamicStore first handles its CFMachPort source, which signals a
-    // second user source. With returnAfterSourceHandled enabled those are
-    // deliberately two run-loop turns. A few bounded turns also cover the
-    // equivalent reachability source chain without making the probe hang on a
-    // regression.
     const unsigned int maximum_turns = 16;
     for (unsigned int turn = 0; turn < maximum_turns && *result == 0; ++turn)
         (void)CFRunLoopRunInMode(kCFRunLoopDefaultMode, 2.0, 1);
@@ -197,9 +192,6 @@ static int run_dynamic_store_probe(CFRunLoopRef run_loop)
 
 static int run_reachability_probe(CFRunLoopRef run_loop, const char* node_name)
 {
-    // Scheduling a name target starts the firmware's asynchronous resolver.
-    // Its completion changes the target from first-resolution-pending and
-    // therefore exercises the actual reachability callback contract.
     SCNetworkReachabilityContext context = { 0, (void*)0, (void*)0, (void*)0,
         (void*)0 };
     SCNetworkReachabilityRef target =

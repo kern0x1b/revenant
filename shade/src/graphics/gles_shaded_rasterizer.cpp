@@ -33,8 +33,6 @@ namespace {
         return (x - a.x) * (b.y - a.y) - (y - a.y) * (b.x - a.x);
     }
 
-    // Top-left fill rule: a pixel centre exactly on an edge belongs to the
-    // triangle only for an edge that runs up or leftwards.
     bool includes_boundary(const Vertex& a, const Vertex& b, float orientation)
     {
         const auto dx = orientation * (b.x - a.x);
@@ -116,9 +114,6 @@ namespace {
         return result;
     }
 
-    // What texture2D reads. A texture that is missing or has no image reads
-    // as opaque black, as GLSL ES defines. Without mipmaps the footprint is
-    // taken as a magnification, so the magnification filter applies.
     class ShaderTextures final : public glsl::TextureAccess {
     public:
         explicit ShaderTextures(const GlesRasterState& state)
@@ -172,7 +167,6 @@ namespace {
         std::string& error;
     };
 
-    // False when the shader failed to run, which ends the draw.
     bool shade_pixel(Pass& pass, std::size_t offset, const Color& coordinate,
         bool front_facing, const std::array<float, 3>& weights,
         const std::array<Vertex, 3>& triangle,
@@ -227,8 +221,6 @@ namespace {
                 fragment.values(*pass.outputs.fragment_color)[0];
             std::copy_n(value.v.begin(), 4, source.begin());
         }
-        // A shader writes gl_FragColor or gl_FragData[0], never both; the one
-        // it did not write stays zero.
         if (pass.outputs.fragment_data != nullptr &&
             std::all_of(source.begin(), source.end(),
                 [](float component) { return component == 0.0F; })) {
@@ -277,8 +269,6 @@ namespace {
                 (state.cull_mode == gles_abi::front && front_facing) ||
                 (state.cull_mode == gles_abi::back && !front_facing)))
             return true;
-        // The vertices are the guest's numbers: NaN, infinity and values far
-        // beyond the frame must not reach a float to int conversion.
         for (const auto& vertex : triangle) {
             if (!std::isfinite(vertex.x) || !std::isfinite(vertex.y))
                 return true;
@@ -306,7 +296,6 @@ namespace {
             for (int x = minimum_x; x <= maximum_x; ++x) {
                 const auto sample_x = static_cast<float>(x) + 0.5F;
                 const auto sample_y = static_cast<float>(y) + 0.5F;
-                // The row a GL window coordinate counts up from.
                 const auto guest_y =
                     state.render_target_inverted_vertical
                         ? sample_y
@@ -341,8 +330,6 @@ namespace {
                     continue;
                 const std::array<float, 3> weights { edge_values[0] / area,
                     edge_values[1] / area, edge_values[2] / area };
-                // Varyings are interpolated in homogeneous space, so a quad
-                // split in two triangles does not bend at the diagonal.
                 const auto inverse_w = triangle[0].inverse_w * weights[0] +
                                        triangle[1].inverse_w * weights[1] +
                                        triangle[2].inverse_w * weights[2];
@@ -363,7 +350,7 @@ namespace {
         return true;
     }
 
-} // namespace
+}
 
 bool layout_varyings(const glsl::Module& vertex, const glsl::Module& fragment,
     GlesVaryingLayout& layout, std::string& error)
@@ -446,7 +433,6 @@ bool GlesShadedRasterizer::draw(DisplayFrame& frame,
     }
     if (state.viewport_width == 0 || state.viewport_height == 0)
         return true;
-    // A vertex carries every float the varyings read.
     std::uint64_t needed = 0;
     for (const auto& binding : varyings) {
         const auto size = static_cast<std::uint64_t>(binding.offset) +
@@ -516,4 +502,4 @@ bool GlesShadedRasterizer::draw(DisplayFrame& frame,
     return true;
 }
 
-} // namespace shade
+}

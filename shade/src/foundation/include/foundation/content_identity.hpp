@@ -31,9 +31,6 @@ struct ContentIdentity {
     [[nodiscard]] std::string hex() const;
 };
 
-// Portable artifact identity is content-addressed. These aliases make the
-// two semantic roles explicit at call sites while retaining the stable
-// SHA-256 representation used by catalogs and on-disk artifact records.
 using PortableExecutableIdentity = ContentIdentity;
 using PortableLayoutIdentity = ContentIdentity;
 
@@ -52,4 +49,4 @@ struct ContentIdentityHash {
     std::optional<std::uint64_t> byte_count = std::nullopt,
     const std::function<bool()>& cancellation_check = { });
 
-} // namespace shade
+}

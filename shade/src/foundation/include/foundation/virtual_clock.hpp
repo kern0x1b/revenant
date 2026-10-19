@@ -12,9 +12,6 @@
 
 namespace shade {
 
-// Process-shared hardware clock model. The monotonic counter drives scheduler
-// waits and never changes discontinuously; the calendar is a separately
-// adjustable RTC offset that advances from the same counter.
 class VirtualClock {
 public:
     static constexpr std::uint64_t default_initial_time = 1'000'000;
@@ -26,10 +23,8 @@ public:
 
     [[nodiscard]] std::uint64_t now() const;
     [[nodiscard]] std::uint64_t wall_time() const;
-    // Calendar time at monotonic zero; follows RTC adjustments atomically.
     [[nodiscard]] std::uint64_t boot_time() const;
     void set_wall_time(std::uint64_t unix_time_nanoseconds);
-    // Retained for deterministic fixtures that seed a known calendar value.
     void synchronize_wall_time(std::uint64_t unix_time_nanoseconds);
     std::uint64_t tick(std::uint64_t increment);
     void advance_to(std::uint64_t deadline);
@@ -39,4 +34,4 @@ private:
     std::atomic_int64_t wall_time_offset_;
 };
 
-} // namespace shade
+}

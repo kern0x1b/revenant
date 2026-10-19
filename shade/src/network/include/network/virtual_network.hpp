@@ -45,4 +45,4 @@ inline constexpr Ipv4Address dns_proxy_address { std::byte { 10 },
     std::byte { 0 }, std::byte { 2 }, std::byte { 3 } };
 inline constexpr std::uint16_t dns_port = 53;
 
-} // namespace shade::virtual_network
+}

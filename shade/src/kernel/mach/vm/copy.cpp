@@ -23,16 +23,12 @@
 namespace shade {
 namespace {
 
-    // XNU's mach_vm subsystem omits vm_region from the leading routine
-    // sequence, so mach_vm_copy is 4807 rather than vm_map's 3808. ARM32 keeps
-    // the same source/size/destination request and simple-reply contract used
-    // by vm_copy.
     constexpr std::uint32_t mach_vm_copy_identifier = 4807U;
     constexpr std::uint32_t vm_copy_request_size =
         xnu::mig::vm_map::vm_copy_arguments[3].request_offset +
         darwin::mig_wire::word_size;
 
-} // namespace
+}
 
 bool CompatibilityKernel::dispatch_mach_vm_copy_message(
     Cpu& cpu, const MachMessageRequest& request)
@@ -83,8 +79,6 @@ bool CompatibilityKernel::dispatch_mach_vm_copy_message(
         return finish(kern_invalid_address);
     }
 
-    // Read into an independent buffer before overwriting the destination.
-    // This preserves XNU vm_map_copyin/vm_map_copy_overwrite overlap semantics.
     if (!memory_.copy_in(*destination, *bytes))
         return finish(kern_invalid_address);
 
@@ -97,4 +91,4 @@ bool CompatibilityKernel::dispatch_mach_vm_copy_message(
     return finish(kern_success);
 }
 
-} // namespace shade
+}

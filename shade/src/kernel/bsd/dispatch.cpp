@@ -49,70 +49,62 @@ namespace {
     std::optional<std::uint32_t> canonical_no_cancel_syscall(
         std::uint32_t number)
     {
-        // Darwin 9 adds non-cancellation syscall entry points for libSystem's
-        // pthread cancellation boundary. The kernel operation is otherwise the
-        // same as the cancellable BSD syscall, so reuse the existing
-        // compatibility path.
         switch (number) {
-        case 396: // read_nocancel
+        case 396:
             return darwin::syscall::read;
-        case 397: // write_nocancel
+        case 397:
             return darwin::syscall::write;
-        case 398: // open_nocancel
+        case 398:
             return darwin::syscall::open;
-        case 399: // close_nocancel
+        case 399:
             return darwin::syscall::close;
-        case 400: // wait4_nocancel
+        case 400:
             return 7U;
-        case 401: // recvmsg_nocancel
+        case 401:
             return darwin::syscall::receive_message;
-        case 402: // sendmsg_nocancel
+        case 402:
             return darwin::syscall::send_message;
-        case 403: // recvfrom_nocancel
+        case 403:
             return darwin::syscall::receive_from;
-        case 404: // accept_nocancel
+        case 404:
             return darwin::syscall::accept;
-        case 405: // msync_nocancel
+        case 405:
             return darwin::syscall::memory_synchronize;
-        case 406: // fcntl_nocancel
+        case 406:
             return darwin::syscall::fcntl;
-        case 407: // select_nocancel
+        case 407:
             return darwin::syscall::select;
-        case 417: // poll_nocancel
+        case 417:
             return darwin::syscall::poll;
-        case 420: // sem_wait_nocancel
+        case 420:
             return darwin::syscall::posix_semaphore_wait;
-        case 408: // fsync_nocancel
+        case 408:
             return darwin::syscall::synchronize_file;
-        case 409: // connect_nocancel
+        case 409:
             return darwin::syscall::connect;
-        case 410: // sigsuspend_nocancel
+        case 410:
             return 111U;
-        case 412: // writev_nocancel
+        case 412:
             return darwin::syscall::write_vector;
-        case 413: // sendto_nocancel
+        case 413:
             return darwin::syscall::send_to;
-        case 414: // pread_nocancel
+        case 414:
             return 153U;
-        case 415: // pwrite_nocancel
+        case 415:
             return 154U;
-        case 421: // aio_suspend_nocancel
+        case 421:
             return darwin::syscall::aio_suspend;
-        case 423: // __semwait_signal_nocancel
+        case 423:
             return darwin::syscall::semaphore_wait_signal;
         default:
             return std::nullopt;
         }
     }
 
-} // namespace
+}
 
 void CompatibilityKernel::dispatch_bsd_nosys(Cpu& cpu, bool send_sigsys)
 {
-    // XNU's nosys path can deliver SIGSYS before returning ENOSYS. The
-    // selected ABI policy determines whether signal delivery is enabled.
-    // Set the ABI result first so a pending/default signal cannot leave stale
-    // r0 or the carry bit visible to the guest.
     bsd_error(cpu, bsd_support::not_implemented);
     if (!send_sigsys)
         return;
@@ -131,17 +123,14 @@ void CompatibilityKernel::dispatch_bsd(Cpu& cpu, std::uint32_t number)
         return;
 
     switch (number) {
-    case 441: // guarded_open_np
-    case 442: // guarded_close_np
-    case 443: // guarded_kqueue_np
+    case 441:
+    case 442:
+    case 443:
         dispatch_bsd_guarded_file(cpu, number);
         return;
-    case 322: { // VersionSensitive nosys/iopolicysys collision.
+    case 322: {
         if (!darwin_abi_route_supported(legacy_iopolicysys_route,
                 shared_state_->darwin_abi.abi_epoch)) {
-            // The pre-disk-policy ABI reserves this syscall slot as nosys.
-            // Return ENOSYS without entering trace_unknown(): expected nosys is not
-            // a fatal ABI violation.
             dispatch_bsd_nosys(cpu,
                 shared_state_->darwin_abi.capabilities.send_sigsys);
             return;
@@ -152,10 +141,6 @@ void CompatibilityKernel::dispatch_bsd(Cpu& cpu, std::uint32_t number)
         constexpr std::uint32_t iopol_type_disk = 0;
         constexpr std::uint32_t iopol_scope_process = 0;
         constexpr std::uint32_t iopol_scope_thread = 1;
-        // The four-policy disk ABI defines DEFAULT/NORMAL/PASSIVE/THROTTLE
-        // (0..3). Extended disk-policy ABIs add values and additional iotypes;
-        // keep those newer values unimplemented instead of accidentally
-        // applying the old policy state to a different ABI.
         constexpr std::uint32_t iopol_policy_max = 3;
         constexpr std::uint32_t iopol_policy_offset =
             2U * sizeof(std::uint32_t);
@@ -213,17 +198,13 @@ void CompatibilityKernel::dispatch_bsd(Cpu& cpu, std::uint32_t number)
         }
     }
         return;
-    case 365: // stack_snapshot, Darwin 11 ARM32 legacy diagnostic ABI
+    case 365:
         if (shared_state_->darwin_abi.stack_snapshot_abi ==
             DarwinStackSnapshotAbi::Unsupported) {
             dispatch_bsd_nosys(cpu,
                 shared_state_->darwin_abi.capabilities.send_sigsys);
             return;
         }
-        // XNU gates stack snapshots on the caller's superuser credential.
-        // The emulator has no debugger/KDP stackshot backend, so preserve the
-        // public failure contract without touching the guest buffer. UIKit
-        // and Preferences treat this diagnostic failure as optional.
         bsd_error(cpu, darwin::error::permission_denied);
         return;
     case 0:
@@ -251,7 +232,7 @@ void CompatibilityKernel::dispatch_bsd(Cpu& cpu, std::uint32_t number)
     case darwin::syscall::get_thread_identity:
     case kernel_bsd::interval_timer::set_syscall:
     case kernel_bsd::interval_timer::get_syscall:
-    case 244: // posix_spawn
+    case 244:
     case 96:
     case 116:
     case darwin::syscall::get_resource_usage:
@@ -294,9 +275,9 @@ void CompatibilityKernel::dispatch_bsd(Cpu& cpu, std::uint32_t number)
     case darwin::syscall::posix_semaphore_get_value:
         dispatch_bsd_posix_semaphore(cpu, number);
         return;
-    case 111: // sigsuspend
-    case 53:  // sigaltstack
-    case 184: // sigreturn
+    case 111:
+    case 53:
+    case 184:
     case darwin::syscall::pthread_kill:
     case darwin::syscall::kill:
         dispatch_bsd_signal(cpu, number);
@@ -342,7 +323,7 @@ void CompatibilityKernel::dispatch_bsd(Cpu& cpu, std::uint32_t number)
     case 201:
     case 196:
     case 199:
-    case 216: // open_dprotected_np
+    case 216:
     case 220:
     case 221:
     case 344:
@@ -409,8 +390,6 @@ void CompatibilityKernel::dispatch_bsd(Cpu& cpu, std::uint32_t number)
             dispatch_bsd_psynch(cpu, number);
             return;
         }
-        // Pre-psynch ARM32 kernels use these two slots for the legacy shared
-        // region ABI. All other entries retain their audited nosys behavior.
         if (number == 299U || number == 300U) {
             static_cast<void>(dispatch_bsd_shared_region(cpu, number));
         } else {
@@ -418,7 +397,7 @@ void CompatibilityKernel::dispatch_bsd(Cpu& cpu, std::uint32_t number)
                 shared_state_->darwin_abi.capabilities.send_sigsys);
         }
         return;
-    case 438: // shared_region_map_and_slide_np
+    case 438:
         if (shared_state_->darwin_abi.shared_region_abi !=
             DarwinSharedRegionAbi::FixedMappingsWithSlideInfoV1) {
             dispatch_bsd_nosys(cpu,
@@ -496,4 +475,4 @@ void CompatibilityKernel::dispatch_bsd(Cpu& cpu, std::uint32_t number)
     }
 }
 
-} // namespace shade
+}

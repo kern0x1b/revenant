@@ -60,7 +60,6 @@ namespace kernel_iokit::baseband {
     [[nodiscard]] std::optional<ServiceKind> matching_service(
         std::span<const std::byte> matching);
 
-    // The caller holds KernelSharedState::mach_mutex.
     [[nodiscard]] std::uint32_t ensure_service_locked(
         KernelSharedState& state, ServiceKind profile);
 
@@ -72,5 +71,5 @@ namespace kernel_iokit::baseband {
         std::uint32_t scalar_output_capacity,
         std::uint32_t inband_output_capacity = 0);
 
-} // namespace kernel_iokit::baseband
-} // namespace shade
+}
+}

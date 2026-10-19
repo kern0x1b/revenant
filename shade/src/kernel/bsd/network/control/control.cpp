@@ -23,4 +23,4 @@ std::optional<std::string_view> name_for_identifier(std::uint32_t identifier)
     return std::nullopt;
 }
 
-} // namespace shade::bsd::kernel_control
+}

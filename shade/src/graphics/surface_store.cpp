@@ -113,7 +113,7 @@ namespace {
         ranges = std::move(normalized);
     }
 
-} // namespace
+}
 
 class SurfaceTransportLease {
 public:
@@ -683,22 +683,12 @@ bool SurfaceStore::synchronize_for_cpu(AddressSpace& memory, std::uint32_t id,
     const auto surface = host_surface(id);
     if (!surface || surface->gpu_generation() <= surface->cpu_generation())
         return true;
-    // Real devices expose one shared surface allocation. ReadOnly|AvoidSync
-    // can therefore consume producer-complete pixels without an extra cache
-    // operation. Our native renderer has a separate GPU image, so skipping
-    // materialization here would expose stale Guest bytes (for example to the
-    // firmware snapshot encoder). Preserve AvoidSync only for writable
-    // ownership, where the caller did not request readable contents.
     if (options.avoid_sync && !options.read_only)
         return true;
 
     const auto sync_state = shared_sync_state(id);
     if (!sync_state)
         return false;
-    // Both synchronization directions serialize the shared guest snapshot
-    // before touching the host surface.  Keeping one lock order avoids a
-    // GPU-readback/guest-flush deadlock when different guest tasks use the
-    // same CoreSurface concurrently.
     std::unique_lock sync_lock { sync_state->mutex };
 
     std::optional<HostRectangle> damage;
@@ -751,9 +741,6 @@ bool SurfaceStore::synchronize_from_guest(
     if (!sync_state)
         return false;
     std::unique_lock sync_lock { sync_state->mutex };
-    // CoreSurface/IOSurface consumers call this at the firmware's CPU-to-GPU
-    // synchronization boundary. Publish the completed Guest writes once per
-    // page here so untracked shared pixels can retain direct JIT stores.
     if (!memory.publish_write_generation(
             backing->base, backing->allocation_size)) {
         return false;
@@ -878,7 +865,6 @@ bool SurfaceStore::synchronize_from_guest(
                     region.rectangle.y + static_cast<std::int32_t>(row),
                     x - begin, 1
                 };
-                // Regions remain alive and unchanged through both copies.
                 run.pixels = std::span { region.pixels }.subspan(
                     source_row + begin, x - begin);
                 changed_runs.push_back(std::move(run));
@@ -1183,4 +1169,4 @@ bool SurfaceStore::write_argb_region_to_guest(AddressSpace& memory,
     return true;
 }
 
-} // namespace shade
+}

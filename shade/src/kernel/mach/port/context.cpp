@@ -25,9 +25,6 @@
 namespace shade {
 namespace {
 
-    // Context accessors extend the base mach_port subsystem used for the
-    // adapter table. MIG represents the context as mach_vm_address_t, even
-    // when the public ARM32 wrapper exposes a natural-sized context pointer.
     constexpr std::uint32_t mach_port_get_context_identifier = 3228U;
     constexpr std::uint32_t mach_port_set_context_identifier = 3229U;
     constexpr std::uint32_t get_request_size = 36U;
@@ -35,7 +32,7 @@ namespace {
     constexpr std::uint32_t name_offset = 32U;
     constexpr std::uint32_t context_offset = 36U;
 
-} // namespace
+}
 
 bool CompatibilityKernel::dispatch_mach_port_context_message(
     Cpu& cpu, const MachMessageRequest& request)
@@ -136,4 +133,4 @@ bool CompatibilityKernel::dispatch_mach_port_context_message(
     return true;
 }
 
-} // namespace shade
+}

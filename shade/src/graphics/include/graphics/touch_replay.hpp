@@ -16,8 +16,6 @@
 
 namespace shade {
 
-// Host-time replay keeps UI automation independent of guest scheduling speed.
-// Each text line is: <delay-ms> <down|move|up|cancel> <x> <y>.
 class TouchReplay {
 public:
     explicit TouchReplay(const std::filesystem::path& path);
@@ -43,4 +41,4 @@ private:
     bool started_ { };
 };
 
-} // namespace shade
+}

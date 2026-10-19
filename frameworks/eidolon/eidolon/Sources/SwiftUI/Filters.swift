@@ -3,9 +3,6 @@ import CoreGraphics
 import CoreImage
 import OpenGLES
 
-// The colour filters of SwiftUI over what Core Image of iOS 6 can do. A filter here is a filter of a picture: the
-// subtree is drawn, the picture goes through the filter, and the picture is what the screen shows. CoreAnimation of this
-// release lays no filter over a layer as it draws, so this is the way these modifiers get an effect at all.
 struct ColorFilter {
     enum Kind: Equatable {
         case brightness(Double), contrast(Double), saturation(Double), grayscale(Double)
@@ -13,8 +10,6 @@ struct ColorFilter {
     }
     var kinds: [Kind] = []
     var isIdentity: Bool { kinds.isEmpty }
-    // a blur softens the edges of what it is given, so the unblurred content behind it would show through: the picture
-    // covers the content rather than lying over it
     var softensEdges: Bool { kinds.contains { if case .blur = $0 { return true }; return false } }
 
     func appending(_ kind: Kind) -> ColorFilter {
@@ -23,7 +18,6 @@ struct ColorFilter {
         return copy
     }
 
-    // the last of a kind, so that a modifier applied twice is the one that counts, as in SwiftUI
     private func last(_ matches: (Kind) -> Bool) -> Kind? {
         var found: Kind?
         for kind in kinds where matches(kind) { found = kind }
@@ -33,10 +27,7 @@ struct ColorFilter {
     func filtered(_ image: UIImage) -> UIImage? {
         guard let cgImage = image.cgImage else { return nil }
         var input = CIImage(cgImage: cgImage)
-        // what was given is what the picture is cut back to: a blur widens the extent of what it produces by its radius
-        // on every side, and the picture belongs to the view, not to the blur's margin
         let extent = input.extent
-        // the three controls of a colour, as CIColorControls has them; a full grayscale is its saturation at zero
         var controls: [String: Any] = [:]
         if case .grayscale(let amount)? = last({ if case .grayscale = $0 { return true }; return false }) {
             controls["inputSaturation"] = 1 - min(max(amount, 0), 1)
@@ -61,16 +52,12 @@ struct ColorFilter {
         if case .blur(let radius)? = last({ if case .blur = $0 { return true }; return false }), radius > 0 {
             input = passing("CIGaussianBlur", through: input, ["inputRadius": radius]) ?? input
         }
-        // a filter may have moved the picture (a blur widens it by its radius on every side), so the part of what came out
-        // that belongs to the view is found by where the picture started against where it now is
         let produced = input.extent
         let from = CGRect(x: extent.minX - produced.minX, y: extent.minY - produced.minY, width: extent.width, height: extent.height)
         guard let out = ColorFilter.context.createCGImage(input, from: from) else { return nil }
         return UIImage(cgImage: out, scale: image.scale, orientation: image.imageOrientation)
     }
 
-    // Core Image of this release takes its input and its values by key: -[CIFilter outputImage] is what it produces, and
-    // applyingFilter(_:parameters:) of later systems is the same thing with a newer name.
     private func passing(_ name: String, through image: CIImage, _ values: [String: Any] = [:]) -> CIImage? {
         guard let filter = CIFilter(name: name) else { return nil }
         filter.setValue(image, forKey: "inputImage")
@@ -78,9 +65,6 @@ struct ColorFilter {
         return filter.outputImage
     }
 
-    // A turn of the colour wheel turns the hue of every pixel and leaves its saturation and its value as they were. A
-    // colour matrix cannot do that - it is a linear map and a turn of the hue is not one - and this release's Core Image
-    // has no CIHueRotate, so the turn is made over the pixels of the picture, in the space the picture is in.
     private func hueRotated(_ image: CGImage, by radians: Double) -> CGImage? {
         let width = image.width, height = image.height
         guard width > 0, height > 0 else { return nil }
@@ -104,8 +88,6 @@ struct ColorFilter {
         return context.makeImage()
     }
 
-    // HSV, the way a colour wheel is: the value is the largest channel, the saturation how far the smallest is from it,
-    // and the hue which of the three it is between. A colour with no saturation has no hue to turn.
     private static func turnHue(_ red: Double, _ green: Double, _ blue: Double, by turn: Double) -> (Double, Double, Double) {
         let value = max(red, green, blue)
         let chroma = value - min(red, green, blue)
@@ -134,8 +116,6 @@ struct ColorFilter {
         }
     }
 
-    // The luminance of a colour in the alpha channel and the colour itself as it was: the weights are those of sRGB, the
-    // ones a release that has no CILuminanceToAlpha still spells out as a matrix.
     private func luminanceToAlpha(_ image: CIImage) -> CIImage? {
         passing("CIColorMatrix", through: image, [
             "inputRVector": CIVector(x: 1, y: 0, z: 0, w: 0),
@@ -145,7 +125,6 @@ struct ColorFilter {
         ])
     }
 
-    // what a row of a colour matrix is multiplied by: a diagonal is a colour multiplied over the picture
     private func multiply(_ image: CIImage, by color: UIColor) -> CIImage? {
         var red: CGFloat = 0, green: CGFloat = 0, blue: CGFloat = 0, alpha: CGFloat = 0
         color.getRed(&red, green: &green, blue: &blue, alpha: &alpha)
@@ -157,12 +136,6 @@ struct ColorFilter {
         ])
     }
 
-    // Swift gives +[CIContext contextWithOptions:] and -[CIContext initWithOptions:] the same spelling,
-    // CIContext(options:), and only one of the two is in iOS 6's Core Image - so the class method is asked whether it is
-    // there and called by its own name when it is, which is the one this release has.
-    // Core Image draws on the GPU through an EAGLContext it makes itself. Where OpenGL ES cannot make one (the emulator
-    // has none), a context made with no options does not fail: Core Image writes through a null pointer and the process
-    // dies with signal 11. The CPU renderer is Core Image's own way to a context without a GPU, so it is asked for there.
     static let context: CIContext = {
         let options: NSDictionary? = EAGLContext(api: .openGLES2) == nil ? [CIContextOption.useSoftwareRenderer.rawValue: true] : nil
         let made = (CIContext.self as AnyObject).perform(NSSelectorFromString("contextWithOptions:"), with: options)
@@ -176,8 +149,6 @@ struct FilterModifier: NodeModifier {
     func makeModifierNode(_ content: any View, _ env: EnvironmentValues) -> Node { FilterNode() }
 }
 
-// What every filter of this family has to say in the log: it is a Core Image filter over a render of the subtree, made
-// when the screen lays out, so an animation inside the filtered view is not followed frame by frame.
 private let filterDifference = "a Core Image filter over a render of the subtree, made when the screen lays out; an animation inside it is not followed frame by frame"
 
 extension View {
@@ -217,10 +188,7 @@ extension View {
         return colored(ColorFilter().appending(.luminanceToAlpha))
     }
     public func blur(radius: CGFloat, opaque: Bool = false) -> some View {
-        // a blur of no radius changes nothing, and a filter that changes nothing is not drawn
         guard radius > 0 else { return colored(ColorFilter()) }
-        // SwiftUI blurs what is behind the view; this release has no live backdrop, so the view's own content is what
-        // goes through the blur, and where the blur is soft the content is covered instead of showing through
         _Unsupported.note("blur(radius:)", opaque
             ? "a Core Image blur of a render of the view's own content — iOS 6 has no live backdrop to blur — and the picture is made when the screen lays out, not per frame"
             : "a Core Image blur of a render of the view's own content — iOS 6 has no live backdrop to blur — and it covers the content, since the unblurred content would show through the soft edges")
@@ -228,9 +196,6 @@ extension View {
     }
 }
 
-// The content's own views live in `content`; the picture lies over them and takes no touches, so a filtered button is
-// still a button. The picture is made in layoutSubviews: that is the first moment the subtree has been laid out and can
-// be drawn.
 final class FilterView: UIView {
     let content = UIView()
     let picture = UIImageView()
@@ -248,7 +213,6 @@ final class FilterView: UIView {
     }
     required init?(coder: NSCoder) { fatalError("a filter is not loaded from a nib") }
 
-    // what a filter that changes nothing does: no picture, and the content as it is
     func wantsNothing() {
         make = nil
         pending = false
@@ -298,7 +262,6 @@ final class FilterNode: ContainerNode {
     override func computeSize(_ proposal: ProposedSize) -> CGSize {
         guard let kid = children.first else { return .zero }
         if children.count == 1 { return kid.sizeThatFits(proposal) }
-        // a group of views under a filter: each keeps its own size, and the node is as big as all of them together
         var size = CGSize.zero
         for kid in children {
             let s = kid.sizeThatFits(proposal)

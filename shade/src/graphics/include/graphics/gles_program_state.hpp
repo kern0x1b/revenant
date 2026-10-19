@@ -22,12 +22,6 @@
 
 namespace shade {
 
-// Owns the API-visible GLES2 shader/program objects. A shader that is valid
-// GLSL ES 1.00 is compiled to a glsl::Module and its program runs in the
-// interpreter. Compositor shaders the legacy adapter recognises, and shaders
-// it can express in fixed-function state, keep their source only: the renderer
-// executes those, and this store preserves the declarations and values needed
-// to adapt their conventional programmable inputs to that pipeline.
 class GlesProgramState {
 public:
     struct Shader {
@@ -46,8 +40,6 @@ public:
         std::optional<std::int32_t> integer;
     };
 
-    // One location of an interpreted program: a uniform, or one element of an
-    // array uniform.
     struct UniformSlot {
         std::string name;
         std::string variable;
@@ -65,8 +57,6 @@ public:
         GlesProgramInterfaceProfile interface_profile;
         bool linked { };
         bool delete_pending { };
-        // Set at link when both shaders are valid GLSL ES and neither is a
-        // compositor shader: the program then runs in the interpreter.
         bool interpreted { };
         std::shared_ptr<const glsl::Module> vertex_module;
         std::shared_ptr<const glsl::Module> fragment_module;
@@ -75,7 +65,6 @@ public:
         std::string info_log;
     };
 
-    // The shape of a glUniform call.
     enum class UniformKind : std::uint8_t { Float, Integer, Matrix };
     enum class UniformResult : std::uint8_t {
         Set,
@@ -89,10 +78,6 @@ public:
     [[nodiscard]] Shader* shader(std::uint32_t name);
     [[nodiscard]] const Shader* shader(std::uint32_t name) const;
     void delete_shader(std::uint32_t name);
-    // Compiles the source of a shader. A shader that is not valid GLSL ES 1.00
-    // does not compile, with the compiler's reason in its info log, unless it
-    // is a shader the legacy adapter takes (compositor conventions in its
-    // source), which compiles as it always did.
     void compile_shader(std::uint32_t name);
 
     [[nodiscard]] std::uint32_t create_program();
@@ -113,8 +98,6 @@ public:
         std::span<const float> values);
     [[nodiscard]] bool set_uniform(
         std::uint32_t program, std::int32_t location, std::int32_t value);
-    // Stores count elements of components floats (or integers, or matrices of
-    // that order), starting at the location, in an interpreted program.
     [[nodiscard]] UniformResult set_uniforms(std::uint32_t program,
         std::int32_t location, UniformKind kind, std::size_t components,
         std::size_t count, std::span<const float> values);
@@ -122,7 +105,6 @@ public:
         std::uint32_t program, std::string_view name) const;
     [[nodiscard]] std::string_view shader_source(
         std::uint32_t program, std::uint32_t type) const;
-    // The number of distinct uniform variables an interpreted program has.
     [[nodiscard]] std::size_t active_uniform_count(std::uint32_t program) const;
 
 private:
@@ -136,4 +118,4 @@ private:
     std::uint32_t next_program_ { 1U };
 };
 
-} // namespace shade
+}

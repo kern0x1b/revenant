@@ -36,27 +36,20 @@ struct Bind {
   std::string symbol;
   int64_t addend = 0;
   bool weak_import = false;
-  std::string library;  // install name of the dylib the bind names; empty for a flat-namespace or unknown one
+  std::string library;
 };
 
-// A call stub, with what the image's own symbol table says of the symbol it is bound to: the library by ordinal,
-// and whether this image imports it weakly. Two images can differ on both for one name.
 struct Stub {
   std::string symbol;
-  std::string library;  // empty for a flat-namespace one
+  std::string library;
   bool weak = false;
 };
 
-// The export trie sends a name to another library's, which is how libc++ hands out libc++abi's operators.
 struct Reexport {
   std::string library;
   std::string symbol;
 };
 
-// A byte range LC_DATA_IN_CODE marks as not-instructions inside an executable section (almost
-// always a compiler jump table): a scanner that decodes raw bytes as arm64 instructions outside
-// the lifter's own control-flow-aware decode (e.g. tsd_scan.cpp) must skip these or risk
-// misdecoding table data as code.
 struct DataInCodeRange {
   uint64_t vmaddr = 0;
   uint64_t length = 0;
@@ -88,7 +81,6 @@ class Image {
   const std::map<uint64_t, uint64_t> &rebases() const { return rebases_; }
   const std::map<std::string, uint64_t> &exports() const { return exports_; }
   const std::map<std::string, Reexport> &reexports() const { return reexports_; }
-  // The libraries this one re-exports whole (LC_REEXPORT_DYLIB): what they export, a bind that names this one gets.
   const std::vector<std::string> &reexported_libraries() const { return reexported_libraries_; }
   const std::vector<std::string> &warnings() const { return warnings_; }
   const std::vector<DataInCodeRange> &data_in_code() const { return data_in_code_; }
@@ -105,7 +97,7 @@ class Image {
   std::string path_;
   std::string install_name_;
   std::vector<std::string> reexported_libraries_;
-  std::vector<std::string> dylibs_;  // install names, by load-command order: a bind ordinal N is dylibs_[N - 1]
+  std::vector<std::string> dylibs_;
   std::string LibraryOf(int ordinal) const;
   llvm::object::OwningBinary<llvm::object::Binary> owning_;
   llvm::object::MachOObjectFile *object_ = nullptr;
@@ -124,4 +116,4 @@ class Image {
   std::vector<DataInCodeRange> data_in_code_;
 };
 
-}  // namespace xlate
+}

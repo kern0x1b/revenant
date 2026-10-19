@@ -34,7 +34,6 @@ bool CompatibilityKernel::dispatch_mach_port_limit_message(
     auto& registers = cpu.registers();
     const auto& arguments =
         xnu::mig::mach_port::mach_port_set_attributes_arguments;
-    // The inline attribute array may be empty (MACH_PORT_TEMPOWNER).
     constexpr std::uint32_t minimum_request_size = 44;
     std::uint32_t result = darwin::mach::success;
     std::uint32_t name = xnu::ipc::null_name;
@@ -78,7 +77,7 @@ bool CompatibilityKernel::dispatch_mach_port_limit_message(
         } else if ((entry->type & xnu::ipc::type_mask(
                                       xnu::ipc::Right::Receive)) == 0) {
             result = darwin::mach::invalid_right;
-        } else if (flavor == 4U) { // MACH_PORT_TEMPOWNER
+        } else if (flavor == 4U) {
             if (!shared_state_->mach_port_objects.set_temporary_owner(
                     entry->object))
                 result = darwin::mach::invalid_argument;
@@ -106,7 +105,7 @@ bool CompatibilityKernel::dispatch_mach_port_limit_message(
                 request.address +
                     static_cast<std::uint32_t>(index * sizeof(std::uint32_t)),
                 reply[index])) {
-            registers[0] = 0x10004008U; // MACH_RCV_INVALID_DATA
+            registers[0] = 0x10004008U;
             return true;
         }
     }
@@ -119,4 +118,4 @@ bool CompatibilityKernel::dispatch_mach_port_limit_message(
     return true;
 }
 
-} // namespace shade
+}

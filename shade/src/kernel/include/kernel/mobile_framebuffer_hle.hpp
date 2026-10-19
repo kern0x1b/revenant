@@ -46,9 +46,6 @@ public:
     void set_scene_coordinator(std::shared_ptr<SceneCoordinator> scenes);
     void set_frame_presented_handler(
         std::function<void(std::uint32_t)> handler);
-    // A compositor-owned panel submission can still contain an active
-    // client's layers. Keep that semantic client observation separate from
-    // the physical process that owns DisplayState's scanout.
     void set_semantic_presentation_handler(
         std::function<void(std::uint32_t)> handler);
     [[nodiscard]] bool has_active_layers() const;
@@ -114,16 +111,10 @@ private:
     std::shared_ptr<GlesRenderer> host_graphics_;
     std::unique_ptr<CommandEncoder> command_encoder_;
     std::shared_ptr<HostSurface> scanout_surface_;
-    // Keep the last published target immutable while the host presenter can
-    // still consume it. The ring is independent of guest model/firmware; the
-    // software path below continues to compose into DisplayState pixels.
     std::vector<std::shared_ptr<HostSurface>> composition_surfaces_;
     std::size_t composition_surface_index_ { };
     std::map<std::uint32_t, LayerState> layers_;
     std::set<std::uint32_t> external_framebuffers_;
-    // A hardware layer retains its IOSurface independently of the process
-    // that created the backing. The lease is presentation state, not a host
-    // renderer concern, and is released when that layer is replaced/removed.
     std::map<std::uint32_t, std::shared_ptr<SurfaceTransportLease>>
         layer_surface_leases_;
     std::map<std::uint32_t, SubmittedLayer> submitted_layers_;
@@ -134,4 +125,4 @@ private:
     std::optional<DeferredForegroundFrame> deferred_foreground_frame_;
 };
 
-} // namespace shade
+}

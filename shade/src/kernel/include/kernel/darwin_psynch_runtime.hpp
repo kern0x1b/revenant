@@ -34,11 +34,6 @@ enum class DarwinPsynchWaitKind : std::uint8_t {
     WriteLock,
 };
 
-// Shared kernel-side state for Darwin's generation-counted pthread waits.
-// Guest libpthread owns the uncontended fast paths and sequence words; this
-// object retains only wait queues, missed-wakeup preposts, and completed wait
-// results.  It is shared by task kernels so process-shared pthread objects can
-// use the same wakeup path as process-private objects.
 class DarwinPsynchRuntime {
 public:
     static constexpr std::uint32_t generation_increment = 0x100U;
@@ -157,4 +152,4 @@ private:
     std::map<DarwinPsynchThread, std::uint32_t> completed_results_;
 };
 
-} // namespace shade
+}

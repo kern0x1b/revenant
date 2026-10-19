@@ -91,14 +91,8 @@ public:
         std::uint32_t level, std::span<const std::uint32_t> pixels);
     void update_texture_render_target_generation(
         std::uint32_t name, std::uint32_t level);
-    // Makes argb the newest image of a texture level that a HostSurface
-    // renders to: reads the surface back when the GPU is ahead of the CPU, and
-    // fills an image that was never kept. A level without a HostSurface is
-    // already its own newest image.
     [[nodiscard]] bool synchronize_texture_to_cpu(std::uint32_t name,
         std::uint32_t level, HostGraphicsDevice& graphics);
-    // Explicit software-fallback boundary for textures whose newest pixels
-    // live only in a HostSurface native image.
     [[nodiscard]] bool materialize_surface_textures(
         HostGraphicsDevice& graphics);
 
@@ -125,4 +119,4 @@ private:
     std::uint64_t next_texture_revision_ { 1 };
 };
 
-} // namespace shade
+}

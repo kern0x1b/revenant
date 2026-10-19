@@ -16,12 +16,8 @@ struct DeviceProcessorProfile {
     std::string_view soc;
     ArmCpuModelKind model;
     std::uint32_t bus_hz;
-    // Guest-visible topology. Host execution resources are intentionally not
-    // stored here: adding host threads must never change the device contract.
     GuestCpuTopology topology;
 
-    // The boot CPU uses the first guest cluster's clock. Keep one source of
-    // truth for timing and topology, including profiles with multiple clusters.
     [[nodiscard]] constexpr std::uint32_t frequency_hz() const noexcept
     {
         return topology.cluster_count != 0U ? topology.clusters[0].frequency_hz
@@ -53,4 +49,4 @@ struct DeviceProcessorProfile {
     }
 };
 
-} // namespace shade
+}

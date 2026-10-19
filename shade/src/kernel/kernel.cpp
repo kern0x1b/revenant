@@ -98,10 +98,6 @@ namespace {
     constexpr std::uint32_t root_disk_minor = 1;
     constexpr std::uint32_t root_disk_device =
         (virtual_disk_major << 24U) | root_disk_minor;
-    // 32-bit ARM XNU's VM_MAX_ADDRESS is 0x80000000. Cache fast traps validate
-    // the exclusive end of the range against that user/kernel boundary before
-    // touching the cache; keep the check in 64-bit arithmetic so host-side
-    // address overflow cannot turn an invalid range into a valid wrapped one.
     constexpr std::uint64_t arm_user_vm_max_address = 0x80000000ULL;
 
     std::pair<PerfDiagnosticSourceKind, std::uint32_t> svc_diagnostic_source(
@@ -120,10 +116,6 @@ namespace {
                 static_cast<std::uint32_t>(
                     -static_cast<std::int64_t>(signed_number)) };
         }
-        // Darwin syscall 0 is the indirect form: r0 contains the real syscall
-        // number and dispatch_bsd_process shifts the remaining arguments before
-        // redispatching it. Attribute the complete outer dispatch to that real
-        // operation instead of collapsing unrelated cold-start work into bsd-0.
         const auto number = raw_number == 0U ? cpu.registers()[0] : raw_number;
         return { PerfDiagnosticSourceKind::SvcBsd, number };
     }
@@ -184,11 +176,10 @@ namespace {
         return OpenGlesGuestCapabilitySet::MbxLiteLegacy;
     }
 
-} // namespace
+}
 
 void CompatibilityKernel::seed_random(std::uint64_t seed)
 {
-    // xorshift64 has no zero state: the low bit is set, so any seed is a valid stream.
     random_state_ = seed | 1U;
 }
 
@@ -234,13 +225,6 @@ CompatibilityKernel::CompatibilityKernel(AddressSpace& memory, Output& output,
     display_state_->set_orientation_resolver(
         [state = shared_state_, scenes = scene_coordinator_](
             std::uint32_t owner_process_id) {
-            // A system compositor can publish a frame while an active client is
-            // still visible (for example, a keyboard or volume HUD over a
-            // landscape App). In that state the compositor's portrait process
-            // is not the orientation owner of the pixels. During Home the
-            // client is Exiting instead, so SpringBoard's portrait frame must
-            // win. Keep the process owner as the default and use the active
-            // client only for system-owned overlay publishes.
             const auto foreground_scene = scenes->foreground_client_scene();
             const auto active_scene = scenes->active_client_scene();
             std::lock_guard lock { state->mach_mutex };
@@ -316,10 +300,6 @@ CompatibilityKernel::CompatibilityKernel(AddressSpace& memory, Output& output,
         device_model_.baseband.transport == BasebandTransport::Offline;
     const auto baseband_device_available =
         virtual_baseband || device_model_.baseband.device_available;
-    // Keep the registry/CoreTelephony surface present in Offline mode so stock
-    // clients can settle on the normal Offline state. Offline still exposes a
-    // fixed mux control endpoint for the daemon's setup ABI, but it only
-    // records logical channels; it has no modem input and no host-bound output.
     shared_state_->baseband_device_state.set_available(
         baseband_device_available);
     shared_state_->baseband_device_state.set_transmit_queue_writable(
@@ -644,18 +624,10 @@ void CompatibilityKernel::enqueue_system_button_impl(
             shared_state_->host_display_wake_after_lock_sequence =
                 shared_state_->host_display_current_lock_down_sequence;
             shared_state_->host_display_wake_power_on_acknowledged = false;
-            // Both physical Home and Sleep/Wake illuminate the panel before
-            // SpringBoard has finished rebuilding the lock scene. Preserve the
-            // original guest-visible event; only the host panel transition is
-            // synthesized here.
             shared_state_->host_display_hardware_wake_pending = true;
             shared_state_->requested_display_power_state = 1U;
         } else if (input.button == SystemButton::Lock &&
                    !force_home_transition) {
-            // Publish a pending Lock transaction before the GSEvent becomes
-            // visible. Do not force the panel off here: SpringBoard owns the
-            // long-press timer and its native SBPowerDownController must remain
-            // visible until the guest asks IOKit to power down.
             shared_state_->host_display_intent =
                 KernelSharedState::HostDisplayIntent::LockPending;
             shared_state_->host_display_wake_power_on_acknowledged = false;
@@ -665,9 +637,6 @@ void CompatibilityKernel::enqueue_system_button_impl(
                    input.button == SystemButton::Home &&
                    (shared_state_->springboard_unlock_touch_pending ||
                        shared_state_->springboard_unlock_touch_active)) {
-            // The LCD can already be on while SpringBoard still owns the lock
-            // scene. Home is then another wake notification, not an App-exit
-            // barrier.
             wake_only_system_button = true;
         }
     }
@@ -680,9 +649,6 @@ void CompatibilityKernel::enqueue_system_button_impl(
             &system_input_sequence, begins_display_lock_transaction);
     wake_graphics_input_receivers();
     const auto enqueued_at = std::chrono::steady_clock::now();
-    // A sleeping Home or Sleep/Wake button is a wake request for SpringBoard,
-    // not a new suspend transition. The firmware prepares its lock scene and
-    // then requests LCD power through IOKit.
     if ((input.button == SystemButton::Home ||
             input.button == SystemButton::Lock) &&
         input.phase == SystemButtonPhase::Down &&
@@ -740,19 +706,10 @@ void CompatibilityKernel::wake_graphics_input_receivers()
             if (!port || port->receive_owner == 0U)
                 continue;
             receivers.emplace_back(port->receive_owner, object);
-            // A Mach receive may block on a port set rather than on the
-            // member port itself.  Host-originated input has no sender CPU
-            // whose send path can walk the set links, so notify every set
-            // containing this queued member as well.  The app-level wake
-            // callback resolves the actual FIFO waiter and keeps the guest
-            // receive ABI unchanged.
             if (const auto links =
                 shared_state_->mach_port_set_links_by_member.find(object);
                 links != shared_state_->mach_port_set_links_by_member.end()) {
                 for (const auto& link : links->second) {
-                    // Port sets are namespace objects and therefore do not
-                    // necessarily have a MachPortObject entry of their own;
-                    // the member receive right identifies their owner.
                     receivers.emplace_back(port->receive_owner,
                         link.set_object);
                 }
@@ -842,17 +799,11 @@ bool CompatibilityKernel::refresh_display_scanout()
     }
 
     const auto waking = !display_state_->powered_on();
-    // Once SpringBoard uses transactional MobileFramebuffer layers, SwapEnd is
-    // the sole frame boundary. Polling the legacy default surface here would
-    // expose partially rendered offscreen buffers between layer transactions.
     if (mobile_framebuffer_hle_.has_active_layers()) {
         display_state_->set_powered_on(true);
         return false;
     }
 
-    // Stage the legacy backing while the panel is still dark, then reveal the
-    // retained scanout.  Reversing this order exposes the pre-wake App or a
-    // partially cleared SpringBoard buffer for one host frame.
     if (waking) {
         const auto refreshed =
             core_surface_hle_.refresh_default_scanout(memory_, process_.pid);
@@ -910,9 +861,6 @@ void CompatibilityKernel::prepare_exec(std::size_t processor_id)
     mobile_framebuffer_hle_.reset();
     layerkit_hle_.reset();
     next_display_scanout_deadline_.reset();
-    // execve resets caught signals to their default and keeps ignored ones
-    // ignored; the thread that execs keeps its mask and every pending
-    // signal, and the other threads are gone.
     for (auto& action : signal_actions_) {
         if (action[0] != darwin::signal::ignore_action)
             action = { };
@@ -1011,12 +959,6 @@ std::size_t CompatibilityKernel::install_mapped_user_image(Cpu& cpu,
             static_cast<std::uint64_t>(elapsed.count()));
         phase_started = std::chrono::steady_clock::now();
     };
-    // A dyld shared-cache mapping is backed by a container/subcache rather than
-    // by a standalone Mach-O file. Its image header and linkedit data are
-    // distributed across cache mappings, so MachOImage::parse(path) cannot be
-    // used here. HLE patching also must not write into shared cache __TEXT;
-    // the cache image is parsed at its container offset and patched through
-    // MAP_PRIVATE/COW pages instead.
     const auto architecture =
         arm_architecture_for_model(device_model_.processor.model);
     constexpr std::string_view uikit_image { "/UIKit.framework/UIKit" };
@@ -1234,8 +1176,6 @@ void CompatibilityKernel::set_process_image(std::string_view guest_path,
     record.termination_signal = 0;
     record.command = std::move(name);
     record.executable_path = std::string { guest_path };
-    // The loader maps dyld at its preferred address. Publish the live native
-    // section, which dyld itself fills as images are loaded and unloaded.
     record.dyld_all_image_info_address = 0;
     record.dyld_all_image_info_size = 0;
     if (dynamic_linker != nullptr) {
@@ -1249,8 +1189,6 @@ void CompatibilityKernel::set_process_image(std::string_view guest_path,
             }
         }
     }
-    // The block profile reads the image list while the process runs, to tell
-    // the backports' code from Apple's (see JitExecutor::attribute_run_stack).
     if (performance_counters().block_profile_enabled()) {
         performance_counters().block_profile().note_image_info(
             static_cast<std::uint32_t>(process_.pid),
@@ -1448,7 +1386,6 @@ std::optional<std::uint32_t> CompatibilityKernel::import_descriptor(
             kqueues_[*fd] = transfer.kqueue_registrations;
         }
     }
-    // SCM_RIGHTS never propagates FD_CLOEXEC to the newly installed fd.
     descriptor_flags_[*fd] = 0;
     return fd;
 }
@@ -1474,9 +1411,6 @@ bool CompatibilityKernel::deliver_pending_event(Cpu& cpu)
         hid_event_system_hle_.prepare_pending_event(
             cpu, process_.pid, 0x80U) &&
         userland_hle_.dispatch(cpu, process_.pid, 0x80U)) {
-        // The firmware callback returns through a continuation that retries
-        // this receive boundary. Retire the old blocked receive before making
-        // the callback runnable so it cannot consume an unrelated message.
         pending_mach_receives_.erase(processor);
         process_.waiting_for_events = !pending_mach_receives_.empty();
         cpu.clear_halt();
@@ -1624,8 +1558,6 @@ void CompatibilityKernel::remember_pending_io_not_ready_locked(
     std::size_t processor, std::uint64_t io_generation,
     std::uint64_t mach_generation)
 {
-    // A producer may race the readiness walk through another task. Do not
-    // publish a negative stamp unless both shared generations stayed stable.
     if (io_generation != shared_state_->io_event_generation_snapshot() ||
         mach_generation != shared_state_->mach_queue_generation_snapshot()) {
         pending_io_poll_cache_.erase(processor);
@@ -1872,7 +1804,7 @@ bool CompatibilityKernel::deliver_pending_io_locked(Cpu& cpu)
                     bsd_success(cpu, *fd);
                 }
             } else {
-                bsd_error(cpu, 24); // EMFILE
+                bsd_error(cpu, 24);
             }
         }
         pending_host_accepts_.erase(pending);
@@ -1975,7 +1907,7 @@ bool CompatibilityKernel::deliver_pending_io_locked(Cpu& cpu)
             if (terminated)
                 bsd_error(cpu, darwin::error::invalid_argument);
             else if (timed_out)
-                bsd_error(cpu, 60); // ETIMEDOUT
+                bsd_error(cpu, 60);
             else
                 bsd_success(cpu, 0);
         } else {
@@ -2000,7 +1932,7 @@ bool CompatibilityKernel::deliver_pending_io_locked(Cpu& cpu)
             return false;
         if (timed_out) {
             shared_state_->psynch_runtime->cancel_wait(thread);
-            bsd_error(cpu, 60U); // ETIMEDOUT
+            bsd_error(cpu, 60U);
         } else {
             bsd_success(cpu, *result);
         }
@@ -2044,7 +1976,6 @@ bool CompatibilityKernel::deliver_pending_io_locked(Cpu& cpu)
                 now / darwin::mach::clock::nanoseconds_per_second);
             const auto nanoseconds = static_cast<std::uint32_t>(
                 now % darwin::mach::clock::nanoseconds_per_second);
-            // XNU clock_sleep_trap deliberately ignores copyout's result.
             static_cast<void>(memory_.write32(
                 *pending.wakeup_time_address +
                     darwin::mach::clock::timespec_seconds_offset,
@@ -2517,7 +2448,7 @@ void CompatibilityKernel::advance_absolute_time(std::uint64_t deadline)
                         static_cast<std::byte>(value >> (byte * 8U));
                 }
             };
-            put32(0, 19); // MACH_MSGH_BITS(MACH_MSG_TYPE_COPY_SEND, 0)
+            put32(0, 19);
             put32(4, static_cast<std::uint32_t>(message.bytes.size()));
             put32(8, port);
             put32(12, 0);
@@ -2545,10 +2476,6 @@ void CompatibilityKernel::service_time_dependent_devices(std::uint64_t deadline)
         return;
     {
         std::lock_guard mach_lock { shared_state_->mach_mutex };
-        // Non-primary runtimes are advanced through this service path by the
-        // host scheduler. Keep their display clients equivalent to the
-        // primary runtime: a registered VSYNC deadline must materialize its
-        // notification in the owning runtime's Mach queue.
         kernel_iokit::display::deliver_due_vsync_locked(
             *shared_state_, deadline);
     }
@@ -2707,10 +2634,6 @@ void CompatibilityKernel::inherit_process_state(
     display_state_ = parent.display_state_;
     presentation_tracker_ = parent.presentation_tracker_;
     scene_coordinator_ = parent.scene_coordinator_;
-    // posix_spawn starts with a fresh virtual address space, not a fresh device
-    // namespace. CoreSurface IDs are global transport names and must still
-    // resolve to the producer's shared backing when firmware sends them to a
-    // compositor task.
     surface_store_->share_registry(*parent.surface_store_);
     wifi_state_ = parent.wifi_state_;
     audio_service_ = parent.audio_service_;
@@ -2765,9 +2688,6 @@ void CompatibilityKernel::inherit_process_state(
     process_.io_master_port = parent.process_.io_master_port;
     process_.io_registry_options_port =
         parent.process_.io_registry_options_port;
-    // fork/posix_spawn creates a new current uthread. Process policy is copied
-    // with proc, but a stale parent uthread policy must not follow its new
-    // kernel thread object.
     process_.thread_disk_io_policies.clear();
     file_descriptors_ = parent.file_descriptors_;
     regular_file_open_descriptions_ = parent.regular_file_open_descriptions_;
@@ -2799,16 +2719,12 @@ void CompatibilityKernel::inherit_process_state(
         vm_purgable_states_ = parent.vm_purgable_states_;
         signal_actions_ = parent.signal_actions_;
     } else {
-        // posix_spawn starts the child as execve would: the parent's caught
-        // signals at their default, its ignored ones still ignored.
         for (std::size_t signal = 0; signal < signal_actions_.size(); ++signal) {
             if (parent.signal_actions_[signal][0] ==
                 darwin::signal::ignore_action)
                 signal_actions_[signal] = parent.signal_actions_[signal];
         }
     }
-    // The child's one thread runs with the mask of the thread that forked or
-    // spawned it.
     {
         const auto mask = parent.thread_signal_masks_.find(parent_processor);
         thread_signal_masks_ = { { 0, mask != parent.thread_signal_masks_.end()
@@ -2816,8 +2732,6 @@ void CompatibilityKernel::inherit_process_state(
                                              : 0U } };
     }
     kqueues_ = parent.kqueues_;
-    // Guarded opens are close-on-fork; inherited ordinary descriptors keep
-    // their existing shared open descriptions.
     descriptor_guards_.clear();
     for (const auto& [fd, guard] : parent.descriptor_guards_) {
         static_cast<void>(guard);
@@ -2873,9 +2787,6 @@ void CompatibilityKernel::dispatch(Cpu& cpu, std::uint32_t svc_immediate)
 {
     const SvcDispatchDiagnostics diagnostics { process_.pid, cpu,
         svc_immediate };
-    // Guest kernel entries conservatively invalidate timer topology. I/O
-    // readiness has a narrower producer generation so drawing and unrelated
-    // syscalls cannot force every blocked descriptor tree to be rescanned.
     note_timer_deadline_transition();
     std::lock_guard lock { mutex_ };
     static_cast<void>(hid_event_system_hle_.prepare_pending_event(
@@ -2890,10 +2801,6 @@ void CompatibilityKernel::dispatch(Cpu& cpu, std::uint32_t svc_immediate)
         reap_stopped_audio_threads();
     } else if (svc_immediate != 0x80) {
         trace_unknown(cpu, "SVC", svc_immediate);
-        // An unexpected SVC immediate is an invalid instruction encoding for
-        // the supported ARM userspace ABI, rather than an unimplemented kernel
-        // entry. Keep that fatal policy explicit and separate from unknown-ABI
-        // tracing.
         cpu.halt(Dynarmic::HaltReason::UserDefined4);
     } else if (cpu.registers()[12] ==
                darwin::arm_fast_trap::syscall_number) {
@@ -2922,10 +2829,6 @@ void CompatibilityKernel::dispatch_arm_fast_trap(Cpu& cpu)
     const auto fail_cache_trap = [&cpu](std::uint32_t address,
                                      std::uint32_t length,
                                      MemoryPermission access) {
-        // XNU's recovery path triages EXC_BAD_ACCESS. Feed the same fault
-        // through Dynarmic when this SVC is running inside an executor; a
-        // deferred SVC receives the scheduler-visible fatal halt boundary from
-        // Cpu instead.
         cpu.raise_memory_fault(address, length, access);
     };
     switch (registers[3]) {
@@ -2941,11 +2844,6 @@ void CompatibilityKernel::dispatch_arm_fast_trap(Cpu& cpu)
                 fail_cache_trap(address, length, MemoryPermission::Execute);
                 return;
             }
-            // iPhoneOS 1.0's UIKit emits ARM trampolines into writable heap
-            // pages, calls this trap, and immediately branches to them without
-            // a vm_protect/mprotect transition. Preserve that first-generation
-            // ARM behavior by making an already-mapped invalidated range
-            // executable; never create memory as a side effect of the trap.
             const auto& capabilities =
                 shared_state_->darwin_abi.capabilities;
             if (capabilities.arm_cache_trap_grants_execute &&
@@ -2956,8 +2854,6 @@ void CompatibilityKernel::dispatch_arm_fast_trap(Cpu& cpu)
             }
             cpu.invalidate_cache_range(address, length);
         }
-        // XNU returns from these cache traps through the original saved state,
-        // so all user registers (including r0) remain unchanged.
         return;
     }
     case darwin::arm_fast_trap::data_cache_flush:
@@ -2969,8 +2865,6 @@ void CompatibilityKernel::dispatch_arm_fast_trap(Cpu& cpu)
             fail_cache_trap(registers[0], registers[1], MemoryPermission::Read);
             return;
         }
-        // Guest writes already update the coherent AddressSpace immediately.
-        // Preserve the saved registers just as the real trap return path does.
         return;
     case darwin::arm_fast_trap::thread_set_cthread_self:
         cpu.set_cthread_self(registers[0]);
@@ -3003,9 +2897,6 @@ void CompatibilityKernel::report_stalled_receives(
 {
     const auto now = shared_state_->clock.now();
     for (const auto& [processor, pending] : pending_mach_receives_) {
-        // A thread parked on a service port is a daemon waiting for work, not
-        // a stall. Only a thread that sent a request and is receiving its
-        // reply is waiting for an answer that should have come.
         if (!pending.awaited_request)
             continue;
         if (pending.started == 0 || now < pending.started)
@@ -3038,9 +2929,6 @@ bool CompatibilityKernel::unmap_memory(
     const auto result = memory_.unmap_with_result(address, size);
     if (!result.succeeded)
         return false;
-    // Translated blocks are keyed by guest address. Once an executable image
-    // is gone, a new mapping at the same address (dlclose followed by dlopen
-    // of another bundle) must not run the old image's instructions.
     if (size != 0 && result.executable_unmapped) {
         constexpr std::uint64_t page_mask =
             static_cast<std::uint64_t>(AddressSpace::page_size - 1U);
@@ -3067,10 +2955,6 @@ bool CompatibilityKernel::protect_memory(Cpu& cpu, std::uint32_t address,
     const auto result = memory_.protect_with_result(address, size, permissions);
     if (!result.succeeded)
         return false;
-    // AddressSpace::protect() applies permissions to the page-rounded range.
-    // Retire only translated blocks intersecting that same range and only when
-    // executable mappings actually changed. Data-only and no-op protection
-    // calls cannot make an existing translated instruction stale.
     if (size != 0 && result.executable_permissions_changed) {
         constexpr std::uint64_t page_mask =
             static_cast<std::uint64_t>(AddressSpace::page_size - 1U);
@@ -3090,8 +2974,6 @@ bool CompatibilityKernel::protect_memory(Cpu& cpu, std::uint32_t address,
 bool CompatibilityKernel::write_guest_stat(std::uint32_t address,
     const std::filesystem::path& path, bool follow_symlink, int host_descriptor)
 {
-    // Darwin 8 32-bit struct stat is 96 bytes. Keep this explicit instead of
-    // copying the host struct: field widths and alignment differ by ABI.
     std::array<std::byte, 96> bytes { };
     auto put16 = [&](std::size_t offset, std::uint16_t value) {
         bytes[offset] = static_cast<std::byte>(value & 0xffU);
@@ -3140,15 +3022,15 @@ bool CompatibilityKernel::write_guest_stat(std::uint32_t address,
     }
     if (!metadata)
         return false;
-    put32(0, root_disk_device); // st_dev
-    put32(4, metadata->permanent_id); // st_ino
-    put16(8, static_cast<std::uint16_t>(metadata->mode)); // st_mode
+    put32(0, root_disk_device);
+    put32(4, metadata->permanent_id);
+    put16(8, static_cast<std::uint16_t>(metadata->mode));
     put16(10, static_cast<std::uint16_t>(std::min(metadata->link_count,
                   static_cast<std::uint32_t>(
                       std::numeric_limits<std::uint16_t>::max()))));
-    put32(12, metadata->owner); // st_uid
-    put32(16, metadata->group); // st_gid
-    put32(20, 0); // st_rdev
+    put32(12, metadata->owner);
+    put32(16, metadata->group);
+    put32(20, 0);
     put32(24, static_cast<std::uint32_t>(metadata->access_time.seconds));
     put32(28, static_cast<std::uint32_t>(metadata->access_time.nanoseconds));
     put32(32, static_cast<std::uint32_t>(metadata->modification_time.seconds));
@@ -3156,10 +3038,10 @@ bool CompatibilityKernel::write_guest_stat(std::uint32_t address,
         static_cast<std::uint32_t>(metadata->modification_time.nanoseconds));
     put32(40, static_cast<std::uint32_t>(metadata->change_time.seconds));
     put32(44, static_cast<std::uint32_t>(metadata->change_time.nanoseconds));
-    put64(48, metadata->data_length); // st_size
-    put64(56, (metadata->data_allocation_size + 511U) / 512U); // st_blocks
-    put32(64, AddressSpace::page_size); // st_blksize
-    put32(68, metadata->flags); // st_flags
+    put64(48, metadata->data_length);
+    put64(56, (metadata->data_allocation_size + 511U) / 512U);
+    put32(64, AddressSpace::page_size);
+    put32(68, metadata->flags);
     return memory_.copy_in(address, bytes);
 }
 
@@ -3176,23 +3058,19 @@ bool CompatibilityKernel::write_guest_device_stat(
             bytes[offset + byte] = static_cast<std::byte>(value >> (byte * 8U));
         }
     };
-    put32(0, 1); // st_dev
-    put32(4, 0x100U + minor); // stable virtual inode
+    put32(0, 1);
+    put32(4, 0x100U + minor);
     put16(8, static_cast<std::uint16_t>(
                  (character_device ? 0020000U : 0060000U) | 0640U));
-    put16(10, 1); // st_nlink
-    put32(20, (virtual_disk_major << 24U) | minor); // Darwin device rdev
-    put32(64, AddressSpace::page_size); // st_blksize
+    put16(10, 1);
+    put32(20, (virtual_disk_major << 24U) | minor);
+    put32(64, AddressSpace::page_size);
     return memory_.copy_in(address, bytes);
 }
 
 bool CompatibilityKernel::write_guest_kqueue_stat(std::uint32_t address,
     std::uint64_t pending_event_count, bool stat64_layout)
 {
-    // XNU exposes DTYPE_KQUEUE through fstat as a FIFO. CoreFoundation uses
-    // this contract to validate descriptors before creating run-loop sources.
-    // Keep the legacy and stat64 layouts explicit because ARM32 field offsets
-    // differ even though both carry the same kqueue metadata.
     std::array<std::byte, 108> bytes { };
     const auto put16 = [&](std::size_t offset, std::uint16_t value) {
         bytes[offset] = static_cast<std::byte>(value & 0xffU);
@@ -3212,14 +3090,14 @@ bool CompatibilityKernel::write_guest_kqueue_stat(std::uint32_t address,
     };
     constexpr std::uint16_t fifo_mode = 0010000U;
     if (stat64_layout) {
-        put16(4, fifo_mode); // st_mode
-        put64(60, pending_event_count); // st_size
-        put32(76, darwin::kqueue::arm32_event::size); // st_blksize
+        put16(4, fifo_mode);
+        put64(60, pending_event_count);
+        put32(76, darwin::kqueue::arm32_event::size);
         return memory_.copy_in(address, bytes);
     }
-    put16(8, fifo_mode); // st_mode
-    put64(48, pending_event_count); // st_size
-    put32(64, darwin::kqueue::arm32_event::size); // st_blksize
+    put16(8, fifo_mode);
+    put64(48, pending_event_count);
+    put32(64, darwin::kqueue::arm32_event::size);
     return memory_.copy_in(address,
         std::span<const std::byte> { bytes }.first(96));
 }
@@ -3227,9 +3105,6 @@ bool CompatibilityKernel::write_guest_kqueue_stat(std::uint32_t address,
 bool CompatibilityKernel::write_guest_stat64(std::uint32_t address,
     const std::filesystem::path& path, bool follow_symlink, int host_descriptor)
 {
-    // Darwin 9 ARM32 struct stat64 keeps 64-bit inode, size, block count, and
-    // qspare fields, while time_t/long timespec members remain 32-bit and
-    // 64-bit integers are only 4-byte aligned on this firmware ABI.
     std::array<std::byte, 108> bytes { };
     auto put16 = [&](std::size_t offset, std::uint16_t value) {
         bytes[offset] = static_cast<std::byte>(value & 0xffU);
@@ -3283,15 +3158,15 @@ bool CompatibilityKernel::write_guest_stat64(std::uint32_t address,
     if (!metadata)
         return false;
 
-    put32(0, root_disk_device); // st_dev
-    put16(4, static_cast<std::uint16_t>(metadata->mode)); // st_mode
+    put32(0, root_disk_device);
+    put16(4, static_cast<std::uint16_t>(metadata->mode));
     put16(6, static_cast<std::uint16_t>(std::min(metadata->link_count,
                  static_cast<std::uint32_t>(
                      std::numeric_limits<std::uint16_t>::max()))));
-    put64(8, metadata->permanent_id); // st_ino
+    put64(8, metadata->permanent_id);
     put32(16, metadata->owner);
     put32(20, metadata->group);
-    put32(24, 0); // st_rdev
+    put32(24, 0);
     put_time(28, metadata->access_time);
     put_time(36, metadata->modification_time);
     put_time(44, metadata->change_time);
@@ -3321,11 +3196,11 @@ bool CompatibilityKernel::write_guest_device_stat64(
             bytes[offset + byte] = static_cast<std::byte>(value >> (byte * 8U));
         }
     };
-    put32(0, 1); // st_dev
+    put32(0, 1);
     put16(4, static_cast<std::uint16_t>(
                  (character_device ? 0020000U : 0060000U) | 0640U));
-    put16(6, 1); // st_nlink
-    put64(8, 0x100U + minor); // stable virtual inode
+    put16(6, 1);
+    put64(8, 0x100U + minor);
     put32(24, (virtual_disk_major << 24U) | minor);
     put32(76, AddressSpace::page_size);
     return memory_.copy_in(address, bytes);
@@ -3334,7 +3209,6 @@ bool CompatibilityKernel::write_guest_device_stat64(
 bool CompatibilityKernel::write_guest_statfs(
     std::uint32_t address, const hfs::VolumeMetadata& volume)
 {
-    // Darwin 8's 32-bit legacy statfs layout is 272 bytes.
     std::array<std::byte, 272> bytes { };
     const auto put16 = [&](std::size_t offset, std::uint16_t value) {
         bytes[offset] = static_cast<std::byte>(value & 0xffU);
@@ -3359,9 +3233,9 @@ bool CompatibilityKernel::write_guest_statfs(
     put32(12, volume.total_blocks);
     put32(16, volume.free_blocks);
     put32(20, volume.free_blocks);
-    put32(24, 0xffff'ffffU); // HFS reports no practical inode ceiling
+    put32(24, 0xffff'ffffU);
     put32(28, 0xffff'ffffU - volume.next_catalog_id);
-    put32(32, 1); // fsid[0]
+    put32(32, 1);
     put32(48, volume.mount_flags);
     put_string(60, 15, "hfs");
     put_string(75, 90, volume.mount_point);
@@ -3372,9 +3246,6 @@ bool CompatibilityKernel::write_guest_statfs(
 bool CompatibilityKernel::write_guest_statfs64(
     std::uint32_t address, const hfs::VolumeMetadata& volume)
 {
-    // Darwin 9's 32-bit statfs64 ABI.  See xnu bsd/sys/mount.h:
-    // two 32-bit sizes, five 64-bit counters, fsid_t, owner/type/flags/subtype,
-    // then fixed-size type and path strings.
     std::array<std::byte, 2168> bytes { };
     const auto put32 = [&](std::size_t offset, std::uint32_t value) {
         for (std::size_t index = 0; index < 4; ++index) {
@@ -3401,13 +3272,13 @@ bool CompatibilityKernel::write_guest_statfs64(
     put64(8, volume.total_blocks);
     put64(16, volume.free_blocks);
     put64(24, volume.free_blocks);
-    put64(32, 0xffff'ffffULL); // HFS reports no practical inode ceiling
+    put64(32, 0xffff'ffffULL);
     put64(40, 0xffff'ffffULL - volume.next_catalog_id);
-    put32(48, 1); // fsid[0]
-    put32(56, 0); // owner
+    put32(48, 1);
+    put32(56, 0);
     put32(60, volume.filesystem_type);
     put32(64, volume.mount_flags);
-    put32(68, 0); // f_fssubtype
+    put32(68, 0);
     put_string(72, 16, "hfs");
     put_string(88, 1024, volume.mount_point);
     put_string(1112, 1024, volume.mounted_device);
@@ -3525,9 +3396,6 @@ CompatibilityKernel::allocate_file_descriptor() const
 void CompatibilityKernel::copy_kqueue_descriptor_state(
     std::uint32_t source, std::uint32_t destination)
 {
-    // dup/dup2 create another descriptor for the same kqueue object. The
-    // descriptor table keeps duplicate aliases separately, so follow the
-    // alias chain before copying the registration set.
     for (unsigned depth = 0; depth < 256U; ++depth) {
         if (const auto queue = kqueues_.find(source);
             queue != kqueues_.end()) {
@@ -3555,4 +3423,4 @@ void CompatibilityKernel::trace_unknown(
     output_.write(message.str());
 }
 
-} // namespace shade
+}

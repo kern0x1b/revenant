@@ -1,10 +1,3 @@
--- patch-portability.lua: the two availability guards build.sh puts in the copy of OpenCombineFoundation's
--- Portability.swift that the armv7 iOS 6 build compiles.
---
---     xmake l patch-portability.lua FILE
---
--- Each guard replaces every occurrence of its text, as Python's str.replace does. The file is rewritten in place.
-
 local REPLACEMENTS = {
     {"return CFRunLoopTimerGetTolerance(underlyingTimer)",
         "if #available(iOS 7.0, *) { return CFRunLoopTimerGetTolerance(underlyingTimer) }\n            return 0"},
@@ -12,7 +5,6 @@ local REPLACEMENTS = {
         "if #available(iOS 7.0, *) { CFRunLoopTimerSetTolerance(underlyingTimer, newValue) }"},
 }
 
--- every occurrence of from in s, replaced by to
 local function replace_all(s, from, to)
     local out, start = {}, 1
     while true do

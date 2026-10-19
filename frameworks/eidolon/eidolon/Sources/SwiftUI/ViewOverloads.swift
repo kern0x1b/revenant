@@ -81,7 +81,6 @@ extension View {
     }
 }
 
-// The work of task(id:) runs while the view is on screen: it ends when the view goes away and starts again when the id changes.
 final class TaskBox {
     var task: Task<Void, Never>?
     func run(_ priority: TaskPriority, _ action: @escaping () async -> Void) {
@@ -131,7 +130,6 @@ struct MaskModifier: NodeModifier {
     func makeModifierNode(_ content: any View, _ env: EnvironmentValues) -> Node { MaskNode() }
 }
 
-// The mask is laid out like an overlay, but its views are not shown: their alpha becomes the alpha of the content.
 final class MaskNode: ContainerNode {
     var maskNode: Node?
     var alignment = Alignment.center
@@ -173,7 +171,6 @@ final class MaskNode: ContainerNode {
     }
 }
 
-// A UIImage from a bundle other than the main one: UIImage(named:) only reads the main bundle on iOS 6.
 func bundleImage(_ name: String, _ bundle: Bundle?) -> UIImage? {
     guard let bundle, bundle != Bundle.main else { return UIImage(named: name) }
     let scale = Int(UIScreen.main.scale)

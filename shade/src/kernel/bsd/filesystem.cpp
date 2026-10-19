@@ -100,7 +100,7 @@ namespace {
         return std::nullopt;
     }
 
-} // namespace
+}
 
 void CompatibilityKernel::dispatch_bsd_filesystem(
     Cpu& cpu, std::uint32_t number)
@@ -141,7 +141,7 @@ void CompatibilityKernel::dispatch_bsd_filesystem(
         return true;
     };
     switch (number) {
-    case 9: { // link
+    case 9: {
         const auto source_path = memory_.read_c_string(registers[0]);
         const auto destination_path = memory_.read_c_string(registers[1]);
         if (!source_path || !destination_path) {
@@ -157,7 +157,7 @@ void CompatibilityKernel::dispatch_bsd_filesystem(
             return;
         }
         if (std::filesystem::is_directory(status)) {
-            bsd_error(cpu, 1U); // EPERM
+            bsd_error(cpu, 1U);
             return;
         }
         {
@@ -192,7 +192,7 @@ void CompatibilityKernel::dispatch_bsd_filesystem(
         bsd_success(cpu, 0);
         return;
     }
-    case 10: { // unlink
+    case 10: {
         const auto path = memory_.read_c_string(registers[0]);
         if (!path) {
             bsd_error(cpu, bsd_support::bad_address);
@@ -201,8 +201,6 @@ void CompatibilityKernel::dispatch_bsd_filesystem(
         {
             std::lock_guard socket_lock { shared_state_->socket_mutex };
             if (shared_state_->unix_socket_nodes.erase(*path) != 0) {
-                // Existing connections and the listening open description
-                // remain alive, but new pathname lookups must stop now.
                 shared_state_->unix_listeners.erase(*path);
                 output_.write("[network] unlink " + *path + "\n");
                 bsd_success(cpu, 0);
@@ -217,7 +215,7 @@ void CompatibilityKernel::dispatch_bsd_filesystem(
             return;
         }
         if (std::filesystem::is_directory(status)) {
-            bsd_error(cpu, 21); // EISDIR
+            bsd_error(cpu, 21);
             return;
         }
         const auto metadata = query_hfs_metadata(host, false);
@@ -232,8 +230,6 @@ void CompatibilityKernel::dispatch_bsd_filesystem(
             std::error_code resource_error;
             static_cast<void>(hfs_metadata_.remove_name(
                 hfs::MetadataProvider::resource_sidecar(host), resource_error));
-            // HFS vnode metadata belongs to the inode, not to one catalog
-            // name.  Keep it while another hard link still names the inode.
             if (metadata && metadata->link_count <= 1U) {
                 shared_state_->hfs_metadata_overrides.erase(
                     metadata->permanent_id);
@@ -249,35 +245,28 @@ void CompatibilityKernel::dispatch_bsd_filesystem(
         bsd_success(cpu, 0);
         return;
     }
-    case 5: // open
-    case 216: { // open_dprotected_np
+    case 5:
+    case 216: {
         const auto flags = registers[1];
         const auto mode = number == 216U ? registers[4] : registers[2];
-        constexpr std::uint32_t raw_encrypted = 1U; // O_DP_GETRAWENCRYPTED
+        constexpr std::uint32_t raw_encrypted = 1U;
         if (number == 216U && (registers[3] & raw_encrypted) != 0U &&
             (flags & darwin::open_flag::access_mode) !=
                 darwin::open_flag::read_only) {
             bsd_error(cpu, darwin::error::invalid_argument);
             return;
         }
-        // The VFS exposes an unencrypted volume (F_GETPROTECTIONCLASS=0).
-        // Raw reads therefore use the same bytes and descriptor lifecycle as
-        // open; a requested creation class adds no encryption metadata.
         const auto path = memory_.read_c_string(registers[0]);
         if (!path) {
             bsd_error(cpu, bsd_support::bad_address);
             return;
         }
         if (path->empty()) {
-            // POSIX open(2) does not treat an empty pathname as the process
-            // working directory.  Resolving it to rootfs would hand the guest a
-            // directory descriptor and change ENOENT into a later EISDIR
-            // failure.
             bsd_error(cpu, darwin::error::no_entry);
             return;
         }
         if (rootfs_.empty()) {
-            bsd_error(cpu, 2); // ENOENT
+            bsd_error(cpu, 2);
             return;
         }
         const auto host = resolve_guest_path(*path);
@@ -290,9 +279,6 @@ void CompatibilityKernel::dispatch_bsd_filesystem(
         if (bsd::baseband_device::is_mux_channel_path(*path) &&
             !shared_state_->baseband_device_state.mux_channel_path_available(
                 *path)) {
-            // This profile has no guest-visible DLCI setup capability. Do not
-            // allocate a descriptor that could be mistaken for a modem
-            // endpoint.
             constexpr auto error = darwin::error::no_such_device_or_address;
             bsd_error(cpu, error);
             return;
@@ -301,7 +287,7 @@ void CompatibilityKernel::dispatch_bsd_filesystem(
             (*path == "/etc/resolv.conf" || *path == "/var/run/resolv.conf")) {
             const auto fd = allocate_file_descriptor();
             if (!fd) {
-                bsd_error(cpu, 24); // EMFILE
+                bsd_error(cpu, 24);
                 return;
             }
             virtual_descriptors_.emplace(*fd, "resolver-config");
@@ -313,10 +299,6 @@ void CompatibilityKernel::dispatch_bsd_filesystem(
         }
         if (bsd::baseband_device::is_path(*path)) {
             if (!shared_state_->baseband_device_state.available()) {
-                // There is no modem attached to the simulator. Report the same
-                // device-level failure a real kernel returns before a client
-                // can send an AT command; do not turn a silent successful write
-                // into a fake radio state.
                 bsd_error(cpu, darwin::error::no_such_device_or_address);
                 return;
             }
@@ -331,7 +313,7 @@ void CompatibilityKernel::dispatch_bsd_filesystem(
         if (const auto minor = darwin::bpf::device_minor(*path)) {
             const auto fd = allocate_file_descriptor();
             if (!fd) {
-                bsd_error(cpu, 24); // EMFILE
+                bsd_error(cpu, 24);
                 return;
             }
             virtual_descriptors_.emplace(*fd, darwin::bpf::descriptor_kind);
@@ -346,7 +328,7 @@ void CompatibilityKernel::dispatch_bsd_filesystem(
         if (*path == darwin::network::apple80211_driver::event_device_path) {
             const auto fd = allocate_file_descriptor();
             if (!fd) {
-                bsd_error(cpu, 24); // EMFILE
+                bsd_error(cpu, 24);
                 return;
             }
             virtual_descriptors_.emplace(
@@ -367,7 +349,7 @@ void CompatibilityKernel::dispatch_bsd_filesystem(
             bsd::offline_serial_device::is_path(*path)) {
             const auto fd = allocate_file_descriptor();
             if (!fd) {
-                bsd_error(cpu, 24); // EMFILE
+                bsd_error(cpu, 24);
                 return;
             }
             const auto kind = *path == "/dev/console"
@@ -398,7 +380,7 @@ void CompatibilityKernel::dispatch_bsd_filesystem(
             }
             const auto fd = allocate_file_descriptor();
             if (!fd) {
-                bsd_error(cpu, 24); // EMFILE
+                bsd_error(cpu, 24);
                 return;
             }
             file_descriptors_.emplace(*fd, backing);
@@ -507,7 +489,7 @@ void CompatibilityKernel::dispatch_bsd_filesystem(
             directory_entries_cache_.clear();
         const auto fd = allocate_file_descriptor();
         if (!fd) {
-            bsd_error(cpu, 24); // EMFILE
+            bsd_error(cpu, 24);
             return;
         }
         file_descriptors_.emplace(*fd, host);
@@ -518,7 +500,7 @@ void CompatibilityKernel::dispatch_bsd_filesystem(
         bsd_success(cpu, *fd);
         return;
     }
-    case 6: { // close
+    case 6: {
         const auto fd = registers[0];
         if (reject_guarded_descriptor(cpu, fd, DarwinFileGuard::close))
             return;
@@ -529,7 +511,7 @@ void CompatibilityKernel::dispatch_bsd_filesystem(
         }
         return;
     }
-    case 12: { // chdir
+    case 12: {
         const auto path = memory_.read_c_string(registers[0]);
         if (!path) {
             bsd_error(cpu, bsd_support::bad_address);
@@ -538,7 +520,7 @@ void CompatibilityKernel::dispatch_bsd_filesystem(
         const auto host = resolve_guest_path(*path);
         std::error_code error;
         if (!std::filesystem::is_directory(host, error)) {
-            bsd_error(cpu, error ? 2U : 20U); // ENOENT / ENOTDIR
+            bsd_error(cpu, error ? 2U : 20U);
             return;
         }
         std::filesystem::path guest { *path };
@@ -552,7 +534,7 @@ void CompatibilityKernel::dispatch_bsd_filesystem(
         bsd_success(cpu, 0);
         return;
     }
-    case 13: { // fchdir
+    case 13: {
         auto fd = registers[0];
         if (const auto duplicate = duplicated_descriptors_.find(fd);
             duplicate != duplicated_descriptors_.end()) {
@@ -581,7 +563,7 @@ void CompatibilityKernel::dispatch_bsd_filesystem(
         bsd_success(cpu, 0);
         return;
     }
-    case 18: { // getfsstat / legacy ogetfsstat
+    case 18: {
         const auto mount_count =
             static_cast<std::uint32_t>(shared_state_->mounts.size());
         if (registers[0] == 0) {
@@ -603,7 +585,7 @@ void CompatibilityKernel::dispatch_bsd_filesystem(
         bsd_success(cpu, count);
         return;
     }
-    case 33: { // access
+    case 33: {
         const auto path = memory_.read_c_string(registers[0]);
         if (!path) {
             bsd_error(cpu, bsd_support::bad_address);
@@ -637,18 +619,13 @@ void CompatibilityKernel::dispatch_bsd_filesystem(
         }
         std::error_code error;
         if (!std::filesystem::exists(resolve_guest_path(*path), error)) {
-            bsd_error(cpu, 2); // ENOENT
+            bsd_error(cpu, 2);
         } else {
-            // Firmware files are exposed read/execute; write checks will move
-            // to the per-process overlay rather than mutating the extracted
-            // image.
             bsd_success(cpu, 0);
         }
         return;
     }
-    case 36: // sync
-        // Guest filesystem state is applied synchronously to the extracted
-        // backing tree and virtual mount table, so there is nothing deferred.
+    case 36:
         bsd_success(cpu, 0);
         return;
     case darwin::syscall::revoke: {
@@ -677,15 +654,11 @@ void CompatibilityKernel::dispatch_bsd_filesystem(
                 return;
             }
         }
-        // Device endpoints are guest-owned objects rather than host
-        // descriptors. A subsequent open therefore receives fresh endpoint
-        // state without asking the host kernel to revoke an unrelated device
-        // node.
         output_.write("[vfs] revoke " + *path + "\n");
         bsd_success(cpu, 0);
         return;
     }
-    case 57: { // symlink
+    case 57: {
         const auto target = memory_.read_c_string(registers[0]);
         const auto link_path = memory_.read_c_string(registers[1]);
         if (!target || !link_path) {
@@ -693,7 +666,7 @@ void CompatibilityKernel::dispatch_bsd_filesystem(
             return;
         }
         if (target->size() >= 4096U) {
-            bsd_error(cpu, 63U); // ENAMETOOLONG
+            bsd_error(cpu, 63U);
             return;
         }
         const auto host = resolve_guest_path(*link_path, false);
@@ -733,7 +706,7 @@ void CompatibilityKernel::dispatch_bsd_filesystem(
         bsd_success(cpu, 0);
         return;
     }
-    case 58: { // readlink
+    case 58: {
         const auto path = memory_.read_c_string(registers[0]);
         if (!path) {
             bsd_error(cpu, bsd_support::bad_address);
@@ -767,7 +740,7 @@ void CompatibilityKernel::dispatch_bsd_filesystem(
         bsd_success(cpu, static_cast<std::uint32_t>(count));
         return;
     }
-    case 128: { // rename
+    case 128: {
         const auto source_path = memory_.read_c_string(registers[0]);
         const auto destination_path = memory_.read_c_string(registers[1]);
         if (!source_path || !destination_path) {
@@ -777,7 +750,7 @@ void CompatibilityKernel::dispatch_bsd_filesystem(
         const auto source = resolve_guest_path(*source_path, false);
         const auto destination = resolve_guest_path(*destination_path, false);
         if (source.lexically_normal() == rootfs_.lexically_normal()) {
-            bsd_error(cpu, 16U); // EBUSY
+            bsd_error(cpu, 16U);
             return;
         }
         std::error_code source_status_error;
@@ -788,9 +761,6 @@ void CompatibilityKernel::dispatch_bsd_filesystem(
             std::filesystem::is_directory(source_status);
         const auto source_metadata = query_hfs_metadata(source, false);
         const auto replaced_metadata = query_hfs_metadata(destination, false);
-        // POSIX specifies rename(old, new) as a successful no-op when both
-        // names already refer to the same inode.  This also avoids disturbing
-        // the two resource-fork sidecar links or their shared metadata.
         if (source_metadata && replaced_metadata &&
             source_metadata->permanent_id == replaced_metadata->permanent_id) {
             bsd_success(cpu, 0);
@@ -802,7 +772,6 @@ void CompatibilityKernel::dispatch_bsd_filesystem(
             const std::lock_guard filesystem_lock {
                 shared_state_->filesystem_mutex
             };
-            // The name the rename replaces ends its inode when it held the last link.
             const auto replaced_identity =
                 hfs_metadata_.last_link_identity(destination);
             std::filesystem::rename(source, destination, error);
@@ -875,7 +844,7 @@ void CompatibilityKernel::dispatch_bsd_filesystem(
         bsd_success(cpu, 0);
         return;
     }
-    case 136: { // mkdir
+    case 136: {
         const auto path = memory_.read_c_string(registers[0]);
         if (!path) {
             bsd_error(cpu, bsd_support::bad_address);
@@ -886,12 +855,12 @@ void CompatibilityKernel::dispatch_bsd_filesystem(
         {
             std::lock_guard filesystem_lock { shared_state_->filesystem_mutex };
             if (std::filesystem::exists(host, error)) {
-                bsd_error(cpu, 17); // EEXIST
+                bsd_error(cpu, 17);
                 return;
             }
             error.clear();
             if (!std::filesystem::is_directory(host.parent_path(), error)) {
-                bsd_error(cpu, 2); // ENOENT
+                bsd_error(cpu, 2);
                 return;
             }
             error.clear();
@@ -931,7 +900,7 @@ void CompatibilityKernel::dispatch_bsd_filesystem(
         bsd_success(cpu, 0);
         return;
     }
-    case 137: { // rmdir
+    case 137: {
         const auto path = memory_.read_c_string(registers[0]);
         if (!path) {
             bsd_error(cpu, bsd_support::bad_address);
@@ -943,9 +912,9 @@ void CompatibilityKernel::dispatch_bsd_filesystem(
         if (error || status.type() == std::filesystem::file_type::not_found) {
             bsd_error(cpu, 2);
         } else if (!std::filesystem::is_directory(status)) {
-            bsd_error(cpu, 20); // ENOTDIR
+            bsd_error(cpu, 20);
         } else if (host.lexically_normal() == rootfs_.lexically_normal()) {
-            bsd_error(cpu, 16U); // EBUSY
+            bsd_error(cpu, 16U);
         } else {
             const auto metadata = query_hfs_metadata(host, false);
             {
@@ -972,7 +941,7 @@ void CompatibilityKernel::dispatch_bsd_filesystem(
         }
         return;
     }
-    case 153: { // pread
+    case 153: {
         if (const auto device = virtual_descriptors_.find(registers[0]);
             device != virtual_descriptors_.end() &&
             device->second == "random") {
@@ -1030,7 +999,7 @@ void CompatibilityKernel::dispatch_bsd_filesystem(
         bsd_success(cpu, static_cast<std::uint32_t>(bytes.size()));
         return;
     }
-    case 154: { // pwrite
+    case 154: {
         auto fd = registers[0];
         if (const auto duplicate = duplicated_descriptors_.find(fd);
             duplicate != duplicated_descriptors_.end()) {
@@ -1087,7 +1056,7 @@ void CompatibilityKernel::dispatch_bsd_filesystem(
         bsd_success(cpu, static_cast<std::uint32_t>(result));
         return;
     }
-    case 157: { // statfs
+    case 157: {
         const auto path = memory_.read_c_string(registers[0]);
         if (!path) {
             bsd_error(cpu, bsd_support::bad_address);
@@ -1095,7 +1064,7 @@ void CompatibilityKernel::dispatch_bsd_filesystem(
         }
         std::error_code error;
         if (!std::filesystem::exists(resolve_guest_path(*path), error)) {
-            bsd_error(cpu, 2); // ENOENT
+            bsd_error(cpu, 2);
             return;
         }
         const auto& volume = hfs_volumes_.for_guest_path(*path);
@@ -1106,7 +1075,7 @@ void CompatibilityKernel::dispatch_bsd_filesystem(
         bsd_success(cpu, 0);
         return;
     }
-    case 345: { // statfs64
+    case 345: {
         const auto path = memory_.read_c_string(registers[0]);
         if (!path) {
             bsd_error(cpu, bsd_support::bad_address);
@@ -1134,7 +1103,7 @@ void CompatibilityKernel::dispatch_bsd_filesystem(
         bsd_success(cpu, 0);
         return;
     }
-    case 159: { // unmount
+    case 159: {
         const auto path = memory_.read_c_string(registers[0]);
         if (!path) {
             bsd_error(cpu, bsd_support::bad_address);
@@ -1153,7 +1122,7 @@ void CompatibilityKernel::dispatch_bsd_filesystem(
         bsd_success(cpu, 0);
         return;
     }
-    case 167: { // mount
+    case 167: {
         const auto type = memory_.read_c_string(registers[0], 32);
         const auto path = memory_.read_c_string(registers[1]);
         if (!type || !path) {
@@ -1189,7 +1158,7 @@ void CompatibilityKernel::dispatch_bsd_filesystem(
         bsd_success(cpu, 0);
         return;
     }
-    case 158: // fstatfs
+    case 158:
         if (!file_descriptors_.contains(registers[0]) &&
             !virtual_descriptors_.contains(registers[0]) && registers[0] > 2) {
             bsd_error(cpu, bsd_support::bad_file_descriptor);
@@ -1203,7 +1172,7 @@ void CompatibilityKernel::dispatch_bsd_filesystem(
             bsd_success(cpu, 0);
         }
         return;
-    case 346: { // fstatfs64
+    case 346: {
         auto descriptor = registers[0];
         if (const auto duplicate = duplicated_descriptors_.find(descriptor);
             duplicate != duplicated_descriptors_.end()) {
@@ -1227,7 +1196,7 @@ void CompatibilityKernel::dispatch_bsd_filesystem(
         bsd_success(cpu, 0);
         return;
     }
-    case 347: { // getfsstat64
+    case 347: {
         const auto mount_count =
             static_cast<std::uint32_t>(shared_state_->mounts.size());
         if (registers[0] == 0) {
@@ -1249,7 +1218,7 @@ void CompatibilityKernel::dispatch_bsd_filesystem(
         bsd_success(cpu, count);
         return;
     }
-    case 200: { // truncate
+    case 200: {
         const auto path = memory_.read_c_string(registers[0]);
         if (!path) {
             bsd_error(cpu, bsd_support::bad_address);
@@ -1280,7 +1249,7 @@ void CompatibilityKernel::dispatch_bsd_filesystem(
         bsd_success(cpu, 0);
         return;
     }
-    case 201: { // ftruncate
+    case 201: {
         auto fd = registers[0];
         if (const auto duplicate = duplicated_descriptors_.find(fd);
             duplicate != duplicated_descriptors_.end()) {
@@ -1316,8 +1285,8 @@ void CompatibilityKernel::dispatch_bsd_filesystem(
         bsd_success(cpu, 0);
         return;
     }
-    case 196: // getdirentries
-    case 344: { // getdirentries64
+    case 196:
+    case 344: {
         auto fd = registers[0];
         if (const auto duplicate = duplicated_descriptors_.find(fd);
             duplicate != duplicated_descriptors_.end()) {
@@ -1331,7 +1300,7 @@ void CompatibilityKernel::dispatch_bsd_filesystem(
         std::error_code directory_error;
         if (!std::filesystem::is_directory(
                 descriptor->second, directory_error)) {
-            bsd_error(cpu, 20); // ENOTDIR
+            bsd_error(cpu, 20);
             return;
         }
         const auto cache_key = descriptor->second.lexically_normal();
@@ -1398,9 +1367,9 @@ void CompatibilityKernel::dispatch_bsd_filesystem(
                                 static_cast<std::uint32_t>(entries.size()) });
                     }
                 };
-                add_virtual("disk0s1", 6); // DT_BLK
+                add_virtual("disk0s1", 6);
                 add_virtual("disk0s2", 6);
-                add_virtual("rdisk0s1", 2); // DT_CHR
+                add_virtual("rdisk0s1", 2);
                 add_virtual("rdisk0s2", 2);
                 add_virtual("console", 2);
                 add_virtual("null", 2);
@@ -1515,7 +1484,7 @@ void CompatibilityKernel::dispatch_bsd_filesystem(
         bsd_success(cpu, static_cast<std::uint32_t>(bytes.size()));
         return;
     }
-    case 199: { // lseek
+    case 199: {
         auto fd = registers[0];
         if (const auto duplicate = duplicated_descriptors_.find(fd);
             duplicate != duplicated_descriptors_.end()) {
@@ -1525,7 +1494,7 @@ void CompatibilityKernel::dispatch_bsd_filesystem(
         if (file == file_descriptors_.end()) {
             bsd_error(cpu, virtual_descriptors_.contains(fd)
                                ? 29
-                               : bsd_support::bad_file_descriptor); // ESPIPE
+                               : bsd_support::bad_file_descriptor);
             return;
         }
         const auto raw_offset =
@@ -1535,11 +1504,11 @@ void CompatibilityKernel::dispatch_bsd_filesystem(
         std::int64_t base = 0;
         switch (registers[3]) {
         case 0:
-            break; // SEEK_SET
+            break;
         case 1:
             base = static_cast<std::int64_t>(file_offsets_[fd]);
-            break; // SEEK_CUR
-        case 2: { // SEEK_END
+            break;
+        case 2: {
             const auto description = ensure_regular_file_open_description(fd);
             struct stat status { };
             if (!description ||
@@ -1575,7 +1544,7 @@ void CompatibilityKernel::dispatch_bsd_filesystem(
             static_cast<std::uint32_t>(result >> 32U));
         return;
     }
-    case 220: { // getattrlist (HFS/HFS+ metadata interface)
+    case 220: {
         const auto path = memory_.read_c_string(registers[0]);
         const auto bitmap_count = memory_.read16(registers[1]);
         if (!path || !bitmap_count || *bitmap_count != 5) {
@@ -1653,7 +1622,7 @@ void CompatibilityKernel::dispatch_bsd_filesystem(
         bsd_success(cpu, 0);
         return;
     }
-    case 221: { // setattrlist
+    case 221: {
         const auto path = memory_.read_c_string(registers[0]);
         const auto bitmap_count = memory_.read16(registers[1]);
         if (!path || !bitmap_count || *bitmap_count != 5) {
@@ -1872,7 +1841,7 @@ void CompatibilityKernel::dispatch_bsd_filesystem(
             return;
         }
 
-        if (operation == 3U) { // listxattr/flistxattr
+        if (operation == 3U) {
             const auto names = query_hfs_named_attributes(host, follow_symlink);
             std::vector<std::byte> packed;
             for (const auto& name : names) {
@@ -1912,7 +1881,7 @@ void CompatibilityKernel::dispatch_bsd_filesystem(
         const auto existing =
             query_hfs_named_attribute(host, follow_symlink, *name);
 
-        if (operation == 0U) { // getxattr/fgetxattr
+        if (operation == 0U) {
             if (!existing) {
                 bsd_error(cpu, darwin::error::no_attribute);
                 return;
@@ -1949,7 +1918,7 @@ void CompatibilityKernel::dispatch_bsd_filesystem(
             return;
         }
 
-        if (operation == 1U) { // setxattr/fsetxattr
+        if (operation == 1U) {
             const auto value = registers[2];
             const auto size = registers[3];
             const auto position = registers[4];
@@ -2045,7 +2014,6 @@ void CompatibilityKernel::dispatch_bsd_filesystem(
             return;
         }
 
-        // removexattr/fremovexattr
         if (!existing) {
             bsd_error(cpu, darwin::error::no_attribute);
             return;
@@ -2080,10 +2048,10 @@ void CompatibilityKernel::dispatch_bsd_filesystem(
         bsd_success(cpu, 0);
         return;
     }
-    case 338: // stat64
-    case 340: // lstat64
-    case 341: // stat64_extended
-    case 342: { // lstat64_extended
+    case 338:
+    case 340:
+    case 341:
+    case 342: {
         const auto path = memory_.read_c_string(registers[0]);
         if (!path) {
             bsd_error(cpu, bsd_support::bad_address);
@@ -2154,8 +2122,8 @@ void CompatibilityKernel::dispatch_bsd_filesystem(
         bsd_success(cpu, 0);
         return;
     }
-    case 339: // fstat64
-    case 343: { // fstat64_extended
+    case 339:
+    case 343: {
         auto descriptor = registers[0];
         if (const auto duplicate = duplicated_descriptors_.find(descriptor);
             duplicate != duplicated_descriptors_.end()) {
@@ -2230,8 +2198,8 @@ void CompatibilityKernel::dispatch_bsd_filesystem(
         bsd_success(cpu, 0);
         return;
     }
-    case 188: // stat
-    case 190: { // lstat
+    case 188:
+    case 190: {
         const auto path = memory_.read_c_string(registers[0]);
         if (!path) {
             bsd_error(cpu, bsd_support::bad_address);
@@ -2291,7 +2259,7 @@ void CompatibilityKernel::dispatch_bsd_filesystem(
         bsd_success(cpu, 0);
         return;
     }
-    case 189: { // fstat
+    case 189: {
         auto descriptor = registers[0];
         if (const auto duplicate = duplicated_descriptors_.find(descriptor);
             duplicate != duplicated_descriptors_.end()) {
@@ -2362,4 +2330,4 @@ void CompatibilityKernel::dispatch_bsd_filesystem(
     }
 }
 
-} // namespace shade
+}

@@ -188,7 +188,7 @@ namespace {
             std::move(property), *value };
     }
 
-} // namespace
+}
 
 std::optional<CategoryVolume> decode_reply(
     std::uint32_t identifier, std::span<const std::byte> bytes)
@@ -278,4 +278,4 @@ std::optional<SourceFloatProperty> decode_source_float_property_request(
     return std::nullopt;
 }
 
-} // namespace shade::celestial_volume_protocol
+}

@@ -188,7 +188,6 @@ final class ListController: NSObject, UITableViewDataSource, UITableViewDelegate
 
     func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
         guard let node, node.prominence[section] == true, let title = node.sections[section].title else { return nil }
-        // the header is text of the section, so it is drawn at the size the section's own size category means
         let scale = node.sectionTextScales[section]
         let holder = UIView(frame: CGRect(x: 0, y: 0, width: tableView.bounds.size.width, height: 44 * scale))
         let label = UILabel(frame: CGRect(x: 20, y: 8, width: tableView.bounds.size.width - 40, height: 28 * scale))
@@ -229,7 +228,6 @@ final class ListController: NSObject, UITableViewDataSource, UITableViewDelegate
         return cell
     }
     func configure(_ cell: UITableViewCell, _ row: ListRow, _ node: ListNode) {
-        // a colour behind the row; a clear one takes away the white card a row of a grouped table is drawn on
         if let color = row.traits.background {
             cell.backgroundColor = color
             var alpha: CGFloat = 1
@@ -250,10 +248,6 @@ final class ListController: NSObject, UITableViewDataSource, UITableViewDelegate
         }
     }
 
-    // The table of iOS 6 draws one hairline between every pair of rows, in the table's own colour, and a cell of that iOS
-    // has no separator inset to shorten it. A row that hides the line, or gives it another colour, therefore covers it
-    // with a line of its own - drawn where the release draws its: one point tall, at the bottom of the row, from one
-    // edge of the cell to the other.
     func applySeparator(_ cell: UITableViewCell, _ row: ListRow) {
         let hiding = row.traits.separator == .hidden
         let tint = row.traits.separatorTint
@@ -269,10 +263,7 @@ final class ListController: NSObject, UITableViewDataSource, UITableViewDelegate
             row.separatorLine = view
             return view
         }()
-        // what the row hides the hairline with is what the hairline was drawn over: the row's own background, or the
-        // table's where the row has none
         line.backgroundColor = tint ?? row.traits.background ?? cell.backgroundColor ?? node?.uiView.backgroundColor
-        // one pixel of a line, where the release puts its own: the bottom of the cell, from one edge to the other
         let thickness = 1 / UIScreen.main.scale
         line.frame = CGRect(x: 0, y: max(0, cell.bounds.size.height - thickness), width: cell.bounds.size.width, height: thickness)
     }
@@ -353,7 +344,6 @@ final class ListNode: LayoutNode {
     var content: Node?
     var rows: [ListRow] = []
     var sections: [(title: String?, footer: String?, rows: [ListRow])] = []
-    // the factor the text of a section is drawn at, which is the size category of that section's own environment
     var sectionTextScales: [CGFloat] = []
     var editable: EditableContent?
     var selection: SelectionBox?
@@ -368,7 +358,6 @@ final class ListNode: LayoutNode {
         let table = uiView as! UITableView
         table.dataSource = controller
         table.delegate = controller
-        // the swipe actions of the backports attach when a delegate is set after their library loaded; asking again is harmless
         let install = NSSelectorFromString("charon_installSwipeActions")
         if table.responds(to: install) { table.perform(install) }
     }
@@ -413,8 +402,6 @@ final class ListNode: LayoutNode {
         return indexPath.row < rows.count ? rows[indexPath.row] : nil
     }
 
-    // Rows are matched by the node they show, so a row keeps its cell when the list around it changes, and what was
-    // inserted, removed or moved is animated by the table; anything structural beyond that reloads it.
     var movedByTable = false
     var measuredHeights: [ObjectIdentifier: CGFloat] = [:]
 
@@ -468,7 +455,6 @@ final class ListNode: LayoutNode {
             let change = ListRowDiff.between(pair.0.rows, pair.1.rows)
             deletions += change.deleted.map { IndexPath(row: $0, section: section) }
             insertions += change.inserted.map { IndexPath(row: $0, section: section) }
-            // a row that moved shows in a new cell, so that no cell is on the way out and the way in at once
             for index in change.inserted where change.deleted.contains(where: { previousSections[section].rows[$0] === pair.1.rows[index] }) {
                 pair.1.rows[index].cell = nil
             }
@@ -518,13 +504,11 @@ func rowTag(_ item: Node, upTo list: Node) -> AnyHashable? {
 }
 
 enum ListRowDiff {
-    // Rows in both lists that keep their order stay; the rest are deleted from the old list and inserted in the new one.
     static func between(_ old: [ListRow], _ new: [ListRow]) -> (deleted: [Int], inserted: [Int]) {
         var oldIndex: [ObjectIdentifier: Int] = [:]
         for (index, row) in old.enumerated() { oldIndex[ObjectIdentifier(row)] = index }
         var common: [(new: Int, old: Int)] = []
         for (index, row) in new.enumerated() { if let before = oldIndex[ObjectIdentifier(row)] { common.append((index, before)) } }
-        // the longest run of common rows that is in the same order in both lists is what stays where it is
         var tails: [Int] = [], tailIndex: [Int] = [], parent = [Int](repeating: -1, count: common.count)
         for (position, pair) in common.enumerated() {
             var low = 0, high = tails.count
@@ -545,7 +529,6 @@ extension ListController {
             guard let cell = table.cellForRow(at: path), let row = node.row(at: path) else { continue }
             configure(cell, row, node)
         }
-        // the table measures its rows again only when one of them changed size
         var resized = false
         for path in table.indexPathsForVisibleRows ?? [] {
             guard let row = node.row(at: path), let before = node.measuredHeights[ObjectIdentifier(row)] else { continue }
@@ -555,8 +538,6 @@ extension ListController {
     }
 }
 
-// The editable forms: a row is written against the element's own binding, so an edit, a delete and a
-// move reach the collection the app holds. Apple's shapes and constraints, from the 26.2 interface.
 extension List {
     private static func setBox<V: Hashable>(_ binding: Binding<Set<V>?>) -> SelectionBox {
         SelectionBox(current: { binding.wrappedValue.map { Set($0.map { AnyHashable($0) }) } ?? [] },
@@ -617,7 +598,6 @@ extension List {
     }
 }
 
-// A list with nothing selected takes its rows under the empty selection, as SwiftUI writes it.
 extension List where SelectionValue == Never {
     public init<C, ID, R>(_ data: Binding<C>, id: KeyPath<C.Element, ID>, @ViewBuilder rowContent: @escaping (Binding<C.Element>) -> R)
         where Content == ForEach<IndexedIdentifierCollection<C, ID>, ID, EditableCollectionContent<R, C>>,

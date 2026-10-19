@@ -52,8 +52,6 @@ bool BigNumberArithmetic::power_modulo(std::span<const std::byte> base,
         modulus.size() != result.size()) {
         return false;
     }
-    // Each operation owns its workspace; independent guest CPUs do not share
-    // OpenSSL scratch state. The secure context clears intermediate values.
     std::unique_ptr<BN_CTX, decltype(&BN_CTX_free)> context {
         BN_CTX_secure_new(), BN_CTX_free
     };
@@ -74,7 +72,6 @@ bool BigNumberArithmetic::power_modulo(std::span<const std::byte> base,
         BN_is_zero(m) || BN_is_one(m) || !BN_is_odd(m)) {
         return false;
     }
-    // Use the constant-time Montgomery implementation for secret exponents.
     if (BN_mod_exp_mont_consttime(r, a, e, m, context.get(), nullptr) != 1)
         return false;
     return BN_bn2lebinpad(r, reinterpret_cast<unsigned char*>(result.data()),
@@ -82,4 +79,4 @@ bool BigNumberArithmetic::power_modulo(std::span<const std::byte> base,
            static_cast<int>(result.size());
 }
 
-} // namespace shade
+}

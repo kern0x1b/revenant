@@ -21,7 +21,7 @@ namespace {
                    : left + right;
     }
 
-} // namespace
+}
 
 std::size_t JitCodeCacheGovernor::recommended_total_budget(
     std::uint64_t effective_memory_bytes, bool effective_memory_known,
@@ -101,8 +101,6 @@ std::optional<std::size_t> JitCodeCacheGovernor::reclassify(
     std::lock_guard lock { mutex_ };
     static_cast<void>(slab_can_resize);
     reservation.cache_class_ = cache_class;
-    // Mapping capacity is a backend/host property, not a lifecycle quota.
-    // Returning it lets a not-yet-created emitter apply the same invariant.
     return reservation.shared_slab_bytes_;
 }
 
@@ -204,4 +202,4 @@ void JitCodeCacheGovernor::release(
             : actual_bytes_total_ - static_cast<std::size_t>(actual_bytes);
 }
 
-} // namespace shade
+}

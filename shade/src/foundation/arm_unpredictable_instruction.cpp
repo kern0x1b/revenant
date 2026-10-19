@@ -25,15 +25,13 @@ namespace {
     {
         if (!thumb)
             return instruction;
-        // Thumb-2 Advanced SIMD keeps the low 24 bits of the ARM encoding and
-        // moves U from bit 28 to bit 24.
         if ((instruction & 0xef000000U) != 0xef000000U)
             return 0U;
         const auto u = (instruction >> 28U) & 1U;
         return 0xf2000000U | (u << 24U) | (instruction & 0x00ffffffU);
     }
 
-} // namespace
+}
 
 bool emulate_arm_unpredictable_instruction(
     ArmUnpredictableInstructionPolicy profile, bool thumb,
@@ -55,17 +53,11 @@ bool emulate_arm_unpredictable_instruction(
     const auto destination =
         (((decoded >> 22U) & 1U) << 4U) | ((decoded >> 12U) & 0xfU);
     const auto source = (((decoded >> 5U) & 1U) << 4U) | (decoded & 0xfU);
-    // The architecture marks equal source/destination results UNKNOWN.
-    // This Cortex-A8 profile follows the ordered NEON writes: the
-    // destination-side result remains visible after the aliased source-side
-    // result has been written.  Vectorized system codecs in iOS 4 rely on
-    // this deterministic hardware behavior.
     if (element_size > 2U || destination != source ||
         (q && (destination & 1U) != 0U)) {
         return false;
     }
 
-    // VUZP/VZIP have no D-register encoding for 32-bit elements.
     if (operation != asimd_vtrn_value && element_size == 2U && !q)
         return false;
 
@@ -141,4 +133,4 @@ bool emulate_arm_unpredictable_instruction(
     return true;
 }
 
-} // namespace shade
+}

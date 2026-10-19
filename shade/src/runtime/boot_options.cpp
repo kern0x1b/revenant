@@ -20,4 +20,4 @@ std::filesystem::path default_host_cache_directory(
     return normalized.parent_path() / ".shade-cache" / rootfs_name;
 }
 
-} // namespace shade
+}

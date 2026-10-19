@@ -18,7 +18,7 @@ namespace {
 
     constexpr std::string_view libsystem_image { "/usr/lib/libSystem.B.dylib" };
 
-} // namespace
+}
 
 DarwinNotifyStateHle::DarwinNotifyStateHle(UserlandHleRegistry& registry)
 {
@@ -117,10 +117,6 @@ void DarwinNotifyStateHle::initialize(UserlandHleCall& call)
         std::lock_guard lock { mutex_ };
         provider_query = native_server_provider_query_;
     }
-    // A provider's image initializers cannot synchronously register with its
-    // own server before main has checked in. Leave libnotify's cached server
-    // port unset so later calls can initialize normally. Other clients retain
-    // native bootstrap lookup, including on-demand service activation.
     if (!native_server_ready() && provider_query && provider_query()) {
         constexpr std::uint32_t notify_status_failed = 1'000'000U;
         call.set_return(notify_status_failed);
@@ -248,8 +244,6 @@ void DarwinNotifyStateHle::get_state(UserlandHleCall& call)
         return;
     }
 
-    // Let libnotify validate and maintain its native token first. A configured
-    // virtual device then supplies only the 64-bit state value.
     call.resume_original_persistently(
         [provider = std::move(provider), state_address](
             UserlandHleCall& completed) {
@@ -338,4 +332,4 @@ bool DarwinNotifyStateHle::native_server_ready() const
     return !query || query();
 }
 
-} // namespace shade
+}

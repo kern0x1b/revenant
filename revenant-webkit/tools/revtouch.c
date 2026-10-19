@@ -39,7 +39,7 @@ static void post(float px, float py, boolean_t down)
     uint64_t ts = mach_absolute_time();
 
     IOHIDEventRef parent = IOHIDEventCreateDigitizerEvent(kCFAllocatorDefault, ts,
-        2 /* hand */, 0, 0, mask, 0, x, y, 0, 0, 0, down, down, 0);
+        2 , 0, 0, mask, 0, x, y, 0, 0, 0, down, down, 0);
     IOHIDEventSetIntegerValue(parent, FIELD_IS_DISPLAY_INTEGRATED, 1);
 
     IOHIDEventRef finger = IOHIDEventCreateDigitizerFingerEvent(kCFAllocatorDefault, ts,

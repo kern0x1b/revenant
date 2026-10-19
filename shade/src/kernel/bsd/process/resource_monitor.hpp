@@ -12,10 +12,8 @@ struct ProcessContext;
 namespace kernel_bsd::resource_monitor {
 inline constexpr std::uint32_t syscall_number = 446;
 
-// Returns a Darwin errno (zero on success). Resource accounting is guest
-// state; host process limits must never be consulted or modified here.
 std::uint32_t control(AddressSpace& memory, KernelSharedState& state,
     const ProcessContext& caller, std::uint32_t pid, std::uint32_t flavor,
     std::uint32_t argument);
 }
-} // namespace shade
+}

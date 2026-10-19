@@ -19,9 +19,6 @@
 
 namespace shade {
 
-// Retains the provenance of a local scene's direct background layer. A scene
-// that later moves across scanout can replay that layer in source coordinates
-// before applying its translucent, premultiplied contents.
 class LocalSceneBackground {
 public:
     void reset();
@@ -41,9 +38,7 @@ private:
     struct State {
         std::shared_ptr<HostSurface> target;
         std::shared_ptr<HostSurface> source;
-        // left, top, right, bottom in the local target's host pixel space.
         std::array<float, 4> target_bounds { };
-        // source x = [0] * target x + [1], source y = [2] * target y + [3].
         std::array<float, 4> source_from_target { };
         std::uint64_t source_generation { };
     };
@@ -51,4 +46,4 @@ private:
     std::map<HostSurfaceKey, State> states_;
 };
 
-} // namespace shade
+}

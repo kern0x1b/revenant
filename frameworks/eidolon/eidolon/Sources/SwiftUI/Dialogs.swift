@@ -13,7 +13,6 @@ struct DialogSpec {
     var buttons: [DialogButton]
 }
 
-// The buttons of a builder of actions, in the order they were written, with their roles.
 func dialogButtons(_ view: any View) -> [DialogButton] {
     var found: [DialogButton] = []
     func walk(_ value: any View) {
@@ -29,7 +28,6 @@ func dialogButtons(_ view: any View) -> [DialogButton] {
     return found
 }
 
-// All the text of a view, one line for each Text: the message of a dialog is a view but is drawn as plain text.
 func dialogText(_ view: any View) -> String? {
     var lines: [String] = []
     func walk(_ value: any View) {
@@ -52,7 +50,6 @@ struct DialogModifier: NodeModifier {
     func makeModifierNode(_ content: any View, _ env: EnvironmentValues) -> Node { DialogNode() }
 }
 
-// What a dialog looks like once it is shown, for a test that has no window to show it in.
 @_spi(Probe) public struct _DialogDescription: Equatable {
     public var title: String
     public var message: String?
@@ -98,7 +95,6 @@ final class DialogNode: Node {
         var buttons = spec.buttons
         if style == .alert {
             if buttons.isEmpty { buttons = [DialogButton(title: "OK", role: nil, action: {})] }
-            // The cancel button goes first, which is where iOS 6 draws it beside another button.
             if let cancel = buttons.firstIndex(where: { $0.role == .cancel }), cancel != 0 {
                 buttons.insert(buttons.remove(at: cancel), at: 0)
             }
@@ -164,7 +160,6 @@ final class DialogNode: Node {
         described = nil
     }
 
-    // A test taps a button of a dialog that was captured.
     func press(_ index: Int) {
         guard index >= 0, index < pressed.count else { return }
         pressed[index]()
@@ -192,8 +187,6 @@ extension _Probe {
         DialogNode.captured.last(where: { $0.described != nil })?.press(index)
     }
 }
-
-// MARK: alerts
 
 extension Alert.Button {
     var dialogButton: DialogButton {
@@ -234,7 +227,6 @@ extension View {
         dialog(.actionSheet, isPresented: itemBinding(item)) { item.wrappedValue.map { sheetSpec(content($0)) } }
     }
 
-    // The title of an alert or a dialog can be given as a key, a string or a Text.
     public func alert<A: View>(_ titleKey: LocalizedStringKey, isPresented: Binding<Bool>, @ViewBuilder actions: @escaping () -> A) -> some View {
         dialog(.alert, isPresented: isPresented) { DialogSpec(title: titleKey.text, message: nil, buttons: dialogButtons(actions())) }
     }
@@ -282,8 +274,6 @@ extension View {
         dialog(.alert, isPresented: isPresented) { error.map { DialogSpec(title: $0.errorDescription ?? "", message: dialogText(message($0)), buttons: dialogButtons(actions($0))) } }
     }
 
-    // MARK: confirmation dialogs
-
     func confirmation(_ title: String, _ visibility: Visibility, _ message: String?, _ buttons: [DialogButton]) -> DialogSpec {
         DialogSpec(title: visibility == .visible ? title : "", message: message, buttons: buttons)
     }
@@ -327,8 +317,6 @@ extension View {
     public func confirmationDialog<T, A: View, M: View>(_ title: Text, isPresented: Binding<Bool>, titleVisibility: Visibility = .automatic, presenting data: T?, @ViewBuilder actions: @escaping (T) -> A, @ViewBuilder message: @escaping (T) -> M) -> some View {
         dialog(.actionSheet, isPresented: isPresented) { data.map { confirmation(title.content, titleVisibility, dialogText(message($0)), dialogButtons(actions($0))) } }
     }
-
-    // MARK: presentations by item
 
     public func fullScreenCover<Item: Identifiable, Content: View>(item: Binding<Item?>, onDismiss: (() -> Void)? = nil, @ViewBuilder content: @escaping (Item) -> Content) -> some View {
         sheet(item: item, onDismiss: onDismiss, content: content)

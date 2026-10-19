@@ -14,7 +14,6 @@ std::uint32_t control(AddressSpace& memory, KernelSharedState& state,
     const ProcessContext& caller, std::uint32_t pid, std::uint32_t flavor,
     std::uint32_t argument)
 {
-    // XNU proc_rlimit_control uses an explicit PID, including for self.
     {
         std::lock_guard lock { state.mach_mutex };
         const auto target = state.processes.find(pid);
@@ -43,14 +42,11 @@ std::uint32_t control(AddressSpace& memory, KernelSharedState& state,
     auto flags = *memory.read32(argument);
     auto rate = *memory.read32(argument + 4U);
     if ((flags & get_parameters) != 0U) {
-        // No interrupt-wakeup ledger is active. GET takes precedence over
-        // the other flags and reports the native disabled representation.
         flags = disable;
         rate = 0xffff'ffffU;
     } else if ((flags & enable) != 0U) {
         if ((flags & set_defaults) == 0U && static_cast<std::int32_t>(rate) < 0)
             return darwin::error::invalid_argument;
-        // Do not claim enforcement when there is no guest accounting source.
         return darwin::error::not_supported;
     }
     if (!memory.accessible(argument, 8U, MemoryPermission::Write) ||
@@ -59,4 +55,4 @@ std::uint32_t control(AddressSpace& memory, KernelSharedState& state,
     return 0;
 }
 
-} // namespace shade::kernel_bsd::resource_monitor
+}

@@ -31,7 +31,6 @@ public struct LayoutSubview: Equatable {
         let origin = CGPoint(x: position.x - size.width * anchor.x, y: position.y - size.height * anchor.y)
         node.place(CGRect(origin: origin, size: size))
     }
-    // the subview behind a LayoutSubview is the node it was made from, so that is what tells two of them apart
     public var containerValues: ContainerValues { ContainerValues.collect(from: node) }
     public static func == (a: LayoutSubview, b: LayoutSubview) -> Bool { a.node === b.node }
 }
@@ -125,7 +124,6 @@ final class CustomLayoutNode<L: Layout>: ContainerNode, LayoutContainer, Explici
 
     var subviews: LayoutSubviews { LayoutSubviews(items: children.map { LayoutSubview(node: $0) }, direction: env.layoutDirection) }
 
-    // The layout is asked for its cache once and told when its inputs change, as SwiftUI does, not once per pass.
     func refreshCache() {
         guard let layout, var current = cache else { return }
         layout.updateCache(&current, subviews: subviews)

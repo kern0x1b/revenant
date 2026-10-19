@@ -212,10 +212,6 @@ static int probe_main(void)
         return 1;
 
     DNSServiceRef service = (DNSServiceRef)0;
-    // The target firmware's iPhone-specific mDNSResponder derives its fallback
-    // label from en0's MAC when Lockdown has not set a local hostname. The
-    // emulator's deterministic 02:00:00:00:00:01 link address therefore
-    // registers this name without external DNS or mutable guest preferences.
     if (DNSServiceGetAddrInfo(&service, 0, 0,
             dns_protocol_ipv4 | dns_protocol_ipv6, local_hostname,
             dnssd_callback, (void*)0) != 0) {

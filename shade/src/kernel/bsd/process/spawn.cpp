@@ -80,7 +80,7 @@ namespace {
         return result;
     }
 
-} // namespace
+}
 
 bool CompatibilityKernel::dispatch_bsd_process_spawn(
     Cpu& cpu, std::uint32_t number)
@@ -110,28 +110,19 @@ bool CompatibilityKernel::dispatch_bsd_process_spawn(
         return true;
     }
 
-    // `--suspended` is an application argument used by first-generation
-    // SpringBoard's prewarm protocol, not a kernel spawn attribute. The child
-    // must run through dyld and suspend itself in userspace. Only the actual
-    // POSIX_SPAWN_START_SUSPENDED flag places the initial thread on hold.
-
     std::error_code path_error;
     if (!std::filesystem::is_regular_file(
             resolve_guest_path(*path), path_error)) {
-        bsd_error(cpu, 2); // ENOENT
+        bsd_error(cpu, 2);
         return true;
     }
 
     if (attributes->setexec) {
         if (!exec_handler_ ||
             !exec_handler_(cpu, *path, *arguments, *environment)) {
-            bsd_error(cpu, 8); // ENOEXEC
+            bsd_error(cpu, 8);
             return true;
         }
-        // SpringBoard's older launch path forks a helper and asks that child to
-        // SETEXEC the application. There is no separate child-return path
-        // below, so observe the successful PID-bound spawn here after exec has
-        // assigned the new process identity.
         graphics_services_input::record_application_spawn(*shared_state_,
             process_.parent_pid, process_.pid, *path, *arguments,
             scene_coordinator_.get(), true);
@@ -165,23 +156,18 @@ bool CompatibilityKernel::dispatch_bsd_process_spawn(
         child = fork_handler_ ? fork_handler_(cpu) : std::nullopt;
     }
     if (!child) {
-        bsd_error(cpu, 11); // EAGAIN
+        bsd_error(cpu, 11);
         return true;
     }
     performance_counters().record_fork();
     if (!spawn_exec_handler_ ||
         !spawn_exec_handler_(*child, *path, *arguments, *environment,
             attributes->start_suspended)) {
-        bsd_error(cpu, 8); // ENOEXEC
+        bsd_error(cpu, 8);
         return true;
     }
     if (scheduler_preemption_query_ &&
         scheduler_preemption_query_(cpu.processor_id())) {
-        // A successful non-suspended spawn leaves a new runnable child visible
-        // to the scheduler before the parent returns to Guest code. A suspended
-        // child is already blocked by spawn_exec_handler_ and therefore does
-        // not trigger this query unless another runnable candidate wins
-        // ordering.
         cpu.request_guest_preemption();
     }
     graphics_services_input::record_application_spawn(*shared_state_,
@@ -207,4 +193,4 @@ bool CompatibilityKernel::dispatch_bsd_process_spawn(
     return true;
 }
 
-} // namespace shade
+}

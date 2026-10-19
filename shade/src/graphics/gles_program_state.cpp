@@ -66,8 +66,6 @@ void GlesProgramState::compile_shader(std::uint32_t name)
         value->compiled = true;
         return;
     }
-    // Compositor shaders were taken on the strength of their main and their
-    // conventions alone, and the renderer's adapter still takes them.
     value->compiled =
         GlesProgramInterfaceProfile::recognizes(value->source) &&
         value->source.find("void main") != std::string::npos;
@@ -184,8 +182,6 @@ bool GlesProgramState::link_interpreted(
         program_value.info_log = "ERROR: " + std::move(message) + "\n";
         return false;
     };
-    // Attributes take the location glBindAttribLocation gave their name, and
-    // the lowest free one otherwise.
     std::map<std::string, std::uint32_t, std::less<>> attributes;
     std::array<std::string, gles_abi::maximum_vertex_attributes> taken;
     for (const auto& variable : vertex.module->variables()) {
@@ -216,8 +212,6 @@ bool GlesProgramState::link_interpreted(
         attributes[variable.name] = static_cast<std::uint32_t>(
             std::distance(taken.begin(), free));
     }
-    // A varying the fragment shader reads must be declared by the vertex
-    // shader with the same name, type and array size.
     GlesVaryingLayout layout;
     std::string varying_error;
     if (!layout_varyings(
@@ -286,7 +280,6 @@ std::int32_t GlesProgramState::uniform_location(
     if (program_value == nullptr || !program_value->linked || name.empty())
         return -1;
     if (program_value->interpreted) {
-        // An array answers to its own name as well as to name[0].
         const auto& slots = program_value->uniform_slots;
         const auto found = std::find_if(
             slots.begin(), slots.end(), [&](const UniformSlot& slot) {
@@ -376,7 +369,6 @@ GlesProgramState::UniformResult GlesProgramState::set_uniforms(
     const bool array = target.array_size != 0U;
     if (count > 1U && !array)
         return UniformResult::InvalidOperation;
-    // The type the call writes, by the family of the uniform's type.
     const auto accepts = [&](glsl::TypeId type) {
         if (kind == UniformKind::Matrix) {
             return type == (components == 2U   ? glsl::TypeId::Mat2
@@ -395,7 +387,6 @@ GlesProgramState::UniformResult GlesProgramState::set_uniforms(
     };
     if (!accepts(target.type))
         return UniformResult::InvalidOperation;
-    // Elements past the end of the array are dropped.
     const auto usable = std::min(count,
         static_cast<std::size_t>(std::max(target.array_size, 1U) -
                                  target.element));
@@ -468,4 +459,4 @@ void GlesProgramState::collect_deleted_shaders()
     }
 }
 
-} // namespace shade
+}

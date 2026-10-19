@@ -82,10 +82,6 @@ namespace {
         const auto host_page =
             reinterpret_cast<std::uintptr_t>(backing.bytes.data());
         if constexpr (sizeof(std::uintptr_t) >= sizeof(std::uint64_t)) {
-            // Dynarmic's absolute-offset page-table mode adds the full Guest
-            // address to this entry. Keep the arithmetic in uintptr_t so the
-            // deliberately-before-object pointer is never formed by C++ pointer
-            // arithmetic; the generated access always lands inside bytes.
             return reinterpret_cast<std::uint8_t*>(host_page - guest_page);
         } else {
             static_cast<void>(guest_page);
@@ -120,7 +116,7 @@ namespace {
             bytes.end(), identity.digest.begin(), identity.digest.end());
     }
 
-} // namespace
+}
 
 struct AddressSpace::JitPageTableStorage {
     static constexpr std::size_t byte_size =
@@ -197,9 +193,6 @@ std::uint64_t AddressSpace::exclusive_reservation_key(
             return backing_reservation_key(*page->backing, address);
         }
     } catch (...) {
-        // A resolver is called from generated guest code. If a host allocation
-        // or lock operation fails, preserve the safe legacy virtual-address key
-        // and let the ordinary memory callback report the actual fault.
     }
     return static_cast<std::uint64_t>(address & exclusive_granule_mask);
 }
@@ -238,8 +231,6 @@ std::uint8_t** AddressSpace::jit_read_page_table()
     direct_reads = direct_reads || owns_exclusive_access();
 #endif
     if (!direct_reads) {
-        // Checked stores update scalar values under the address-space lock.
-        // A raw load on another lane could otherwise observe a partial store.
         static JitPageTableStorage checked_reads;
         return checked_reads.entries();
     }
@@ -254,12 +245,9 @@ std::uint8_t** AddressSpace::jit_write_page_table()
     ensure_jit_page_tables_locked();
     bool direct_writes = !parallel_access_;
 #if defined(__x86_64__) || defined(_M_X64)
-    // The x64 backend reloads executor page-table links on every JIT entry.
     direct_writes = direct_writes || owns_exclusive_access();
 #endif
     if (!direct_writes) {
-        // Shared by every parallel lane. Serialized slices can select the
-        // guarded private-write table through their executor's runtime link.
         static JitPageTableStorage checked_writes;
         return checked_writes.entries();
     }
@@ -307,8 +295,6 @@ void AddressSpace::track_exclusive_access(
         if (page == nullptr || !page->shared_writable || !page->backing)
             continue;
 
-        // Keep every local alias guarded, including already guarded aliases
-        // when another granule on the physical page acquires a reservation.
         const auto* backing = page->backing.get();
         for (auto& [alias_address, alias_mask] :
             exclusive_write_tracked_pages_) {
@@ -391,9 +377,6 @@ void AddressSpace::synchronize_shared_write_tracking()
         return;
     }
     auto lock = write_lock();
-    // Capture the target again after serializing parallel address-space users.
-    // A still newer epoch published during the scan remains pending for the
-    // next safe point rather than being accidentally acknowledged here.
     target = GuestPageBacking::shared_write_tracking_epoch();
     if (target ==
         observed_shared_write_tracking_epoch_.load(std::memory_order_relaxed)) {
@@ -725,9 +708,6 @@ bool AddressSpace::copy_in_batch(std::span<const CopyInOperation> operations)
         }
     }
 
-    // Small host-to-guest spans commonly stay on one page. Preserve the same
-    // copy-on-write, reservation and generation updates without allocating
-    // vectors and sorting a one-element page set for each scanline.
     if (operations.size() == 1U) {
         const auto& operation = operations.front();
         const auto offset = operation.address & (page_size - 1U);
@@ -870,9 +850,6 @@ bool AddressSpace::map_file(std::uint32_t address, std::uint32_t size,
     if (!inserted)
         return false;
     vm_map_.map_or(address, end, permissions);
-    // map_file rejects any overlapping VM range, so the new pages have no
-    // permissions to preserve. Use the range setter; unlike the OR path used
-    // by map(), it can fill sparse permission chunks in bulk.
     set_page_permissions_locked(address, end, permissions);
     bump_executable_content_generation_locked();
     if (batch_context && !batch_context->backing)
@@ -920,10 +897,6 @@ void AddressSpace::share_pages_locked(std::uint32_t address, std::uint64_t end,
         page.shared_writable = true;
         page.copy_on_write_possible = false;
         if (tracks_write_locked(static_cast<std::uint32_t>(base), page_size)) {
-            // A private page has no other virtual alias whose direct JIT write
-            // entry can become stale. refresh_jit_page_locked below handles
-            // this mapping directly; retain the full scan only for genuinely
-            // shared backings or a concurrently published tracking transition.
             tracked_backing_may_have_aliases |= page.backing.use_count() != 1;
             if (page.backing->enable_shared_write_tracking())
                 ++tracking_transitions;
@@ -994,8 +967,6 @@ bool AddressSpace::map_page_backings(std::uint32_t address, std::uint32_t size,
     vm_map_.map_or(address, end, permissions);
     add_page_permissions_locked(address, end, permissions);
     if (has_tracked_shared_backing) {
-        // Imported backings are supplied by an existing shared object and can
-        // already have aliases in this task.
         finish_shared_write_tracking_locked(
             initial_tracking_epoch, tracking_transitions, true);
     }
@@ -1159,10 +1130,6 @@ AddressSpace::Page& AddressSpace::ensure_page_locked(std::uint32_t address)
                     page_size, mapping->backing->end_offset - file_offset));
             auto backing = file_page_cache_->load_page(
                 mapping->backing, file_offset, byte_count);
-            // A resident AddressSpace page always owns fully initialized bytes.
-            // Page-in remains lazy at the range level, while ordinary guest
-            // reads no longer re-enter GuestPageBacking's one-time
-            // materialization lock.
             backing->materialize();
             page->second.backing = std::move(backing);
             page->second.file_cached = true;
@@ -1245,10 +1212,6 @@ bool AddressSpace::fault_file_pages(std::uint32_t address, std::size_t size)
                         page_size, cluster_file_end - file_page));
                 auto backing = file_page_cache_->load_page(
                     mapping.backing, file_page, byte_count);
-                // The vnode-style cluster fault publishes ready pages as one
-                // unit. Descriptor-backed mappings perform one host read for
-                // the cluster; immutable executable mappings copy each page
-                // from their snapshot.
                 backing->materialize();
                 resident->second.backing = std::move(backing);
                 resident->second.file_cached = true;
@@ -1403,8 +1366,6 @@ void AddressSpace::refresh_jit_page_locked(std::uint32_t address)
     constexpr auto read_required = static_cast<std::uint8_t>(
         mapped_page_flag | permission_bits(MemoryPermission::Read));
     const auto* page = find_page_locked(base);
-    // The table is selected only while this address space is exclusively
-    // owned. Shared mappings still require their backing's synchronization.
     const bool direct_read_safe = !parallel_access_ ||
         (page != nullptr && !page->shared_writable && page->backing &&
             !page->backing->shared_write_tracking_enabled());
@@ -1469,8 +1430,6 @@ void AddressSpace::finish_shared_write_tracking_locked(
     std::uint64_t initial_epoch, std::size_t local_transitions,
     bool backing_may_have_aliases)
 {
-    // Capture before scanning. A transition racing after this point retains a
-    // newer epoch and is handled by the next execution safe point.
     const auto observed_epoch = GuestPageBacking::shared_write_tracking_epoch();
     const auto expected_epoch =
         initial_epoch + static_cast<std::uint64_t>(local_transitions);
@@ -1533,10 +1492,6 @@ AddressSpaceWriteStats address_space_write_stats() noexcept
 bool AddressSpace::reservation_invalidation_required_locked(
     const Page& page) const noexcept
 {
-    // A serialized address space has no reservation to invalidate once its
-    // last exclusive page marker is consumed. Shared physical pages can carry
-    // a reservation from another address-space alias, while parallel execution
-    // and modes without the guarded direct-write table cannot make that proof.
     return page.shared_writable ||
            (page.backing && page.backing->shared_write_tracking_enabled()) ||
            parallel_access_ || !jit_write_page_table_enabled_ ||
@@ -1707,9 +1662,6 @@ bool AddressSpace::write_integer(std::uint32_t address, T value)
         if (tracks_write_locked(address, sizeof(T))) {
             page.write_generation = ++write_generation_;
         }
-        // Invalidate the physical reservation before removing its virtual
-        // page guard. The refresh can then restore only an otherwise eligible
-        // direct-write entry without a second AddressSpace pass.
         release_exclusive_write_tracking_locked(address, sizeof(T));
         return true;
     }
@@ -1982,10 +1934,6 @@ AddressSpace::executable_backing_identity(
             return std::nullopt;
         }
 
-        // The file mapping remains as range metadata after a private write.  A
-        // later mprotect(PROT_EXEC) must not make that detached page look like
-        // the original immutable file cache again.  Shared aliases are likewise
-        // mutable even when this particular virtual mapping is currently RX.
         const auto* page = find_page_locked(page_address);
         if (page != nullptr &&
             (!page->backing || !page->file_cached || page->shared_writable ||
@@ -2005,10 +1953,6 @@ AddressSpace::executable_backing_identity(
         append_u64(layout_material, mapping.end);
         append_u64(layout_material, file_offset);
         append_identity(layout_material, identity);
-        // ContentIdentity protects the bytes. Runtime file generation remains
-        // on GuestFileBacking for vnode/mutation/writeback isolation, but it is
-        // not portable Guest execution semantics and must not affect this
-        // digest.
     }
 
     if (source_identities.empty())
@@ -2344,9 +2288,6 @@ std::unique_ptr<AddressSpace> AddressSpace::clone() const
         cursor = region->end;
     }
 
-    // VM_INHERIT_SHARE makes anonymous/private pages aliases in the new task.
-    // Materialize demand-zero or lazy file pages before publishing the clone so
-    // a later first write in either address space observes the same backing.
     for (const auto& region : non_copy_regions) {
         if (region.inheritance == VmInheritance::Share) {
             const_cast<AddressSpace*>(this)->share_pages_locked(
@@ -2397,8 +2338,6 @@ std::unique_ptr<AddressSpace> AddressSpace::clone() const
     result->parallel_access_ = parallel_access_;
     result->jit_page_table_enabled_ = jit_page_table_enabled_;
 
-    // VM_INHERIT_NONE removes the complete mapping from the child while the
-    // parent's interval and resident backing remain intact.
     for (const auto& region : non_copy_regions) {
         if (region.inheritance != VmInheritance::None)
             continue;
@@ -2506,4 +2445,4 @@ AddressSpace::writable_page_permission_chunk_locked(std::size_t page_index)
     return *chunk;
 }
 
-} // namespace shade
+}

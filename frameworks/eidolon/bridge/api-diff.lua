@@ -1,19 +1,6 @@
--- api-diff.lua: the typed API surface of Eidolon against Apple's SwiftUI, from two swift-api-digester dumps.
---
---     xmake l api-diff.lua apple.json ours.json [--conformances] [--variants] [--type NAME]
---
--- Apple's dump is taken from the SDK's SwiftUI interface for iOS 16.4 (so what is unavailable on iOS is not in
--- it); ours is taken from the module this repository builds. A declaration of Apple's counts as missing when no
--- declaration with the same USR exists in ours; it is then told apart as
---   absent   nothing of that name on that type in ours,
---   variant  a declaration of that name exists there but with another signature (an overload, a constraint, an
---            attribute).
--- Names starting with an underscore and implicit (compiler-made) declarations are left out.
-
 import("core.base.json")
 local text = import("lib.text", {rootdir = path.join(os.scriptdir(), ".."), anonymous = true})
 
--- `a or b or c` in Python: the first value that is truthy there (a non-empty string, a non-zero number)
 local function either(a, b)
     if text.truthy(a) then
         return a
@@ -21,7 +8,6 @@ local function either(a, b)
     return b
 end
 
--- a JSON object as opposed to a JSON array (both decode to a Lua table; an array has an element 1)
 local function is_object(v)
     return type(v) == "table" and v[1] == nil
 end
@@ -30,7 +16,6 @@ local function children(node)
     return node.children or {}
 end
 
--- Every node with a USR, with the names of the types it is nested in.
 local function walk(node, path, out)
     if not is_object(node) then
         return
@@ -58,7 +43,6 @@ local function load(file)
     return found
 end
 
--- 'init(_:text:onCommit:)' -> 'init', {'_', 'text', 'onCommit'}
 local function split_name(printed)
     local base, inner = string.match(printed, "^([^%(]+)%((.*)%)$")
     if not base then
@@ -79,8 +63,6 @@ local function key(owner, name)
     return owner .. "\1" .. name
 end
 
--- A call written the way Apple's declaration reads compiles against one of ours whose extra parameters have
--- defaults: the labels of Apple's are a subsequence of ours, in order, and every other label of ours has a default.
 local function covered_by_defaults(ours_shapes, owner, printed)
     local base, wanted = split_name(printed)
     if not base then
@@ -117,7 +99,6 @@ local function signature(node)
     return ""
 end
 
--- the member name of a printed declaration: everything before its first "("
 local function bare(printed)
     return string.match(printed, "^([^%(]*)")
 end
@@ -178,7 +159,6 @@ function main(...)
                 params[#params + 1] = child
             end
         end
-        -- [1:] drops the return type, which is the first Type child
         local shape_params = {table.unpack(params, 2)}
         if text.truthy(base) and #shape_params == #labels then
             local shape = {}
@@ -191,7 +171,6 @@ function main(...)
         end
     end
 
-    -- bridge/not-applicable.txt: a type or a member Apple declares that has no meaning on iOS 6, with the reason
     local not_applicable = {}
     local listed = path.join(os.scriptdir(), "not-applicable.txt")
     if os.isfile(listed) then
@@ -238,7 +217,6 @@ function main(...)
         end
     end
 
-    -- most rows first; owners with as many rows keep the order they were first seen in
     local seen_order = {}
     for i, owner in ipairs(order) do
         seen_order[owner] = i

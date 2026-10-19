@@ -24,4 +24,4 @@ struct TouchInput {
     float y { };
 };
 
-} // namespace shade
+}

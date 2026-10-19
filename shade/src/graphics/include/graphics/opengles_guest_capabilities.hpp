@@ -30,9 +30,6 @@ enum class OpenGlesGuestCapabilitySet {
     Sgx543,
 };
 
-// Guest-visible capabilities of the firmware GPU driver. Host renderer names
-// and limits never cross this boundary: UIKit and QuartzCore use these values
-// to select paths supported by the emulated device.
 struct OpenGlesGuestCapabilities {
     std::string_view name;
     std::string_view vendor;
@@ -50,4 +47,4 @@ struct OpenGlesGuestCapabilities {
 [[nodiscard]] OpenGlesGuestCapabilitySet open_gles_framebuffer_capabilities(
     OpenGlesGuestCapabilitySet kind);
 
-} // namespace shade
+}

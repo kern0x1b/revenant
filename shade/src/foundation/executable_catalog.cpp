@@ -484,9 +484,6 @@ bool executable_instruction_address(
 bool instruction_symbol(
     const shade::MachOImage& image, const shade::MachSymbol& symbol)
 {
-    // n_sect is a one-based ordinal over every section in load-command order.
-    // Segment execute permission is not sufficient: __TEXT commonly contains
-    // __cstring, constants, and unwind metadata alongside __text.
     constexpr std::uint32_t pure_instructions = 0x80000000U;
     constexpr std::uint32_t some_instructions = 0x00000400U;
     if (symbol.section == 0U)
@@ -531,20 +528,12 @@ void collect_reliable_entry_points(
     if (image.entry_point())
         add(*image.entry_point(), false);
     for (const auto& symbol : image.symbols()) {
-        // N_SECT definitions are the only symbol records with an image-local
-        // address. Require the referenced section itself to carry Mach-O's
-        // instruction attribute; an executable __TEXT segment also contains
-        // data.
         if ((symbol.type & 0x0eU) == 0x0eU &&
             instruction_symbol(image, symbol)) {
             add(symbol.value, symbol.thumb_definition());
         }
     }
     for (const auto address : image.function_starts()) {
-        // On 32-bit ARM, LC_FUNCTION_STARTS stores the Thumb state in bit zero
-        // of the cumulative address. Normalize the address before checking the
-        // instruction range and retain the mode in the descriptor; otherwise an
-        // odd Thumb start becomes an invalid ARM entry one byte into the code.
         const auto thumb = (address & 1U) != 0U;
         add(address & ~1U, thumb, true);
     }
@@ -552,7 +541,7 @@ void collect_reliable_entry_points(
         add(stub.address, false);
 }
 
-} // namespace
+}
 
 namespace shade {
 
@@ -624,9 +613,6 @@ const ExecutableCatalogEntry& ExecutableCatalog::register_path_alias(
     const auto& target_entry = register_image(image);
     if (alias_path == target_path)
         return target_entry;
-    // Removing an existing alias can erase an earlier vector element and move
-    // the target entry. Copy the identity before that mutation invalidates the
-    // reference returned by register_image.
     const auto identity = target_entry.content_identity;
     remove_path(alias_path);
     auto& entry = upsert(identity, alias_path, classify(image, alias_path));
@@ -696,7 +682,7 @@ std::size_t ExecutableCatalog::register_shared_cache(
             std::filesystem::path { image.path },
             classify_shared_cache_image(image.path));
         entry.uuid = image.text_uuid;
-        entry.file_type = 6U; // MH_DYLIB: shared-cache images are dylib code.
+        entry.file_type = 6U;
         for (const auto& range : image.executable_ranges) {
             const auto mapping = ExecutableMappingIdentity { range.file_offset,
                 range.size, range.address, range.size };
@@ -791,13 +777,6 @@ ExecutableCatalogScanSummary ExecutableCatalog::refresh_paths(
             !status_error && std::filesystem::is_directory(status);
         const bool replaced_catalog_subtree =
             has_catalog_descendant(normalized);
-        // A removed directory has no status to inspect.  Existing catalog
-        // aliases are the authoritative shape of that old subtree, so retain
-        // the directory scope even after the host path has disappeared.  This
-        // also covers the source side of an atomic directory rename.  If an
-        // installation replaced a directory with a regular file, retain the old
-        // subtree scope as well as the new file request so stale descendants
-        // are removed without losing the replacement image.
         if (current_directory || replaced_catalog_subtree) {
             requested_subtrees.insert(normalized);
             if (!current_directory && !status_error)
@@ -899,10 +878,6 @@ ExecutableCatalogScanSummary ExecutableCatalog::refresh_paths(
         if (!prefix) {
             ++summary.failed_files;
         } else if (has_dyld_cache_magic(*prefix)) {
-            // Shared-cache generations remain outside this incremental path.
-            // The ordinary firmware catalog command is still the explicit full
-            // rebuild for those inputs; do not synchronously rescan the whole
-            // root here.
         } else if (has_macho_magic(*prefix)) {
             try {
                 std::optional<ContentIdentity> known_identity;
@@ -978,10 +953,6 @@ ExecutableCatalogScanSummary ExecutableCatalog::scan_tree(
     if (error)
         ++summary.failed_files;
 
-    // Filesystem enumeration order is not part of the recursive-directory
-    // iterator contract. Sort the candidates so a main shared cache (whose
-    // subcache suffix is lexically appended to the main name) is discovered
-    // before its subcaches and can claim the complete generation atomically.
     std::sort(regular_files.begin(), regular_files.end(),
         [](const ScanCandidate& left, const ScanCandidate& right) {
             return left.alias < right.alias;
@@ -1528,4 +1499,4 @@ std::size_t ExecutableCatalog::resident_bytes_estimate() const noexcept
     return total;
 }
 
-} // namespace shade
+}

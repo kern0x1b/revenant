@@ -72,7 +72,7 @@ CGSize CTFontShapeGlyphs(CTFontRef font, CGGlyph glyphs[], CGSize advances[], CG
     (void)indexes;
 
     if (font && glyphs && advances && count > 0)
-        CTFontGetAdvancesForGlyphs(font, 0 /* horizontal */, glyphs, advances, count);
+        CTFontGetAdvancesForGlyphs(font, 0 , glyphs, advances, count);
     if (origins && count > 0)
         memset(origins, 0, (size_t)count * sizeof(CGPoint));
 

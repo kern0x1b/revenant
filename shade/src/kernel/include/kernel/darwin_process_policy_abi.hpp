@@ -8,7 +8,6 @@
 
 namespace shade::darwin::process_policy {
 
-// bsd/sys/process_policy.h and bsd/kern/process_policy.c in XNU.
 inline constexpr std::uint32_t syscall_number = 323;
 inline constexpr std::uint32_t scope_process = 1;
 inline constexpr std::uint32_t scope_thread = 2;
@@ -59,4 +58,4 @@ inline constexpr std::uint32_t boost_donation = 3;
     }
 }
 
-} // namespace shade::darwin::process_policy
+}

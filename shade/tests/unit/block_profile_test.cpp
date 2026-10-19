@@ -35,7 +35,6 @@ bool contains(const std::string& text, const std::string& part)
 
 shade::GuestImageTable sample_table()
 {
-    // Given out of order on purpose: the table sorts by load address.
     return shade::GuestImageTable { {
         { "/usr/lib/c.dylib", 0x3000U, 0x400U },
         { "/usr/lib/a.dylib", 0x1000U, 0x100U },
@@ -66,7 +65,7 @@ void test_image_table()
     CHECK(table.images().front().path == "/usr/lib/a.dylib");
     CHECK(table.find(0x1000U) != nullptr);
     CHECK(table.find(0x10ffU) != nullptr);
-    CHECK(table.find(0x1100U) == nullptr); // past __TEXT, before the next image
+    CHECK(table.find(0x1100U) == nullptr);
     CHECK(table.find(0x2fffU) == nullptr);
     CHECK(table.find(0x3200U) != nullptr);
     CHECK(table.find(0x0fffU) == nullptr);
@@ -79,17 +78,16 @@ void test_run_classification()
     profile.set_enabled(true);
     CHECK(profile.enabled());
 
-    // Block A: 5 cycles, ends in a checked link. Block B: 7 cycles, fast link.
     profile.record_translation(
         1U, 0x1000U, { 5U, shade::BlockEnd::LinkBlock });
     profile.record_translation(
         1U, 0x2000U, { 7U, shade::BlockEnd::LinkBlockFast });
 
-    profile.record_run(1U, 0x1000U, 0x1000U, false, 5U, 0U); // exact
-    profile.record_run(1U, 0x1000U, 0x1000U, false, 5U, 0U); // exact
-    profile.record_run(1U, 0x2000U, 0x2000U, true, 12U, 0U); // chained: 7 + 5
-    profile.record_run(1U, 0x2000U, 0x2000U, true, 3U, 0U); // short
-    profile.record_run(1U, 0x3000U, 0x3000U, false, 4U, 0U); // never translated
+    profile.record_run(1U, 0x1000U, 0x1000U, false, 5U, 0U);
+    profile.record_run(1U, 0x1000U, 0x1000U, false, 5U, 0U);
+    profile.record_run(1U, 0x2000U, 0x2000U, true, 12U, 0U);
+    profile.record_run(1U, 0x2000U, 0x2000U, true, 3U, 0U);
+    profile.record_run(1U, 0x3000U, 0x3000U, false, 4U, 0U);
 
     const auto rows = profile.rows();
     CHECK(rows.size() == 3U);
@@ -156,7 +154,7 @@ void test_clear_and_images()
         1U, 0x1000U, { 5U, shade::BlockEnd::LinkBlock });
     profile.record_run(1U, 0x1000U, 0x1000U, false, 5U, 0x3020U);
     profile.record_images(1U, sample_table());
-    CHECK(profile.image_table_count() == 0U); // not enabled: nothing recorded
+    CHECK(profile.image_table_count() == 0U);
     profile.set_enabled(true);
     profile.record_images(1U, sample_table());
     CHECK(profile.image_table_count() == 1U);
@@ -166,7 +164,7 @@ void test_clear_and_images()
     CHECK(profile.callers().empty());
     CHECK(profile.translation_count() == 0U);
     CHECK(profile.image_table_count() == 0U);
-    CHECK(profile.enabled()); // clearing keeps the switch
+    CHECK(profile.enabled());
 }
 
 void test_mapping_and_order()
@@ -187,12 +185,12 @@ void test_mapping_and_order()
     const auto mapped = shade::map_block_rows(profile);
     CHECK(mapped.size() == 3U);
     if (mapped.size() == 3U) {
-        CHECK(mapped[0].row.entry == 0x1010U); // largest ticks first
+        CHECK(mapped[0].row.entry == 0x1010U);
         CHECK(mapped[0].image == "/usr/lib/a.dylib");
         CHECK(mapped[0].offset == 0x10U);
         CHECK(mapped[1].image == "/usr/lib/c.dylib");
         CHECK(mapped[1].offset == 0x10U);
-        CHECK(mapped[2].image.empty()); // no image holds 0x7000
+        CHECK(mapped[2].image.empty());
     }
 
     const auto table = shade::format_block_table(mapped);
@@ -214,9 +212,6 @@ void test_caller_rows()
     profile.record_translation(
         1U, 0x3010U, { 4U, shade::BlockEnd::LinkBlock });
 
-    // Two runs of block 0x1010 entered from 0x3021 (Thumb bit set in LR: the
-    // return address is 0x3020, in c.dylib), one from 0x3100, one from 0x7000
-    // (in no image). Block 0x3010 is entered from 0x3021 once.
     profile.record_run(1U, 0x1010U, 0x1010U, false, 5U, 0x3021U);
     profile.record_run(1U, 0x1010U, 0x1010U, false, 5U, 0x3021U);
     profile.record_run(1U, 0x1010U, 0x1010U, false, 5U, 0x3100U);
@@ -231,7 +226,7 @@ void test_caller_rows()
     std::uint64_t block_ticks = 0;
     for (const auto& row : profile.rows())
         block_ticks += row.ticks;
-    CHECK(caller_ticks == block_ticks); // the caller rows add up to the blocks
+    CHECK(caller_ticks == block_ticks);
 
     const auto mapped = shade::map_caller_rows(profile);
     CHECK(mapped.size() == 4U);
@@ -244,7 +239,7 @@ void test_caller_rows()
         CHECK(thumb->image == "/usr/lib/a.dylib");
         CHECK(thumb->offset == 0x10U);
         CHECK(thumb->caller_image == "/usr/lib/c.dylib");
-        CHECK(thumb->caller_offset == 0x20U); // Thumb bit dropped
+        CHECK(thumb->caller_offset == 0x20U);
     }
     const auto* plain = find_caller(mapped, 0x3100U);
     CHECK(plain != nullptr);
@@ -260,7 +255,6 @@ void test_caller_rows()
         CHECK(unmapped->image == "/usr/lib/a.dylib");
     }
 
-    // Largest first: the 10-tick caller row leads.
     CHECK(!mapped.empty() && mapped.front().row.caller == 0x3021U);
 
     const auto table = shade::format_caller_table(mapped);
@@ -300,7 +294,6 @@ void test_mapping_order_and_summary()
     CHECK(!off.empty() && contains(off.front(), "difference=-2 "));
 }
 
-// A synthetic guest stack: words at addresses, nothing else readable.
 struct SyntheticStack {
     std::map<std::uint32_t, std::uint32_t> words;
 
@@ -316,7 +309,6 @@ struct SyntheticStack {
     }
 };
 
-// Our image's __TEXT is [0x1000, 0x2000); Apple's code lies at 0x3000 and up.
 const shade::AddressRanges kOwn { { 0x1000U, 0x2000U } };
 
 void test_own_ranges()
@@ -344,49 +336,36 @@ void test_stack_walk()
             pc, lr, frame, kOwn, stack.reader(), max_frames);
     };
 
-    // The PC is ours: the run is ours, whatever the frames say.
     const auto self = walk(0x1040U, 0x3000U, 0U, {});
     CHECK(self.kind == Kind::Self && self.address == 0x1040U);
 
-    // Apple code entered from ours through LR (a leaf with no frame, or a
-    // function at its entry). The Thumb bit of LR is dropped.
     const auto leaf = walk(0x3010U, 0x1045U, 0x9999U, {});
     CHECK(leaf.kind == Kind::Caller && leaf.address == 0x1044U);
 
-    // LR is Apple's: the walk goes on to the frame chain. Frame 0x8000 is the
-    // Apple function's own frame, and its saved LR is Apple's too; frame
-    // 0x8100 is ours, so its saved LR names our caller.
     SyntheticStack ours_second;
     ours_second.words = { { 0x8000U, 0x8100U }, { 0x8004U, 0x3030U },
         { 0x8100U, 0x8200U }, { 0x8104U, 0x1050U } };
     const auto chained = walk(0x3010U, 0x3020U, 0x8000U, ours_second);
     CHECK(chained.kind == Kind::Caller && chained.address == 0x1050U);
 
-    // No frame of ours: the outermost Apple frame is the attribution.
     SyntheticStack apple_only;
     apple_only.words = { { 0x8000U, 0x8100U }, { 0x8004U, 0x3030U },
         { 0x8100U, 0U }, { 0x8104U, 0x3090U } };
     const auto system = walk(0x3010U, 0x3020U, 0x8000U, apple_only);
     CHECK(system.kind == Kind::System && system.address == 0x3090U);
 
-    // A frame that does not climb (the stack would go back down) ends the walk
-    // after its own saved LR was read.
     SyntheticStack falling;
     falling.words = { { 0x8000U, 0x7f00U }, { 0x8004U, 0x3030U },
         { 0x7f00U, 0x0U }, { 0x7f04U, 0x1050U } };
     const auto stopped = walk(0x3010U, 0x3020U, 0x8000U, falling);
     CHECK(stopped.kind == Kind::System && stopped.address == 0x3030U);
 
-    // A misaligned frame pointer is not followed; the PC is the outermost.
     const auto misaligned = walk(0x3010U, 0x3020U, 0x8002U, ours_second);
     CHECK(misaligned.kind == Kind::System && misaligned.address == 0x3010U);
 
-    // An unreadable frame stops the walk the same way.
     const auto unreadable = walk(0x3010U, 0x3020U, 0x9000U, ours_second);
     CHECK(unreadable.kind == Kind::System && unreadable.address == 0x3010U);
 
-    // The bound: our frame is the 35th, so 32 frames do not reach it and 40
-    // do. The frames climb by 0x100 from 0x10000.
     SyntheticStack deep;
     for (std::uint32_t index = 0; index < 40; ++index) {
         const auto frame = 0x10000U + index * 0x100U;
@@ -437,8 +416,6 @@ void test_stack_rows()
 
 void test_stack_chain()
 {
-    // Every frame is kept, ours and Apple's: the PC, LR without its Thumb bit,
-    // then the return address of each frame of the r7 chain.
     SyntheticStack ours_second;
     ours_second.words = { { 0x8000U, 0x8100U }, { 0x8004U, 0x3030U },
         { 0x8100U, 0x8200U }, { 0x8104U, 0x1050U } };
@@ -447,7 +424,6 @@ void test_stack_chain()
     CHECK(chain == std::vector<std::uint32_t>({ 0x3010U, 0x3020U, 0x3030U,
                        0x1050U }));
 
-    // A frame that does not climb is recorded, then the walk ends.
     SyntheticStack falling;
     falling.words = { { 0x8000U, 0x7f00U }, { 0x8004U, 0x3030U },
         { 0x7f00U, 0x0U }, { 0x7f04U, 0x1050U } };
@@ -456,12 +432,10 @@ void test_stack_chain()
     CHECK(stopped == std::vector<std::uint32_t>({ 0x3010U, 0x3020U,
                          0x3030U }));
 
-    // A misaligned frame pointer adds nothing: PC and LR only.
     const auto misaligned = shade::capture_stack_chain(
         0x3010U, 0x3020U, 0x8002U, ours_second.reader());
     CHECK(misaligned == std::vector<std::uint32_t>({ 0x3010U, 0x3020U }));
 
-    // The bound counts return addresses: 16 by default, 40 when asked.
     SyntheticStack deep;
     for (std::uint32_t index = 0; index < 40; ++index) {
         const auto frame = 0x10000U + index * 0x100U;
@@ -474,8 +448,6 @@ void test_stack_chain()
     const auto longer = shade::capture_stack_chain(
         0x3010U, 0x3020U, 0x10000U, deep.reader(), 40);
     CHECK(longer.size() == 2 + 40);
-    // The chain holds our frame too: index 34 is the 36th entry (PC, LR, then
-    // the return addresses in order), and the walk does not stop there.
     CHECK(longer.size() == 42 && longer[36] == 0x1050U);
 }
 
@@ -494,14 +466,10 @@ void test_chain_rows()
     profile.record_chain(
         1, 7, 0x3010U, 0x3010U, false, { 0x3010U, 0x3020U, 0x3090U }, 3);
     CHECK(profile.chains().size() == 2);
-    // The same chain on another guest thread is another row.
     profile.record_chain(
         1, 8, 0x3010U, 0x3010U, false, { 0x3010U, 0x3020U, 0x1050U }, 4);
     CHECK(profile.chains().size() == 3);
 
-    // Equal chains of one thread are one row; the largest ticks come first,
-    // and each frame is an image and offset, or its address when no image
-    // holds it.
     const auto table = shade::format_chain_table(profile);
     CHECK(contains(table,
         "pid\tthread\tlocation\tentry\tthumb\truns\tticks\tdepth\tframes\n"));
@@ -518,7 +486,6 @@ void test_chain_rows()
                           "/usr/lib/libsystem_c.dylib+0x00000020 "
                           "/usr/lib/libsystem_c.dylib+0x00000090\n"));
 
-    // The row cap keeps the largest rows and leaves the others out.
     const auto capped = shade::format_chain_table(profile, 1);
     CHECK(contains(capped,
         "1\t7\t0x0000000000003010\t0x00003010\t0\t2\t15\t3\t"));
@@ -526,7 +493,6 @@ void test_chain_rows()
     CHECK(shade::format_chain_table(profile, 0) ==
           "pid\tthread\tlocation\tentry\tthumb\truns\tticks\tdepth\tframes\n");
 
-    // The thread summary counts every row, capped or not.
     const auto threads = shade::format_thread_summary(profile);
     CHECK(threads.size() == 2);
     CHECK(threads.size() == 2 &&
@@ -540,7 +506,7 @@ void test_chain_rows()
     CHECK(profile.chains().empty());
 }
 
-} // namespace
+}
 
 int main()
 {

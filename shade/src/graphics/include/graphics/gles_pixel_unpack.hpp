@@ -14,13 +14,10 @@ namespace shade {
 
 struct GlesPixelUnpack {
     std::uint32_t alignment { gles_abi::default_pixel_alignment };
-    // Zero selects the upload width. Row length and skips are in pixels/rows,
-    // not bytes, and apply to both image and subimage uploads.
     std::uint32_t row_length { };
     std::uint32_t skip_rows { };
     std::uint32_t skip_pixels { };
-    // APPLE_row_bytes overrides row length and alignment when nonzero.
     std::uint32_t row_bytes { };
 };
 
-} // namespace shade
+}

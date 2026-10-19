@@ -29,9 +29,6 @@
 namespace shade::bsd::baseband_device {
 
 inline constexpr std::string_view path { "/dev/h5.baseband" };
-// Darwin 9/early iPhoneOS CommCenter probes the legacy serial node before
-// selecting the H5 transport. It is the same emulated baseband endpoint, not
-// a second transport or a firmware-specific success result.
 inline constexpr std::string_view legacy_path { "/dev/cu.baseband" };
 inline constexpr std::string_view spi_mux_path { "/dev/mux.spi-baseband" };
 inline constexpr std::string_view h5_mux_path { "/dev/mux.h5.baseband" };
@@ -40,18 +37,9 @@ inline constexpr std::string_view spi_mux_directory_name { "mux.spi-baseband" };
 inline constexpr std::string_view h5_mux_directory_name { "mux.h5.baseband" };
 inline constexpr std::string_view descriptor_kind { "baseband" };
 inline constexpr unsigned device_minor = 3;
-// Offline devices with a fixed endpoint retain the finite logical channel
-// table expected by stock CommCenter. These channels are not backed by a
-// modem and never synthesize receive data.
 inline constexpr std::uint32_t offline_mux_channel_capacity = 16;
-// Keep the firmware's modem setup asynchronous even when no physical or
-// replay peer is attached. A real multiplexed serial modem cannot complete an
-// arbitrary number of commands in the same scheduler turn.
 inline constexpr auto offline_control_response_interval =
     std::chrono::milliseconds { 25 };
-// In-memory capture is a test/embedding diagnostic, not the production
-// transport. Keep it bounded even when a caller explicitly enables it; the
-// application uses the streaming sink for unbounded captures.
 inline constexpr std::size_t transmit_capture_capacity = 1U * 1024U * 1024U;
 inline constexpr std::size_t maximum_receive_threshold = 64U * 1024U;
 
@@ -112,16 +100,10 @@ public:
 
     [[nodiscard]] bool available() const;
     void set_available(bool available);
-    // This is the guest-to-device tty transmit queue, not modem availability.
     [[nodiscard]] bool transmit_queue_writable() const;
     void set_transmit_queue_writable(bool writable);
-    // Whether the profile supports guest-visible DLCI setup nodes. Offline
-    // devices may expose bounded logical channels without a modem peer.
     [[nodiscard]] bool dynamic_channels_available() const;
     void set_dynamic_channels_available(bool available);
-    // Direct /dev/dlci.*.<unit> opens use the same bounded logical channel
-    // table as ASMIOCNEWDLCI.  Keep the path validation in the device state so
-    // filesystem, stat, and access do not grow separate capacity rules.
     [[nodiscard]] bool mux_channel_path_available(
         std::string_view candidate) const;
     [[nodiscard]] bool may_open(bool privileged) const;
@@ -138,22 +120,11 @@ public:
     [[nodiscard]] std::uint32_t modem_control_bits() const;
     void set_modem_control_bits(std::uint32_t bits);
     void update_modem_control_bits(std::uint32_t bits, bool enabled);
-    // IOAOS_RECEIVE_QUEUE installs a fixed-size driver queue descriptor. The
-    // offline endpoint records the bounded descriptor for state inspection but
-    // never dereferences guest pointers or creates synthetic receive bytes.
     [[nodiscard]] bool configure_receive_queue(
         std::span<const std::byte> configuration);
     [[nodiscard]] bool receive_queue_configured() const;
-    // TIOCFLUSH clears the software receive queue. Writes are synchronous, so
-    // there is no pending transmit queue to retain or fabricate.
     void flush_buffers(std::uint32_t what);
-    // A zero capacity preserves the virtual/replay transport's dynamic channel
-    // allocation. Offline transport bounds both its anonymous slots and its
-    // named logical-channel registry; named channels use the same logical
-    // unit table as the stock serial-mux ABI.
     void set_mux_channel_capacity(std::uint32_t capacity);
-    // Offline transports retain the modem's small command/control handshake
-    // while omitting radio state and unsolicited traffic.
     void set_offline_control_enabled(bool enabled);
     [[nodiscard]] std::uint32_t register_mux_channel(std::string_view name,
         std::optional<std::uint32_t> requested_unit = std::nullopt);
@@ -169,13 +140,7 @@ public:
     [[nodiscard]] std::size_t pending_receive_bytes() const;
     [[nodiscard]] std::size_t write(std::span<const std::byte> bytes);
     [[nodiscard]] std::vector<std::byte> take_transmitted();
-    // Capture is opt-in. The application installs either a null sink or a
-    // streaming sink, and tests/embedding callers explicitly enable bounded
-    // in-memory capture when they need to inspect recent bytes.
     void set_transmit_capture_enabled(bool enabled);
-    // A sink receives one complete guest write while the device state is
-    // serialized. Returning false makes that write fail instead of reporting a
-    // partial fixed-node write.
     void set_transmit_sink(TransmitSink sink);
     [[nodiscard]] bool transmit_sink_failed() const;
 
@@ -262,4 +227,4 @@ inline State::~State()
         lifetime_->state = nullptr;
 }
 
-} // namespace shade::bsd::baseband_device
+}

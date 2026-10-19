@@ -92,4 +92,4 @@ namespace shade::runtime_detail {
     return mode == JitProfileMode::Startup;
 }
 
-} // namespace shade::runtime_detail
+}

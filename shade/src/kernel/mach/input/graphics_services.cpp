@@ -122,7 +122,6 @@ namespace {
 
     HidEventQueue::KeyboardInput hid_button(const SystemButtonInput& input)
     {
-        // USB HID Consumer page: Menu, Power, Volume Increment/Decrement.
         std::uint32_t usage = 0;
         switch (input.button) {
         case SystemButton::Home: usage = 0x40U; break;
@@ -210,13 +209,8 @@ namespace {
         write_word(message.bytes, hand_offset, profile.hand_type(input.phase));
         message.bytes[hand_path_count_offset] = std::byte { 1 };
         message.bytes[path_offset] = static_cast<std::byte>(path_index);
-        // The second path byte is ABI-defined: the early profile uses a stable
-        // identity, while later UIKit keyboard layouts consume the touch stage.
         message.bytes[path_offset + 1] =
             static_cast<std::byte>(profile.path_type(input.phase));
-        // Proximity is a contact-lifetime bit field. UIKit matches a terminal
-        // path by index, then retires that contact only when proximity is fully
-        // clear.
         message.bytes[path_offset + 2] = static_cast<std::byte>(
             active(input.phase) ? path_proximity_touching : 0U);
         write_float(message.bytes, path_pressure_offset,
@@ -541,11 +535,6 @@ namespace {
     presentation_touch_route_locked(KernelSharedState& state,
         const PresentationHitTest& presentation, SceneCoordinator* scenes)
     {
-        // A version adapter can establish a logical App scene even when an
-        // early compositor flattens all of its pixels into SpringBoard-owned
-        // surfaces. That semantic identity belongs to this exact completed
-        // frame, so consult it before physical provenance unless a newer
-        // firmware-classified system alert is above the App.
         if (presentation.logical_client_scene &&
             presentation.logical_client_scene->state ==
                 ClientSceneState::Active &&
@@ -557,12 +546,6 @@ namespace {
             }
         }
 
-        // Early firmware flattens an application's full-screen scene into a
-        // SpringBoard-owned presentation. In that mode the physical layer list
-        // can name SpringBoard even though the semantic application route is
-        // still the active foreground owner. Prefer that exact route before
-        // treating the compositor's owner as the touch target; system alerts
-        // and lock state have already been excluded by the checks above.
         if (!springboard_alert_owns_input_locked(state)) {
             if (const auto route = semantic_touch_route_locked(state, scenes))
                 return route;
@@ -581,10 +564,6 @@ namespace {
                     process->second.executable_path))
                 return springboard_touch_route();
 
-            // SpringBoard's desktop can retain App-produced icon/snapshot
-            // assets. Only a publication already classified as a display-sized
-            // App scene is an input owner; otherwise continue to the layer
-            // beneath it.
             if (!application_fullscreen_publication_locked(state, process_id,
                     layer.surface_provenance.publication_sequence)) {
                 continue;
@@ -629,12 +608,6 @@ namespace {
         }
         if (scenes) {
             const auto scene = scenes->client_scene(port->receive_owner);
-            // Some early firmware flattens the App into a SpringBoard-owned
-            // presentation without publishing a ClientScene for the App. The
-            // active event port and foreground route above are still
-            // authoritative in that case. An explicitly published non-active
-            // scene remains a hard rejection so a stale route cannot cross a
-            // lifecycle boundary.
             if (scene && scene->state != ClientSceneState::Active)
                 return std::nullopt;
         }
@@ -760,11 +733,6 @@ namespace {
                 return attempt->second.origin_touch_sequence;
             }
         }
-        // Home can arrive after SpringBoard has selected and spawned an App but
-        // before it asks launchd for that App's event service. The foreground
-        // authorization is deliberately cleared at Home, so retain causality
-        // through the exact outgoing PID instead of falling back to an
-        // unrelated historical touch.
         if (state.application_touch_suspended &&
             state.application_suspension_reason ==
                 KernelSharedState::ApplicationSuspensionReason::Home &&
@@ -895,14 +863,6 @@ namespace {
             state.iokit_display_vsync.end(),
             [&state, process_id](const auto& entry) {
                 const auto& [connection_object, registration] = entry;
-                // GraphicsServices deliberately toggles its VSync callback
-                // around lifecycle transitions. Scene admission still needs to
-                // see the registered display client while that callback is
-                // disabled; the callback path itself independently gates on
-                // `enabled` and therefore sends no notifications and produces
-                // no client animation frames. Keeping the retained deadline
-                // here preserves the last frame and lets the causal foreground
-                // handoff finish before the next enable.
                 if (registration.owner_pid != process_id ||
                     !registration.next_deadline) {
                     return false;
@@ -945,12 +905,6 @@ namespace {
         KernelSharedState::ApplicationLaunchAttempt& attempt,
         bool requests_userspace_prewarm, SceneCoordinator* scenes)
     {
-        // Some early UIKit stacks render through a display connection owned by
-        // the App while SpringBoard flattens those pixels into its own
-        // hardware-layer surfaces. There is no cross-process CoreSurface
-        // placement for LayerKit to commit, so rendezvous the firmware's
-        // independent intent and presentation signals instead. A lifecycle
-        // message alone remains insufficient.
         const auto lifecycle_resume_origin =
             attempt.origin ==
                 KernelSharedState::ApplicationLaunchOrigin::Spawn ||
@@ -1130,10 +1084,6 @@ namespace {
                 attempt->second.token ==
                     state.held_application_launch->launch_token &&
                 attempt_held_by_lock(attempt->second)) {
-                // The host has validated a complete rightward unlock gesture.
-                // Promote the exact held token now; waiting for another
-                // lifecycle callback after SpringBoard consumes Up can strand
-                // an App whose only callback raced just before that receive.
                 attempt->second.phase =
                     KernelSharedState::ApplicationLaunchPhase::Launching;
                 state.foreground_application_attempt_process_id = process_id;
@@ -1147,11 +1097,6 @@ namespace {
         if (!completion.resume_process_id &&
             !completion.completes_interrupted_home_exit &&
             retained_lock_process_id) {
-            // Lock suspends the already-active scene without destroying its
-            // event route. A completed unlock must promote that same resident
-            // scene even when no launch/lifecycle callback follows; otherwise
-            // its retained pixels return while all later touches continue to
-            // route to SpringBoard.
             const auto process_id = *retained_lock_process_id;
             if (auto* attempt = launch_attempt_locked(state, process_id);
                 attempt && !attempt_interrupted(*attempt)) {
@@ -1175,11 +1120,6 @@ namespace {
         std::uint64_t origin_touch_sequence,
         KernelSharedState::ApplicationLaunchOrigin origin)
     {
-        // A foreground application can ask SpringBoard to open another ordinary
-        // application (for example through the system URL launcher). Such a
-        // spawn has no SpringBoard icon touch sequence, but it is still a real
-        // foreground intent. Keep lookup-only/background work suspended while
-        // accepting this generic process-owned handoff.
         const auto active_application_route =
             has_active_application_route_locked(state);
         const auto pending_application_handoff =
@@ -1298,10 +1238,6 @@ namespace {
         const KernelSharedState::ApplicationLaunchAttempt& attempt,
         bool force_foreground, bool mark_spawned)
     {
-        // A lifecycle/scene rendezvous is the authoritative foreground decision
-        // for the rare path where a process-owned attempt was initially
-        // Suspended. The normal launch path remains gated by the causal attempt
-        // phase.
         if (!force_foreground && !foreground_transition_attempt(attempt))
             return;
         const auto destination = state.process_identity_locked(process_id);
@@ -1327,16 +1263,9 @@ namespace {
     void record_resident_lookup_locked(KernelSharedState& state,
         std::uint32_t process_id, std::uint64_t origin_touch_sequence)
     {
-        // Unlock may cause SpringBoard to probe resident application services.
-        // It is never a foreground selection, so preserve an exact existing
-        // token (or leave a prewarmed process without one) until a later icon
-        // gesture.
         if (origin_is_unlock_touch_locked(state, origin_touch_sequence))
             return;
         if (const auto* existing = launch_attempt_locked(state, process_id)) {
-            // Repeated lookups caused by one icon/unlock gesture are one
-            // intent. In particular, unlock-triggered lookups must retain the
-            // HeldLock token.
             if (existing->origin_touch_sequence == origin_touch_sequence) {
                 bind_held_launch_locked(state, process_id, *existing);
                 if (state.springboard_pending_launch_touch_sequence ==
@@ -1380,9 +1309,6 @@ namespace {
         state.application_launch_barrier =
             KernelSharedState::ApplicationLaunchBarrier { reason,
                 input_sequence, std::nullopt };
-        // A Home/Lock barrier supersedes an incomplete App-to-App transition.
-        // Do not let a later process spawn consume a foreground intent that the
-        // user has already interrupted.
         state.pending_application_handoff_process_id.reset();
         state.interrupted_home_exit_lock_sequence.reset();
 
@@ -1405,11 +1331,6 @@ namespace {
                     attempt.origin_touch_sequence < input_sequence) {
                     attempt.phase = KernelSharedState::ApplicationLaunchPhase::
                         InterruptedHome;
-                    // SpringBoard may defer Home until the App publishes its
-                    // first real frame. Keep that exact outgoing surface
-                    // sampleable for the native shrink animation; foreground
-                    // authorization, not black pixels, prevents the cancelled
-                    // App from taking ownership again.
                     if (sampleable_home_exit_process_id == process_id) {
                         release_application_fullscreen_suppression_locked(
                             state, process_id);
@@ -1515,9 +1436,6 @@ namespace {
                 KernelSharedState::ApplicationLaunchPhase::Active)
                 continue;
             if (attempt_interrupted(attempt)) {
-                // A Lock that follows Home must not turn the already-outgoing
-                // snapshot black while SpringBoard finishes the exit behind the
-                // lock screen.
                 if (sampleable_home_exit_process_id == process_id) {
                     release_application_fullscreen_suppression_locked(
                         state, process_id);
@@ -1663,7 +1581,7 @@ namespace {
         state.suspended_application_scene_process_id.reset();
     }
 
-} // namespace
+}
 
 void register_springboard_alert_observers(UserlandHleRegistry& registry,
     std::function<void(std::uint32_t, SpringBoardAlertObservation)> observer)
@@ -1760,9 +1678,6 @@ void register_application_suspension_observer(UserlandHleRegistry& registry,
             call.resume_original_persistently(
                 [observer, process_id, suspended](UserlandHleCall& completed) {
                     static_cast<void>(completed);
-                    // Under-lock resume is completed by the native unlock
-                    // gesture; only its entering edge establishes the Lock
-                    // barrier here.
                     if (observer && suspended)
                         observer(process_id);
                 });
@@ -1819,16 +1734,12 @@ void record_springboard_lock_state(KernelSharedState& state, bool active)
         const auto now = state.clock.now();
         for (auto& [connection_object, registration] :
             state.iokit_display_vsync) {
-            // A notification port can outlive the firmware's callback. A
-            // selector-off request withdraws the callout and refcon; waking
-            // the panel must not turn that port into a null callback.
             if (registration.notification_port == 0U ||
                 registration.async_reference
                     [iokit_abi::display_vsync::async_callout_index] == 0U ||
                 registration.async_reference
                     [iokit_abi::display_vsync::async_refcon_index] == 0U)
                 continue;
-            // Preserve the valid callback window on the panel's fixed phase.
             registration.enabled = true;
             registration.last_notification_frame_time.reset();
             if (!registration.next_deadline ||
@@ -1858,11 +1769,6 @@ void record_springboard_lock_state(KernelSharedState& state, bool active)
                 state.springboard_unlock_touch_end_x,
                 state.springboard_unlock_touch_end_y);
         if (completed_before_classification) {
-            // A loaded SpringBoard can return from -activate only after the
-            // native slider has already completed. Reconcile that stale
-            // activation with the exact immediately preceding trajectory; it
-            // must not turn the first desktop alert or icon tap into another
-            // unlock gesture.
             state.springboard_lock_screen_active = false;
             state.springboard_unlock_touch_pending = false;
             state.springboard_unlock_touch_active = false;
@@ -1876,10 +1782,6 @@ void record_springboard_lock_state(KernelSharedState& state, bool active)
         }
         if (!state.springboard_unlock_touch_active &&
             in_flight_touch_begin != 0U) {
-            // SBAwayController can finish activating after the firmware has
-            // already consumed the slider's Down event. Adopt that exact
-            // in-flight gesture instead of making its trailing Up arm another
-            // unlock attempt.
             state.springboard_unlock_touch_pending = false;
             state.springboard_unlock_touch_active = true;
             state.springboard_unlock_touch_begin_sequence =
@@ -1913,10 +1815,6 @@ void register_springboard_application_handoff_animation(
             constexpr std::uint32_t animation_start_time_setting = 0x1000U;
             if (call.argument(2) == animation_start_time_setting &&
                 call.argument(3) != 0U) {
-                // SpringBoard records the start before preparing the zoom
-                // layers. Removing only this explicit start lets the
-                // transaction choose its commit time while retaining the
-                // firmware's animation definition.
                 call.cpu().registers()[3] = 0U;
             }
             call.resume_original_persistently();
@@ -1935,10 +1833,6 @@ void register_springboard_application_handoff_animation(
                 call.resume_original_persistently();
                 return;
             }
-            // Finish the firmware's setting mutation exactly once, then
-            // schedule its native launch animation before
-            // applicationOpenURL:asPanel: continues into the display-stack
-            // push.
             call.resume_original_persistently(
                 [application](UserlandHleCall& return_call) {
                     animate_application_handoff(return_call, application);
@@ -2068,9 +1962,6 @@ ServiceResolution record_bootstrap_reply_locked(KernelSharedState& state,
         }
     }
 
-    // Keep the firmware-resolved service object available to protocol Profiles.
-    // The object is refreshed on every successful bootstrap reply so a service
-    // generation cannot leave a stale remote-renderer rendezvous behind.
     state.bootstrap_service_objects[service_name] = service->object;
 
     std::size_t flushed = 0;
@@ -2185,9 +2076,6 @@ EnqueueResult enqueue_touch(KernelSharedState& state, const TouchInput& input,
     if (input_sequence_output)
         *input_sequence_output = input_sequence;
 
-    // Preserve host transition tracking, but let an open firmware HID system
-    // classify physical contacts before routing them to system gestures,
-    // accessibility services or an application window.
     const auto native_input = state.native_hid_touch_events
         ? state.hid_event_queue.enqueue({ sanitized, state.clock.now() })
         : false;
@@ -2229,10 +2117,6 @@ EnqueueResult enqueue_touch(KernelSharedState& state, const TouchInput& input,
         if (!native_input)
             queue_locked(state, route->destination_object,
                 transform_touch(sanitized, route->transform), input_sequence);
-        // App-owned event ports do not pass the physical touch through
-        // SpringBoard. Preserve the firmware's separate idle-duration event so
-        // SpringBoard can run its native resetIdleDuration: path as it would
-        // for input consumed by the system event port.
         queue_idle_duration_reset_locked(state, input_sequence);
         if (terminal)
             state.active_graphics_touch_route.reset();
@@ -2243,9 +2127,6 @@ EnqueueResult enqueue_touch(KernelSharedState& state, const TouchInput& input,
                                     state.springboard_unlock_touch_active;
     auto completed_unlock_gesture = false;
     if (sanitized.phase == TouchPhase::Down) {
-        // Retain the origin even before SpringBoard has classified the visible
-        // layer as its lock scene. The classification callback can race this
-        // already-enqueued Down event on another guest CPU.
         state.springboard_unlock_touch_start_x = sanitized.x;
         state.springboard_unlock_touch_start_y = sanitized.y;
     }
@@ -2264,9 +2145,6 @@ EnqueueResult enqueue_touch(KernelSharedState& state, const TouchInput& input,
         state.springboard_unlock_touch_end_sequence = input_sequence;
         state.springboard_unlock_touch_end_x = sanitized.x;
         state.springboard_unlock_touch_end_y = sanitized.y;
-        // The iPhone OS 1.x lock control is a deliberate rightward slider. Do
-        // not turn a tap, failed drag, or cancelled gesture into a synthetic
-        // Home.
         completed_unlock_gesture =
             sanitized.phase == TouchPhase::Up &&
             valid_unlock_trajectory(state.springboard_unlock_touch_start_x,
@@ -2283,10 +2161,6 @@ EnqueueResult enqueue_touch(KernelSharedState& state, const TouchInput& input,
                 complete_home_transition_locked(state,
                     *state.suspended_application_scene_process_id, scenes);
             }
-            // A deliberate post-unlock gesture supersedes a held launch that
-            // still has not become foreground. The exact PID/token remains
-            // suppressed; a later lookup for it is background work, not the
-            // user's new selection.
             if (state.held_application_launch &&
                 state.held_application_launch->unlock_up_sequence != 0U) {
                 const auto held = *state.held_application_launch;
@@ -2326,17 +2200,9 @@ EnqueueResult enqueue_touch(KernelSharedState& state, const TouchInput& input,
     auto unlock_completion = UnlockTransitionCompletion { };
     if (completed_unlock_gesture) {
         state.springboard_lock_screen_active = false;
-        // Keep the completed trajectory until the asynchronous SpringBoard lock
-        // classification observes it. SBAwayController can report the old
-        // active state after the slider's Up event;
-        // record_springboard_lock_state uses these exact sequence fields to
-        // reconcile that stale callback instead of arming the next desktop tap
-        // as another unlock gesture.
         unlock_completion =
             complete_unlock_transition_locked(state, input_sequence);
     }
-    // Native HID owns the unlock and application-exit sequence. A second
-    // physical HOME after its swipe would act on the newly unlocked screen.
     if (!native_input && unlock_completion.completes_interrupted_home_exit &&
         home_recovery_requested) {
         *home_recovery_requested = true;
@@ -2364,10 +2230,6 @@ EnqueueResult enqueue_touch(KernelSharedState& state, const TouchInput& input,
     }
     if (!native_input)
         queue_locked(state, service->second, sanitized, input_sequence);
-    // Hardware input reaches SpringBoard through this event port. The device
-    // also emits its separate idle-duration event for the same input, which
-    // lets SpringBoard run resetIdleDuration: even when the touch is consumed
-    // by the desktop or by a SpringBoard launch control.
     queue_idle_duration_reset_locked(state, input_sequence);
     lock.unlock();
     if (resume_process_id) {
@@ -2397,9 +2259,6 @@ EnqueueResult enqueue_system_button(KernelSharedState& state,
         system_graphics_input_abi_locked(state, destination));
     const auto event_type = profile.system_button_type(input);
     if (service == state.bootstrap_service_objects.end()) {
-        // A firmware HID consumer can own system controls without publishing
-        // the legacy GraphicsServices system-event port. Let that consumer
-        // classify the physical key and perform its native wake/idle handling.
         if (state.hid_event_queue.enqueue({ hid_button(input), state.clock.now() })) {
             state.note_io_event_transition();
             return EnqueueResult::Queued;
@@ -2516,10 +2375,6 @@ namespace {
             (!scenes || scenes->client_scene_active(*active_process_id))) {
             target_process_id = active_process_id;
         }
-        // Capture the exact selected token before Home updates the cancellation
-        // watermark and clears foreground authorization. This narrow interval is
-        // where SpringBoard has finished the opening animation but the App has not
-        // yet published its first UI frame.
         const auto sampleable_home_exit_process_id =
             reason == KernelSharedState::ApplicationSuspensionReason::Home
                 ? target_process_id ? target_process_id : prior_home_exit_process_id
@@ -2534,9 +2389,6 @@ namespace {
                 *target_process_id;
         }
 
-        // With no exact current target, the sequence barrier is sufficient. A later
-        // SpringBoard spawn/lookup will create a PID-bound attempt and compare its
-        // causal touch sequence with this barrier.
         if (!target_process_id)
             return;
 
@@ -2559,7 +2411,7 @@ namespace {
         }
     }
 
-} // namespace
+}
 
 void suspend_active_application(KernelSharedState& state,
     KernelSharedState::ApplicationSuspensionReason reason,
@@ -2588,9 +2440,6 @@ void record_system_event_delivery_locked(KernelSharedState& state,
     if (home && (state.springboard_unlock_touch_pending ||
                     state.springboard_unlock_touch_active))
         return;
-    // Firmware event producers (accessibility and other system services) own
-    // the wire event. Apply the same scene barrier as physical input without
-    // injecting a second button event.
     suspend_active_application_locked(state,
         home ? KernelSharedState::ApplicationSuspensionReason::Home
              : KernelSharedState::ApplicationSuspensionReason::Lock,
@@ -2609,10 +2458,6 @@ void complete_home_transition_after_present(KernelSharedState& state,
         return;
     }
     const auto process_id = *state.suspended_application_scene_process_id;
-    // The first SpringBoard SwapEnd starts the animation; it is not an
-    // ownership completion point. Keep any live, PID-bound attempt sampleable
-    // until the ordered native background event. A later user gesture provides
-    // a deterministic stale-exit fallback if that private event never arrives.
     const auto process = state.processes.find(process_id);
     if (launch_attempt_locked(state, process_id) &&
         process != state.processes.end() && !process->second.exited) {
@@ -2627,11 +2472,6 @@ void record_application_spawn(KernelSharedState& state,
     SceneCoordinator* scenes, bool force_foreground)
 {
     std::lock_guard lock { state.mach_mutex };
-    // Older SpringBoard launches fork through launchd and then SETEXEC in the
-    // child, so that successful child has parent PID 1 rather than the
-    // SpringBoard PID. Keep this exception causal: a SETEXEC application is
-    // foreground-observable only while a recent host input or exact handoff is
-    // still pending. Ordinary/background launches retain the sender guard.
     const auto exact_foreground_handoff =
         state.foreground_application_attempt_process_id == process_id ||
         state.pending_application_handoff_process_id == process_id;
@@ -2771,11 +2611,6 @@ namespace {
         if (scene_committed && event_object != 0U && valid_application &&
             !preserves_committed_foreground &&
             (!requests_userspace_prewarm || owns_active_intent)) {
-            // Some firmware builds bind the resident process first and only
-            // later promote its Suspended attempt through this scene/event
-            // rendezvous. Start the bounded observation at the point foreground
-            // ownership is actually accepted, then fill milestones already
-            // proven by this block.
             ensure_foreground_transition_snapshot_locked(
                 state, process_id, *attempt, true, false);
             state.mark_foreground_transition_locked(
@@ -2817,13 +2652,6 @@ namespace {
         }
     }
 
-    // A prewarmed application can receive its first lifecycle event only after
-    // the lock slider has completed.  That event is the firmware's foreground
-    // rendezvous for the application that was already rendering behind the
-    // lock scene; it is not an icon-selection lookup and therefore has no
-    // launch attempt to consume.  Bind a normal lifecycle-origin attempt to
-    // this exact completed unlock so the existing scene admission path can
-    // promote it without naming an application or page.
     bool promote_application_after_unlock_locked(
         KernelSharedState& state, std::uint32_t process_id)
     {
@@ -2849,11 +2677,6 @@ namespace {
         }
         auto& attempt = begin_launch_attempt_locked(state, process_id, 0U,
             KernelSharedState::ApplicationLaunchOrigin::ForegroundLifecycle);
-        // The lifecycle event is already the post-unlock foreground proof.
-        // Display timing may still be disabled while SpringBoard is handing
-        // the panel back, so do not wait for the first VSync registration to
-        // authorize this exact route; the normal scene/event checks below
-        // still gate ownership.
         attempt.phase = KernelSharedState::ApplicationLaunchPhase::Launching;
         state.foreground_application_attempt_process_id = process_id;
         release_application_fullscreen_suppression_locked(state, process_id);
@@ -2862,7 +2685,7 @@ namespace {
         return true;
     }
 
-} // namespace
+}
 
 void activate_resolved_application(KernelSharedState& state,
     std::uint32_t process_id, SceneCoordinator* scenes)
@@ -2892,19 +2715,9 @@ std::optional<std::uint32_t> record_application_scene_transform(
     std::lock_guard lock { state.mach_mutex };
     const auto context_key = std::pair { render_process_id, context };
     auto owner = state.application_scene_context_owners.find(context_key);
-    // During early boot launchd can start the first UIKit client before
-    // SpringBoard has delivered its event-port/lifecycle rendezvous.  The
-    // client's own LayerKit transform is nevertheless a process-owned display
-    // admission signal.  Bind a lifecycle attempt here so the normal scene
-    // activation path can consume the transform and establish touch routing;
-    // do not steal an already-resolved foreground route.
     if (!has_active_application_route_locked(state) &&
         state.application_suspension_reason ==
             KernelSharedState::ApplicationSuspensionReason::None) {
-        // LayerKit may be serviced by a shared renderer (for example lsd),
-        // so the caller PID is not necessarily the UIKit client's PID. When
-        // that happens, use the pending event right as the capability-bound
-        // client identity rather than dropping the first live transform.
         auto candidate_process_id = render_process_id;
         const auto render_process = state.processes.find(render_process_id);
         if (render_process == state.processes.end() ||
@@ -2925,9 +2738,6 @@ std::optional<std::uint32_t> record_application_scene_transform(
                 : begin_launch_attempt_locked(state, candidate_process_id, 0U,
                       KernelSharedState::ApplicationLaunchOrigin::
                           ForegroundLifecycle);
-            // A stale prewarm/lookup token must not mask the first live root;
-            // the capability-bound pending event and transform re-authorize
-            // this client while no other foreground route is active.
             attempt.phase =
                 KernelSharedState::ApplicationLaunchPhase::Launching;
             state.foreground_application_attempt_process_id =
@@ -2987,24 +2797,14 @@ std::optional<std::uint32_t> record_application_scene_transform(
     }
     if (owner != state.application_scene_context_owners.end() &&
         owner->second != process_id) {
-        // LayerKit contexts are reused by SpringBoard. A retired owner must not
-        // permanently redirect a new exact launch to the previous App.
         owner->second = process_id;
     }
-    // SpringBoard publishes separate full-screen roots for the outgoing App's
-    // lock screen and exit snapshots. Ignore only that App's roots: a different
-    // App can publish its first live root before didBecomeActive arrives.
     const auto* attempt = launch_attempt_locked(state, process_id);
     const auto exact_held_launch =
         attempt && attempt_held_by_lock(*attempt) &&
         held_launch_matches_locked(state, process_id, *attempt);
     const auto exact_home_exit = attempt && attempt_is_home_exit_target_locked(
                                                 state, process_id, *attempt);
-    // While the display is locked, SpringBoard publishes its own full-screen
-    // root using the same rendering process/context machinery. A launch token
-    // held behind that lock proves which App may resume after unlock; it does
-    // not make the current lock-screen root an App scene. Accept the App's next
-    // transform only after unlock promotes the token back to Launching.
     if (exact_held_launch && state.application_touch_suspended &&
         state.application_suspension_reason ==
             KernelSharedState::ApplicationSuspensionReason::Lock &&
@@ -3179,12 +2979,6 @@ void record_application_event_delivery_locked(KernelSharedState& state,
         state.pending_application_event_launches.erase(pending);
         record_resident_lookup_locked(state, process_id, origin_touch_sequence);
     } else if (resume_origin_touch_sequence != 0U) {
-        // A resident event port remains cached after Home, so SpringBoard can
-        // send the resume lifecycle event without another bootstrap lookup.
-        // Bind that firmware-owned event to the exact icon gesture still
-        // pending in the system input queue; otherwise the committed App
-        // snapshot becomes visible while touch continues to route to
-        // SpringBoard.
         record_resident_lookup_locked(
             state, process_id, resume_origin_touch_sequence);
     }
@@ -3198,10 +2992,6 @@ void record_application_event_delivery_locked(KernelSharedState& state,
     state.mark_foreground_transition_locked(
         KernelSharedState::ForegroundTransitionMilestone::Lifecycle,
         process_id);
-    // Event delivery proves the PID-owned route, not lifecycle meaning. Retry
-    // the readiness rendezvous for every firmware event so an event port that
-    // arrives after a LayerKit commit, or after display timing becomes live,
-    // cannot strand an otherwise authorized foreground launch.
     activate_resolved_application_locked(state, process_id, scenes);
     if (unlock_promotion && state.active_application_scene &&
         state.active_application_scene->process_id == process_id &&
@@ -3230,10 +3020,6 @@ void record_application_remote_scene_commit_locked(KernelSharedState& state,
         KernelSharedState::ForegroundTransitionMilestone::SceneCommitted,
         sender_pid);
     scenes->commit_client_scene(sender_pid, std::nullopt);
-    // Early boot clients can publish their remote scene before SpringBoard
-    // delivers the application event port. Preserve the semantic foreground
-    // state in that interval; event delivery will still establish the input
-    // route and full activation later.
     if (!scenes->active_client_scene())
         scenes->activate_client_scene(sender_pid);
     activate_resolved_application_locked(state, sender_pid, scenes);
@@ -3261,11 +3047,6 @@ void record_application_suspension_state(KernelSharedState& state,
         auto* attempt = launch_attempt_locked(state, process_id);
         if (!attempt && flattened_display_scene_available_locked(
                             state, process_id, false)) {
-            // launchd-mediated jobs fork and SETEXEC in the child, so there is
-            // no SpringBoard-owned posix_spawn call from which to bind a token.
-            // The verified lifecycle destination and active display client
-            // supply the missing current-process identity without borrowing a
-            // historical touch sequence.
             attempt = &begin_launch_attempt_locked(state, process_id, 0U,
                 KernelSharedState::ApplicationLaunchOrigin::
                     ForegroundLifecycle);
@@ -3359,9 +3140,6 @@ void record_application_suspension_state(KernelSharedState& state,
         const auto semantic_scene_committed =
             scenes &&
             scenes->client_scene(destination_port->receive_owner).has_value();
-        // Native resume is foreground intent, not proof that the replacement
-        // has become visible. Preserve a different committed foreground until
-        // it suspends or this process owns the only committed scene.
         const auto preserves_committed_foreground =
             state.active_application_scene &&
             state.active_application_scene->process_id !=
@@ -3445,10 +3223,6 @@ void record_application_suspension_state(KernelSharedState& state,
                 state, state.active_application_event_object, process_id);
             if (reason ==
                 KernelSharedState::ApplicationSuspensionReason::Home) {
-                // This is an older Home-cancelled background App, not the exact
-                // outgoing PID retained by maintain_home_exit_process_locked.
-                // Keep its publications suppressed and retire any stale global
-                // route.
                 if (owns_global_scene)
                     state.active_application_scene.reset();
                 if (owns_global_route)
@@ -3477,21 +3251,12 @@ void record_application_suspension_state(KernelSharedState& state,
         const auto owns_current_route = object_owned_by_process_locked(
             state, state.active_application_event_object, process_id);
         if (!owns_current_scene && !owns_current_route) {
-            // Lifecycle messages are asynchronous. A previous App may resign
-            // after a newer launch or Home exit has already become
-            // authoritative; such a callback must not overwrite the singleton
-            // suspended PID/reason.
             return;
         }
 
         const auto prior_suspension_reason =
             state.application_suspension_reason;
         if (scenes) {
-            // A completed native suspension transition from a live App is the
-            // display-stack
-            // handoff boundary. Keep its committed scene presentable until
-            // SpringBoard has pushed the replacement display; only Lock retains
-            // a suspended scene without an outgoing display-stack transition.
             if (prior_suspension_reason ==
                 KernelSharedState::ApplicationSuspensionReason::Lock) {
                 scenes->suspend_client_scene(process_id);
@@ -3527,18 +3292,11 @@ void record_application_suspension_state(KernelSharedState& state,
                 state.foreground_application_attempt_process_id.reset();
             return;
         }
-        // Preserve one exact outgoing identity while SpringBoard performs a
-        // normal App-to-App handoff. It may deliver the replacement spawn after
-        // this callback has already retired the active input route.
         state.pending_application_handoff_process_id = process_id;
         if (attempt) {
             attempt->phase =
                 KernelSharedState::ApplicationLaunchPhase::Suspended;
         }
-        // A normally active App remains the source of SpringBoard's shrinking
-        // exit snapshot after willResignActive. Suppression is reserved for an
-        // interrupted launch above; hiding this surface here turns the
-        // otherwise valid Home animation black.
         state.application_suspension_reason =
             KernelSharedState::ApplicationSuspensionReason::None;
         if (state.latest_application_scene_transform &&
@@ -3569,4 +3327,4 @@ void record_application_suspension_state(KernelSharedState& state,
     }
 }
 
-} // namespace shade::graphics_services_input
+}

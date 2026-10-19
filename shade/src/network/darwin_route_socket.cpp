@@ -58,7 +58,6 @@ namespace {
 
     std::size_t aligned_sockaddr_size(std::size_t size)
     {
-        // Darwin's ROUNDUP treats a zero-length netmask as one alignment unit.
         if (size == 0)
             return sockaddr_alignment;
         return (size + sockaddr_alignment - 1U) & ~(sockaddr_alignment - 1U);
@@ -164,7 +163,7 @@ namespace {
         return link;
     }
 
-} // namespace
+}
 
 ParseResult parse_message(std::span<const std::byte> bytes)
 {
@@ -241,8 +240,6 @@ ParseResult parse_message(std::span<const std::byte> bytes)
         }
         const auto candidate_family =
             std::to_integer<std::uint8_t>((*message.sockaddrs[index])[1]);
-        // Compact netmasks are permitted to carry AF_UNSPEC.  Gateways may be
-        // AF_LINK for directly attached routes.
         if (candidate_family != network::address_family_unspecified &&
             candidate_family != family &&
             !(index == 1U &&
@@ -590,4 +587,4 @@ std::vector<Entry> Table::snapshot() const
     return entries_;
 }
 
-} // namespace shade::darwin::route
+}

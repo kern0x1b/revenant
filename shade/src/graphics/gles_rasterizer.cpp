@@ -471,10 +471,6 @@ namespace {
                 const auto w0 = edge_values[0] / area;
                 const auto w1 = edge_values[1] / area;
                 const auto w2 = edge_values[2] / area;
-                // GLES varyings are interpolated in homogeneous space. Using
-                // screen-space barycentric weights directly makes a textured
-                // 3D quad bend at the diagonal where it is split into
-                // triangles.
                 const auto inverse_w = triangle[0].inverse_w * w0 +
                                        triangle[1].inverse_w * w1 +
                                        triangle[2].inverse_w * w2;
@@ -530,9 +526,6 @@ namespace {
                     pixel = apply_texture_environment(
                         unit.environment, sampled, primary, pixel);
                 }
-                // Blending already applies the source representation selected
-                // by its factors. Only a direct replacement needs conversion
-                // to the premultiplied render-target representation.
                 if (state.render_target_premultiplied && !state.blend_enabled)
                     pixel = premultiply_argb(pixel);
                 const auto offset = static_cast<std::size_t>(y) * frame.width +
@@ -555,7 +548,7 @@ namespace {
         }
     }
 
-} // namespace
+}
 
 std::uint32_t premultiply_argb(std::uint32_t pixel)
 {
@@ -649,4 +642,4 @@ bool GlesSoftwareRasterizer::draw(DisplayState& display,
     return true;
 }
 
-} // namespace shade
+}

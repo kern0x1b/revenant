@@ -31,11 +31,6 @@
 namespace shade {
 namespace {
 
-    // The iPhoneOS 1 ARM dyld uses five 32-bit words here.  This differs from
-    // xnu's desktop 32-bit ABI, whose mach_vm_* members make the entry 32
-    // bytes.  The layout below is confirmed by the firmware dyld's syscall 299
-    // call site and matches the ARM split-segment addresses in the system
-    // dylibs.
     constexpr std::uint32_t arm_mapping_size = 5U * sizeof(std::uint32_t);
     constexpr std::uint32_t mach_vm_mapping_size =
         (3U * sizeof(std::uint64_t)) + (2U * sizeof(std::uint32_t));
@@ -167,10 +162,6 @@ namespace {
         if (size == 0 || add_overflows(address, size))
             return false;
         const auto end = address + size;
-        // XNU validates these mappings against the complete ARM shared-region
-        // VM map.  The pmap nesting boundary is an implementation detail, not
-        // a forbidden gap: newer unslid caches legitimately have a mapping
-        // that crosses the older 0x38000000 nesting boundary.
         return address >= bounds.shared_region_base &&
                end <= bounds.shared_region_end;
     }
@@ -451,8 +442,6 @@ namespace {
         if (!may_slide || mappings.empty())
             return std::nullopt;
 
-        // XNU's map_shared_file() applies one slide to both ARM halves.  Search
-        // by page so TEXT/DATA retain their 0x08000000 relationship.
         for (std::uint64_t slide = AddressSpace::page_size;
             slide < arm_shared_half_size; slide += AddressSpace::page_size) {
             if (mappings_fit(
@@ -533,10 +522,6 @@ namespace {
         if (header->table_count > mapped_page_count)
             return bsd_support::invalid_argument;
 
-        // XNU consumes the firmware-provided bitmap to rebase only the marked
-        // 32-bit words in the VM_PROT_SLIDE mapping. Eagerly applying the same
-        // bitmap preserves those semantics without leaking the host memory
-        // backend into the Darwin ABI layer.
         auto writable_permissions = permissions(mapping->initial_protection);
         writable_permissions |= MemoryPermission::Write;
         if (!memory.protect(
@@ -597,7 +582,7 @@ namespace {
         return 0;
     }
 
-} // namespace
+}
 
 const DyldSharedCache* CompatibilityKernel::dyld_shared_cache_for(
     const std::filesystem::path& path)
@@ -644,10 +629,10 @@ bool CompatibilityKernel::dispatch_bsd_shared_region(
 {
     auto& registers = cpu.registers();
     const auto bounds = darwin_address_bounds(shared_state_->darwin_abi.address_layout);
-    if (number == 294) { // shared_region_check_np
+    if (number == 294) {
         const auto start_address = first_mapped_shared_region_page(memory_, bounds);
         if (!start_address) {
-            bsd_error(cpu, 12); // ENOMEM: shared region exists but is empty.
+            bsd_error(cpu, 12);
         } else if (!memory_.write64(registers[0], *start_address)) {
             bsd_error(cpu, bsd_support::bad_address);
         } else {
@@ -655,13 +640,7 @@ bool CompatibilityKernel::dispatch_bsd_shared_region(
         }
         return true;
     }
-    if (number == 300) { // shared_region_make_private_np
-        // The old ARM ABI passes (rangeCount, ranges), where each range
-        // contains two mach_vm_* (64-bit) fields.  AddressSpace is already
-        // process-local; map_file() gives retained file pages private-on-write
-        // semantics.  The observable part of privatization is therefore
-        // releasing every mapped shared-region interval outside the requested
-        // ranges.
+    if (number == 300) {
         const auto parsed =
             read_shared_region_ranges(memory_, registers[0], registers[1], bounds);
         if (parsed.error != 0) {
@@ -737,10 +716,6 @@ bool CompatibilityKernel::dispatch_bsd_shared_region(
     const auto* shared_cache =
         is_shared_cache ? dyld_shared_cache_for(descriptor->second) : nullptr;
     diagnostics.checkpoint(SharedRegionDiagnosticPhase::CacheParse);
-    // A split cache can place an executable mapping in a subcache. The parser
-    // validates each file independently; use an intentionally permissive bound
-    // here and perform the source-file bounds check after correlating the
-    // range.
     const auto mapping_validation_size =
         shared_cache ? std::numeric_limits<std::uintmax_t>::max() : file_size;
 
@@ -762,7 +737,7 @@ bool CompatibilityKernel::dispatch_bsd_shared_region(
     const auto address_slide = choose_slide(
         memory_, *mappings, !fixed_mapping_contract && slide_address != 0, bounds);
     if (!address_slide) {
-        bsd_error(cpu, 12); // ENOMEM / KERN_NO_SPACE
+        bsd_error(cpu, 12);
         return true;
     }
     diagnostics.checkpoint(SharedRegionDiagnosticPhase::ChooseSlide);
@@ -803,16 +778,8 @@ bool CompatibilityKernel::dispatch_bsd_shared_region(
             }
         }
 
-        // dyld may include an auxiliary range, such as the code-signature
-        // tail, in the shared-region request even though it is not listed in
-        // the cache member's VM mapping table. XNU rounds vnode mappings to a
-        // page and zeroes bytes beyond EOF, so accept only that final partial
-        // page while retaining the exact immutable cache generation.
         const auto descriptor_file = std::find_if(files.begin(), files.end(),
             [&](const DyldCacheFileView& file) {
-                // Parsed generations may retain an absolute catalog path
-                // while the guest descriptor was opened through a relative
-                // rootfs or a symlink. Match the file, not its spelling.
                 std::error_code equivalent_error;
                 return std::filesystem::equivalent(
                     std::filesystem::path { file.path }, descriptor->second,
@@ -835,11 +802,6 @@ bool CompatibilityKernel::dispatch_bsd_shared_region(
 
     std::vector<AppliedMapping> applied;
     applied.reserve(mappings->size());
-    // Non-cache shared-region calls describe several ranges of the same
-    // descriptor. Reuse the first validated backing across those ranges so a
-    // cold App launch does not reopen, canonicalize, and re-identify the same
-    // executable for every segment. Dyld-cache mappings already carry their
-    // immutable file view and keep the ordinary path disabled.
     FileMappingBatchContext file_mapping_context;
     std::chrono::nanoseconds source_resolution_time { };
     std::chrono::nanoseconds map_time { };
@@ -928,12 +890,6 @@ bool CompatibilityKernel::dispatch_bsd_shared_region(
                     mapping.size,
                     source->file_offset));
         }
-        // Image installation discovers and patches guest functions, publishes
-        // executable catalog hints, and detects framework ABI profiles. Keep it
-        // restricted to executable ranges except for standalone images with an
-        // explicitly registered data export: those symbols reside in __DATA and
-        // still need their runtime address published. Shared-cache data exports
-        // were resolved above without parsing or patching the data mapping.
         if (!executable && (shared_cache != nullptr ||
                                !userland_hle_.needs_data_symbol_mapping(
                                    source->path.generic_string()))) {
@@ -963,4 +919,4 @@ bool CompatibilityKernel::dispatch_bsd_shared_region(
     return true;
 }
 
-} // namespace shade
+}

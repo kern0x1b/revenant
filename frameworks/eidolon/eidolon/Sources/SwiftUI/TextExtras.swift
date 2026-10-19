@@ -210,7 +210,6 @@ final class AspectRatioNode: ContainerNode {
         let natural = children.first?.sizeThatFits(p) ?? .zero
         let wanted = ratio ?? (natural.height > 0 ? natural.width / natural.height : 1)
         guard wanted > 0 else { return natural }
-        // one side proposed: the other follows from the ratio, whatever the child would have chosen
         if let width = p.width, p.height == nil { return CGSize(width: width, height: width / wanted) }
         if let height = p.height, p.width == nil { return CGSize(width: height * wanted, height: height) }
         let box = CGSize(width: p.width ?? natural.width, height: p.height ?? natural.height)

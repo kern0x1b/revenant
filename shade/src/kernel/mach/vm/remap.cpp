@@ -66,7 +66,7 @@ namespace {
         return result;
     }
 
-} // namespace
+}
 
 CompatibilityKernel::RemapResult CompatibilityKernel::remap_into(
     AddressSpace& memory, RemapPlacement placement)
@@ -166,9 +166,6 @@ bool CompatibilityKernel::dispatch_mach_vm_remap_message(
     const auto data_offset = (*flags & vm_flags_return_data_address) != 0U
         ? requested_source_address & page_mask : 0U;
 
-    // XNU rounds the source down even for the legacy interface. When callers
-    // request the data address, include its page offset in the covered extent
-    // so a small byte range crossing a page boundary maps both pages.
     const auto requested_target_address = static_cast<std::uint32_t>(*target_wire);
     const auto size = requested_size <= UINT32_MAX - data_offset
         ? round_page_size(requested_size + data_offset) : std::nullopt;
@@ -219,8 +216,6 @@ bool CompatibilityKernel::dispatch_mach_vm_remap_message(
     const auto protection =
         source ? darwin_permissions(source->permissions) : 0U;
     if (result == kern_success && *target_pid != process_.pid) {
-        // Another task's mappings are not unmapped from here, so an overwrite
-        // that would replace one is refused like any other overlap.
         const auto placed = task_memory_remap_handler_(*target_pid,
             RemapPlacement { target_address, *size, mask, anywhere,
                 *copy != 0U, *inheritance, std::move(*source) });
@@ -281,4 +276,4 @@ bool CompatibilityKernel::dispatch_mach_vm_remap_message(
     return true;
 }
 
-} // namespace shade
+}

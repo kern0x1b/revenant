@@ -62,7 +62,7 @@ namespace {
                          process->second.application_display };
     }
 
-} // namespace
+}
 
 MobileFramebufferHle::MobileFramebufferHle(UserlandHleRegistry& registry,
     std::shared_ptr<DisplayState> display,
@@ -83,11 +83,6 @@ MobileFramebufferHle::MobileFramebufferHle(UserlandHleRegistry& registry,
             std::move(symbol), std::move(handler));
     };
     register_device_functions(registry);
-    // NotifyFunc begins by calling this firmware routine before it examines or
-    // dispatches the notification. Observe that boundary, then immediately run
-    // the original routine. The VSync/IONotificationPort entry points, callback
-    // dispatch, coalescing, arguments, and object lifetime remain firmware
-    // code.
     add("_IOMobileFramebufferGetNotifyMessageCount",
         [this](UserlandHleCall& call) {
             const auto callback_processor =
@@ -95,10 +90,6 @@ MobileFramebufferHle::MobileFramebufferHle(UserlandHleRegistry& registry,
             std::optional<std::uint64_t> callback_sequence;
             if (shared_state_) {
                 std::lock_guard lock { shared_state_->mach_mutex };
-                // This records the processor and consumes the host-only pending
-                // watermark at the real firmware callback boundary, after Mach
-                // delivery and before the original routine resumes. Guest
-                // callback semantics are unchanged.
                 callback_sequence =
                     shared_state_->observe_display_vsync_callback_locked(
                     call.process_id(), call.argument(0), callback_processor);
@@ -108,9 +99,6 @@ MobileFramebufferHle::MobileFramebufferHle(UserlandHleRegistry& registry,
                 callback_processor);
             call.resume_original_persistently();
         });
-    // GetLayerDefaultSurface intentionally remains firmware code. It calls
-    // IOConnectCallScalarMethod(selector 3) and then CoreSurfaceBufferLookup,
-    // preserving the real CFRuntime wrapper around our client-buffer HLE.
     add("_IOMobileFramebufferSwapBegin", [this](UserlandHleCall& call) {
         const auto callback_processor =
             static_cast<std::uint32_t>(call.cpu().processor_id());
@@ -145,9 +133,6 @@ MobileFramebufferHle::MobileFramebufferHle(UserlandHleRegistry& registry,
                 static_cast<std::uint32_t>(call.cpu().processor_id()));
             const auto submission = submit_layers(call);
             if (submission == SubmissionResult::Deferred) {
-                // Keep the firmware's display cadence alive with the last
-                // accepted surface, but leave ownership and transition
-                // callbacks untouched until the candidate is actually ready.
                 if (display_)
                     display_->present();
             } else {
@@ -175,9 +160,6 @@ MobileFramebufferHle::MobileFramebufferHle(UserlandHleRegistry& registry,
     };
     add("_IOMobileFramebufferWaitSurface", success);
     add("_IOMobileFramebufferEnableStatistics", success);
-    // GetNotifyMessageCount's observed original implementation asks the Mach
-    // port layer for MACH_PORT_RECEIVE_STATUS and returns mps_msgcount so the
-    // native callback can coalesce queued notifications accurately.
     add("_IOMobileFramebufferSetDebugFlags", success);
     add("_IOMobileFramebufferSetTVOutMode", success);
     add("_IOMobileFramebufferSetWSSInfo", success);
@@ -194,15 +176,11 @@ void MobileFramebufferHle::reset()
     external_framebuffers_.clear();
     layers_.clear();
     layer_surface_leases_.clear();
-    // The HLE is shared by all guest processes. An exec of a helper process
-    // must not erase the panel's last submitted frame while SpringBoard is
-    // being relaunched; preserve scanout until the new owner presents.
     next_swap_id_ = 1;
     background_argb_ = 0xff000000U;
     submitted_background_argb_ = background_argb_;
     composition_surface_index_ = 0;
     deferred_foreground_frame_.reset();
-    // Keep submitted_layers_ and scanout_contents_valid_ across process exec.
 }
 
 void MobileFramebufferHle::inherit_state(const MobileFramebufferHle& parent)
@@ -215,9 +193,6 @@ void MobileFramebufferHle::inherit_state(const MobileFramebufferHle& parent)
     background_argb_ = parent.background_argb_;
     submitted_background_argb_ = parent.submitted_background_argb_;
     scanout_surface_ = parent.scanout_surface_;
-    // The published scanout is read-only from the child's point of view. Do
-    // not inherit the writable composition targets: forked kernels can submit
-    // concurrently, so each instance must own the targets it may modify.
     composition_surfaces_.clear();
     composition_surface_index_ = 0;
     scanout_contents_valid_ = parent.scanout_contents_valid_;
@@ -406,9 +381,6 @@ std::shared_ptr<HostSurface> MobileFramebufferHle::acquire_composition_surface()
             !candidate->presentation_leased())
             return candidate;
     }
-    // All ring targets may still be referenced by the ordered presenter. Grow
-    // the host-only pool for this submission instead of reusing a mutable
-    // surface and changing the pixels of an older queued DisplayFrame.
     auto surface = host_graphics_->create_surface(
         { 0x434f4d50U,
             next_scanout_surface.fetch_add(1, std::memory_order_relaxed) },
@@ -520,9 +492,6 @@ MobileFramebufferHle::submit_host_layers(UserlandHleCall& call)
             }
             call.output().write(message + "\n");
         }
-        // Page-granular guest dirtiness cannot be merged safely into a surface
-        // whose complete contents are newer on the GPU. CPU-owned layers still
-        // need their direct mapped writes imported before presentation.
         if (source && source->gpu_generation() <= source->cpu_generation() &&
             !surface_store_->synchronize_from_guest(
                 call.memory(), effective_state.surface_id)) {
@@ -663,10 +632,6 @@ MobileFramebufferHle::submit_host_layers(UserlandHleCall& call)
             deferred_foreground_frame_.reset();
             release_deferred_foreground_frame = true;
         } else {
-            // Keep the last accepted scanout visible while the destination's
-            // first real GPU update is still pending. Continue through the
-            // compositor below so guest rendering and the native command
-            // stream are not stalled by the publication guard.
             defer_foreground_publication = true;
         }
     }
@@ -711,9 +676,6 @@ MobileFramebufferHle::submit_host_layers(UserlandHleCall& call)
             index = 0;
         }
         damage.push_back(rectangle);
-        // Keep command growth bounded if a pathological producer updates many
-        // isolated regions in one SwapEnd. The fallback remains a conservative
-        // union, not a layer-driven full-screen expansion.
         constexpr std::size_t maximum_damage_rectangles = 32;
         if (damage.size() > maximum_damage_rectangles) {
             auto merged = damage.front();
@@ -922,10 +884,6 @@ void MobileFramebufferHle::set_layer(UserlandHleCall& call)
         call.set_return(iokit_abi::success);
         return;
     }
-    // CoreSurface-era firmware stores a CoreSurfaceClientBuffer here. When the
-    // IOSurface symbol family is loaded, the genuine CoreSurface CFRuntime
-    // wrapper forwards to an IOSurfaceClient instead. Select by that exported
-    // transport capability, not by firmware build or calling application.
     const auto& transport = surface_transport::loaded_client_abi(call);
     if (surface > std::numeric_limits<std::uint32_t>::max() -
                       transport.public_client_pointer_offset) {
@@ -1192,10 +1150,7 @@ void MobileFramebufferHle::set_background_color(UserlandHleCall& call)
     const auto blue = channel(call.argument(3));
     const auto alpha = channel(call.argument(4));
     background_argb_ = (alpha << 24U) | (red << 16U) | (green << 8U) | blue;
-    // This updates the pending swap transaction.  Publishing the clear here
-    // exposes an incomplete frame when SpringBoard sets the background before
-    // its layers and SwapEnd, notably during Lock/wake handoff.
     call.set_return(iokit_abi::success);
 }
 
-} // namespace shade
+}

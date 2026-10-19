@@ -47,7 +47,7 @@ bool CompatibilityKernel::dispatch_mach_port_kernel_rpc_trap(
         return true;
     }
 
-    if (trap == 16U) { // _kernelrpc_mach_port_allocate_trap
+    if (trap == 16U) {
         const auto right = registers[1];
         const auto output_address = registers[2];
         if (right != 1U && right != 3U && right != 4U) {
@@ -80,7 +80,7 @@ bool CompatibilityKernel::dispatch_mach_port_kernel_rpc_trap(
         return true;
     }
 
-    if (trap == 17U) { // _kernelrpc_mach_port_destroy_trap
+    if (trap == 17U) {
         const auto name = registers[1];
         registers[0] =
             name == xnu::ipc::null_name || name == xnu::ipc::dead_name
@@ -91,7 +91,7 @@ bool CompatibilityKernel::dispatch_mach_port_kernel_rpc_trap(
         return true;
     }
 
-    if (trap == 19U) { // _kernelrpc_mach_port_mod_refs_trap
+    if (trap == 19U) {
         const auto right = registers[2];
         registers[0] =
             right > static_cast<std::uint32_t>(xnu::ipc::Right::DeadName)
@@ -102,15 +102,13 @@ bool CompatibilityKernel::dispatch_mach_port_kernel_rpc_trap(
         return true;
     }
 
-    if (trap == 21U) { // _kernelrpc_mach_port_insert_right_trap
+    if (trap == 21U) {
         registers[0] = insert_port_right_locked(*shared_state_, process_.pid,
             *target, registers[1], registers[2], registers[3]);
         return true;
     }
 
     if (trap == 20U || trap == 22U || trap == 23U) {
-        // _kernelrpc_mach_port_{move,insert,extract}_member_trap share the
-        // task/member/port-set register contract.
         const auto operation =
             trap == 20U ? PortMembershipOperation::Move
             : trap == 22U ? PortMembershipOperation::Insert
@@ -121,9 +119,6 @@ bool CompatibilityKernel::dispatch_mach_port_kernel_rpc_trap(
         return true;
     }
 
-    // _kernelrpc_mach_port_deallocate_trap. mach_port_deallocate releases a
-    // send, send-once, or dead-name user reference; it must not consume the
-    // receive right when a composite name has no send reference.
     const auto name = registers[1];
     if (name == xnu::ipc::null_name || name == xnu::ipc::dead_name) {
         registers[0] = darwin::mach::success;
@@ -151,4 +146,4 @@ bool CompatibilityKernel::dispatch_mach_port_kernel_rpc_trap(
     return true;
 }
 
-} // namespace shade
+}

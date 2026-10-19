@@ -71,7 +71,6 @@ open class _HostingViewController: UIViewController {
 
     var onPopped: (() -> Void)?
 
-    // The screen's editing state is UIKit's own (editButtonItem, setEditing); lists and edit buttons follow it.
     var editingObservers: [ObjectIdentifier: (Bool) -> Void] = [:]
     open override func setEditing(_ editing: Bool, animated: Bool) {
         super.setEditing(editing, animated: animated)

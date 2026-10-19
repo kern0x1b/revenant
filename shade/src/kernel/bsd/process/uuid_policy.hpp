@@ -16,5 +16,5 @@ inline constexpr std::uint32_t syscall_number = 452;
 [[nodiscard]] std::uint32_t control(AddressSpace& memory,
     const ProcessContext& caller, std::uint32_t operation,
     std::uint32_t uuid_address, std::uint32_t uuid_length);
-} // namespace kernel_bsd::uuid_policy
-} // namespace shade
+}
+}

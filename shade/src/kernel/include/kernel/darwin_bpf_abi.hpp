@@ -21,8 +21,6 @@
 
 namespace shade::darwin::bpf {
 
-// Darwin 8 / XNU Berkeley Packet Filter ABI. The target firmware is
-// ARM32, so pointers, timeval, ifreq and bpf_program use 32-bit layouts.
 inline constexpr std::string_view descriptor_kind { "bpf" };
 inline constexpr std::string_view device_prefix { "/dev/bpf" };
 inline constexpr std::uint32_t maximum_device_minor = 255;
@@ -103,4 +101,4 @@ struct DescriptorState {
     return minor;
 }
 
-} // namespace shade::darwin::bpf
+}

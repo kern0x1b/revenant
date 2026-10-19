@@ -1,11 +1,6 @@
 import UIKit
 import CoreGraphics
 
-// The value types SDK 26.2's environment keys name, declared as Apple declares them: an option set or a
-// struct over a name, with the cases its own interface lists and the defaults the framework of macOS 27
-// answers with (.agent-work/host/envdefaults.txt). They are what the keys in EnvironmentKeysExtra.swift
-// store; a key is storage whether or not a view acts on it today.
-
 public struct WritingToolsBehavior: Hashable {
     let name: String
     public static let automatic = WritingToolsBehavior(name: "automatic")
@@ -87,21 +82,14 @@ public struct MaterialActiveAppearance: Hashable {
     public static let inactive = MaterialActiveAppearance(name: "inactive")
 }
 
-/// A document being edited or read: iOS 6 has no document browser, so the configuration is the empty
-/// one, and the key reads it as such.
 public struct DocumentConfiguration: Hashable {
     public init() {}
 }
 
-/// A device an app is being driven on, as `Xcode` shows a Mac or a paired device. There is none on iOS 6.
 public struct RemoteDeviceIdentifier: Hashable {
     public init() {}
 }
 
-// The three value types left: what device the app is being driven on, the focus system's own state, and
-// the reset-focus action. iOS 6 has one device and the focus system the engine keeps, so each is the empty
-// one until something fills it. Apple's `_DeviceVariant` names the sizes of a watch (compact, regular and two
-// heights), and a device that is not a watch is `regular`.
 public enum _DeviceVariant: Equatable { case compact, regular, h394, h448 }
 
 public struct _FocusSystem {
@@ -115,8 +103,6 @@ public struct ResetFocusAction {
     public func callAsFunction() { bridge?() }
 }
 
-/// Whether a find-and-replace sheet is up: iOS 6 has no find in a text view, so it is never presented
-/// and never replaces.
 public struct FindContext: Hashable {
     public var isPresented: Bool?
     public var supportsReplace: Bool

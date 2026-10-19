@@ -3,7 +3,6 @@
 #include <string>
 #include <vector>
 
-// Plain C logging so it is safe to call from a C++ static constructor (before main).
 static void Mark(const char *event)
 {
     FILE *f = fopen("/private/var/charon/cxxinit.log", "a");
@@ -11,9 +10,6 @@ static void Mark(const char *event)
     fprintf(stderr, "CXXINIT %s\n", event);
 }
 
-// A file-scope C++ object with a non-trivial destructor. Its destructor is registered at
-// load time via __cxa_atexit -- exactly the path xkcd's Realm statics take. If the runtime
-// bridge for __cxa_atexit is wrong, this crashes during static initialization, before main.
 struct Global {
     std::string name;
     std::vector<int> data;

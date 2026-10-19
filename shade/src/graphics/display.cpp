@@ -38,7 +38,7 @@ namespace {
         return std::vector<std::uint32_t>(scanout.size(), 0xff000000U);
     }
 
-} // namespace
+}
 
 DisplayState::DisplayState()
     : DisplayState(default_display_geometry)
@@ -322,4 +322,4 @@ bool DisplayState::powered_on() const
     return powered_on_;
 }
 
-} // namespace shade
+}

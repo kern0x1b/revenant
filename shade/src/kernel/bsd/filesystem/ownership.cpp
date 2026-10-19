@@ -27,7 +27,7 @@ namespace {
         std::numeric_limits<std::uint32_t>::max();
     constexpr std::uint32_t permission_bits = 07777U;
 
-} // namespace
+}
 
 bool CompatibilityKernel::dispatch_bsd_filesystem_ownership(
     Cpu& cpu, std::uint32_t number)
@@ -137,8 +137,6 @@ bool CompatibilityKernel::dispatch_bsd_filesystem_ownership(
         const auto requested_group = registers[2];
         const auto requested_mode = registers[3];
         const auto extended_security = registers[4];
-        // Unlike fchmod_extended, the extended permission ABI uses NULL for no ACL
-        // mutation and the sentinel pointer 1 to remove an ACL.
         constexpr std::uint32_t remove_acl = 1;
         if (extended_security != 0 && extended_security != remove_acl) {
             bsd_error(cpu, darwin::error::operation_not_supported);
@@ -218,11 +216,6 @@ bool CompatibilityKernel::dispatch_bsd_filesystem_ownership(
         const auto requested_group = registers[2];
         const auto requested_mode = registers[3];
         const auto extended_security = registers[4];
-        // the extended permission ABI uses NULL to remove the ACL and -1 to leave it
-        // unchanged. ACLs are not exposed by the current HFS metadata
-        // projection, so both operations are representable as no-ops. Refuse a
-        // real filesec payload instead of reporting a silently incomplete
-        // mutation.
         if (extended_security != 0 && extended_security != unchanged_identity) {
             bsd_error(cpu, darwin::error::operation_not_supported);
             return true;
@@ -294,8 +287,6 @@ bool CompatibilityKernel::dispatch_bsd_filesystem_ownership(
         return true;
     }
     case darwin::syscall::change_owner_link: {
-        // lchown(2) changes the owner of a symbolic link itself rather than
-        // the file it names.
         const auto path = memory_.read_c_string(registers[0]);
         if (!path) {
             bsd_error(cpu, bsd_support::bad_address);
@@ -412,4 +403,4 @@ bool CompatibilityKernel::dispatch_bsd_filesystem_ownership(
     }
 }
 
-} // namespace shade
+}

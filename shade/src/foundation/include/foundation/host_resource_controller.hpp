@@ -33,9 +33,6 @@ enum class HostWorkKind : std::uint8_t {
 struct HostResourceBudget {
     std::size_t worker_count { 1 };
     std::chrono::nanoseconds duty_period { std::chrono::seconds { 1 } };
-    // Aggregate worker-time per duty window. A multi-worker controller may
-    // spend more than one wall-clock period, but never more than worker_count
-    // periods, across concurrently executing interactive compile tasks.
     std::chrono::nanoseconds interactive_compile_budget {
         std::chrono::milliseconds { 100 }
     };
@@ -208,27 +205,16 @@ public:
     HostResourceController(const HostResourceController&) = delete;
     HostResourceController& operator=(const HostResourceController&) = delete;
 
-    // A deadline is advisory: work is rejected only when the controller knows
-    // that the next deadline is inside the reserve window. The caller can retry
-    // after the deadline advances. Background work reserves estimated_cost when
-    // it starts; a zero estimate conservatively consumes the full configured
-    // interactive compile budget for that duty window.
     [[nodiscard]] std::shared_ptr<HostWorkToken> submit(HostWorkKind kind,
         std::optional<Clock::time_point> deadline, Work work,
         std::chrono::nanoseconds estimated_cost =
             std::chrono::nanoseconds::zero());
-    // The token is passed to the work body so a task that has already started
-    // can stop at its own safe points. Cancellation remains cooperative: the
-    // controller never interrupts a host function in the middle of an ABI or
-    // filesystem operation.
     [[nodiscard]] std::shared_ptr<HostWorkToken> submit_cancellable(
         HostWorkKind kind, std::optional<Clock::time_point> deadline,
         CancellableWork work,
         std::chrono::nanoseconds estimated_cost =
             std::chrono::nanoseconds::zero());
     void set_next_deadline(std::optional<Clock::time_point> deadline);
-    // Wakes workers after a queued token is cancelled so the cancellation can
-    // be observed without waiting for the current duty window to expire.
     void wake() noexcept;
     void wait_idle();
 
@@ -277,4 +263,4 @@ private:
     bool stopping_ { };
 };
 
-} // namespace shade
+}

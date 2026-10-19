@@ -63,12 +63,7 @@ struct DyldCacheFile {
     std::uintmax_t file_size { };
     std::optional<GuestFileGeneration> file_generation;
     ContentIdentity content_identity;
-    // A published generation owns the exact bytes used to build its metadata.
-    // Lazy image parsing must not reopen path after a rootfs replacement.
     std::shared_ptr<const std::vector<std::byte>> immutable_snapshot;
-    // Cross-process content-addressed backing for the same immutable file
-    // generation. Shared-cache images prefer this demand-paged view; the
-    // vector remains available for standalone/fallback parser callers.
     std::shared_ptr<const ImmutableFileView> immutable_file_view;
     DyldCacheUuid uuid { };
     std::uint64_t cache_vm_offset { };
@@ -76,11 +71,6 @@ struct DyldCacheFile {
     std::vector<DyldCacheMapping> mappings;
 };
 
-// Views returned by a published generation.  The scalar records are typed
-// accessors, while strings and range tables point directly into the read-only
-// generation artifact (or into the owning records used while building a new
-// generation).  In particular, artifact loads do not materialize a second
-// vector of DyldCacheImage/DyldCacheFile records in the emulator process.
 struct DyldCacheFileView {
     std::string_view path;
     std::uintmax_t file_size { };
@@ -223,12 +213,7 @@ private:
 };
 
 struct DyldSharedCacheOptions {
-    // When empty, the 16-byte magic is used as the architecture identity in
-    // the generation key. A firmware catalog can provide a normalized Guest
-    // ISA tag instead.
     std::string architecture;
-    // Entries are ordered exactly as the main cache's subCacheArray. If this is
-    // empty, fileSuffix is used to discover each sibling next to the main file.
     std::vector<std::filesystem::path> subcache_paths;
 };
 
@@ -237,9 +222,6 @@ public:
     static constexpr std::uint32_t parser_schema_version = 2;
     static constexpr std::uint32_t hle_profile_schema_version = 2;
 
-    // Pointer-like parse result retaining the historical optional-style
-    // has_value()/operator* API while allowing all successful callers to share
-    // one immutable generation object.
     class ParseResult {
     public:
         ParseResult() = default;
@@ -279,9 +261,6 @@ public:
 
     [[nodiscard]] static ParseStats parse_stats() noexcept;
 
-    // Returns one immutable parsed Mach-O view per logical image and guest
-    // architecture. The returned object is shared by all registries/processes
-    // that use this cache generation.
     [[nodiscard]] std::shared_ptr<const MachOImage> parse_image(
         std::uint32_t image_index, ArmArchitectureVersion architecture) const;
     [[nodiscard]] std::vector<std::uint32_t> images_intersecting_file_range(
@@ -290,14 +269,8 @@ public:
 
     [[nodiscard]] DyldCacheFileView main_cache() const;
     [[nodiscard]] DyldCacheFileRange files() const noexcept;
-    // Return the retained immutable, demand-paged backing for one cache file.
-    // Shared-region mappings use this to avoid reopening and revalidating the
-    // same cache member once per mapping entry during process startup.
     [[nodiscard]] std::shared_ptr<const ImmutableFileView>
     immutable_file_view_at(std::size_t index) const;
-    // Resolve one unslid cache VM address across the main cache or subcaches.
-    // Objective-C selector uniquing can point an image's method metadata at a
-    // string owned by a different cache image.
     [[nodiscard]] std::optional<std::string> read_vm_c_string(
         std::uint64_t address) const;
     [[nodiscard]] DyldCacheImageRange images() const noexcept;
@@ -343,15 +316,8 @@ private:
     std::uint64_t max_slide_ { };
     std::vector<std::vector<ImageRangeIndexEntry>> image_range_index_;
     std::shared_ptr<ImageStore> image_store_;
-    // Artifact-loaded generations have no process-local DyldCacheFile records
-    // that can retain their immutable member views. Keep one demand-paged view
-    // per member so logical images sharing a subcache do not reopen/remap it.
     struct FileViewStore;
     std::shared_ptr<FileViewStore> file_view_store_;
-    // Cross-process artifact loads retain the read-only mmap backing for the
-    // lifetime of this generation. Typed lookup records remain a small local
-    // façade for the existing API; the immutable serialized source is never
-    // copied into a process-local byte vector.
     std::shared_ptr<const GenerationArtifactView> generation_artifact_view_;
 
     [[nodiscard]] DyldCacheFileView file_view_at(std::size_t index) const;
@@ -360,4 +326,4 @@ private:
     friend class DyldCacheImageRange;
 };
 
-} // namespace shade
+}

@@ -30,9 +30,6 @@ void MobileFramebufferHle::register_device_functions(
     constexpr std::string_view image {
         "/IOMobileFramebuffer.framework/IOMobileFramebuffer"
     };
-    // Keep CFRuntime allocation, notification setup and device opening native.
-    // Observe the returned handle instead of relying on a firmware's private
-    // object layout. Each successful open also replaces any recycled handle.
     registry.register_function(std::string { image },
         "_IOMobileFramebufferOpen", [this](UserlandHleCall& call) {
             const auto service_name = call.argument(0);
@@ -96,4 +93,4 @@ void MobileFramebufferHle::register_device_functions(
         });
 }
 
-} // namespace shade
+}

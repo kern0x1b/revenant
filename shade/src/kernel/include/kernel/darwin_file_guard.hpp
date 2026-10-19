@@ -12,4 +12,4 @@ struct DarwinFileGuard {
     std::uint64_t identifier;
     std::uint32_t flags;
 };
-} // namespace shade
+}

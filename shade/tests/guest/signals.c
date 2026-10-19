@@ -1,6 +1,3 @@
-// signals.c: guest test of signal delivery - handlers, frames, sigreturn,
-// faults turned into signals, the alternate stack, masks and VFP state.
-// One line per case, "ok" or "FAIL <why>"; exits with the number of failures.
 #include <setjmp.h>
 #include <signal.h>
 #include <stdint.h>
@@ -16,7 +13,6 @@ static void report(const char *name, int ok, const char *why)
     if (!ok) ++failures;
 }
 
-// 1. kill(self) with SA_SIGINFO; 7. the signal is blocked while its handler runs.
 static volatile int usr1_calls, usr1_signo, usr1_pid, usr1_blocked;
 static void on_usr1(int signal, siginfo_t *info, void *context)
 {
@@ -29,7 +25,6 @@ static void on_usr1(int signal, siginfo_t *info, void *context)
     usr1_blocked = sigismember(&current, signal);
 }
 
-// 2./4. faults escape with siglongjmp.
 static sigjmp_buf escape;
 static volatile int fault_signal, fault_code;
 static volatile uintptr_t fault_address;
@@ -42,8 +37,6 @@ static void on_fault(int signal, siginfo_t *info, void *context)
     siglongjmp(escape, 1);
 }
 
-// 3. a write to a read-only page: the handler makes it writable and returns,
-// and the store runs again.
 static volatile char *protected_page;
 static volatile int bus_calls;
 static void on_bus_repair(int signal, siginfo_t *info, void *context)
@@ -54,7 +47,6 @@ static void on_bus_repair(int signal, siginfo_t *info, void *context)
              getpagesize(), PROT_READ | PROT_WRITE);
 }
 
-// 5. the handler runs on the alternate stack.
 static char alternate[65536];
 static volatile int on_alternate;
 static void on_usr2(int signal)
@@ -64,7 +56,6 @@ static void on_usr2(int signal)
     on_alternate = &here >= alternate && &here < alternate + sizeof alternate;
 }
 
-// 6. the handler uses VFP registers; the interrupted code's must survive.
 static void on_alarm(int signal)
 {
     (void)signal;
@@ -73,7 +64,6 @@ static void on_alarm(int signal)
     __asm__ volatile("vmov.f64 d8, #2.0\n" "vmov.f64 d9, #-3.0" ::: "d8", "d9");
 }
 
-// 8. SA_RESETHAND: the second delivery takes the default action (ignore).
 static volatile int winch_calls;
 static void on_winch(int signal) { (void)signal; ++winch_calls; }
 
@@ -112,13 +102,13 @@ int main(void)
                "wrong signal, address or code");
     }
     if (sigsetjmp(escape, 1) == 0) {
-        __asm__ volatile(".inst.n 0xde00"); // UDF #0 in Thumb
+        __asm__ volatile(".inst.n 0xde00");
         report("sigill-udf", 0, "no fault");
     } else {
         report("sigill-udf", fault_signal == SIGILL, "wrong signal");
     }
     if (sigsetjmp(escape, 1) == 0) {
-        __asm__ volatile(".inst.n 0xdefe"); // the trap encoding: a breakpoint to Darwin
+        __asm__ volatile(".inst.n 0xdefe");
         report("sigtrap-trap", 0, "no fault");
     } else {
         report("sigtrap-trap", fault_signal == SIGTRAP, "wrong signal");
@@ -133,14 +123,7 @@ int main(void)
     report("bus-repair-retry", bus_calls == 1 && protected_page[16] == 'x',
            "handler did not run once or the store was not retried");
 
-    // 3b. calling into a page that is not executable, three times over:
-    // each call faults, each fault reaches the handler.
     {
-        // iOS 6's sigsetjmp never saves the mask and its siglongjmp never
-        // restores it (both test the savemask flag with "tst rN, #0"), so a
-        // handler left with siglongjmp keeps its signal blocked and the next
-        // fault kills the process - on the device as here. SA_NODEFER keeps
-        // the signal deliverable, as code that escapes its handlers must.
         memset(&action, 0, sizeof action);
         action.sa_sigaction = on_fault;
         action.sa_flags = SA_SIGINFO | SA_NODEFER;
@@ -148,7 +131,7 @@ int main(void)
         sigaction(SIGSEGV, &action, NULL);
         static char blob[8192] __attribute__((aligned(4096)));
         void *data = (void *)(((uintptr_t)blob + 4095) & ~(uintptr_t)4095);
-        ((volatile uint16_t *)data)[0] = 0x4770; // bx lr, Thumb
+        ((volatile uint16_t *)data)[0] = 0x4770;
         int (*call)(void) = (int (*)(void))((uintptr_t)data | 1);
         volatile int faults = 0;
         for (int i = 0; i < 3; ++i) {

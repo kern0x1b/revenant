@@ -1,10 +1,3 @@
--- surf-diff-test.lua: the reader refuses a file that is not three columns, rather than reading it as nothing.
---
---     xmake l surf-diff-test.lua
---
--- Each case writes its two files under .agent-work/runs/surf-diff-test/ and runs surf-diff.lua through /bin/sh, so the
--- exit code and the stderr are the ones a reader of the tool sees.
-
 local root = path.join(os.scriptdir(), "..", "..")
 local scratch = path.join(root, ".agent-work", "runs", "surf-diff-test")
 local script = path.join(os.scriptdir(), "surf-diff.lua")
@@ -14,7 +7,6 @@ local TWO = "Image\talpha\nText\tbold\n"
 local ONE = "Image#alpha\n"
 local FOUR = "Image\tvar\talpha\tABI.swift\n"
 
--- runs surf-diff.lua on the two texts with the flags given, and returns the exit code and the stderr
 local function run(old, new, flags)
     os.mkdir(scratch)
     local a, b = path.join(scratch, "old.tsv"), path.join(scratch, "new.tsv")
@@ -50,16 +42,12 @@ end
 
 function main(...)
     local results = {}
-    -- the defect: a two-column file read as the empty set, every identity holding at 0 == 0
     results[#results + 1] = case("a 2-column NEW is a hard error naming the file and the count",
         THREE, TWO, {}, 1, {"new.tsv", "has 2 tab-separated column(s)", "the 3 this diff reads", "owner/kind/name"})
-    -- a 4-column file - the shape ours.lua writes - is refused the same way
     results[#results + 1] = case("a 4-column NEW is refused with the count it found",
         THREE, FOUR, {}, 1, {"new.tsv", "has 4 tab-separated column(s)"})
-    -- and the OLD side too: a diff of two wrong-shaped files must not print a partition
     results[#results + 1] = case("a 1-column OLD is refused as well",
         ONE, THREE, {}, 1, {"old.tsv", "has 1 tab-separated column(s)"})
-    -- the empty NEW the flag is for
     results[#results + 1] = case("an empty NEW is refused without the flag", THREE, "", {}, 1,
         {"new.tsv", "no rows", "--allow-empty-new"})
     local code, stderr = run(THREE, "", {"--allow-empty-new"})

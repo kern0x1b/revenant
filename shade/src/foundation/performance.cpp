@@ -35,9 +35,6 @@ namespace {
     constexpr std::uint64_t ten_seconds = 10'000'000'000;
     constexpr std::size_t diagnostic_source_table_capacity = 4096;
 
-    // Temporary frame-hitch diagnostic. Keep the ordered values out of the
-    // product snapshot and remove this probe after the exit/unlock stall is
-    // localized.
     constexpr std::array diagnostic_sequence_kinds {
         PerfLatencyKind::DisplayMailbox,
         PerfLatencyKind::NativeMailbox,
@@ -121,9 +118,6 @@ namespace {
 
     constexpr auto diagnostic_cpu_run_phase_count =
         diagnostic_cpu_run_phase_kinds.size();
-    // Keep the bounded timeline focused on runs that can consume a meaningful
-    // fraction of a 60 Hz frame. The percentile histograms retain the complete
-    // phase population; this ordered list is for frame-correlation outliers.
     constexpr std::uint64_t minimum_diagnostic_cpu_run_nanoseconds = 8'000'000;
 
     struct DiagnosticCpuRun {
@@ -462,8 +456,6 @@ namespace {
         case PerfLatencyKind::SchedulerRunnableToDispatch:
         case PerfLatencyKind::SchedulerPreemptionRequestToReturn:
         case PerfLatencyKind::MachMessageSendToReceive:
-        // Demand-launched services share the interactive guest executor.
-        // Attribute their creation and image setup to the active frame window.
         case PerfLatencyKind::PosixSpawnTotal:
         case PerfLatencyKind::PosixSpawnDecode:
         case PerfLatencyKind::PosixSpawnFork:
@@ -492,7 +484,7 @@ namespace {
         return false;
     }
 
-} // namespace
+}
 
 void PerformanceCounters::reset(bool enabled)
 {
@@ -765,9 +757,6 @@ bool PerformanceCounters::begin_display_window()
         jit_demand_artifact_hits_.load(std::memory_order_relaxed);
     diagnostic_work_baseline.jit_demand_artifact_misses =
         jit_demand_artifact_misses_.load(std::memory_order_relaxed);
-    // Demand translation stays out of the display-window histogram lock.
-    // Snapshot only its monotonic totals so interaction windows can attribute
-    // translation without synchronizing every newly compiled block.
     constexpr auto jit_demand_index =
         static_cast<std::size_t>(PerfLatencyKind::JitDemandTranslation);
     diagnostic_work_baseline.latencies[jit_demand_index].samples =
@@ -1141,9 +1130,6 @@ void PerformanceCounters::record_jit(std::uint64_t creation_nanoseconds)
 
 void PerformanceCounters::record_jit_block_compile(std::uint64_t nanoseconds)
 {
-    // Keep this small history even when --perf-summary is not requested: the
-    // scheduler uses it to protect the next guest deadline from one
-    // non-preemptible background translation.
     record_global_latency(PerfLatencyKind::JitBlockCompile, nanoseconds);
     refresh_jit_block_compile_percentiles();
 }
@@ -1217,8 +1203,6 @@ void PerformanceCounters::record_jit_shared_slab_usage(std::uint64_t slab_id,
     jit_shared_reserved_bytes_.store(reserved, std::memory_order_relaxed);
     jit_shared_committed_bytes_.store(committed, std::memory_order_relaxed);
     jit_shared_used_bytes_.store(used, std::memory_order_relaxed);
-    // Keep the legacy field as the aggregate shared-slab used count.  It is
-    // deliberately not updated by executor-local samples.
     jit_code_cache_current_bytes_.store(used, std::memory_order_relaxed);
     auto peak = jit_code_cache_peak_bytes_.load(std::memory_order_relaxed);
     while (used > peak &&
@@ -1241,9 +1225,6 @@ void PerformanceCounters::record_jit_shared_cache_state(std::uint64_t slab_id,
     std::uint64_t recycled_code_delta { };
     std::uint64_t full_clear_delta { };
     const auto delta = [](std::uint64_t current, std::uint64_t previous) {
-        // Exact-range counters reset when Dynarmic performs an explicit full
-        // clear. Treat that reset as a new monotonic epoch while centralizing
-        // duplicate executor observations by slab id.
         return current >= previous ? current - previous : current;
     };
     {
@@ -2219,9 +2200,6 @@ void PerformanceCounters::record_vsync_callback(std::uint32_t process_id,
         }
         if (timeline == found->second.end())
             return;
-        // A newer firmware callback supersedes an older callback that did not
-        // submit a frame. Discard those unconsumed prefixes so a later
-        // input-driven SwapEnd cannot be paired with a stale VSync.
         superseded.assign(found->second.begin(), timeline);
         found->second.erase(found->second.begin(), timeline);
         auto& current = found->second.front();
@@ -2584,9 +2562,6 @@ void PerformanceCounters::record_diagnostic_source(
     std::uint32_t number, std::uint64_t runnable_generation,
     std::uint64_t nanoseconds)
 {
-    // Source diagnostics are opt-in. Callers perform the fast check before
-    // entering this helper, and the helper repeats it so future call sites
-    // cannot accidentally add a production-path lock or allocation.
     if (!cpu_source_diagnostics_enabled())
         return;
     if (runnable_generation == 0 &&
@@ -2628,9 +2603,6 @@ void PerformanceCounters::record_diagnostic_source(
 
     std::optional<std::size_t> target = empty_index;
     if (!target) {
-        // Only a full-table miss needs an eviction scan. The common miss path
-        // stops at its first empty slot, keeping the diagnostic table bounded
-        // without turning every new source into a 4096-entry walk.
         std::uint64_t least_recent_use =
             std::numeric_limits<std::uint64_t>::max();
         for (std::size_t slot = 0; slot < diagnostic_source_capacity; ++slot) {
@@ -3900,4 +3872,4 @@ std::string format_display_performance_summary(
     return text.str();
 }
 
-} // namespace shade
+}

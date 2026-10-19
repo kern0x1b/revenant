@@ -2,8 +2,6 @@
 import UIKit
 import Observation
 
-// @Observable models: a view that reads one is re-rendered when what it read changes (see CompositeNode.trackedBody).
-
 @propertyWrapper @dynamicMemberLookup
 public struct Bindable<Value: AnyObject & Observable> {
     public var wrappedValue: Value
@@ -17,7 +15,6 @@ public struct Bindable<Value: AnyObject & Observable> {
     }
 }
 
-/// A `Bindable` is the model it wraps, so a list that identifies its rows identifies on the model.
 extension Bindable: Identifiable where Value: Identifiable {
     public var id: Value.ID { wrappedValue.id }
 }

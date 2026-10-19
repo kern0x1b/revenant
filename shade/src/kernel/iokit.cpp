@@ -280,9 +280,6 @@ namespace {
                 return std::nullopt;
             request.inband_input = std::move(*bytes);
         }
-        // The two CountInOut capacities follow the profiled OOL input fields.
-        // Legacy clients use natural_t address/size words; later clients carry
-        // mach_vm_address_t and mach_vm_size_t even for an ARM32 caller.
         const auto output_capacities_offset = trailing_offset + ool_request_size;
         const auto first_output_capacity =
             memory
@@ -630,7 +627,6 @@ namespace {
     {
         std::size_t identifier = 0;
         auto serialized = serialize_property_xml(property, identifier);
-        // Darwin 8 OSSerialize::getLength() includes its trailing NUL.
         serialized.push_back('\0');
         return bytes_from_string(serialized);
     }
@@ -795,10 +791,6 @@ namespace {
             { std::string { mobile_framebuffer_class } }, { }, { }, 0,
             KernelSharedState::IOKitUserClientKind::Display
         };
-        // IOMobileFramebufferOpen reads this registry capability as a required
-        // CFBoolean. False selects the normal untraced notification path and
-        // has no host-side side effect; publishing the value also matches a
-        // physical driver which supports the property but leaves tracing off.
         service.properties.emplace(
             std::string { mobile_framebuffer_swap_notify_trace_property },
             KernelSharedState::IOKitRegistryProperty {
@@ -852,9 +844,6 @@ namespace {
             KernelSharedState::IOKitRegistryProperty {
                 KernelSharedState::IOKitRegistryProperty::Kind::Data,
                 bytes_from_string(shared_state.device_model_number) });
-        // Platform identity belongs to the virtual device across Darwin ABIs.
-        // Native MobileGestalt clients require the serial as well as legacy
-        // Lockdown; use the same existing virtual identity for every client.
         const auto serial = std::string { "Shade-" } +
                             shared_state.device_product_type + "-" +
                             shared_state.device_model_number;
@@ -945,10 +934,6 @@ namespace {
                 KernelSharedState::IOKitRegistryProperty::Kind::Data,
                 std::vector<std::byte> { wifi_interface_mac_address.begin(),
                     wifi_interface_mac_address.end() } });
-        // WiFiManager snapshots controller properties as the firmware device's
-        // capability dictionary. Publish an explicit negative capability for
-        // the unsupported WAPI protocol so clients receive a normal CFBoolean
-        // through the firmware's own property serialization path.
         service.properties.emplace(std::string { wifi_wapi_enabled_property },
             KernelSharedState::IOKitRegistryProperty {
                 KernelSharedState::IOKitRegistryProperty::Kind::Boolean,
@@ -1045,10 +1030,6 @@ namespace {
                 shared_state.mach_namespaces.resolve(task, name)) {
             return *object;
         }
-        // Standalone ABI tests may invoke this module without constructing a
-        // CompatibilityKernel. A live guest task always has an ipc_space and an
-        // unknown name must not accidentally address a same-valued kernel
-        // object.
         return shared_state.mach_namespaces.contains_task(task) ? 0U : name;
     }
 
@@ -1129,11 +1110,6 @@ namespace {
         if (const auto profile =
                 kernel_iokit::baseband::matching_service(matching);
             profile && shared_state.baseband_device_state.available()) {
-            // Offline keeps the registry-level service visible so CoreTelephony
-            // can observe the modem's normal Offline state. The filesystem
-            // boundary rejects the mux transport separately; this service must
-            // not be treated as evidence that a physical modem or a data path
-            // exists.
             services.push_back(kernel_iokit::baseband::ensure_service_locked(
                 shared_state, *profile));
         }
@@ -1179,10 +1155,6 @@ namespace {
             services.push_back(
                 ensure_wifi_interface_service_locked(shared_state));
         }
-        // IONetworkStack represents the guest kernel's networking subsystem,
-        // not an external Wi-Fi uplink. It remains published for loopback and
-        // local IPC even when the host policy intentionally exposes no
-        // radio/backend.
         if (contains_text(matching, io_network_stack_class)) {
             services.push_back(
                 ensure_network_stack_service_locked(shared_state));
@@ -1191,9 +1163,6 @@ namespace {
             contains_text(matching, sdio_device_name)) {
             services.push_back(ensure_wifi_bus_service_locked(shared_state));
         }
-        // The physical service class is a device capability. Keep generic
-        // IOMobileFramebuffer conformance visible while letting each SoC's
-        // stock QuartzCore select its own native display-server implementation.
         const auto framebuffer_service_class =
             shared_state.framebuffer_service_class.empty()
                 ? apple_h1clcd_class
@@ -1302,7 +1271,7 @@ namespace {
             shared_state, connection->second.service_port);
     }
 
-} // namespace
+}
 
 std::optional<std::uint32_t> handle_iokit_mach_request(AddressSpace& memory,
     Output& output, KernelSharedState& shared_state, ProcessContext& process,
@@ -1516,12 +1485,6 @@ std::optional<std::uint32_t> handle_iokit_mach_request(AddressSpace& memory,
 
     if (message_id == static_cast<std::uint32_t>(
                           iokit_abi::Message::ServiceGetMatchingServices)) {
-        // io_service_get_matching_services uses the Darwin 8 c_string wire
-        // form generated from device.defs. Until a modeled service matches,
-        // return a valid empty iterator so callers take their no-hardware path.
-        // receive_size is the mach_msg receive capacity, not the request's
-        // send size. Validate only the minimum port reply here; AddressSpace
-        // reads below validate the independently sized request buffer.
         if (receive_size < 40U)
             return mach_rcv_invalid_data;
         const auto matching_count =
@@ -1571,11 +1534,6 @@ std::optional<std::uint32_t> handle_iokit_mach_request(AddressSpace& memory,
 
     if (message_id != 0U && message_id == single_service_message_id(
             shared_state.darwin_abi.iokit_matching_rpc)) {
-        // Darwin 11's private singular routine carries the same serialized
-        // matching dictionary as the public plural call but returns the first
-        // service port directly. Reuse the registry matcher so every modeled
-        // service class follows one implementation and an empty match remains
-        // a successful null object, as IOServiceGetMatchingService expects.
         using namespace iokit_abi::service_get_matching_service_v1;
         if (receive_size < minimum_port_reply_size ||
             send_size < matching_offset) {
@@ -1623,9 +1581,6 @@ std::optional<std::uint32_t> handle_iokit_mach_request(AddressSpace& memory,
 
     if (message_id == static_cast<std::uint32_t>(
                           iokit_abi::Message::ServiceAddNotification)) {
-        // io_service_add_notification. iPhoneOS 1.0 uses routine 0xb21 for
-        // the inline matching form. The returned iterator contains services
-        // which already matched when notification registration completed.
         if (receive_size < 40U)
             return mach_rcv_invalid_data;
         const auto descriptor_count =
@@ -2294,10 +2249,6 @@ std::optional<std::uint32_t> handle_iokit_mach_request(AddressSpace& memory,
 
     if (message_id ==
         static_cast<std::uint32_t>(iokit_abi::Message::ServiceGetBusyState)) {
-        // IOKitGetBusyState queries the master service plane as well as
-        // individual IOService objects. The modeled tree has no asynchronous
-        // service-start work, so its XNU getBusyState value is consistently
-        // quiet.
         constexpr std::uint32_t reply_size = 40U;
         if (receive_size < reply_size)
             return mach_rcv_invalid_data;
@@ -2322,10 +2273,6 @@ std::optional<std::uint32_t> handle_iokit_mach_request(AddressSpace& memory,
 
     if (message_id ==
         device_mig::id(device_mig::Routine::io_service_get_state)) {
-        // IOService::getState() reports the stable state bits from the
-        // registry entry. All services exposed by the modeled registry have
-        // completed registration, matching, publication, and first-match
-        // notification before they can be returned to a client.
         constexpr std::uint64_t registered = 1ULL << 1U;
         constexpr std::uint64_t matched = 1ULL << 2U;
         constexpr std::uint64_t first_publish = 1ULL << 3U;
@@ -2368,9 +2315,6 @@ std::optional<std::uint32_t> handle_iokit_mach_request(AddressSpace& memory,
 
     if (message_id == device_mig::id(
                           device_mig::Routine::io_service_wait_quiet)) {
-        // All modeled services are synchronously published. IOServiceWaitQuiet
-        // therefore completes immediately, which is also the contract needed
-        // by MultitouchSupport before it opens the HID user client.
         if (receive_size < 36U)
             return mach_rcv_invalid_data;
         const std::array<std::uint32_t, 9> reply {
@@ -2394,8 +2338,6 @@ std::optional<std::uint32_t> handle_iokit_mach_request(AddressSpace& memory,
         static_cast<std::uint32_t>(iokit_abi::Message::ServiceOpen)) {
         if (receive_size < 40U)
             return mach_rcv_invalid_data;
-        // The task port is one complex descriptor and connect_type follows
-        // its NDR record, exactly as emitted by the target firmware stub.
         const auto descriptor_count =
             memory
                 .read32(message_address +
@@ -2754,11 +2696,6 @@ std::optional<std::uint32_t> handle_iokit_mach_request(AddressSpace& memory,
             std::lock_guard mach_lock { shared_state.mach_mutex };
             kernel_iokit::camera::close_connection_locked(
                 shared_state, remote_object);
-            // ServiceClose is an ipc_port teardown, not just an IOKit map
-            // erase. Convert foreign Send rights to dead names and discard
-            // queued transfers through the common lifecycle path; the old
-            // direct erase left stale connection/notification state and could
-            // resurrect a queue when a delayed reply was copied out.
             static_cast<void>(
                 shared_state.mach_namespaces.mark_object_dead(remote_object));
             mach_support::remove_port_object_locked(
@@ -2786,4 +2723,4 @@ std::optional<std::uint32_t> handle_iokit_mach_request(AddressSpace& memory,
     return std::nullopt;
 }
 
-} // namespace shade
+}

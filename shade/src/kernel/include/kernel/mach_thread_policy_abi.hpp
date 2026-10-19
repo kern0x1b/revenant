@@ -15,9 +15,6 @@
 
 namespace shade::darwin::mach::thread_policy {
 
-// XNU osfmk/mach/thread_act.defs and thread_policy.h. The request
-// offsets are also verified against iPhone OS 1.0 libSystem.B.dylib's
-// _thread_policy_set MIG client stub.
 constexpr std::uint32_t subsystem_base = 3600;
 constexpr std::uint32_t legacy_policy_message = subsystem_base + 16;
 constexpr std::uint32_t policy_set_message = subsystem_base + 17;
@@ -59,4 +56,4 @@ constexpr std::size_t simple_reply_word_count = simple_reply_size / 4;
 
 constexpr std::uint64_t absolute_time_units_per_second = 1'000'000'000ULL;
 
-} // namespace shade::darwin::mach::thread_policy
+}

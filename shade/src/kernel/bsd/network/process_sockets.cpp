@@ -21,8 +21,6 @@ void CompatibilityKernel::dispatch_bsd_process_sockets(Cpu& cpu)
 {
     const auto target_pid = cpu.registers()[0];
     const auto level = cpu.registers()[1];
-    // xnu bsd/vm/vm_unix.c accepts service (1) or all (2).
-    // Per-socket defunct errors do not fail the process-level operation.
     if (level != 1U && level != 2U) {
         bsd_error(cpu, bsd_support::invalid_argument);
         return;
@@ -61,8 +59,6 @@ void CompatibilityKernel::shutdown_process_sockets(std::uint32_t level)
             descriptor.starts_with("unix-") || descriptor == "socketpair";
         if (level == 1U && !local)
             continue;
-        // AF_UNIX defaults to SOF_NODEFUNCT. Native IPC clients opt in through
-        // SO_DEFUNCTOK; do not tear down launchd or other protected IPC pairs.
         auto eligible = !local;
         if (const auto options = socket_options_.find(fd);
             options != socket_options_.end()) {
@@ -99,4 +95,4 @@ void CompatibilityKernel::shutdown_process_sockets(std::uint32_t level)
     shared_state_->note_io_event_transition();
 }
 
-} // namespace shade
+}

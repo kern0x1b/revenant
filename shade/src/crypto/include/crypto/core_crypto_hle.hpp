@@ -13,4 +13,4 @@ class UserlandHleRegistry;
 
 void register_core_crypto_hle(UserlandHleRegistry& registry);
 
-} // namespace shade
+}

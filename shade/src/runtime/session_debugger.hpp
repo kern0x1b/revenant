@@ -220,4 +220,4 @@ private:
         breakpoints_;
 };
 
-} // namespace shade::runtime_detail
+}
