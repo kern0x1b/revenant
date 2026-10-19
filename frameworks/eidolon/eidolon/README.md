@@ -198,9 +198,9 @@ QuartzCore, CoreGraphics, Dispatch, ObjectiveC, CoreFoundation и CoreData. Це
 `-bundled-swift-runtime`, **проверка доступности включена**: любое API новее iOS 6 компилятор называет сам, а не
 падение на устройстве (так нашлись и исправлены `CGPathAddRoundedRect`, `component(_:from:)`,
 `keyboardDismissMode`, `contentSizeForViewInPopover`; `NSItemProvider`/`NSUserActivity` в подписях помечены iOS 8).
-Combine — пакет `charon@styx` 2026.09.20 (форк OpenCombine, модуль `Combine`) из той же установки, собранный против того же
-рантайма: без издателей `URLSession` (iOS 7), допуск таймера — за `#available`; `../rtpkg` требует его с тем же
-рантаймом. Прогон тестов предка, OpenCombine, — `../combine/build.sh pkg` (1448 из 1453); у Styx свои тесты.
+Combine — цель `Combine` проекта hades (`../../styx`): исходники OpenCombine с патчами пакета `charon@styx` 2026.10.19,
+собранные против того же рантайма; допуск таймера — за `#available`; `../rtpkg` требует его с тем же рантаймом. Тесты
+OpenCombine против этого модуля — цель `CombineTests` там же.
 
 ## Замеры
 

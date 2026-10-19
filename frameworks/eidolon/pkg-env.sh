@@ -9,7 +9,8 @@ pkg_where() {
 }
 # sourced, a failure returns to the script; run on its own, it exits
 RT=$(pkg_where swift-runtime) && LIBCXX=$(pkg_where libcxx) && COMPAT=$(pkg_where apple-compat) &&
-    SDKPKG=$(pkg_where iphoneos-sdk) && LLVM=$(pkg_where llvm) && LD=$(pkg_where ld64)/bin/ld && LDID=$(pkg_where ldid)/bin/ldid ||
+    SDKPKG=$(pkg_where iphoneos-sdk) && LLVM=$(pkg_where llvm) && LD=$(pkg_where ld64)/bin/ld && LDID=$(pkg_where ldid)/bin/ldid &&
+    STYX=$(pkg_where styx) ||
     { return 1 2>/dev/null || exit 1; }
 STLIB=$HADES/build/iphoneos/armv7/release
 STMOD=$HADES/build/.gens/Combine/iphoneos/armv7/release/swift
@@ -21,7 +22,7 @@ SWIFTC=$(grep -A1 'SWIFT_EXEC' $RT/manifest.txt | tail -1 | tr -d ' "')
 [ -x "$SWIFTC" ] || SWIFTC=$(ls -td "${RT%%/s/swift-runtime/*}"/s/swift/*/*/bin/swiftc 2>/dev/null | head -1)
 [ -x "$SWIFTC" ] || { echo "pkg-env: no swiftc for the runtime at $RT" >&2; return 1 2>/dev/null || exit 1; }
 SWIFTHOME=$(dirname $(dirname $SWIFTC))
-OCFLAGS="-I $STMOD -I $HADES/styx/Sources/CombineHelpers/include"
+OCFLAGS="-I $STMOD -I $STYX/src/CombineHelpers/include"
 OCLINK="-L$STLIB -lCombine -lCombineHelpers"
 SDK=$(ls -d $SDKPKG/Developer.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS*.sdk)
 MARK=$(grep -A1 'CHARON_SWIFT_RUNTIME_MARK' $RT/manifest.txt | tail -1 | tr -d ' "')
