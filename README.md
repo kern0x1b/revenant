@@ -72,3 +72,9 @@ Each member's history was brought in with `git subtree add` and is kept whole, a
 that brought it in ("Bring <member> into hades with its history"). Those commits name their files without the
 member's folder, so the history before the move is read from that parent: `git log <bring-commit>^2 -- <path in the
 member>`. Building and testing follow each member's own README.
+
+## Licences and policies
+
+Each member is under the licence in its own folder: shade under MPL-2.0 (with its `NOTICE`), every other member under
+MIT. A member that builds on third-party code lists it in its `THIRD-PARTY.md`; the code itself comes in as a package
+of `third_party/` or of charon. [CONTRIBUTING.md](CONTRIBUTING.md) and [SECURITY.md](SECURITY.md) hold for all members.

@@ -154,10 +154,7 @@ charon build --lockfile= --update
 
 A stale lock does not fail on the machine that made the change - the old
 revision is still in its cache and the build quietly uses it - only on a fresh
-clone. `.github/workflows/port.yml` is that fresh clone: without the SDK, which
-cannot be redistributed, it checks that every Python file compiles, that the
-engine at the pinned commit still holds what `carry-manifest.txt` names, that
-`conan.lock` resolves against both repositories' recipes, and ICU on the host.
+clone.
 
 Three things about this build are worth knowing, because they explain choices
 that look arbitrary otherwise.
