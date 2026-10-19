@@ -1,6 +1,3 @@
-.agent-work/
-.build/
-.deps/
 .xmake/
 /build/
 .DS_Store

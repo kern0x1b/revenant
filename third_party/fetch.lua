@@ -1,18 +1,3 @@
--- xmake l third_party/fetch.lua <name> [<outputdir>]
---
--- Prepares one third-party source from its pin: third_party/<name>/UPSTREAM names where it comes from, and
--- third_party/<name>/patches/*.patch, applied in order, are ours. Nothing of upstream is kept in this repository.
---
--- UPSTREAM holds "key value" lines:
---   url <git url> and commit <full hash>    a git source, fetched at that commit only, our patches committed on top
---   url <archive url> and sha256 <digest>   an archive, checked against the digest; "extract <path>" names the part
---                                           of it that is wanted
---
--- The output (default .deps/<name> at the top of the repository, never tracked) is made again only when the pin
--- or a patch changed: <output>.stamp holds the digest of everything it was made from. The patches are committed
--- with a fixed identity and their own dates, so the same pin and patches give the same commit, and a build that
--- keys on that commit (Shade's IR artifacts do) sees a different source as a different build.
-
 local function readpin(dir)
     local file = path.join(dir, "UPSTREAM")
     assert(os.isfile(file), "no pin: " .. file)
@@ -34,7 +19,6 @@ end
 local function fetch_git(pin, patches, output)
     os.mkdir(output)
     git(output, {"init", "-q"})
-    -- through a remote named origin: submodules named by a relative url resolve against it
     git(output, {"remote", "add", "origin", pin.url})
     git(output, {"fetch", "-q", "--depth", "1", "origin", pin.commit})
     git(output, {"-c", "advice.detachedHead=false", "checkout", "-q", "FETCH_HEAD"})
@@ -64,7 +48,6 @@ local function fetch_archive(pin, patches, output)
         table.insert(args, pin.extract)
     end
     os.vrunv("tar", args)
-    -- the archive's top folder becomes the output, holding only what "extract" named inside it
     local top = os.dirs(path.join(unpacked, "*"))
     assert(#top == 1, "the archive " .. archive .. " has no single top folder")
     os.mv(top[1], output)

@@ -1,5 +1,3 @@
--- xmake itself: the release plus our patches to its addon handling (version locks and pins). The patches are
--- ours until upstream carries the same behaviour; each one is a git format-patch file in patches/.
 package("xmake")
     set_kind("binary")
     set_homepage("https://xmake.io")
@@ -9,7 +7,6 @@ package("xmake")
     add_urls("https://github.com/xmake-io/xmake.git")
     add_versions("v3.1.1", "3ba37a0d4f6c7584fc662780f27ab29d50f95899")
 
-    -- in order: each patch applies on top of the ones before it
     for _, patch in ipairs({
         {"0001-Lock-the-installed-addon-version-a-project-declares.patch", "3470649e6c468dc462e2dce37dcffe75856d62a6f62bc2818916a312b964119f"},
         {"0002-Keep-the-active-addon-version-when-a-project-install.patch", "617c1322f7fbc0a8737c73a764611faa0a118a9864f561495ff954569a29db67"},
