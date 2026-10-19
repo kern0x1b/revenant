@@ -1,0 +1,250 @@
+From b86e1a9b2558f02b317e06923eabbafed1e6718a Mon Sep 17 00:00:00 2001
+From: kern0x1b <kern0x1b@users.noreply.github.com>
+Date: Sat, 19 Sep 2026 19:33:43 +0200
+Subject: [PATCH 3/3] Name the fault-injection hooks for the core, not for one
+ user of it
+
+The macro, the CMake option and the environment variable that switch the
+portable-emit failure hooks were named for the emulator that used them.
+They are DYNARMIC_ENABLE_TEST_EMIT_FAILURE and DYNARMIC_TEST_EMIT_FAILURE now.
+
+Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>
+---
+ CMakeLists.txt                               |  4 ++--
+ src/dynarmic/CMakeLists.txt                  |  4 ++--
+ src/dynarmic/backend/arm64/a32_interface.cpp | 18 +++++++++---------
+ src/dynarmic/backend/x64/a32_interface.cpp   | 18 +++++++++---------
+ src/dynarmic/interface/A32/a32.h             |  2 +-
+ src/dynarmic/interface/A32/config.h          |  2 +-
+ 6 files changed, 24 insertions(+), 24 deletions(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 336a4f04..2ae232eb 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -19,8 +19,8 @@ option(DYNARMIC_FATAL_ERRORS "Errors are fatal" OFF)
+ option(DYNARMIC_IGNORE_ASSERTS "Ignore asserts" OFF)
+ option(DYNARMIC_TESTS "Build tests" ${BUILD_TESTING})
+ option(DYNARMIC_TESTS_USE_UNICORN "Enable fuzzing tests against unicorn" OFF)
+-option(DYNARMIC_ENABLE_ILEMU_TEST_EMIT_FAILURE
+-       "Compile iLEmu portable-emit fault injection hooks" OFF)
++option(DYNARMIC_ENABLE_TEST_EMIT_FAILURE
++       "Compile portable-emit fault injection hooks" OFF)
+ option(DYNARMIC_USE_LLVM "Support disassembly of jitted x86_64 code using LLVM" OFF)
+ option(DYNARMIC_USE_PRECOMPILED_HEADERS "Use precompiled headers" ON)
+ option(DYNARMIC_USE_BUNDLED_EXTERNALS "Use all bundled externals (useful when e.g. cross-compiling)" OFF)
+diff --git a/src/dynarmic/CMakeLists.txt b/src/dynarmic/CMakeLists.txt
+index 6ef5bdb6..30441cd8 100644
+--- a/src/dynarmic/CMakeLists.txt
++++ b/src/dynarmic/CMakeLists.txt
+@@ -522,9 +522,9 @@ endif()
+ if (DYNARMIC_ENABLE_NO_EXECUTE_SUPPORT)
+     target_compile_definitions(dynarmic PRIVATE DYNARMIC_ENABLE_NO_EXECUTE_SUPPORT=1)
+ endif()
+-if (DYNARMIC_ENABLE_ILEMU_TEST_EMIT_FAILURE)
++if (DYNARMIC_ENABLE_TEST_EMIT_FAILURE)
+     target_compile_definitions(dynarmic PRIVATE
+-        DYNARMIC_ENABLE_ILEMU_TEST_EMIT_FAILURE=1)
++        DYNARMIC_ENABLE_TEST_EMIT_FAILURE=1)
+ endif()
+ if (DYNARMIC_IGNORE_ASSERTS)
+     target_compile_definitions(dynarmic PRIVATE MCL_IGNORE_ASSERTS=1)
+diff --git a/src/dynarmic/backend/arm64/a32_interface.cpp b/src/dynarmic/backend/arm64/a32_interface.cpp
+index f1dbf0fd..a7e54c63 100644
+--- a/src/dynarmic/backend/arm64/a32_interface.cpp
++++ b/src/dynarmic/backend/arm64/a32_interface.cpp
+@@ -15,7 +15,7 @@
+ #include <utility>
+ #include <vector>
+ 
+-#if defined(DYNARMIC_ENABLE_ILEMU_TEST_EMIT_FAILURE)
++#if defined(DYNARMIC_ENABLE_TEST_EMIT_FAILURE)
+ #    include <cstdlib>
+ #    include <cstring>
+ #endif
+@@ -75,7 +75,7 @@ using namespace Backend::Arm64;
+     return block.HasTerminal() && IsEmittableTerminal(block.GetTerminal());
+ }
+ 
+-#if defined(DYNARMIC_ENABLE_ILEMU_TEST_EMIT_FAILURE)
++#if defined(DYNARMIC_ENABLE_TEST_EMIT_FAILURE)
+ enum class TestEmitFailure : std::uint8_t {
+     None,
+     Before,
+@@ -86,7 +86,7 @@ enum class TestEmitFailure : std::uint8_t {
+ };
+ 
+ [[nodiscard]] static TestEmitFailure ReadTestEmitFailure() noexcept {
+-    const char* const value = std::getenv("ILEMU_DYNARMIC_TEST_EMIT_FAILURE");
++    const char* const value = std::getenv("DYNARMIC_TEST_EMIT_FAILURE");
+     if (value == nullptr)
+         return TestEmitFailure::None;
+     if (std::strcmp(value, "before-once") == 0) {
+@@ -293,7 +293,7 @@ struct NativeCodeSlab::Impl {
+         code_cache_size = conf->code_cache_size;
+         shared_mode = shared;
+         initialize_code_segments();
+-#if defined(DYNARMIC_ENABLE_ILEMU_TEST_EMIT_FAILURE)
++#if defined(DYNARMIC_ENABLE_TEST_EMIT_FAILURE)
+         test_emit_failure = ReadTestEmitFailure();
+ #endif
+         initialized = true;
+@@ -338,7 +338,7 @@ struct NativeCodeSlab::Impl {
+     [[nodiscard]] BlockDescriptor emit(
+         IR::Block& block, std::uint64_t expected_generation, bool caller_executing) {
+         std::lock_guard lock{mutex};
+-#if defined(DYNARMIC_ENABLE_ILEMU_TEST_EMIT_FAILURE)
++#if defined(DYNARMIC_ENABLE_TEST_EMIT_FAILURE)
+         if (test_emit_failure == TestEmitFailure::Generation && !test_emit_failure_injected) {
+             test_emit_failure_injected = true;
+             request_generation_transition(
+@@ -354,7 +354,7 @@ struct NativeCodeSlab::Impl {
+                 existing, address_space->GetBlockSize(existing), current_generation,
+                 false};
+         }
+-#if defined(DYNARMIC_ENABLE_ILEMU_TEST_EMIT_FAILURE)
++#if defined(DYNARMIC_ENABLE_TEST_EMIT_FAILURE)
+         if (test_emit_failure == TestEmitFailure::Before && !test_emit_failure_injected) {
+             test_emit_failure_injected = true;
+             throw std::runtime_error{"injected portable emit failure before code"};
+@@ -370,7 +370,7 @@ struct NativeCodeSlab::Impl {
+         if (quiescent) {
+             address_space->PublishPendingBlockRelinks();
+         }
+-#if defined(DYNARMIC_ENABLE_ILEMU_TEST_EMIT_FAILURE)
++#if defined(DYNARMIC_ENABLE_TEST_EMIT_FAILURE)
+         if (test_emit_failure == TestEmitFailure::After && !test_emit_failure_injected) {
+             test_emit_failure_injected = true;
+             throw std::runtime_error{"injected portable emit failure after code"};
+@@ -392,7 +392,7 @@ struct NativeCodeSlab::Impl {
+ 
+     void ensure_memory_committed(std::size_t) {
+         std::lock_guard lock{mutex};
+-#if defined(DYNARMIC_ENABLE_ILEMU_TEST_EMIT_FAILURE)
++#if defined(DYNARMIC_ENABLE_TEST_EMIT_FAILURE)
+         if (test_emit_failure == TestEmitFailure::Commit && !test_emit_failure_injected) {
+             test_emit_failure_injected = true;
+             throw std::runtime_error{"injected portable code commit failure"};
+@@ -700,7 +700,7 @@ struct NativeCodeSlab::Impl {
+     bool clear_pending{};
+     GenerationTransitionKind pending_transition{
+         GenerationTransitionKind::ClearAll};
+-#if defined(DYNARMIC_ENABLE_ILEMU_TEST_EMIT_FAILURE)
++#if defined(DYNARMIC_ENABLE_TEST_EMIT_FAILURE)
+     TestEmitFailure test_emit_failure{TestEmitFailure::None};
+     bool test_emit_failure_injected{};
+ #endif
+diff --git a/src/dynarmic/backend/x64/a32_interface.cpp b/src/dynarmic/backend/x64/a32_interface.cpp
+index 90829f62..4d69533a 100644
+--- a/src/dynarmic/backend/x64/a32_interface.cpp
++++ b/src/dynarmic/backend/x64/a32_interface.cpp
+@@ -15,7 +15,7 @@
+ #include <utility>
+ #include <vector>
+ 
+-#if defined(DYNARMIC_ENABLE_ILEMU_TEST_EMIT_FAILURE)
++#if defined(DYNARMIC_ENABLE_TEST_EMIT_FAILURE)
+ #    include <cstdlib>
+ #    include <cstring>
+ #endif
+@@ -123,7 +123,7 @@ static A32::UserConfig WithFastDispatchTable(A32::UserConfig conf, void* storage
+     return conf;
+ }
+ 
+-#if defined(DYNARMIC_ENABLE_ILEMU_TEST_EMIT_FAILURE)
++#if defined(DYNARMIC_ENABLE_TEST_EMIT_FAILURE)
+ // Workspace-only fault injection. The hook is read once when a slab is
+ // initialized, so it cannot add an environment lookup to the guest hot path.
+ // The entire implementation is absent from production builds.
+@@ -137,7 +137,7 @@ enum class TestEmitFailure : std::uint8_t {
+ };
+ 
+ [[nodiscard]] static TestEmitFailure ReadTestEmitFailure() noexcept {
+-    const char* const value = std::getenv("ILEMU_DYNARMIC_TEST_EMIT_FAILURE");
++    const char* const value = std::getenv("DYNARMIC_TEST_EMIT_FAILURE");
+     if (value == nullptr)
+         return TestEmitFailure::None;
+     if (std::strcmp(value, "before-once") == 0) {
+@@ -356,7 +356,7 @@ struct NativeCodeSlab::Impl {
+         conf = std::move(config);
+         code_cache_size = conf->code_cache_size;
+         shared_mode = shared;
+-#if defined(DYNARMIC_ENABLE_ILEMU_TEST_EMIT_FAILURE)
++#if defined(DYNARMIC_ENABLE_TEST_EMIT_FAILURE)
+         test_emit_failure = ReadTestEmitFailure();
+ #endif
+         initialized = true;
+@@ -404,7 +404,7 @@ struct NativeCodeSlab::Impl {
+     [[nodiscard]] BlockDescriptor emit(
+         IR::Block& block, std::uint64_t expected_generation) {
+         std::lock_guard lock{mutex};
+-#if defined(DYNARMIC_ENABLE_ILEMU_TEST_EMIT_FAILURE)
++#if defined(DYNARMIC_ENABLE_TEST_EMIT_FAILURE)
+         if (test_emit_failure == TestEmitFailure::Generation && !test_emit_failure_injected) {
+             test_emit_failure_injected = true;
+             request_generation_transition(
+@@ -422,7 +422,7 @@ struct NativeCodeSlab::Impl {
+                 existing->entrypoint, existing->size, current_generation,
+                 false};
+         }
+-#if defined(DYNARMIC_ENABLE_ILEMU_TEST_EMIT_FAILURE)
++#if defined(DYNARMIC_ENABLE_TEST_EMIT_FAILURE)
+         if (test_emit_failure == TestEmitFailure::Before && !test_emit_failure_injected) {
+             test_emit_failure_injected = true;
+             throw std::runtime_error{"injected portable emit failure before code"};
+@@ -433,7 +433,7 @@ struct NativeCodeSlab::Impl {
+         }
+ #endif
+         const auto result = emitter->Emit(block);
+-#if defined(DYNARMIC_ENABLE_ILEMU_TEST_EMIT_FAILURE)
++#if defined(DYNARMIC_ENABLE_TEST_EMIT_FAILURE)
+         if (test_emit_failure == TestEmitFailure::After && !test_emit_failure_injected) {
+             test_emit_failure_injected = true;
+             throw std::runtime_error{"injected portable emit failure after code"};
+@@ -457,7 +457,7 @@ struct NativeCodeSlab::Impl {
+ 
+     void ensure_memory_committed(std::size_t codesize) {
+         std::lock_guard lock{mutex};
+-#if defined(DYNARMIC_ENABLE_ILEMU_TEST_EMIT_FAILURE)
++#if defined(DYNARMIC_ENABLE_TEST_EMIT_FAILURE)
+         if (test_emit_failure == TestEmitFailure::Commit && !test_emit_failure_injected) {
+             test_emit_failure_injected = true;
+             throw std::runtime_error{"injected portable code commit failure"};
+@@ -835,7 +835,7 @@ struct NativeCodeSlab::Impl {
+     bool clear_pending{};
+     GenerationTransitionKind pending_transition{
+         GenerationTransitionKind::ClearAll};
+-#if defined(DYNARMIC_ENABLE_ILEMU_TEST_EMIT_FAILURE)
++#if defined(DYNARMIC_ENABLE_TEST_EMIT_FAILURE)
+     TestEmitFailure test_emit_failure{TestEmitFailure::None};
+     bool test_emit_failure_injected{};
+ #endif
+diff --git a/src/dynarmic/interface/A32/a32.h b/src/dynarmic/interface/A32/a32.h
+index 73232f4e..f25c91cc 100644
+--- a/src/dynarmic/interface/A32/a32.h
++++ b/src/dynarmic/interface/A32/a32.h
+@@ -176,7 +176,7 @@ public:
+      * execution is stopped.
+      */
+     void GeneratePortableIR(std::uint64_t location_descriptor);
+-    // iLEMU portable-IR patch state: GeneratePortableIR-v1.
++    // portable-IR patch state: GeneratePortableIR-v1.
+ 
+     /**
+      * Emits a previously optimized IR block without translating guest code.
+diff --git a/src/dynarmic/interface/A32/config.h b/src/dynarmic/interface/A32/config.h
+index e0d192a5..cdc008b9 100644
+--- a/src/dynarmic/interface/A32/config.h
++++ b/src/dynarmic/interface/A32/config.h
+@@ -100,7 +100,7 @@ struct UserCallbacks : public TranslateCallbacks {
+     // IR that a backend would otherwise emit. The default lets existing
+     // portable-IR consumers share their completed-translation handler.
+     virtual void PortableIRGenerated(
+-            // iLEMU portable-IR patch state: PortableIRGenerated-v1.
++            // portable-IR patch state: PortableIRGenerated-v1.
+             std::uint64_t location_descriptor,
+             std::uint64_t translation_nanoseconds,
+             const Dynarmic::IR::Block& block) noexcept {
+-- 
+2.54.0 (Apple Git-157)
+

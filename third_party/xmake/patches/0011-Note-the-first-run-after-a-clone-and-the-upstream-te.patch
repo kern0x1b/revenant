@@ -1,0 +1,48 @@
+From f07cd5dcb92532044c7f8e8a77e27a6cbaf798a5 Mon Sep 17 00:00:00 2001
+From: kern0x1b <kern0x1b@users.noreply.github.com>
+Date: Thu, 24 Sep 2026 00:04:07 +0200
+Subject: [PATCH 11/11] Note the first run after a clone and the upstream test
+ failures
+
+Two notes from the review of 170db1796..38c3403e1 in AGENTS.md: until the
+locked addon version is installed, the first xmake in a project builds the
+plugin menu from the active version, as upstream does for includes; and
+tests/projects/package/requires_lock (zlib 1.2.13 against this macOS SDK)
+and tests/projects/embed/esp32/blink (no add_addons, broken upstream) fail on
+Homebrew 3.1.1 too, so they are not regressions.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ AGENTS.md | 9 +++++++++
+ 1 file changed, 9 insertions(+)
+
+diff --git a/AGENTS.md b/AGENTS.md
+index b7c77ee15..9c5c02adb 100644
+--- a/AGENTS.md
++++ b/AGENTS.md
+@@ -63,6 +63,11 @@ XMAKE_PROGRAM_DIR=$PWD/xmake xmake lua -v tests/run.lua actions/addon
+ - The built binary: `env -u XMAKE_PROGRAM_DIR PATH=$HOME/.local/xmake-kern/bin:$PATH xmake lua -v
+   tests/run.lua actions/addon`. The tests run `xmake` from `PATH`, so set it for that command only.
+ - The first run clones xmake-repo into the new global directory (network, about 30 MB).
++- Failing on Homebrew 3.1.1 too, not regressions: `tests/projects/package/requires_lock` (zlib
++  1.2.13 does not compile against this macOS SDK, `_stdio.h: expected ')'`), and
++  `tests/projects/embed/esp32/blink`, broken upstream: no `test.lua`, and no `add_addons` in its
++  `xmake.lua` (nothing reads its `xmake-addons.lua` since upstream f53769382). On arm64 most of
++  `tests/projects/package` and `tests/actions/install` skip their builds (an x86-only guard).
+ 
+ ## Conventions
+ 
+@@ -89,6 +94,10 @@ XMAKE_PROGRAM_DIR=$PWD/xmake xmake lua -v tests/run.lua actions/addon
+   check that `--version` names HEAD.
+ - `XMAKE_PROGRAM_DIR` left in the environment overrides the installed binary's own scripts →
+   `env -u XMAKE_PROGRAM_DIR` when checking the built binary.
++- After a fresh clone, until the version which the lock names is installed, the first `xmake` in
++  the project builds the plugin menu from the machine's active version, as upstream does for
++  `includes` → `project._pin_addons()` pins only installed versions; the auto-fetch installs it and
++  every later command runs the locked version's plugins.
+ - In the sandbox `semver.select` raises when nothing matches and `semver.satisfies` raises on a
+   range that does not parse, e.g. `latest` → a caller that expects no match wraps them in `try`.
+ 
+-- 
+2.54.0 (Apple Git-157)
+

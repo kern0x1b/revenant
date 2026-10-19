@@ -1,0 +1,39 @@
+From 0d1640df9cdfd7bdbf640a8f97c8945685ab3da3 Mon Sep 17 00:00:00 2001
+From: kern0x1b <kern0x1b@users.noreply.github.com>
+Date: Wed, 23 Sep 2026 21:41:29 +0200
+Subject: [PATCH 08/11] Say why the inherited addon pins do no harm
+
+addon.pin(..., {inherit = true}) sets XMAKE_ADDONS_PINNED with os.setenv(), which
+cannot be undone for one child: it holds for the rest of the process and all of
+its later children, e.g. the other packages which the installer builds after the
+addon. The comment now says why this does no harm: only the installer of a
+project pins with it, in its own process which ends with that installation, and
+it pins only the versions which the project locks.
+
+A comment only, no behaviour changes, so there is no test of its own.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ xmake/core/package/addon.lua | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/xmake/core/package/addon.lua b/xmake/core/package/addon.lua
+index ff37720e2..15cfc8a77 100644
+--- a/xmake/core/package/addon.lua
++++ b/xmake/core/package/addon.lua
+@@ -506,6 +506,12 @@ end
+ --              pins the version which it installs for a project, and the `on_test` script of this
+ --              addon may run `xmake create -t ...`, @see private/action/require/impl/actions/install.lua
+ --
++-- @note os.setenv() cannot be undone for a single child, it holds for the rest of this process and all
++-- of its later child processes, e.g. the other packages which the installer builds after this addon.
++-- it does no harm, only the installer of a project pins with it, in its own process which ends with
++-- this installation, and it only pins the versions which the project locks, so every child process
++-- sees the same addons as the project which it installs them for, and the other addons stay active
++--
+ function addon.pin(name, version, opt)
+     local pinned = addon._pinned()
+     pinned[addon.dirname(name)] = version
+-- 
+2.54.0 (Apple Git-157)
+

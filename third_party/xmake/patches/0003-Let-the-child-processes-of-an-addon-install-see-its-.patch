@@ -1,0 +1,145 @@
+From 10c7f2c33043c61883ea60d5f721abc273a19dde Mon Sep 17 00:00:00 2001
+From: kern0x1b <kern0x1b@users.noreply.github.com>
+Date: Wed, 23 Sep 2026 17:38:37 +0200
+Subject: [PATCH 03/11] Let the child processes of an addon install see its
+ version
+
+The previous commit pins a version installed for a project only in the
+installing process, but the on_test scripts of the addons in xmake-repo
+run xmake in child processes (avr-devel `xmake create -t avr.blink`,
+basic-templates `xmake create`, doxygen-plugin `xmake doxygen --help`),
+and a child saw the machine's active version instead, so it tested
+another version of the addon.
+
+addon.pin(name, version, {inherit = true}) now also passes the pinned
+versions to the child processes in XMAKE_ADDONS_PINNED, and a process
+starts from the versions its parent pinned; the installer pins with it.
+A version which the parent pinned but which is not installed here,
+e.g. a child with another XMAKE_GLOBALDIR, falls back to the active
+one instead of hiding the addon. Project pins are still per process.
+
+The release recipes in the addon tests now also check the version in a
+child `xmake lua` from on_test; with the scripts of the previous commit
+test_autofetch_keep_active_version fails there ("a child process sees
+2.0.0 while installing 1.0.0!").
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ tests/actions/addon/test.lua                  |  8 +++-
+ xmake/core/package/addon.lua                  | 38 +++++++++++++++----
+ .../action/require/impl/actions/install.lua   |  5 ++-
+ 3 files changed, 40 insertions(+), 11 deletions(-)
+
+diff --git a/tests/actions/addon/test.lua b/tests/actions/addon/test.lua
+index 6507f99d2..3c0bf6b03 100644
+--- a/tests/actions/addon/test.lua
++++ b/tests/actions/addon/test.lua
+@@ -110,7 +110,8 @@ end
+ --
+ -- every version is a commit of a git repository which only differs by `includes/release`,
+ -- so a project can tell which version it really loads, e.g. includes("@addon/custom-include/release"),
+--- and the recipe tests that the addon sees the version which is being installed
++-- and the recipe tests that the addon sees the version which is being installed, in the installer
++-- and in a child process, e.g. the `on_test` scripts which run `xmake create -t ...`
+ --
+ -- @note the repository is created in the given directory, the caller needs to remove it
+ --
+@@ -135,7 +136,10 @@ function _release(name, versions, gitdir)
+         local addoninfo = addon.addons()[%q]
+         assert(addoninfo and addoninfo.version == package:version_str(), "the addon sees %%s while installing %%s!",
+             addoninfo and addoninfo.version, package:version_str())
+-    end)]]):format(name)
++        local script = ("import('core.package.addon'); print(addon.addons()[%%q].version)"):format(%q)
++        local version = os.iorunv("xmake", {"lua", "-c", script}):trim()
++        assert(version == package:version_str(), "a child process sees %%s while installing %%s!", version, package:version_str())
++    end)]]):format(name, name)
+ end
+ 
+ -- run the given function with a repository which distributes the given releases of an addon fixture
+diff --git a/xmake/core/package/addon.lua b/xmake/core/package/addon.lua
+index e5498c252..db919bbaf 100644
+--- a/xmake/core/package/addon.lua
++++ b/xmake/core/package/addon.lua
+@@ -474,19 +474,40 @@ function addon._registry(opt)
+     return registry
+ end
+ 
+--- pin the active version of the given addon for this process
++-- get the pinned versions of this process, e.g. {["esp32"] = "1.0.2"}
+ --
+--- @note a project locks the versions of its addons, so we need to activate them
+--- when we load it, @see core/project/addons.lua
++-- @note the parent process may have pinned some versions for its child processes too,
++-- @see addon.pin
+ --
+-function addon.pin(name, version)
++function addon._pinned()
+     local pinned = addon._PINNED
+     if pinned == nil then
+         pinned = {}
++        local inherited = os.getenv("XMAKE_ADDONS_PINNED")
++        if inherited then
++            pinned = inherited:deserialize() or {}
++        end
+         addon._PINNED = pinned
+     end
++    return pinned
++end
++
++-- pin the active version of the given addon for this process
++--
++-- @note a project locks the versions of its addons, so we need to activate them
++-- when we load it, @see core/project/addons.lua
++--
++-- @param opt   the options, e.g. {inherit = true}, the child processes also use it, e.g. the installer
++--              pins the version which it installs for a project, and the `on_test` script of this
++--              addon may run `xmake create -t ...`, @see private/action/require/impl/actions/install.lua
++--
++function addon.pin(name, version, opt)
++    local pinned = addon._pinned()
+     pinned[addon.dirname(name)] = version
+     addon._ADDONS = nil
++    if opt and opt.inherit then
++        os.setenv("XMAKE_ADDONS_PINNED", string.serialize(pinned, {strip = true, indent = false}))
++    end
+ end
+ 
+ -- get all the installed versions of the given addon, e.g. {"1.0.2", "1.0.3"}
+@@ -533,11 +554,14 @@ function addon.addons(opt)
+     local addons = addon._ADDONS
+     if addons == nil then
+         addons = {}
+-        local pinned = addon._PINNED or {}
++        local pinned = addon._pinned()
+         for dirname, addoninfo in pairs(addon._registry()) do
+             -- the project may lock another version of it, @see addon.pin
+-            local version = pinned[dirname] or addoninfo.active
+-            local versioninfo = addoninfo.versions and addoninfo.versions[version]
++            --
++            -- @note the version which the parent process has pinned may not be installed here,
++            -- e.g. the child process uses another XMAKE_GLOBALDIR, so we use the active one
++            local versions = addoninfo.versions or {}
++            local versioninfo = versions[pinned[dirname]] or versions[addoninfo.active]
+             if versioninfo then
+                 addons[dirname] = versioninfo
+             end
+diff --git a/xmake/modules/private/action/require/impl/actions/install.lua b/xmake/modules/private/action/require/impl/actions/install.lua
+index 262601e1c..e0bb84bbb 100644
+--- a/xmake/modules/private/action/require/impl/actions/install.lua
++++ b/xmake/modules/private/action/require/impl/actions/install.lua
+@@ -338,9 +338,10 @@ function _register_addon(package)
+          manifest_deps = manifest and manifest.deps or nil,
+          globalmodules = manifest and #manifest.globalmodules > 0 and manifest.globalmodules or nil})
+ 
+-    -- its `on_test` needs to use this version, even if it is not the active one
++    -- its `on_test` needs to use this version, even if it is not the active one,
++    -- and it may use it in a child process, e.g. `xmake create -t esp32.blink`
+     if not activate then
+-        addon.pin(package:name(), version)
++        addon.pin(package:name(), version, {inherit = true})
+     end
+ end
+ 
+-- 
+2.54.0 (Apple Git-157)
+

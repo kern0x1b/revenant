@@ -1,0 +1,46 @@
+From 170db179690b484c0d75b6c2d396474766c936f0 Mon Sep 17 00:00:00 2001
+From: kern0x1b <kern0x1b@users.noreply.github.com>
+Date: Wed, 23 Sep 2026 20:56:01 +0200
+Subject: [PATCH 06/11] Rebuild the fork from an empty build directory
+
+./configure writes the new commit into xmake.config.h, but the
+generated makefile tracks no headers, so a rebuild over an old build/
+(also after `make clean`, which only cleans the cli target) relinked
+core/src/cli/xmake.c alone and kept libxmake.a: the binary built at
+a8fb9af37 still printed v3.1.1+charon.10c7f2c33. After removing build/
+and makefile it compiled 589 files and prints the commit of HEAD.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ AGENTS.md | 7 ++++++-
+ 1 file changed, 6 insertions(+), 1 deletion(-)
+
+diff --git a/AGENTS.md b/AGENTS.md
+index c3bd89136..cb8861ed1 100644
+--- a/AGENTS.md
++++ b/AGENTS.md
+@@ -39,8 +39,9 @@ Clone with `--recurse-submodules`; after checking out another tag or branch run
+ Build and install into our own prefix, never over Homebrew, and only through the slots:
+ 
+ ```
++rm -rf build makefile                           # generated; see the trap about make clean
+ $HOME/Git/projects/ios/coordination/heavy.sh sh -c "./configure --prefix=$HOME/.local/xmake-kern && make -j8 && make install"
+-$HOME/.local/xmake-kern/bin/xmake --version     # xmake v3.1.1+charon.<commit>
++$HOME/.local/xmake-kern/bin/xmake --version     # xmake v3.1.1+charon.<commit of HEAD>
+ ```
+ 
+ The default `./configure` builds the Lua runtime, like Homebrew's. The fleet runs this binary only
+@@ -81,6 +82,10 @@ XMAKE_PROGRAM_DIR=$PWD/xmake xmake lua -v tests/run.lua actions/addon
+   cache) → always set it; the shared store is every band's.
+ - Never `xrepo`/`xmake require --force` against the shared store and never edit
+   `~/.xmake/addons/addons.conf` by hand → the fleet builds from them; that needs the coordinator.
++- Rebuilding over an old `build/`, even after `make clean`, relinks only `core/src/cli`: the new
++  commit goes into `xmake.config.h` but `libxmake.a` (`engine.c`, which prints the version) is not
++  rebuilt, since the makefile does not track headers → remove `build` and `makefile` first, then
++  check that `--version` names HEAD.
+ - `XMAKE_PROGRAM_DIR` left in the environment overrides the installed binary's own scripts →
+   `env -u XMAKE_PROGRAM_DIR` when checking the built binary.
+ - In the sandbox `semver.select` raises when nothing matches and `semver.satisfies` raises on a
+-- 
+2.54.0 (Apple Git-157)
+

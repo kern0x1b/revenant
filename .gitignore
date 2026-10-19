@@ -1,2 +1,4 @@
 .agent-work/
+.build/
+.deps/
 .DS_Store

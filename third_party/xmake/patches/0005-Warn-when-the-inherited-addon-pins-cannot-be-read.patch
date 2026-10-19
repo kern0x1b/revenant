@@ -1,0 +1,36 @@
+From a8fb9af37ac00b4d52e933b67f7e2219e5212bde Mon Sep 17 00:00:00 2001
+From: kern0x1b <kern0x1b@users.noreply.github.com>
+Date: Wed, 23 Sep 2026 17:58:52 +0200
+Subject: [PATCH 05/11] Warn when the inherited addon pins cannot be read
+
+A process takes the addon versions its parent pinned from
+XMAKE_ADDONS_PINNED; a value that does not deserialize was dropped
+silently, so the child used the active versions with nothing said.
+It now warns with the value and the reason and uses no inherited pins.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ xmake/core/package/addon.lua | 7 ++++++-
+ 1 file changed, 6 insertions(+), 1 deletion(-)
+
+diff --git a/xmake/core/package/addon.lua b/xmake/core/package/addon.lua
+index db919bbaf..ff37720e2 100644
+--- a/xmake/core/package/addon.lua
++++ b/xmake/core/package/addon.lua
+@@ -485,7 +485,12 @@ function addon._pinned()
+         pinned = {}
+         local inherited = os.getenv("XMAKE_ADDONS_PINNED")
+         if inherited then
+-            pinned = inherited:deserialize() or {}
++            local errors
++            pinned, errors = inherited:deserialize()
++            if not pinned then
++                utils.warning("XMAKE_ADDONS_PINNED(%s) is ignored, %s", inherited, errors or "it is invalid")
++                pinned = {}
++            end
+         end
+         addon._PINNED = pinned
+     end
+-- 
+2.54.0 (Apple Git-157)
+

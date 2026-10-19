@@ -1,0 +1,2463 @@
+From 0d1b9a4dd816224cc02e5f18031a85be0e59c3ba Mon Sep 17 00:00:00 2001
+From: kern0x1b <kern0x1b@users.noreply.github.com>
+Date: Sat, 19 Sep 2026 15:22:12 +0200
+Subject: [PATCH 1/3] Apply Charon's dynarmic arm64 backend
+
+---
+ .../backend/arm64/a32_address_space.cpp       |  223 ++-
+ .../backend/arm64/a32_address_space.h         |   18 +-
+ src/dynarmic/backend/arm64/a32_interface.cpp  | 1304 ++++++++++++++++-
+ src/dynarmic/backend/arm64/a32_jitstate.h     |   19 +-
+ src/dynarmic/backend/arm64/abi.h              |    1 +
+ src/dynarmic/backend/arm64/address_space.cpp  |   95 +-
+ src/dynarmic/backend/arm64/address_space.h    |   42 +
+ src/dynarmic/backend/arm64/emit_arm64.cpp     |    2 +-
+ src/dynarmic/backend/arm64/emit_arm64.h       |    6 +-
+ src/dynarmic/backend/arm64/emit_arm64_a32.cpp |   43 +-
+ .../arm64/emit_arm64_a32_coprocessor.cpp      |    7 +-
+ .../backend/arm64/emit_arm64_memory.cpp       |   42 +-
+ .../backend/arm64/exclusive_monitor.cpp       |    4 +-
+ .../backend/block_range_information.cpp       |   12 +-
+ 14 files changed, 1674 insertions(+), 144 deletions(-)
+
+diff --git a/src/dynarmic/backend/arm64/a32_address_space.cpp b/src/dynarmic/backend/arm64/a32_address_space.cpp
+index 2f28e46f..dda85b5d 100644
+--- a/src/dynarmic/backend/arm64/a32_address_space.cpp
++++ b/src/dynarmic/backend/arm64/a32_address_space.cpp
+@@ -20,16 +20,40 @@
+ 
+ namespace Dynarmic::Backend::Arm64 {
+ 
+-template<auto mfp, typename T>
+-static void* EmitCallTrampoline(oaknut::CodeGenerator& code, T* this_) {
++static void EmitLoadLinkedPointer(oaknut::CodeGenerator& code, oaknut::XReg destination, std::size_t link_offset) {
++    code.LDR(destination, Xstate, link_offset);
++    code.LDR(destination, destination, 0);
++}
++
++template<auto mfp>
++static void EmitLoadCallbackObject(oaknut::CodeGenerator& code, const A32::UserConfig& conf, oaknut::Label& l_this) {
+     using namespace oaknut::util;
+ 
+-    const auto info = Devirtualize<mfp>(this_);
++    if (!conf.callbacks_link) {
++        code.LDR(X0, l_this);
++        return;
++    }
++
++    const auto info = Devirtualize<mfp>(conf.callbacks);
++    const u64 adjustment = info.this_ptr - mcl::bit_cast<u64>(conf.callbacks);
++
++    EmitLoadLinkedPointer(code, X0, offsetof(A32JitState, callbacks_link));
++    if (adjustment != 0) {
++        code.MOV(Xscratch1, adjustment);
++        code.ADD(X0, X0, Xscratch1);
++    }
++}
++
++template<auto mfp>
++static void* EmitCallTrampoline(oaknut::CodeGenerator& code, const A32::UserConfig& conf) {
++    using namespace oaknut::util;
++
++    const auto info = Devirtualize<mfp>(conf.callbacks);
+ 
+     oaknut::Label l_addr, l_this;
+ 
+     void* target = code.xptr<void*>();
+-    code.LDR(X0, l_this);
++    EmitLoadCallbackObject<mfp>(code, conf, l_this);
+     code.LDR(Xscratch0, l_addr);
+     code.BR(Xscratch0);
+ 
+@@ -42,11 +66,11 @@ static void* EmitCallTrampoline(oaknut::CodeGenerator& code, T* this_) {
+     return target;
+ }
+ 
+-template<auto mfp, typename T>
+-static void* EmitWrappedReadCallTrampoline(oaknut::CodeGenerator& code, T* this_) {
++template<auto mfp>
++static void* EmitWrappedReadCallTrampoline(oaknut::CodeGenerator& code, const A32::UserConfig& conf) {
+     using namespace oaknut::util;
+ 
+-    const auto info = Devirtualize<mfp>(this_);
++    const auto info = Devirtualize<mfp>(conf.callbacks);
+ 
+     oaknut::Label l_addr, l_this;
+ 
+@@ -54,8 +78,8 @@ static void* EmitWrappedReadCallTrampoline(oaknut::CodeGenerator& code, T* this_
+ 
+     void* target = code.xptr<void*>();
+     ABI_PushRegisters(code, save_regs, 0);
+-    code.LDR(X0, l_this);
+     code.MOV(X1, Xscratch0);
++    EmitLoadCallbackObject<mfp>(code, conf, l_this);
+     code.LDR(Xscratch0, l_addr);
+     code.BLR(Xscratch0);
+     code.MOV(Xscratch0, X0);
+@@ -71,6 +95,16 @@ static void* EmitWrappedReadCallTrampoline(oaknut::CodeGenerator& code, T* this_
+     return target;
+ }
+ 
++static void EmitLoadRuntimeConfig(oaknut::CodeGenerator& code, const A32::UserConfig& conf, oaknut::Label& l_this) {
++    using namespace oaknut::util;
++
++    if (conf.runtime_config_link) {
++        EmitLoadLinkedPointer(code, X0, offsetof(A32JitState, runtime_config_link));
++    } else {
++        code.LDR(X0, l_this);
++    }
++}
++
+ template<auto callback, typename T>
+ static void* EmitExclusiveReadCallTrampoline(oaknut::CodeGenerator& code, const A32::UserConfig& conf) {
+     using namespace oaknut::util;
+@@ -78,13 +112,14 @@ static void* EmitExclusiveReadCallTrampoline(oaknut::CodeGenerator& code, const
+     oaknut::Label l_addr, l_this;
+ 
+     auto fn = [](const A32::UserConfig& conf, A32::VAddr vaddr) -> T {
++        conf.callbacks->MemoryReadExclusive(vaddr, sizeof(T));
+         return conf.global_monitor->ReadAndMark<T>(conf.processor_id, vaddr, [&]() -> T {
+             return (conf.callbacks->*callback)(vaddr);
+         });
+     };
+ 
+     void* target = code.xptr<void*>();
+-    code.LDR(X0, l_this);
++    EmitLoadRuntimeConfig(code, conf, l_this);
+     code.LDR(Xscratch0, l_addr);
+     code.BR(Xscratch0);
+ 
+@@ -97,11 +132,11 @@ static void* EmitExclusiveReadCallTrampoline(oaknut::CodeGenerator& code, const
+     return target;
+ }
+ 
+-template<auto mfp, typename T>
+-static void* EmitWrappedWriteCallTrampoline(oaknut::CodeGenerator& code, T* this_) {
++template<auto mfp>
++static void* EmitWrappedWriteCallTrampoline(oaknut::CodeGenerator& code, const A32::UserConfig& conf) {
+     using namespace oaknut::util;
+ 
+-    const auto info = Devirtualize<mfp>(this_);
++    const auto info = Devirtualize<mfp>(conf.callbacks);
+ 
+     oaknut::Label l_addr, l_this;
+ 
+@@ -109,9 +144,9 @@ static void* EmitWrappedWriteCallTrampoline(oaknut::CodeGenerator& code, T* this
+ 
+     void* target = code.xptr<void*>();
+     ABI_PushRegisters(code, save_regs, 0);
+-    code.LDR(X0, l_this);
+     code.MOV(X1, Xscratch0);
+     code.MOV(X2, Xscratch1);
++    EmitLoadCallbackObject<mfp>(code, conf, l_this);
+     code.LDR(Xscratch0, l_addr);
+     code.BLR(Xscratch0);
+     ABI_PopRegisters(code, save_regs, 0);
+@@ -142,7 +177,7 @@ static void* EmitExclusiveWriteCallTrampoline(oaknut::CodeGenerator& code, const
+     };
+ 
+     void* target = code.xptr<void*>();
+-    code.LDR(X0, l_this);
++    EmitLoadRuntimeConfig(code, conf, l_this);
+     code.LDR(Xscratch0, l_addr);
+     code.BR(Xscratch0);
+ 
+@@ -161,6 +196,14 @@ A32AddressSpace::A32AddressSpace(const A32::UserConfig& conf)
+     EmitPrelude();
+ }
+ 
++A32AddressSpace::A32AddressSpace(const A32::UserConfig& conf, LookupBlockFunction lookup, void* lookup_arg)
++        : AddressSpace(conf.code_cache_size)
++        , conf(conf)
++        , lookup_block(lookup)
++        , lookup_block_arg(lookup_arg) {
++    EmitPrelude();
++}
++
+ IR::Block A32AddressSpace::GenerateIR(IR::LocationDescriptor descriptor) const {
+     IR::Block ir_block = A32::Translate(A32::LocationDescriptor{descriptor}, conf.callbacks, {conf.arch_version, conf.define_unpredictable_behaviour, conf.hook_hint_instructions});
+ 
+@@ -186,8 +229,26 @@ IR::Block A32AddressSpace::GenerateIR(IR::LocationDescriptor descriptor) const {
+     return ir_block;
+ }
+ 
+-void A32AddressSpace::InvalidateCacheRanges(const boost::icl::interval_set<u32>& ranges) {
+-    InvalidateBasicBlocks(block_ranges.InvalidateRanges(ranges));
++tsl::robin_set<IR::LocationDescriptor> A32AddressSpace::InvalidateCacheRanges(const boost::icl::interval_set<u32>& ranges) {
++    auto locations = block_ranges.InvalidateRanges(ranges);
++    InvalidateBasicBlocks(locations);
++    return locations;
++}
++
++void A32AddressSpace::ClearCacheAndRanges() {
++    ClearCache();
++    block_ranges.ClearCache();
++}
++
++AddressSpace::RetiredCodeStats A32AddressSpace::RetireCodeRangeAndRanges(CodePtr begin, CodePtr end) {
++    tsl::robin_set<IR::LocationDescriptor> locations;
++    const auto stats = RetireCodeRange(begin, end, locations);
++    block_ranges.InvalidateLocations(locations);
++    return stats;
++}
++
++bool A32AddressSpace::ReadPageTableInRegister() const {
++    return !conf.fastmem_pointer && conf.read_page_table != nullptr && (conf.read_page_table_link != nullptr || conf.read_page_table != conf.page_table);
+ }
+ 
+ void A32AddressSpace::EmitPrelude() {
+@@ -195,40 +256,60 @@ void A32AddressSpace::EmitPrelude() {
+ 
+     UnprotectCodeMemory();
+ 
+-    prelude_info.read_memory_8 = EmitCallTrampoline<&A32::UserCallbacks::MemoryRead8>(code, conf.callbacks);
+-    prelude_info.read_memory_16 = EmitCallTrampoline<&A32::UserCallbacks::MemoryRead16>(code, conf.callbacks);
+-    prelude_info.read_memory_32 = EmitCallTrampoline<&A32::UserCallbacks::MemoryRead32>(code, conf.callbacks);
+-    prelude_info.read_memory_64 = EmitCallTrampoline<&A32::UserCallbacks::MemoryRead64>(code, conf.callbacks);
+-    prelude_info.wrapped_read_memory_8 = EmitWrappedReadCallTrampoline<&A32::UserCallbacks::MemoryRead8>(code, conf.callbacks);
+-    prelude_info.wrapped_read_memory_16 = EmitWrappedReadCallTrampoline<&A32::UserCallbacks::MemoryRead16>(code, conf.callbacks);
+-    prelude_info.wrapped_read_memory_32 = EmitWrappedReadCallTrampoline<&A32::UserCallbacks::MemoryRead32>(code, conf.callbacks);
+-    prelude_info.wrapped_read_memory_64 = EmitWrappedReadCallTrampoline<&A32::UserCallbacks::MemoryRead64>(code, conf.callbacks);
++    prelude_info.read_memory_8 = EmitCallTrampoline<&A32::UserCallbacks::MemoryRead8>(code, conf);
++    prelude_info.read_memory_16 = EmitCallTrampoline<&A32::UserCallbacks::MemoryRead16>(code, conf);
++    prelude_info.read_memory_32 = EmitCallTrampoline<&A32::UserCallbacks::MemoryRead32>(code, conf);
++    prelude_info.read_memory_64 = EmitCallTrampoline<&A32::UserCallbacks::MemoryRead64>(code, conf);
++    prelude_info.wrapped_read_memory_8 = EmitWrappedReadCallTrampoline<&A32::UserCallbacks::MemoryRead8>(code, conf);
++    prelude_info.wrapped_read_memory_16 = EmitWrappedReadCallTrampoline<&A32::UserCallbacks::MemoryRead16>(code, conf);
++    prelude_info.wrapped_read_memory_32 = EmitWrappedReadCallTrampoline<&A32::UserCallbacks::MemoryRead32>(code, conf);
++    prelude_info.wrapped_read_memory_64 = EmitWrappedReadCallTrampoline<&A32::UserCallbacks::MemoryRead64>(code, conf);
+     prelude_info.exclusive_read_memory_8 = EmitExclusiveReadCallTrampoline<&A32::UserCallbacks::MemoryRead8, u8>(code, conf);
+     prelude_info.exclusive_read_memory_16 = EmitExclusiveReadCallTrampoline<&A32::UserCallbacks::MemoryRead16, u16>(code, conf);
+     prelude_info.exclusive_read_memory_32 = EmitExclusiveReadCallTrampoline<&A32::UserCallbacks::MemoryRead32, u32>(code, conf);
+     prelude_info.exclusive_read_memory_64 = EmitExclusiveReadCallTrampoline<&A32::UserCallbacks::MemoryRead64, u64>(code, conf);
+-    prelude_info.write_memory_8 = EmitCallTrampoline<&A32::UserCallbacks::MemoryWrite8>(code, conf.callbacks);
+-    prelude_info.write_memory_16 = EmitCallTrampoline<&A32::UserCallbacks::MemoryWrite16>(code, conf.callbacks);
+-    prelude_info.write_memory_32 = EmitCallTrampoline<&A32::UserCallbacks::MemoryWrite32>(code, conf.callbacks);
+-    prelude_info.write_memory_64 = EmitCallTrampoline<&A32::UserCallbacks::MemoryWrite64>(code, conf.callbacks);
+-    prelude_info.swap_memory_8 = EmitCallTrampoline<&A32::UserCallbacks::MemorySwap8>(code, conf.callbacks);
+-    prelude_info.swap_memory_32 = EmitCallTrampoline<&A32::UserCallbacks::MemorySwap32>(code, conf.callbacks);
+-    prelude_info.wrapped_write_memory_8 = EmitWrappedWriteCallTrampoline<&A32::UserCallbacks::MemoryWrite8>(code, conf.callbacks);
+-    prelude_info.wrapped_write_memory_16 = EmitWrappedWriteCallTrampoline<&A32::UserCallbacks::MemoryWrite16>(code, conf.callbacks);
+-    prelude_info.wrapped_write_memory_32 = EmitWrappedWriteCallTrampoline<&A32::UserCallbacks::MemoryWrite32>(code, conf.callbacks);
+-    prelude_info.wrapped_write_memory_64 = EmitWrappedWriteCallTrampoline<&A32::UserCallbacks::MemoryWrite64>(code, conf.callbacks);
++    prelude_info.write_memory_8 = EmitCallTrampoline<&A32::UserCallbacks::MemoryWrite8>(code, conf);
++    prelude_info.write_memory_16 = EmitCallTrampoline<&A32::UserCallbacks::MemoryWrite16>(code, conf);
++    prelude_info.write_memory_32 = EmitCallTrampoline<&A32::UserCallbacks::MemoryWrite32>(code, conf);
++    prelude_info.write_memory_64 = EmitCallTrampoline<&A32::UserCallbacks::MemoryWrite64>(code, conf);
++    prelude_info.swap_memory_8 = EmitCallTrampoline<&A32::UserCallbacks::MemorySwap8>(code, conf);
++    prelude_info.swap_memory_32 = EmitCallTrampoline<&A32::UserCallbacks::MemorySwap32>(code, conf);
++    prelude_info.wrapped_write_memory_8 = EmitWrappedWriteCallTrampoline<&A32::UserCallbacks::MemoryWrite8>(code, conf);
++    prelude_info.wrapped_write_memory_16 = EmitWrappedWriteCallTrampoline<&A32::UserCallbacks::MemoryWrite16>(code, conf);
++    prelude_info.wrapped_write_memory_32 = EmitWrappedWriteCallTrampoline<&A32::UserCallbacks::MemoryWrite32>(code, conf);
++    prelude_info.wrapped_write_memory_64 = EmitWrappedWriteCallTrampoline<&A32::UserCallbacks::MemoryWrite64>(code, conf);
+     prelude_info.exclusive_write_memory_8 = EmitExclusiveWriteCallTrampoline<&A32::UserCallbacks::MemoryWriteExclusive8, u8>(code, conf);
+     prelude_info.exclusive_write_memory_16 = EmitExclusiveWriteCallTrampoline<&A32::UserCallbacks::MemoryWriteExclusive16, u16>(code, conf);
+     prelude_info.exclusive_write_memory_32 = EmitExclusiveWriteCallTrampoline<&A32::UserCallbacks::MemoryWriteExclusive32, u32>(code, conf);
+     prelude_info.exclusive_write_memory_64 = EmitExclusiveWriteCallTrampoline<&A32::UserCallbacks::MemoryWriteExclusive64, u64>(code, conf);
+-    prelude_info.call_svc = EmitCallTrampoline<&A32::UserCallbacks::CallSVC>(code, conf.callbacks);
+-    prelude_info.exception_raised = EmitCallTrampoline<&A32::UserCallbacks::ExceptionRaised>(code, conf.callbacks);
+-    prelude_info.isb_raised = EmitCallTrampoline<&A32::UserCallbacks::InstructionSynchronizationBarrierRaised>(code, conf.callbacks);
+-    prelude_info.add_ticks = EmitCallTrampoline<&A32::UserCallbacks::AddTicks>(code, conf.callbacks);
+-    prelude_info.get_ticks_remaining = EmitCallTrampoline<&A32::UserCallbacks::GetTicksRemaining>(code, conf.callbacks);
++    prelude_info.call_svc = EmitCallTrampoline<&A32::UserCallbacks::CallSVC>(code, conf);
++    prelude_info.exception_raised = EmitCallTrampoline<&A32::UserCallbacks::ExceptionRaised>(code, conf);
++    prelude_info.interpreter_fallback = EmitCallTrampoline<&A32::UserCallbacks::InterpreterFallback>(code, conf);
++    prelude_info.isb_raised = EmitCallTrampoline<&A32::UserCallbacks::InstructionSynchronizationBarrierRaised>(code, conf);
++    prelude_info.add_ticks = EmitCallTrampoline<&A32::UserCallbacks::AddTicks>(code, conf);
++    prelude_info.get_ticks_remaining = EmitCallTrampoline<&A32::UserCallbacks::GetTicksRemaining>(code, conf);
+ 
+     oaknut::Label return_from_run_code, l_return_to_dispatcher;
+ 
++    const auto emit_load_memory_bases = [this] {
++        if (conf.page_table) {
++            if (conf.page_table_link) {
++                EmitLoadLinkedPointer(code, Xpagetable, offsetof(A32JitState, page_table_link));
++            } else {
++                code.MOV(Xpagetable, mcl::bit_cast<u64>(conf.page_table));
++            }
++        }
++        if (conf.fastmem_pointer) {
++            code.MOV(Xfastmem, *conf.fastmem_pointer);
++        } else if (ReadPageTableInRegister()) {
++            if (conf.read_page_table_link) {
++                EmitLoadLinkedPointer(code, Xreadpagetable, offsetof(A32JitState, read_page_table_link));
++            } else {
++                code.MOV(Xreadpagetable, mcl::bit_cast<u64>(conf.read_page_table));
++            }
++        }
++    };
++
+     prelude_info.run_code = code.xptr<PreludeInfo::RunCodeFuncType>();
+     {
+         ABI_PushRegisters(code, ABI_CALLEE_SAVE | (1 << 30), sizeof(StackLayout));
+@@ -236,12 +317,7 @@ void A32AddressSpace::EmitPrelude() {
+         code.MOV(X19, X0);
+         code.MOV(Xstate, X1);
+         code.MOV(Xhalt, X2);
+-        if (conf.page_table) {
+-            code.MOV(Xpagetable, mcl::bit_cast<u64>(conf.page_table));
+-        }
+-        if (conf.fastmem_pointer) {
+-            code.MOV(Xfastmem, *conf.fastmem_pointer);
+-        }
++        emit_load_memory_bases();
+ 
+         if (conf.HasOptimization(OptimizationFlag::ReturnStackBuffer)) {
+             code.LDR(Xscratch0, l_return_to_dispatcher);
+@@ -275,12 +351,7 @@ void A32AddressSpace::EmitPrelude() {
+         code.MOV(X19, X0);
+         code.MOV(Xstate, X1);
+         code.MOV(Xhalt, X2);
+-        if (conf.page_table) {
+-            code.MOV(Xpagetable, mcl::bit_cast<u64>(conf.page_table));
+-        }
+-        if (conf.fastmem_pointer) {
+-            code.MOV(Xfastmem, *conf.fastmem_pointer);
+-        }
++        emit_load_memory_bases();
+ 
+         if (conf.HasOptimization(OptimizationFlag::ReturnStackBuffer)) {
+             code.LDR(Xscratch0, l_return_to_dispatcher);
+@@ -323,21 +394,38 @@ void A32AddressSpace::EmitPrelude() {
+             code.B(LE, return_from_run_code);
+         }
+ 
+-        code.LDR(X0, l_this);
+-        code.MOV(X1, Xstate);
+-        code.LDR(Xscratch0, l_addr);
+-        code.BLR(Xscratch0);
+-        code.BR(X0);
+-
+-        const auto fn = [](A32AddressSpace& self, A32JitState& context) -> CodePtr {
+-            return self.GetOrEmit(context.GetLocationDescriptor());
+-        };
+-
+-        code.align(8);
+-        code.l(l_this);
+-        code.dx(mcl::bit_cast<u64>(this));
+-        code.l(l_addr);
+-        code.dx(mcl::bit_cast<u64>(Common::FptrCast(fn)));
++        if (lookup_block) {
++            if (conf.lookup_link) {
++                EmitLoadLinkedPointer(code, X0, offsetof(A32JitState, lookup_link));
++            } else {
++                code.LDR(X0, l_this);
++            }
++            code.LDR(Xscratch0, l_addr);
++            code.BLR(Xscratch0);
++            code.BR(X0);
++
++            code.align(8);
++            code.l(l_this);
++            code.dx(mcl::bit_cast<u64>(lookup_block_arg));
++            code.l(l_addr);
++            code.dx(mcl::bit_cast<u64>(lookup_block));
++        } else {
++            code.LDR(X0, l_this);
++            code.MOV(X1, Xstate);
++            code.LDR(Xscratch0, l_addr);
++            code.BLR(Xscratch0);
++            code.BR(X0);
++
++            const auto fn = [](A32AddressSpace& self, A32JitState& context) -> CodePtr {
++                return self.GetOrEmit(context.GetLocationDescriptor());
++            };
++
++            code.align(8);
++            code.l(l_this);
++            code.dx(mcl::bit_cast<u64>(this));
++            code.l(l_addr);
++            code.dx(mcl::bit_cast<u64>(Common::FptrCast(fn)));
++        }
+     }
+ 
+     prelude_info.return_from_run_code = code.xptr<void*>();
+@@ -422,6 +510,9 @@ EmitConfig A32AddressSpace::GetEmitConfig() {
+         .coprocessors = conf.coprocessors,
+ 
+         .very_verbose_debugging_output = conf.very_verbose_debugging_output,
++
++        .read_page_table_in_register = ReadPageTableInRegister(),
++        .link_coprocessor_user_arg = conf.coprocessor_user_arg_link != nullptr,
+     };
+ }
+ 
+diff --git a/src/dynarmic/backend/arm64/a32_address_space.h b/src/dynarmic/backend/arm64/a32_address_space.h
+index 3b9e9fb2..894515bb 100644
+--- a/src/dynarmic/backend/arm64/a32_address_space.h
++++ b/src/dynarmic/backend/arm64/a32_address_space.h
+@@ -15,11 +15,23 @@ struct EmittedBlockInfo;
+ 
+ class A32AddressSpace final : public AddressSpace {
+ public:
++    using LookupBlockFunction = CodePtr (*)(void* lookup_arg);
++
+     explicit A32AddressSpace(const A32::UserConfig& conf);
++    A32AddressSpace(const A32::UserConfig& conf, LookupBlockFunction lookup, void* lookup_arg);
+ 
+     IR::Block GenerateIR(IR::LocationDescriptor) const override;
+ 
+-    void InvalidateCacheRanges(const boost::icl::interval_set<u32>& ranges);
++    tsl::robin_set<IR::LocationDescriptor> InvalidateCacheRanges(const boost::icl::interval_set<u32>& ranges);
++
++    void ClearCacheAndRanges();
++
++    RetiredCodeStats RetireCodeRangeAndRanges(CodePtr begin, CodePtr end);
++
++    typename BlockRangeInformation<u32>::Stats GetRangeStats() const noexcept { return block_ranges.GetStats(); }
++
++    PreludeInfo::RunCodeFuncType RunCodeFunction() const { return prelude_info.run_code; }
++    PreludeInfo::RunCodeFuncType StepCodeFunction() const { return prelude_info.step_code; }
+ 
+ protected:
+     friend class A32Core;
+@@ -28,7 +40,11 @@ protected:
+     EmitConfig GetEmitConfig() override;
+     void RegisterNewBasicBlock(const IR::Block& block, const EmittedBlockInfo& block_info) override;
+ 
++    bool ReadPageTableInRegister() const;
++
+     const A32::UserConfig conf;
++    LookupBlockFunction lookup_block = nullptr;
++    void* lookup_block_arg = nullptr;
+     BlockRangeInformation<u32> block_ranges;
+ };
+ 
+diff --git a/src/dynarmic/backend/arm64/a32_interface.cpp b/src/dynarmic/backend/arm64/a32_interface.cpp
+index 37b7e884..f1dbf0fd 100644
+--- a/src/dynarmic/backend/arm64/a32_interface.cpp
++++ b/src/dynarmic/backend/arm64/a32_interface.cpp
+@@ -3,41 +3,878 @@
+  * SPDX-License-Identifier: 0BSD
+  */
+ 
++#include <algorithm>
++#include <atomic>
++#include <chrono>
++#include <condition_variable>
++#include <limits>
+ #include <memory>
+ #include <mutex>
++#include <optional>
++#include <stdexcept>
++#include <utility>
++#include <vector>
++
++#if defined(DYNARMIC_ENABLE_ILEMU_TEST_EMIT_FAILURE)
++#    include <cstdlib>
++#    include <cstring>
++#endif
+ 
+ #include <boost/icl/interval_set.hpp>
++#include <boost/variant/get.hpp>
+ #include <mcl/assert.hpp>
++#include <mcl/bit_cast.hpp>
+ #include <mcl/scope_exit.hpp>
+ #include <mcl/stdint.hpp>
+ 
+ #include "dynarmic/backend/arm64/a32_address_space.h"
+-#include "dynarmic/backend/arm64/a32_core.h"
+ #include "dynarmic/backend/arm64/a32_jitstate.h"
+ #include "dynarmic/common/atomic.h"
++#include "dynarmic/frontend/A32/a32_location_descriptor.h"
++#include "dynarmic/frontend/A32/translate/a32_translate.h"
+ #include "dynarmic/interface/A32/a32.h"
++#include "dynarmic/ir/basic_block.h"
++#include "dynarmic/ir/location_descriptor.h"
++#include "dynarmic/ir/opt/passes.h"
++#include "dynarmic/ir/terminal.h"
+ 
+ namespace Dynarmic::A32 {
+ 
+ using namespace Backend::Arm64;
+ 
++[[nodiscard]] static std::uint32_t InclusiveRangeEnd(
++    std::uint32_t start_address, std::size_t length) noexcept {
++    ASSERT(length != 0);
++    const auto offset = static_cast<std::uint64_t>(length - 1U);
++    const auto maximum = static_cast<std::uint64_t>(
++        std::numeric_limits<std::uint32_t>::max());
++    if (offset > maximum - start_address) {
++        return std::numeric_limits<std::uint32_t>::max();
++    }
++    return static_cast<std::uint32_t>(
++        static_cast<std::uint64_t>(start_address) + offset);
++}
++
++[[nodiscard]] static bool IsEmittableTerminal(const IR::Terminal& terminal) {
++    if (boost::get<IR::Term::Invalid>(&terminal) != nullptr) {
++        return false;
++    }
++    if (const auto* if_ = boost::get<IR::Term::If>(&terminal)) {
++        return IsEmittableTerminal(if_->then_) && IsEmittableTerminal(if_->else_);
++    }
++    if (const auto* check_bit = boost::get<IR::Term::CheckBit>(&terminal)) {
++        return IsEmittableTerminal(check_bit->then_) && IsEmittableTerminal(check_bit->else_);
++    }
++    if (const auto* check_halt = boost::get<IR::Term::CheckHalt>(&terminal)) {
++        return IsEmittableTerminal(check_halt->else_);
++    }
++    return true;
++}
++
++[[nodiscard]] static bool IsEmittableBlock(const IR::Block& block) {
++    return block.HasTerminal() && IsEmittableTerminal(block.GetTerminal());
++}
++
++#if defined(DYNARMIC_ENABLE_ILEMU_TEST_EMIT_FAILURE)
++enum class TestEmitFailure : std::uint8_t {
++    None,
++    Before,
++    After,
++    Commit,
++    Null,
++    Generation,
++};
++
++[[nodiscard]] static TestEmitFailure ReadTestEmitFailure() noexcept {
++    const char* const value = std::getenv("ILEMU_DYNARMIC_TEST_EMIT_FAILURE");
++    if (value == nullptr)
++        return TestEmitFailure::None;
++    if (std::strcmp(value, "before-once") == 0) {
++        return TestEmitFailure::Before;
++    }
++    if (std::strcmp(value, "after-once") == 0) {
++        return TestEmitFailure::After;
++    }
++    if (std::strcmp(value, "commit-once") == 0) {
++        return TestEmitFailure::Commit;
++    }
++    if (std::strcmp(value, "null-once") == 0) {
++        return TestEmitFailure::Null;
++    }
++    if (std::strcmp(value, "generation-once") == 0) {
++        return TestEmitFailure::Generation;
++    }
++    return TestEmitFailure::None;
++}
++#endif
++
++struct NativeCodeSlab::Impl {
++    using BlockDescriptor = NativeCodeSlab::BlockDescriptor;
++
++    enum class GenerationTransitionKind {
++        RecycleSegment,
++        ClearAll,
++    };
++
++    struct CodeSegment {
++        CodePtr begin{};
++        CodePtr end{};
++        std::uint64_t last_touch{};
++        std::size_t used_bytes{};
++        bool initialized{};
++    };
++
++    void initialize_code_segments() {
++        constexpr std::size_t minimum_segment_bytes = 16U * 1024U * 1024U;
++        constexpr std::size_t target_segment_bytes = 32U * 1024U * 1024U;
++        constexpr std::size_t maximum_segment_count = 48U;
++        constexpr std::size_t alignment = 4096U;
++        const CodePtr code_begin = address_space->CodeBegin();
++        const CodePtr code_end = code_begin + address_space->CodeCacheSize();
++        const auto prelude_bytes = static_cast<std::size_t>(address_space->CodeEndOfPrelude() - code_begin);
++        const CodePtr begin = code_begin + ((prelude_bytes + alignment - 1U) & ~(alignment - 1U));
++        const auto usable_bytes = static_cast<std::size_t>(code_end - begin);
++        const auto target_count = std::max<std::size_t>(1U,
++            (usable_bytes + target_segment_bytes - 1U) /
++                target_segment_bytes);
++        const auto maximum_by_minimum = std::max<std::size_t>(
++            1U, usable_bytes / minimum_segment_bytes);
++        const auto segment_count = std::min(
++            {maximum_segment_count, target_count, maximum_by_minimum});
++        auto segment_bytes = usable_bytes / segment_count;
++        segment_bytes &= ~(alignment - 1U);
++        if (segment_bytes == 0U) {
++            segment_bytes = usable_bytes;
++        }
++
++        code_segments.clear();
++        code_segments.reserve(segment_count);
++        code_segments_begin = begin;
++        regular_segment_bytes = segment_bytes;
++        for (std::size_t index = 0; index < segment_count; ++index) {
++            const CodePtr segment_begin = begin + segment_bytes * index;
++            const CodePtr segment_end = index + 1U == segment_count
++                                          ? begin + usable_bytes
++                                          : segment_begin + segment_bytes;
++            code_segments.push_back(
++                CodeSegment{segment_begin, segment_end, 0U, 0U, false});
++        }
++        reset_code_segments();
++    }
++
++    void reset_code_segments() {
++        for (auto& segment : code_segments) {
++            segment.last_touch = 0U;
++            segment.used_bytes = 0U;
++            segment.initialized = false;
++        }
++        current_segment = 0U;
++        segment_touch_clock = 1U;
++        live_allocated_code_bytes = 0U;
++        if (!code_segments.empty()) {
++            code_segments.front().initialized = true;
++            code_segments.front().last_touch = segment_touch_clock;
++            address_space->SetCurrentCodePtr(code_segments.front().begin);
++        }
++    }
++
++    [[nodiscard]] std::optional<std::size_t> code_segment_index(
++        const void* entrypoint) const {
++        const auto address = static_cast<CodePtr>(const_cast<void*>(entrypoint));
++        if (address == nullptr || code_segments.empty() ||
++            regular_segment_bytes == 0U || address < code_segments_begin ||
++            address >= code_segments.back().end) {
++            return std::nullopt;
++        }
++        const auto offset = static_cast<std::size_t>(
++            address - code_segments_begin);
++        return std::min(
++            offset / regular_segment_bytes, code_segments.size() - 1U);
++    }
++
++    void touch_code_segment(const void* entrypoint) const {
++        if (const auto index = code_segment_index(entrypoint)) {
++            code_segments[*index].last_touch = ++segment_touch_clock;
++        }
++    }
++
++    void update_active_segment_usage() {
++        if (code_segments.empty())
++            return;
++        auto& segment = code_segments[current_segment];
++        const CodePtr current = address_space->CurrentCodePtr();
++        const auto occupied = current <= segment.begin
++                                ? std::size_t{0U}
++                            : current >= segment.end
++                                ? static_cast<std::size_t>(
++                                      segment.end - segment.begin)
++                                : static_cast<std::size_t>(
++                                      current - segment.begin);
++        if (occupied > segment.used_bytes) {
++            live_allocated_code_bytes += occupied - segment.used_bytes;
++            segment.used_bytes = occupied;
++        }
++    }
++
++    [[nodiscard]] std::size_t active_segment_space_remaining() const {
++        const CodePtr current = address_space->CurrentCodePtr();
++        const CodePtr end = code_segments.empty()
++                              ? address_space->CodeBegin() + address_space->CodeCacheSize()
++                              : code_segments[current_segment].end;
++        return current >= end ? 0U : static_cast<std::size_t>(end - current);
++    }
++
++    [[nodiscard]] std::size_t select_recycle_segment() const {
++        if (code_segments.size() <= 1U) {
++            return 0U;
++        }
++        for (std::size_t offset = 1U; offset <= code_segments.size();
++             ++offset) {
++            const auto candidate = (current_segment + offset) % code_segments.size();
++            if (!code_segments[candidate].initialized) {
++                return candidate;
++            }
++        }
++
++        std::size_t victim = current_segment == 0U ? std::size_t{1U} : std::size_t{0U};
++        for (std::size_t index = 0; index < code_segments.size(); ++index) {
++            if (index == current_segment) {
++                continue;
++            }
++            if (code_segments[index].last_touch < code_segments[victim].last_touch) {
++                victim = index;
++            }
++        }
++        return victim;
++    }
++
++    [[nodiscard]] AddressSpace::RetiredCodeStats recycle_code_segment() {
++        const auto victim = select_recycle_segment();
++        auto& segment = code_segments[victim];
++        const auto retired = address_space->RetireCodeRangeAndRanges(segment.begin, segment.end);
++        live_allocated_code_bytes =
++            segment.used_bytes > live_allocated_code_bytes
++                ? 0U
++                : live_allocated_code_bytes - segment.used_bytes;
++        recycled_descriptors += retired.descriptors;
++        recycled_code_bytes += retired.code_bytes;
++        ++segment_recycles;
++        segment.initialized = true;
++        segment.last_touch = ++segment_touch_clock;
++        segment.used_bytes = 0U;
++        current_segment = victim;
++        address_space->SetCurrentCodePtr(segment.begin);
++        return retired;
++    }
++
++    void initialize(A32::UserConfig config, A32::Jit*, void*, const void* (*lookup)(void*), void* lookup_arg, bool shared) {
++        std::lock_guard lock{mutex};
++        if (initialized) {
++            if (shared_mode != shared || config.code_cache_size != code_cache_size || config.arch_version != conf->arch_version || config.optimizations != conf->optimizations || config.unsafe_optimizations != conf->unsafe_optimizations || config.define_unpredictable_behaviour != conf->define_unpredictable_behaviour || config.hook_hint_instructions != conf->hook_hint_instructions || config.check_halt_on_memory_access != conf->check_halt_on_memory_access || config.enable_cycle_counting != conf->enable_cycle_counting || config.always_little_endian != conf->always_little_endian) {
++                throw std::invalid_argument{
++                    "native code slab configuration mismatch"};
++            }
++            return;
++        }
++
++        if (shared) {
++            if (config.callbacks_link == nullptr || config.lookup_link == nullptr || config.runtime_config_link == nullptr || config.coprocessor_user_arg_link == nullptr || config.fastmem_pointer.has_value() || (config.page_table != nullptr && config.page_table_link == nullptr) || (config.read_page_table != nullptr && config.read_page_table_link == nullptr)) {
++                throw std::invalid_argument{
++                    "shared native code slab requires linked runtime state"};
++            }
++        }
++
++        config.native_code_slab = nullptr;
++        config.fast_dispatch_table_storage = nullptr;
++
++        address_space = std::make_unique<A32AddressSpace>(
++            config, reinterpret_cast<A32AddressSpace::LookupBlockFunction>(lookup), lookup_arg);
++        conf = std::move(config);
++        code_cache_size = conf->code_cache_size;
++        shared_mode = shared;
++        initialize_code_segments();
++#if defined(DYNARMIC_ENABLE_ILEMU_TEST_EMIT_FAILURE)
++        test_emit_failure = ReadTestEmitFailure();
++#endif
++        initialized = true;
++    }
++
++    [[nodiscard]] std::uint64_t generation() const {
++        std::unique_lock lock{mutex};
++        generation_changed.wait(lock, [this] {
++            return !clear_pending && pending_ranges.empty();
++        });
++        return current_generation;
++    }
++
++    [[nodiscard]] std::uint64_t generation_snapshot() const noexcept {
++        return published_generation.load(std::memory_order_acquire);
++    }
++
++    [[nodiscard]] bool find_block(std::uint64_t location_descriptor,
++                                  std::uint64_t expected_generation,
++                                  BlockDescriptor& result) const {
++        std::lock_guard lock{mutex};
++        if (!initialized || clear_pending || !pending_ranges.empty() || expected_generation != current_generation) {
++            return false;
++        }
++        const CodePtr entrypoint = address_space->Get(IR::LocationDescriptor{location_descriptor});
++        if (entrypoint == nullptr) {
++            return false;
++        }
++        touch_code_segment(entrypoint);
++        result = BlockDescriptor{
++            entrypoint, address_space->GetBlockSize(entrypoint), current_generation};
++        return true;
++    }
++
++    [[nodiscard]] bool relinks_are_quiescent(bool caller_executing) const {
++        if (!shared_mode) {
++            return true;
++        }
++        return active_executions == (caller_executing ? 1U : 0U);
++    }
++
++    [[nodiscard]] BlockDescriptor emit(
++        IR::Block& block, std::uint64_t expected_generation, bool caller_executing) {
++        std::lock_guard lock{mutex};
++#if defined(DYNARMIC_ENABLE_ILEMU_TEST_EMIT_FAILURE)
++        if (test_emit_failure == TestEmitFailure::Generation && !test_emit_failure_injected) {
++            test_emit_failure_injected = true;
++            request_generation_transition(
++                GenerationTransitionKind::ClearAll, false);
++        }
++#endif
++        if (clear_pending || !pending_ranges.empty() || expected_generation != current_generation) {
++            return {};
++        }
++        if (const CodePtr existing = address_space->Get(block.Location())) {
++            touch_code_segment(existing);
++            return BlockDescriptor{
++                existing, address_space->GetBlockSize(existing), current_generation,
++                false};
++        }
++#if defined(DYNARMIC_ENABLE_ILEMU_TEST_EMIT_FAILURE)
++        if (test_emit_failure == TestEmitFailure::Before && !test_emit_failure_injected) {
++            test_emit_failure_injected = true;
++            throw std::runtime_error{"injected portable emit failure before code"};
++        }
++        if (test_emit_failure == TestEmitFailure::Null && !test_emit_failure_injected) {
++            test_emit_failure_injected = true;
++            return {};
++        }
++#endif
++        const bool quiescent = relinks_are_quiescent(caller_executing);
++        address_space->SetDeferBlockRelinks(!quiescent);
++        const auto result = address_space->EmitBlock(block);
++        if (quiescent) {
++            address_space->PublishPendingBlockRelinks();
++        }
++#if defined(DYNARMIC_ENABLE_ILEMU_TEST_EMIT_FAILURE)
++        if (test_emit_failure == TestEmitFailure::After && !test_emit_failure_injected) {
++            test_emit_failure_injected = true;
++            throw std::runtime_error{"injected portable emit failure after code"};
++        }
++#endif
++        if (result.entry_point != nullptr) {
++            update_active_segment_usage();
++            touch_code_segment(result.entry_point);
++        }
++        return BlockDescriptor{
++            result.entry_point, result.size, current_generation,
++            result.entry_point != nullptr};
++    }
++
++    [[nodiscard]] std::size_t space_remaining() const {
++        std::lock_guard lock{mutex};
++        return active_segment_space_remaining();
++    }
++
++    void ensure_memory_committed(std::size_t) {
++        std::lock_guard lock{mutex};
++#if defined(DYNARMIC_ENABLE_ILEMU_TEST_EMIT_FAILURE)
++        if (test_emit_failure == TestEmitFailure::Commit && !test_emit_failure_injected) {
++            test_emit_failure_injected = true;
++            throw std::runtime_error{"injected portable code commit failure"};
++        }
++#endif
++    }
++
++    void register_executor(void*, void* jit_state) {
++        if (jit_state == nullptr)
++            return;
++        std::lock_guard lock{mutex};
++        auto* const state = static_cast<A32JitState*>(jit_state);
++        const auto existing = std::find_if(
++            executors.begin(), executors.end(),
++            [state](const Executor& executor) {
++                return executor.state == state;
++            });
++        if (existing == executors.end()) {
++            executors.push_back(Executor{state});
++        }
++    }
++
++    void unregister_executor(void*, void* jit_state) {
++        if (jit_state == nullptr)
++            return;
++        std::lock_guard lock{mutex};
++        auto* const state = static_cast<A32JitState*>(jit_state);
++        const auto existing = std::find_if(
++            executors.begin(), executors.end(),
++            [state](const Executor& executor) {
++                return executor.state == state;
++            });
++        if (existing == executors.end())
++            return;
++        if (existing->active) {
++            throw std::logic_error{
++                "cannot unregister an active native code slab executor"};
++        }
++        executors.erase(existing);
++    }
++
++    void finish_pending_direct_link_publication() {
++        if (active_executions != 0) {
++            return;
++        }
++        address_space->PublishPendingBlockRelinks();
++    }
++
++    void publish_generation() {
++        current_generation = pending_generation;
++        published_generation.store(current_generation,
++                                   std::memory_order_release);
++    }
++
++    void finish_pending_invalidation() {
++        if (active_executions != 0)
++            return;
++        if (clear_pending) {
++            if (pending_transition == GenerationTransitionKind::ClearAll) {
++                address_space->ClearCacheAndRanges();
++                reset_code_segments();
++                ++full_generation_clears;
++                publish_generation();
++            } else {
++                if (!pending_ranges.empty()) {
++                    static_cast<void>(address_space->InvalidateCacheRanges(pending_ranges));
++                }
++                const auto retired = recycle_code_segment();
++                if (retired.descriptors != 0U || retired.code_bytes != 0U) {
++                    publish_generation();
++                }
++            }
++            pending_ranges.clear();
++            clear_pending = false;
++            generation_changed.notify_all();
++            return;
++        }
++        if (pending_ranges.empty())
++            return;
++
++        static_cast<void>(address_space->InvalidateCacheRanges(pending_ranges));
++        pending_ranges.clear();
++        generation_changed.notify_all();
++    }
++
++    void signal_active_executors() {
++        for (const auto& executor : executors) {
++            if (executor.active) {
++                Atomic::Or(&executor.state->halt_reason,
++                           static_cast<u32>(HaltReason::CacheInvalidation));
++            }
++        }
++        Atomic::Barrier();
++    }
++
++    void request_generation_transition(GenerationTransitionKind kind,
++                                       bool finish = true) {
++        if (!clear_pending) {
++            clear_pending = true;
++            pending_generation = current_generation + 1;
++            pending_transition = kind;
++            if (kind == GenerationTransitionKind::ClearAll) {
++                pending_ranges.clear();
++            }
++        } else if (kind == GenerationTransitionKind::ClearAll) {
++            pending_transition = kind;
++            pending_ranges.clear();
++        }
++        signal_active_executors();
++        if (finish)
++            finish_pending_invalidation();
++    }
++
++    void clear_cache() {
++        std::lock_guard lock{mutex};
++        if (!initialized)
++            return;
++        request_generation_transition(GenerationTransitionKind::ClearAll);
++    }
++
++    void recycle_cache() {
++        std::lock_guard lock{mutex};
++        if (!initialized)
++            return;
++        request_generation_transition(
++            GenerationTransitionKind::RecycleSegment);
++    }
++
++    void request_range_transition(std::uint32_t start_address,
++                                  std::size_t length,
++                                  bool finish = true) {
++        if (length == 0 || (clear_pending && pending_transition == GenerationTransitionKind::ClearAll)) {
++            return;
++        }
++        const auto last_address = InclusiveRangeEnd(start_address, length);
++        pending_ranges.add(boost::icl::discrete_interval<u32>::closed(
++            start_address, last_address));
++        signal_active_executors();
++        if (finish)
++            finish_pending_invalidation();
++    }
++
++    void invalidate_cache_range(std::uint32_t start_address,
++                                std::size_t length) {
++        std::lock_guard lock{mutex};
++        if (!initialized)
++            return;
++        request_range_transition(start_address, length);
++    }
++
++    void request_cache_clear() {
++        std::lock_guard lock{mutex};
++        if (!initialized)
++            return;
++        request_generation_transition(
++            GenerationTransitionKind::ClearAll, false);
++    }
++
++    void request_cache_range(std::uint32_t start_address,
++                             std::size_t length) {
++        std::lock_guard lock{mutex};
++        if (!initialized)
++            return;
++        request_range_transition(start_address, length, false);
++    }
++
++    void service_pending_invalidation() {
++        std::lock_guard lock{mutex};
++        if (!initialized)
++            return;
++        finish_pending_invalidation();
++        finish_pending_direct_link_publication();
++    }
++
++    [[nodiscard]] HaltReason run_code(void* jit_state,
++                                      const void* code_ptr) const {
++        {
++            std::lock_guard lock{mutex};
++            touch_code_segment(code_ptr);
++        }
++        auto* const state = static_cast<A32JitState*>(jit_state);
++        return address_space->RunCodeFunction()(
++            static_cast<CodePtr>(const_cast<void*>(code_ptr)), state, &state->halt_reason);
++    }
++
++    [[nodiscard]] HaltReason step_code(void* jit_state,
++                                       const void* code_ptr) const {
++        {
++            std::lock_guard lock{mutex};
++            touch_code_segment(code_ptr);
++        }
++        auto* const state = static_cast<A32JitState*>(jit_state);
++        return address_space->StepCodeFunction()(
++            static_cast<CodePtr>(const_cast<void*>(code_ptr)), state, &state->halt_reason);
++    }
++
++    [[nodiscard]] const void* return_from_run_code() const {
++        return address_space->ReturnFromRunCodeAddress();
++    }
++
++    [[nodiscard]] std::size_t code_cache_used() const {
++        std::lock_guard lock{mutex};
++        return live_allocated_code_bytes;
++    }
++
++    [[nodiscard]] NativeCodeSlab::CacheStats GetCacheStats() const {
++        std::lock_guard lock{mutex};
++        if (!initialized) {
++            return {};
++        }
++        const auto stats = address_space->GetRangeStats();
++        return NativeCodeSlab::CacheStats{
++            stats.range_count,
++            stats.descriptor_count,
++            stats.invalidated_descriptors,
++            address_space->RetiredCodeBytes(),
++            segment_recycles,
++            recycled_descriptors,
++            recycled_code_bytes,
++            full_generation_clears,
++        };
++    }
++
++    void dump_disassembly() const {
++        std::lock_guard lock{mutex};
++        address_space->DumpDisassembly();
++    }
++
++    [[nodiscard]] std::vector<std::string> disassemble() const {
++        std::lock_guard lock{mutex};
++        return address_space->Disassemble();
++    }
++
++    [[nodiscard]] bool has_host_feature_sha() const {
++        return true;
++    }
++
++    [[nodiscard]] std::uint64_t enter_execution(void* jit_state) {
++        std::unique_lock lock{mutex};
++        generation_changed.wait(lock, [this] {
++            return !clear_pending && pending_ranges.empty();
++        });
++        finish_pending_direct_link_publication();
++        auto* const state = static_cast<A32JitState*>(jit_state);
++        const auto executor = std::find_if(
++            executors.begin(), executors.end(),
++            [state](const Executor& candidate) {
++                return candidate.state == state;
++            });
++        if (executor == executors.end() || executor->active) {
++            throw std::logic_error{
++                "native code slab executor registration mismatch"};
++        }
++        executor->active = true;
++        executor->generation = current_generation;
++        ++active_executions;
++        return current_generation;
++    }
++
++    void leave_execution(void* jit_state, std::uint64_t generation) {
++        std::lock_guard lock{mutex};
++        auto* const state = static_cast<A32JitState*>(jit_state);
++        const auto executor = std::find_if(
++            executors.begin(), executors.end(),
++            [state](const Executor& candidate) {
++                return candidate.state == state;
++            });
++        if (executor == executors.end() || !executor->active || executor->generation != generation || generation != current_generation || active_executions == 0) {
++            throw std::logic_error{"native code slab execution underflow"};
++        }
++        executor->active = false;
++        --active_executions;
++        finish_pending_invalidation();
++        finish_pending_direct_link_publication();
++    }
++
++    struct Executor {
++        A32JitState* state{};
++        std::uint64_t generation{};
++        bool active{};
++    };
++
++    mutable std::recursive_mutex mutex;
++    std::optional<A32::UserConfig> conf;
++    std::unique_ptr<A32AddressSpace> address_space;
++    std::vector<Executor> executors;
++    mutable std::vector<CodeSegment> code_segments;
++    std::size_t code_cache_size{};
++    CodePtr code_segments_begin{};
++    std::size_t regular_segment_bytes{};
++    std::size_t current_segment{};
++    std::size_t live_allocated_code_bytes{};
++    std::size_t active_executions{};
++    mutable std::uint64_t segment_touch_clock{};
++    std::uint64_t segment_recycles{};
++    std::uint64_t recycled_descriptors{};
++    std::uint64_t recycled_code_bytes{};
++    std::uint64_t full_generation_clears{};
++    std::uint64_t current_generation{1};
++    std::atomic<std::uint64_t> published_generation{1};
++    std::uint64_t pending_generation{1};
++    boost::icl::interval_set<u32> pending_ranges;
++    bool initialized{};
++    bool shared_mode{};
++    bool clear_pending{};
++    GenerationTransitionKind pending_transition{
++        GenerationTransitionKind::ClearAll};
++#if defined(DYNARMIC_ENABLE_ILEMU_TEST_EMIT_FAILURE)
++    TestEmitFailure test_emit_failure{TestEmitFailure::None};
++    bool test_emit_failure_injected{};
++#endif
++    mutable std::condition_variable_any generation_changed;
++};
++
++NativeCodeSlab::NativeCodeSlab() : impl{std::make_unique<Impl>()} {}
++
++NativeCodeSlab::~NativeCodeSlab() = default;
++
++void NativeCodeSlab::initialize(
++    UserConfig conf, Jit* jit_interface, void* jit_state, const void* (*lookup)(void*), void* lookup_arg, bool shared_mode) {
++    impl->initialize(std::move(conf), jit_interface, jit_state, lookup,
++                     lookup_arg, shared_mode);
++}
++
++std::uint64_t NativeCodeSlab::generation() const {
++    return impl->generation();
++}
++
++std::uint64_t NativeCodeSlab::generation_snapshot() const noexcept {
++    return impl->generation_snapshot();
++}
++
++bool NativeCodeSlab::find_block(
++    std::uint64_t location_descriptor, std::uint64_t expected_generation, BlockDescriptor& result) const {
++    return impl->find_block(
++        location_descriptor, expected_generation, result);
++}
++
++NativeCodeSlab::BlockDescriptor NativeCodeSlab::emit(
++    IR::Block& block, std::uint64_t expected_generation) {
++    return impl->emit(block, expected_generation, false);
++}
++
++std::size_t NativeCodeSlab::space_remaining() const {
++    return impl->space_remaining();
++}
++
++void NativeCodeSlab::ensure_memory_committed(std::size_t codesize) {
++    impl->ensure_memory_committed(codesize);
++}
++
++void NativeCodeSlab::register_executor(void* storage, void* jit_state) {
++    impl->register_executor(storage, jit_state);
++}
++
++void NativeCodeSlab::unregister_executor(void* storage, void* jit_state) {
++    impl->unregister_executor(storage, jit_state);
++}
++
++void NativeCodeSlab::clear_cache() {
++    impl->clear_cache();
++}
++
++void NativeCodeSlab::recycle_cache() {
++    impl->recycle_cache();
++}
++
++void NativeCodeSlab::invalidate_cache_range(
++    std::uint32_t start_address, std::size_t length) {
++    impl->invalidate_cache_range(start_address, length);
++}
++
++void NativeCodeSlab::request_cache_clear() {
++    impl->request_cache_clear();
++}
++
++void NativeCodeSlab::request_cache_range(
++    std::uint32_t start_address, std::size_t length) {
++    impl->request_cache_range(start_address, length);
++}
++
++void NativeCodeSlab::service_pending_invalidation() {
++    impl->service_pending_invalidation();
++}
++
++HaltReason NativeCodeSlab::run_code(void* jit_state,
++                                    const void* code_ptr) const {
++    return impl->run_code(jit_state, code_ptr);
++}
++
++HaltReason NativeCodeSlab::step_code(void* jit_state,
++                                     const void* code_ptr) const {
++    return impl->step_code(jit_state, code_ptr);
++}
++
++const void* NativeCodeSlab::return_from_run_code() const {
++    return impl->return_from_run_code();
++}
++
++std::size_t NativeCodeSlab::code_cache_used() const {
++    return impl->code_cache_used();
++}
++
++NativeCodeSlab::CacheStats NativeCodeSlab::GetCacheStats() const {
++    return impl->GetCacheStats();
++}
++
++void NativeCodeSlab::dump_disassembly() const {
++    impl->dump_disassembly();
++}
++
++std::vector<std::string> NativeCodeSlab::disassemble() const {
++    return impl->disassemble();
++}
++
++bool NativeCodeSlab::has_host_feature_sha() const {
++    return impl->has_host_feature_sha();
++}
++
++std::uint64_t NativeCodeSlab::enter_execution(void* jit_state) {
++    return impl->enter_execution(jit_state);
++}
++
++void NativeCodeSlab::leave_execution(
++    void* jit_state, std::uint64_t generation) {
++    impl->leave_execution(jit_state, generation);
++}
++
+ struct Jit::Impl final {
+-    Impl(Jit* jit_interface, A32::UserConfig conf)
+-            : jit_interface(jit_interface)
+-            , conf(conf)
+-            , current_address_space(conf)
+-            , core(conf) {}
++    Impl(Jit* jit, A32::UserConfig conf)
++            : conf(std::move(conf))
++            , jit_interface(jit) {
++        if (this->conf.native_code_slab == nullptr) {
++            owned_native_code_slab = std::make_unique<NativeCodeSlab>();
++            native_code_slab = owned_native_code_slab.get();
++            native_code_slab_shared = false;
++        } else {
++            native_code_slab = this->conf.native_code_slab;
++            native_code_slab_shared = true;
++        }
++        if (this->conf.lookup_link) {
++            this->conf.lookup_link->store(
++                reinterpret_cast<u64>(this),
++                std::memory_order_release);
++        }
++        if (this->conf.runtime_config_link) {
++            this->conf.runtime_config_link->store(
++                reinterpret_cast<u64>(&this->conf),
++                std::memory_order_release);
++        }
++        BindExecutionContext();
++        native_code_slab->initialize(
++            this->conf, jit, &jit_state, &GetCurrentBlockThunk, this,
++            native_code_slab_shared);
++        native_code_slab->register_executor(&jit_state, &jit_state);
++    }
++
++    ~Impl() {
++        if (native_code_slab != nullptr) {
++            native_code_slab->unregister_executor(&jit_state, &jit_state);
++        }
++    }
+ 
+     HaltReason Run() {
+         ASSERT(!jit_interface->is_executing);
+-        PerformRequestedCacheInvalidation(static_cast<HaltReason>(Atomic::Load(&halt_reason)));
++        PerformRequestedCacheInvalidation(static_cast<HaltReason>(Atomic::Load(&jit_state.halt_reason)));
+ 
++        const auto execution_generation = native_code_slab->enter_execution(&jit_state);
++        active_generation = execution_generation;
+         jit_interface->is_executing = true;
+         SCOPE_EXIT {
+             jit_interface->is_executing = false;
++            active_generation = 0;
++            native_code_slab->leave_execution(
++                &jit_state, execution_generation);
+         };
+ 
+-        HaltReason hr = core.Run(current_address_space, current_state, &halt_reason);
++        ++jit_state.rsb_misses;
++        const CodePtr current_codeptr = GetCurrentBlock(execution_generation);
++
++        const HaltReason hr = native_code_slab->run_code(
++            &jit_state, current_codeptr);
+ 
+         PerformRequestedCacheInvalidation(hr);
+ 
+@@ -46,135 +883,460 @@ struct Jit::Impl final {
+ 
+     HaltReason Step() {
+         ASSERT(!jit_interface->is_executing);
+-        PerformRequestedCacheInvalidation(static_cast<HaltReason>(Atomic::Load(&halt_reason)));
++        PerformRequestedCacheInvalidation(static_cast<HaltReason>(Atomic::Load(&jit_state.halt_reason)));
+ 
++        const auto execution_generation = native_code_slab->enter_execution(&jit_state);
++        active_generation = execution_generation;
+         jit_interface->is_executing = true;
+         SCOPE_EXIT {
+             jit_interface->is_executing = false;
++            active_generation = 0;
++            native_code_slab->leave_execution(
++                &jit_state, execution_generation);
+         };
+ 
+-        HaltReason hr = core.Step(current_address_space, current_state, &halt_reason);
++        const HaltReason hr = native_code_slab->step_code(
++            &jit_state, GetCurrentSingleStep(execution_generation));
+ 
+         PerformRequestedCacheInvalidation(hr);
+ 
+         return hr;
+     }
+ 
+-    void SetHostExecutionBlockBudget(std::uint32_t) noexcept {}
++    void SetHostExecutionBlockBudget(u32 block_budget) noexcept {
++        jit_state.host_execution_block_budget = block_budget;
++        jit_state.host_execution_block_budget_initial = block_budget;
++        jit_state.host_execution_budget_exhausted = 0;
++    }
+ 
+     HostExecutionBudgetResult GetHostExecutionBudgetResult() const noexcept {
+-        return HostExecutionBudgetResult{};
++        const auto initial = jit_state.host_execution_block_budget_initial;
++        const auto remaining = std::min(
++            initial, jit_state.host_execution_block_budget);
++        return HostExecutionBudgetResult{
++            initial - remaining,
++            jit_state.host_execution_budget_exhausted != 0,
++            true,
++        };
++    }
++
++    bool Precompile(u64 location_descriptor) {
++        ASSERT(!jit_interface->is_executing);
++        PerformRequestedCacheInvalidation(static_cast<HaltReason>(Atomic::Load(&jit_state.halt_reason)));
++        const auto generation = native_code_slab->generation();
++        return GetBasicBlock(
++                   IR::LocationDescriptor{location_descriptor}, generation)
++            .newly_emitted;
++    }
++
++    void GeneratePortableIR(u64 location_descriptor) {
++        ASSERT(!jit_interface->is_executing);
++        PerformRequestedCacheInvalidation(static_cast<HaltReason>(Atomic::Load(&jit_state.halt_reason)));
++        const IR::LocationDescriptor descriptor{location_descriptor};
++        const auto translation_started = std::chrono::steady_clock::now();
++        auto ir_block = TranslateBlock(descriptor);
++        const auto translation_nanoseconds = static_cast<u64>(
++            std::chrono::duration_cast<std::chrono::nanoseconds>(
++                std::chrono::steady_clock::now() - translation_started)
++                .count());
++        conf.callbacks->PortableIRGenerated(
++            descriptor.Value(), translation_nanoseconds, ir_block);
++    }
++
++    PortableIREmitOutcome PrecompileWithResult(IR::Block block) {
++        ASSERT(!jit_interface->is_executing);
++        PerformRequestedCacheInvalidation(static_cast<HaltReason>(Atomic::Load(&jit_state.halt_reason)));
++        if (!IsEmittableBlock(block)) {
++            abandon_portable_emit();
++            return PortableIREmitOutcome::EmitFailed;
++        }
++        NativeCodeSlab::BlockDescriptor existing;
++        auto generation = native_code_slab->generation();
++        if (native_code_slab->find_block(
++                block.Location().Value(), generation, existing)) {
++            return PortableIREmitOutcome::AlreadyPresent;
++        }
++
++        if (native_code_slab->space_remaining() < MINIMUM_REMAINING_CODESIZE) {
++            recycle_native_slab = true;
++            invalidate_entire_cache = true;
++            PerformRequestedCacheInvalidation(HaltReason::CacheInvalidation);
++            generation = native_code_slab->generation();
++        }
++        NativeCodeSlab::BlockDescriptor emitted;
++        try {
++            native_code_slab->ensure_memory_committed(
++                MINIMUM_REMAINING_CODESIZE);
++            emitted = EmitToSlab(block, generation);
++        } catch (...) {
++            abandon_portable_emit();
++            return PortableIREmitOutcome::EmitFailed;
++        }
++        if (emitted.entrypoint == nullptr) {
++            abandon_portable_emit();
++            return PortableIREmitOutcome::EmitFailed;
++        }
++        return emitted.newly_emitted
++                 ? PortableIREmitOutcome::NativeEmitted
++                 : PortableIREmitOutcome::AlreadyPresent;
++    }
++
++    bool Precompile(IR::Block block) {
++        return PrecompileWithResult(std::move(block)) == PortableIREmitOutcome::NativeEmitted;
++    }
++
++    void SetPortableIRDemandProvider(
++        PortableIRDemandProvider provider, void* user_arg) noexcept {
++        portable_ir_demand_provider = provider;
++        portable_ir_demand_provider_arg = user_arg;
++    }
++
++    void SetPortableIREmitCompletion(
++        PortableIREmitCompletion completion, void* user_arg) noexcept {
++        portable_ir_emit_completion = completion;
++        portable_ir_emit_completion_arg = user_arg;
++    }
++
++    void request_entire_cache_invalidation(bool recycle_segment) noexcept {
++        if (invalidate_entire_cache) {
++            recycle_native_slab = recycle_native_slab && recycle_segment;
++        } else {
++            recycle_native_slab = recycle_segment;
++        }
++        invalidate_entire_cache = true;
++        HaltExecution(HaltReason::CacheInvalidation);
++        if (!jit_interface->is_executing) {
++            try {
++                PerformRequestedCacheInvalidation(HaltReason::CacheInvalidation);
++            } catch (...) {
++                invalidate_entire_cache = true;
++                HaltExecution(HaltReason::CacheInvalidation);
++            }
++        }
++    }
++
++    void abandon_portable_emit() noexcept {
++        request_entire_cache_invalidation(false);
++    }
++
++    void request_capacity_recycle() noexcept {
++        request_entire_cache_invalidation(true);
+     }
+ 
+     void ClearCache() {
+         std::unique_lock lock{invalidation_mutex};
++        recycle_native_slab = false;
+         invalidate_entire_cache = true;
+         HaltExecution(HaltReason::CacheInvalidation);
+     }
+ 
+     void InvalidateCacheRange(std::uint32_t start_address, std::size_t length) {
+         std::unique_lock lock{invalidation_mutex};
+-        invalid_cache_ranges.add(boost::icl::discrete_interval<u32>::closed(start_address, static_cast<u32>(start_address + length - 1)));
++        if (length == 0)
++            return;
++        invalid_cache_ranges.add(boost::icl::discrete_interval<u32>::closed(
++            start_address, InclusiveRangeEnd(start_address, length)));
+         HaltExecution(HaltReason::CacheInvalidation);
+     }
+ 
+     void Reset() {
+-        current_state = {};
++        ASSERT(!jit_interface->is_executing);
++        jit_state = {};
++        BindExecutionContext();
+     }
+ 
+     void HaltExecution(HaltReason hr) {
+-        Atomic::Or(&halt_reason, static_cast<u32>(hr));
++        Atomic::Or(&jit_state.halt_reason, static_cast<u32>(hr));
+         Atomic::Barrier();
+     }
+ 
+     void ClearHalt(HaltReason hr) {
+-        Atomic::And(&halt_reason, ~static_cast<u32>(hr));
++        Atomic::And(&jit_state.halt_reason, ~static_cast<u32>(hr));
+         Atomic::Barrier();
+     }
+ 
+-    std::array<std::uint32_t, 16>& Regs() {
+-        return current_state.regs;
++    void ClearExclusiveState() {
++        jit_state.exclusive_state = 0;
+     }
+ 
+-    const std::array<std::uint32_t, 16>& Regs() const {
+-        return current_state.regs;
++    std::array<u32, 16>& Regs() {
++        return jit_state.regs;
+     }
+ 
+-    std::array<std::uint32_t, 64>& ExtRegs() {
+-        return current_state.ext_regs;
++    const std::array<u32, 16>& Regs() const {
++        return jit_state.regs;
+     }
+ 
+-    const std::array<std::uint32_t, 64>& ExtRegs() const {
+-        return current_state.ext_regs;
++    std::array<u32, 64>& ExtRegs() {
++        return jit_state.ext_regs;
+     }
+ 
+-    std::uint32_t Cpsr() const {
+-        return current_state.Cpsr();
++    const std::array<u32, 64>& ExtRegs() const {
++        return jit_state.ext_regs;
+     }
+ 
+-    void SetCpsr(std::uint32_t value) {
+-        current_state.SetCpsr(value);
++    u32 Cpsr() const {
++        return jit_state.Cpsr();
+     }
+ 
+-    std::uint32_t Fpscr() const {
+-        return current_state.Fpscr();
++    void SetCpsr(u32 value) {
++        jit_state.SetCpsr(value);
+     }
+ 
+-    void SetFpscr(std::uint32_t value) {
+-        current_state.SetFpscr(value);
++    u32 Fpscr() const {
++        return jit_state.Fpscr();
+     }
+ 
+-    void ClearExclusiveState() {
+-        current_state.exclusive_state = false;
++    void SetFpscr(u32 value) {
++        jit_state.SetFpscr(value);
+     }
+ 
+     void DumpDisassembly() const {
+-        ASSERT_FALSE("Unimplemented");
++        native_code_slab->dump_disassembly();
+     }
+ 
+     size_t CodeCacheUsed() const {
+-        return current_address_space.GetCodeCacheUsed();
++        return native_code_slab->code_cache_used();
++    }
++
++    DispatchCounters GetDispatchCounters() const {
++        return DispatchCounters{
++            0,
++            0,
++            jit_state.rsb_hits,
++            jit_state.rsb_misses,
++            0,
++            0,
++            0,
++            0,
++        };
++    }
++
++    std::vector<std::string> Disassemble() const {
++        return native_code_slab->disassemble();
+     }
+ 
+ private:
++    static constexpr size_t MINIMUM_REMAINING_CODESIZE = 1 * 1024 * 1024;
++
++    void BindExecutionContext() {
++        jit_state.callbacks_link = conf.callbacks_link;
++        jit_state.lookup_link = conf.lookup_link;
++        jit_state.runtime_config_link = conf.runtime_config_link;
++        jit_state.page_table_link = conf.page_table_link;
++        jit_state.read_page_table_link = conf.read_page_table_link;
++        jit_state.coprocessor_user_arg_link = conf.coprocessor_user_arg_link;
++    }
++
++    static const void* GetCurrentBlockThunk(void* this_voidptr) {
++        Jit::Impl& this_ = *static_cast<Jit::Impl*>(this_voidptr);
++        return this_.GetCurrentBlock(this_.active_generation);
++    }
++
++    IR::LocationDescriptor GetCurrentLocation() const {
++        return jit_state.GetLocationDescriptor();
++    }
++
++    CodePtr GetCurrentBlock(std::uint64_t generation) {
++        return static_cast<CodePtr>(const_cast<void*>(GetBasicBlock(GetCurrentLocation(), generation).entrypoint));
++    }
++
++    CodePtr GetCurrentSingleStep(std::uint64_t generation) {
++        return static_cast<CodePtr>(const_cast<void*>(GetBasicBlock(
++                                                          A32::LocationDescriptor{GetCurrentLocation()}
++                                                              .SetSingleStepping(true),
++                                                          generation)
++                                                          .entrypoint));
++    }
++
++    NativeCodeSlab::BlockDescriptor EmitToSlab(IR::Block& block, std::uint64_t generation) {
++        return native_code_slab->impl->emit(block, generation, jit_interface->is_executing);
++    }
++
++    NativeCodeSlab::BlockDescriptor ReturnFromRunCodeDescriptor(std::uint64_t generation) const {
++        return NativeCodeSlab::BlockDescriptor{
++            native_code_slab->return_from_run_code(), 0, generation};
++    }
++
++    NativeCodeSlab::BlockDescriptor GetBasicBlock(
++        IR::LocationDescriptor descriptor, std::uint64_t generation) {
++        NativeCodeSlab::BlockDescriptor block;
++        if (native_code_slab->find_block(
++                descriptor.Value(), generation, block)) {
++            if (jit_interface->is_executing && conf.native_code_block_lookup_callback != nullptr) {
++                conf.native_code_block_lookup_callback(
++                    conf.native_code_block_lookup_callback_arg,
++                    descriptor.Value());
++            }
++            return block;
++        }
++
++        const auto translation_started = std::chrono::steady_clock::now();
++
++        bool portable_completion_called = false;
++        auto* portable_artifact = portable_ir_demand_provider != nullptr
++                                    ? portable_ir_demand_provider(
++                                          portable_ir_demand_provider_arg,
++                                          descriptor.Value(), generation)
++                                    : nullptr;
++        const bool portable_artifact_handed_off = portable_artifact != nullptr;
++        const auto complete_portable_artifact =
++            [&](PortableIREmitOutcome outcome) noexcept {
++                if (!portable_artifact_handed_off || portable_completion_called) {
++                    return;
++                }
++                portable_completion_called = true;
++                if (portable_ir_emit_completion != nullptr) {
++                    portable_ir_emit_completion(
++                        portable_ir_emit_completion_arg,
++                        descriptor.Value(), generation, outcome);
++                }
++            };
++
++        if (portable_artifact != nullptr) {
++            bool descriptor_matches = false;
++            try {
++                descriptor_matches = portable_artifact->Location().Value() == descriptor.Value() && IsEmittableBlock(*portable_artifact);
++            } catch (...) {
++                descriptor_matches = false;
++            }
++            if (!descriptor_matches) {
++                complete_portable_artifact(PortableIREmitOutcome::EmitFailed);
++                portable_artifact = nullptr;
++            }
++        }
++
++        if (native_code_slab->space_remaining() < MINIMUM_REMAINING_CODESIZE) {
++            complete_portable_artifact(PortableIREmitOutcome::EmitFailed);
++            request_capacity_recycle();
++            return ReturnFromRunCodeDescriptor(generation);
++        }
++
++        if (portable_artifact != nullptr) {
++            try {
++                native_code_slab->ensure_memory_committed(
++                    MINIMUM_REMAINING_CODESIZE);
++            } catch (...) {
++                complete_portable_artifact(PortableIREmitOutcome::EmitFailed);
++                abandon_portable_emit();
++                return ReturnFromRunCodeDescriptor(generation);
++            }
++
++            try {
++                IR::Block ir_block = std::move(*portable_artifact);
++                const auto emitted = EmitToSlab(ir_block, generation);
++                if (emitted.entrypoint == nullptr) {
++                    complete_portable_artifact(
++                        PortableIREmitOutcome::EmitFailed);
++                    abandon_portable_emit();
++                    return ReturnFromRunCodeDescriptor(generation);
++                }
++                const auto outcome = emitted.newly_emitted
++                                       ? PortableIREmitOutcome::NativeEmitted
++                                       : PortableIREmitOutcome::AlreadyPresent;
++                complete_portable_artifact(outcome);
++                return emitted;
++            } catch (...) {
++                complete_portable_artifact(PortableIREmitOutcome::EmitFailed);
++                abandon_portable_emit();
++                return ReturnFromRunCodeDescriptor(generation);
++            }
++        }
++
++        native_code_slab->ensure_memory_committed(
++            MINIMUM_REMAINING_CODESIZE);
++        IR::Block ir_block = TranslateBlock(descriptor);
++        auto emitted = EmitToSlab(ir_block, generation);
++        if (emitted.entrypoint == nullptr) {
++            return ReturnFromRunCodeDescriptor(generation);
++        }
++        const auto translation_nanoseconds = static_cast<u64>(
++            std::chrono::duration_cast<std::chrono::nanoseconds>(
++                std::chrono::steady_clock::now() - translation_started)
++                .count());
++        if (emitted.newly_emitted) {
++            conf.callbacks->CodeTranslationCompleted(
++                descriptor.Value(), translation_nanoseconds, ir_block);
++        }
++        return emitted;
++    }
++
++    IR::Block TranslateBlock(IR::LocationDescriptor descriptor) {
++        IR::Block ir_block = A32::Translate(A32::LocationDescriptor{descriptor}, conf.callbacks, {conf.arch_version, conf.define_unpredictable_behaviour, conf.hook_hint_instructions});
++        Optimization::PolyfillPass(ir_block, {});
++        Optimization::NamingPass(ir_block);
++        if (conf.HasOptimization(OptimizationFlag::GetSetElimination)) {
++            Optimization::A32GetSetElimination(ir_block,
++                {.convert_nzc_to_nz = true,
++                    .preserve_state_at_memory_access =
++                        conf.check_halt_on_memory_access});
++            Optimization::DeadCodeElimination(ir_block);
++        }
++        if (conf.HasOptimization(OptimizationFlag::ConstProp)) {
++            Optimization::A32ConstantMemoryReads(ir_block, conf.callbacks);
++            Optimization::ConstantPropagation(ir_block);
++            Optimization::DeadCodeElimination(ir_block);
++        }
++        Optimization::IdentityRemovalPass(ir_block);
++        Optimization::NamingPass(ir_block);
++        Optimization::VerificationPass(ir_block);
++        return ir_block;
++    }
++
+     void PerformRequestedCacheInvalidation(HaltReason hr) {
+         if (Has(hr, HaltReason::CacheInvalidation)) {
+             std::unique_lock lock{invalidation_mutex};
+ 
+             ClearHalt(HaltReason::CacheInvalidation);
+ 
+-            if (invalidate_entire_cache) {
+-                current_address_space.ClearCache();
+-
+-                invalidate_entire_cache = false;
+-                invalid_cache_ranges.clear();
++            if (!invalidate_entire_cache && invalid_cache_ranges.empty()) {
+                 return;
+             }
+ 
+-            if (!invalid_cache_ranges.empty()) {
+-                current_address_space.InvalidateCacheRanges(invalid_cache_ranges);
+-
+-                invalid_cache_ranges.clear();
+-                return;
++            if (invalidate_entire_cache) {
++                if (recycle_native_slab) {
++                    native_code_slab->recycle_cache();
++                } else {
++                    native_code_slab->clear_cache();
++                }
++            } else {
++                for (const auto& range : invalid_cache_ranges) {
++                    const auto lower = range.lower();
++                    const auto upper = range.upper();
++                    native_code_slab->invalidate_cache_range(
++                        lower, static_cast<std::size_t>(upper - lower) + 1U);
++                }
+             }
++            invalid_cache_ranges.clear();
++            invalidate_entire_cache = false;
++            recycle_native_slab = false;
++            ClearHalt(HaltReason::CacheInvalidation);
+         }
+     }
+ 
+-    Jit* jit_interface;
++    A32JitState jit_state;
++    std::unique_ptr<NativeCodeSlab> owned_native_code_slab;
++    NativeCodeSlab* native_code_slab{};
++    bool native_code_slab_shared{};
++    std::uint64_t active_generation{};
++
+     A32::UserConfig conf;
+-    A32JitState current_state{};
+-    A32AddressSpace current_address_space;
+-    A32Core core;
+ 
+-    volatile u32 halt_reason = 0;
++    Jit* jit_interface;
++
++    PortableIRDemandProvider portable_ir_demand_provider{};
++    void* portable_ir_demand_provider_arg{};
++    PortableIREmitCompletion portable_ir_emit_completion{};
++    void* portable_ir_emit_completion_arg{};
+ 
+-    std::mutex invalidation_mutex;
+-    boost::icl::interval_set<u32> invalid_cache_ranges;
+     bool invalidate_entire_cache = false;
++    bool recycle_native_slab = false;
++    boost::icl::interval_set<u32> invalid_cache_ranges;
++    std::mutex invalidation_mutex;
+ };
+ 
+ Jit::Jit(UserConfig conf)
+-        : impl(std::make_unique<Impl>(this, conf)) {}
++        : impl(std::make_unique<Impl>(this, std::move(conf))) {}
+ 
+ Jit::~Jit() = default;
+ 
+@@ -195,6 +1357,32 @@ Jit::GetHostExecutionBudgetResult() const {
+     return impl->GetHostExecutionBudgetResult();
+ }
+ 
++bool Jit::Precompile(std::uint64_t location_descriptor) {
++    return impl->Precompile(location_descriptor);
++}
++
++void Jit::GeneratePortableIR(std::uint64_t location_descriptor) {
++    impl->GeneratePortableIR(location_descriptor);
++}
++
++bool Jit::Precompile(IR::Block block) {
++    return impl->Precompile(std::move(block));
++}
++
++Jit::PortableIREmitOutcome Jit::PrecompileWithResult(IR::Block block) {
++    return impl->PrecompileWithResult(std::move(block));
++}
++
++void Jit::SetPortableIRDemandProvider(
++    PortableIRDemandProvider provider, void* user_arg) {
++    impl->SetPortableIRDemandProvider(provider, user_arg);
++}
++
++void Jit::SetPortableIREmitCompletion(
++    PortableIREmitCompletion completion, void* user_arg) {
++    impl->SetPortableIREmitCompletion(completion, user_arg);
++}
++
+ void Jit::ClearCache() {
+     impl->ClearCache();
+ }
+@@ -259,4 +1447,12 @@ std::size_t Jit::CodeCacheUsed() const {
+     return impl->CodeCacheUsed();
+ }
+ 
++DispatchCounters Jit::GetDispatchCounters() const {
++    return impl->GetDispatchCounters();
++}
++
++std::vector<std::string> Jit::Disassemble() const {
++    return impl->Disassemble();
++}
++
+ }  // namespace Dynarmic::A32
+diff --git a/src/dynarmic/backend/arm64/a32_jitstate.h b/src/dynarmic/backend/arm64/a32_jitstate.h
+index 978bf84a..efeeb3c0 100644
+--- a/src/dynarmic/backend/arm64/a32_jitstate.h
++++ b/src/dynarmic/backend/arm64/a32_jitstate.h
+@@ -6,6 +6,7 @@
+ #pragma once
+ 
+ #include <array>
++#include <atomic>
+ 
+ #include <mcl/stdint.hpp>
+ 
+@@ -25,12 +26,28 @@ struct A32JitState {
+ 
+     std::array<u32, 16> regs{};
+ 
+-    u32 upper_location_descriptor;
++    u32 upper_location_descriptor = 0;
+ 
+     alignas(16) std::array<u32, 64> ext_regs{};
+ 
+     u32 exclusive_state = 0;
+ 
++    volatile u32 halt_reason = 0;
++
++    u32 host_execution_block_budget = 0;
++    u32 host_execution_block_budget_initial = 0;
++    u32 host_execution_budget_exhausted = 0;
++
++    const std::atomic<u64>* callbacks_link = nullptr;
++    const std::atomic<u64>* lookup_link = nullptr;
++    const std::atomic<u64>* runtime_config_link = nullptr;
++    const std::atomic<u64>* page_table_link = nullptr;
++    const std::atomic<u64>* read_page_table_link = nullptr;
++    const std::atomic<u64>* coprocessor_user_arg_link = nullptr;
++
++    u64 rsb_hits = 0;
++    u64 rsb_misses = 0;
++
+     u32 Cpsr() const;
+     void SetCpsr(u32 cpsr);
+ 
+diff --git a/src/dynarmic/backend/arm64/abi.h b/src/dynarmic/backend/arm64/abi.h
+index 609b06cd..0054dc57 100644
+--- a/src/dynarmic/backend/arm64/abi.h
++++ b/src/dynarmic/backend/arm64/abi.h
+@@ -22,6 +22,7 @@ constexpr oaknut::XReg Xhalt{27};
+ constexpr oaknut::XReg Xticks{26};
+ constexpr oaknut::XReg Xfastmem{25};
+ constexpr oaknut::XReg Xpagetable{24};
++constexpr oaknut::XReg Xreadpagetable{25};
+ 
+ constexpr oaknut::XReg Xscratch0{16}, Xscratch1{17}, Xscratch2{30};
+ constexpr oaknut::WReg Wscratch0{16}, Wscratch1{17}, Wscratch2{30};
+diff --git a/src/dynarmic/backend/arm64/address_space.cpp b/src/dynarmic/backend/arm64/address_space.cpp
+index a5e22b6e..fc112cea 100644
+--- a/src/dynarmic/backend/arm64/address_space.cpp
++++ b/src/dynarmic/backend/arm64/address_space.cpp
+@@ -84,6 +84,7 @@ void AddressSpace::InvalidateBasicBlocks(const tsl::robin_set<IR::LocationDescri
+         RelinkForDescriptor(descriptor, nullptr);
+ 
+         block_entries.erase(iter);
++        pending_block_relinks.erase(descriptor);
+     }
+ 
+     ProtectCodeMemory();
+@@ -94,15 +95,88 @@ void AddressSpace::ClearCache() {
+     reverse_block_entries.clear();
+     block_infos.clear();
+     block_references.clear();
++    pending_block_relinks.clear();
+     code.set_offset(prelude_info.end_of_prelude);
+ }
+ 
++void AddressSpace::PublishPendingBlockRelinks() {
++    if (pending_block_relinks.empty()) {
++        return;
++    }
++
++    UnprotectCodeMemory();
++
++    for (const auto& descriptor : pending_block_relinks) {
++        if (const CodePtr target = Get(descriptor)) {
++            RelinkForDescriptor(descriptor, target);
++        }
++    }
++    pending_block_relinks.clear();
++
++    ProtectCodeMemory();
++}
++
++AddressSpace::RetiredCodeStats AddressSpace::RetireCodeRange(CodePtr begin, CodePtr end, tsl::robin_set<IR::LocationDescriptor>& retired_locations) {
++    RetiredCodeStats stats;
++    if (begin == nullptr || end == nullptr || begin >= end) {
++        return stats;
++    }
++
++    UnprotectCodeMemory();
++
++    auto iter = reverse_block_entries.lower_bound(begin);
++    while (iter != reverse_block_entries.end() && iter->first < end) {
++        const CodePtr entry_point = iter->first;
++        const IR::LocationDescriptor descriptor = iter->second;
++
++        const auto block_info = block_infos.find(entry_point);
++        const auto entry = block_entries.find(descriptor);
++        if (entry != block_entries.end() && entry->second == entry_point) {
++            RelinkForDescriptor(descriptor, nullptr);
++            block_entries.erase(entry);
++            pending_block_relinks.erase(descriptor);
++            retired_locations.insert(descriptor);
++            ++stats.descriptors;
++            if (block_info != block_infos.end()) {
++                stats.code_bytes += block_info->second.size;
++            }
++        }
++
++        if (block_info != block_infos.end()) {
++            for (const auto& [target_descriptor, relocations] : block_info->second.block_relocations) {
++                if (auto references = block_references.find(target_descriptor); references != block_references.end()) {
++                    references.value().erase(entry_point);
++                    if (references->second.empty()) {
++                        block_references.erase(references);
++                    }
++                }
++            }
++            block_infos.erase(block_info);
++        }
++
++        iter = reverse_block_entries.erase(iter);
++    }
++
++    ProtectCodeMemory();
++
++    retired_code_bytes += stats.code_bytes;
++    return stats;
++}
++
+ void AddressSpace::DumpDisassembly() const {
+     for (u32* ptr = mem.ptr(); ptr < code.xptr<u32*>(); ptr++) {
+         std::printf("%s", Common::DisassembleAArch64(*ptr, mcl::bit_cast<u64>(ptr)).c_str());
+     }
+ }
+ 
++std::vector<std::string> AddressSpace::Disassemble() const {
++    std::vector<std::string> result;
++    for (u32* ptr = mem.ptr(); ptr < code.xptr<u32*>(); ptr++) {
++        result.push_back(Common::DisassembleAArch64(*ptr, mcl::bit_cast<u64>(ptr)));
++    }
++    return result;
++}
++
+ size_t AddressSpace::GetCodeCacheUsed() const {
+     return static_cast<size_t>(code.offset());
+ }
+@@ -116,16 +190,26 @@ EmittedBlockInfo AddressSpace::Emit(IR::Block block) {
+         ClearCache();
+     }
+ 
++    return EmitBlock(block);
++}
++
++EmittedBlockInfo AddressSpace::EmitBlock(IR::Block& block) {
++    const IR::LocationDescriptor location = block.Location();
++
+     UnprotectCodeMemory();
+ 
+-    EmittedBlockInfo block_info = EmitArm64(code, std::move(block), GetEmitConfig(), fastmem_manager);
++    EmittedBlockInfo block_info = EmitArm64(code, block, GetEmitConfig(), fastmem_manager);
+ 
+-    ASSERT(block_entries.insert({block.Location(), block_info.entry_point}).second);
+-    ASSERT(reverse_block_entries.insert({block_info.entry_point, block.Location()}).second);
++    ASSERT(block_entries.insert({location, block_info.entry_point}).second);
++    ASSERT(reverse_block_entries.insert({block_info.entry_point, location}).second);
+     ASSERT(block_infos.insert({block_info.entry_point, block_info}).second);
+ 
+     Link(block_info);
+-    RelinkForDescriptor(block.Location(), block_info.entry_point);
++    if (defer_block_relinks) {
++        pending_block_relinks.insert(location);
++    } else {
++        RelinkForDescriptor(location, block_info.entry_point);
++    }
+ 
+     mem.invalidate(reinterpret_cast<u32*>(block_info.entry_point), block_info.size);
+     ProtectCodeMemory();
+@@ -252,6 +336,9 @@ void AddressSpace::Link(EmittedBlockInfo& block_info) {
+         case LinkTarget::ExceptionRaised:
+             c.BL(prelude_info.exception_raised);
+             break;
++        case LinkTarget::InterpreterFallback:
++            c.BL(prelude_info.interpreter_fallback);
++            break;
+         case LinkTarget::InstructionSynchronizationBarrierRaised:
+             c.BL(prelude_info.isb_raised);
+             break;
+diff --git a/src/dynarmic/backend/arm64/address_space.h b/src/dynarmic/backend/arm64/address_space.h
+index 4dcf173c..58052f0f 100644
+--- a/src/dynarmic/backend/arm64/address_space.h
++++ b/src/dynarmic/backend/arm64/address_space.h
+@@ -5,8 +5,11 @@
+ 
+ #pragma once
+ 
++#include <cstdint>
+ #include <map>
+ #include <optional>
++#include <string>
++#include <vector>
+ 
+ #include <mcl/stdint.hpp>
+ #include <oaknut/code_block.hpp>
+@@ -45,8 +48,42 @@ public:
+ 
+     void DumpDisassembly() const;
+ 
++    std::vector<std::string> Disassemble() const;
++
+     size_t GetCodeCacheUsed() const;
+ 
++    struct RetiredCodeStats {
++        std::size_t descriptors{};
++        std::uint64_t code_bytes{};
++    };
++
++    EmittedBlockInfo EmitBlock(IR::Block& ir_block);
++
++    void SetDeferBlockRelinks(bool defer) { defer_block_relinks = defer; }
++
++    void PublishPendingBlockRelinks();
++
++    RetiredCodeStats RetireCodeRange(CodePtr begin, CodePtr end, tsl::robin_set<IR::LocationDescriptor>& retired_locations);
++
++    CodePtr CodeBegin() const { return reinterpret_cast<CodePtr>(mem.ptr()); }
++
++    CodePtr CodeEndOfPrelude() const { return CodeBegin() + prelude_info.end_of_prelude; }
++
++    CodePtr CurrentCodePtr() const { return code.xptr<CodePtr>(); }
++
++    void SetCurrentCodePtr(CodePtr ptr) { code.set_offset(ptr - CodeBegin()); }
++
++    size_t CodeCacheSize() const { return code_cache_size; }
++
++    std::uint64_t RetiredCodeBytes() const { return retired_code_bytes; }
++
++    void* ReturnFromRunCodeAddress() const { return prelude_info.return_from_run_code; }
++
++    size_t GetBlockSize(CodePtr entry_point) const {
++        const auto iter = block_infos.find(entry_point);
++        return iter != block_infos.end() ? iter->second.size : 0;
++    }
++
+ protected:
+     virtual EmitConfig GetEmitConfig() = 0;
+     virtual void RegisterNewBasicBlock(const IR::Block& block, const EmittedBlockInfo& block_info) = 0;
+@@ -82,6 +119,10 @@ protected:
+     tsl::robin_map<CodePtr, EmittedBlockInfo> block_infos;
+     tsl::robin_map<IR::LocationDescriptor, tsl::robin_set<CodePtr>> block_references;
+ 
++    bool defer_block_relinks = false;
++    tsl::robin_set<IR::LocationDescriptor> pending_block_relinks;
++    std::uint64_t retired_code_bytes = 0;
++
+     ExceptionHandler exception_handler;
+     FastmemManager fastmem_manager;
+ 
+@@ -129,6 +170,7 @@ protected:
+ 
+         void* call_svc;
+         void* exception_raised;
++        void* interpreter_fallback;
+         void* dc_raised;
+         void* ic_raised;
+         void* isb_raised;
+diff --git a/src/dynarmic/backend/arm64/emit_arm64.cpp b/src/dynarmic/backend/arm64/emit_arm64.cpp
+index 1ecb5424..d9ef96ba 100644
+--- a/src/dynarmic/backend/arm64/emit_arm64.cpp
++++ b/src/dynarmic/backend/arm64/emit_arm64.cpp
+@@ -191,7 +191,7 @@ static void EmitAddCycles(oaknut::CodeGenerator& code, EmitContext& ctx, size_t
+     }
+ }
+ 
+-EmittedBlockInfo EmitArm64(oaknut::CodeGenerator& code, IR::Block block, const EmitConfig& conf, FastmemManager& fastmem_manager) {
++EmittedBlockInfo EmitArm64(oaknut::CodeGenerator& code, IR::Block& block, const EmitConfig& conf, FastmemManager& fastmem_manager) {
+     if (conf.very_verbose_debugging_output) {
+         std::puts(IR::DumpBlock(block).c_str());
+     }
+diff --git a/src/dynarmic/backend/arm64/emit_arm64.h b/src/dynarmic/backend/arm64/emit_arm64.h
+index a5d2c1b3..0e3bf5b2 100644
+--- a/src/dynarmic/backend/arm64/emit_arm64.h
++++ b/src/dynarmic/backend/arm64/emit_arm64.h
+@@ -77,6 +77,7 @@ enum class LinkTarget {
+     ExclusiveWriteMemory128,
+     CallSVC,
+     ExceptionRaised,
++    InterpreterFallback,
+     InstructionSynchronizationBarrierRaised,
+     InstructionCacheOperationRaised,
+     DataCacheOperationRaised,
+@@ -164,9 +165,12 @@ struct EmitConfig {
+ 
+     // Debugging
+     bool very_verbose_debugging_output;
++
++    bool read_page_table_in_register = false;
++    bool link_coprocessor_user_arg = false;
+ };
+ 
+-EmittedBlockInfo EmitArm64(oaknut::CodeGenerator& code, IR::Block block, const EmitConfig& emit_conf, FastmemManager& fastmem_manager);
++EmittedBlockInfo EmitArm64(oaknut::CodeGenerator& code, IR::Block& block, const EmitConfig& emit_conf, FastmemManager& fastmem_manager);
+ 
+ template<IR::Opcode op>
+ void EmitIR(oaknut::CodeGenerator& code, EmitContext& ctx, IR::Inst* inst);
+diff --git a/src/dynarmic/backend/arm64/emit_arm64_a32.cpp b/src/dynarmic/backend/arm64/emit_arm64_a32.cpp
+index 909dde73..96616278 100644
+--- a/src/dynarmic/backend/arm64/emit_arm64_a32.cpp
++++ b/src/dynarmic/backend/arm64/emit_arm64_a32.cpp
+@@ -3,6 +3,8 @@
+  * SPDX-License-Identifier: 0BSD
+  */
+ 
++#include <optional>
++
+ #include <mcl/bit/bit_field.hpp>
+ #include <oaknut/oaknut.hpp>
+ 
+@@ -33,8 +35,16 @@ oaknut::Label EmitA32Cond(oaknut::CodeGenerator& code, EmitContext&, IR::Cond co
+ 
+ void EmitA32Terminal(oaknut::CodeGenerator& code, EmitContext& ctx, IR::Term::Terminal terminal, IR::LocationDescriptor initial_location, bool is_single_step);
+ 
+-void EmitA32Terminal(oaknut::CodeGenerator&, EmitContext&, IR::Term::Interpret, IR::LocationDescriptor, bool) {
+-    ASSERT_FALSE("Interpret should never be emitted.");
++void EmitA32Terminal(oaknut::CodeGenerator& code, EmitContext& ctx, IR::Term::Interpret terminal, IR::LocationDescriptor initial_location, bool) {
++    ASSERT_MSG(A32::LocationDescriptor{terminal.next}.TFlag() == A32::LocationDescriptor{initial_location}.TFlag(), "Unimplemented");
++    ASSERT_MSG(A32::LocationDescriptor{terminal.next}.EFlag() == A32::LocationDescriptor{initial_location}.EFlag(), "Unimplemented");
++    ASSERT_MSG(terminal.num_instructions == 1, "Unimplemented");
++
++    code.MOV(W1, A32::LocationDescriptor{terminal.next}.PC());
++    code.MOV(X2, 1);
++    code.STR(W1, Xstate, offsetof(A32JitState, regs) + sizeof(u32) * 15);
++    EmitRelocation(code, ctx, LinkTarget::InterpreterFallback);
++    EmitRelocation(code, ctx, LinkTarget::ReturnToDispatcher);
+ }
+ 
+ void EmitA32Terminal(oaknut::CodeGenerator& code, EmitContext& ctx, IR::Term::ReturnToDispatch, IR::LocationDescriptor, bool) {
+@@ -58,12 +68,31 @@ static void EmitSetUpperLocationDescriptor(oaknut::CodeGenerator& code, EmitCont
+     }
+ }
+ 
++static void EmitHostExecutionBoundary(oaknut::CodeGenerator& code, EmitContext& ctx, std::optional<u32> return_pc) {
++    oaknut::Label disabled;
++
++    code.LDR(Wscratch0, Xstate, offsetof(A32JitState, host_execution_block_budget));
++    code.CBZ(Wscratch0, disabled);
++    code.SUBS(Wscratch0, Wscratch0, 1);
++    code.STR(Wscratch0, Xstate, offsetof(A32JitState, host_execution_block_budget));
++    code.B(NE, disabled);
++    code.MOV(Wscratch0, 1);
++    code.STR(Wscratch0, Xstate, offsetof(A32JitState, host_execution_budget_exhausted));
++    if (return_pc) {
++        code.MOV(Wscratch0, *return_pc);
++        code.STR(Wscratch0, Xstate, offsetof(A32JitState, regs) + sizeof(u32) * 15);
++    }
++    EmitRelocation(code, ctx, LinkTarget::ReturnFromRunCode);
++    code.l(disabled);
++}
++
+ void EmitA32Terminal(oaknut::CodeGenerator& code, EmitContext& ctx, IR::Term::LinkBlock terminal, IR::LocationDescriptor initial_location, bool is_single_step) {
+     EmitSetUpperLocationDescriptor(code, ctx, terminal.next, initial_location);
+ 
+     oaknut::Label fail;
+ 
+     if (ctx.conf.HasOptimization(OptimizationFlag::BlockLinking) && !is_single_step) {
++        EmitHostExecutionBoundary(code, ctx, A32::LocationDescriptor{terminal.next}.PC());
+         if (ctx.conf.enable_cycle_counting) {
+             code.CMP(Xticks, 0);
+             code.B(LE, fail);
+@@ -85,6 +114,7 @@ void EmitA32Terminal(oaknut::CodeGenerator& code, EmitContext& ctx, IR::Term::Li
+     EmitSetUpperLocationDescriptor(code, ctx, terminal.next, initial_location);
+ 
+     if (ctx.conf.HasOptimization(OptimizationFlag::BlockLinking) && !is_single_step) {
++        EmitHostExecutionBoundary(code, ctx, A32::LocationDescriptor{terminal.next}.PC());
+         EmitBlockLinkRelocation(code, ctx, terminal.next, BlockRelocationType::Branch);
+     }
+ 
+@@ -97,6 +127,8 @@ void EmitA32Terminal(oaknut::CodeGenerator& code, EmitContext& ctx, IR::Term::Po
+     if (ctx.conf.HasOptimization(OptimizationFlag::ReturnStackBuffer) && !is_single_step) {
+         oaknut::Label fail;
+ 
++        EmitHostExecutionBoundary(code, ctx, std::nullopt);
++
+         code.LDR(Wscratch2, SP, offsetof(StackLayout, rsb_ptr));
+         code.AND(Wscratch2, Wscratch2, RSBIndexMask);
+         code.ADD(X2, SP, Xscratch2);
+@@ -118,10 +150,11 @@ void EmitA32Terminal(oaknut::CodeGenerator& code, EmitContext& ctx, IR::Term::Po
+     EmitRelocation(code, ctx, LinkTarget::ReturnToDispatcher);
+ }
+ 
+-void EmitA32Terminal(oaknut::CodeGenerator& code, EmitContext& ctx, IR::Term::FastDispatchHint, IR::LocationDescriptor, bool) {
++void EmitA32Terminal(oaknut::CodeGenerator& code, EmitContext& ctx, IR::Term::FastDispatchHint, IR::LocationDescriptor, bool is_single_step) {
++    if (ctx.conf.HasOptimization(OptimizationFlag::FastDispatch) && !is_single_step) {
++        EmitHostExecutionBoundary(code, ctx, std::nullopt);
++    }
+     EmitRelocation(code, ctx, LinkTarget::ReturnToDispatcher);
+-
+-    // TODO: Implement FastDispatchHint optimization
+ }
+ 
+ void EmitA32Terminal(oaknut::CodeGenerator& code, EmitContext& ctx, IR::Term::If terminal, IR::LocationDescriptor initial_location, bool is_single_step) {
+diff --git a/src/dynarmic/backend/arm64/emit_arm64_a32_coprocessor.cpp b/src/dynarmic/backend/arm64/emit_arm64_a32_coprocessor.cpp
+index 5115fbbb..326fb6f8 100644
+--- a/src/dynarmic/backend/arm64/emit_arm64_a32_coprocessor.cpp
++++ b/src/dynarmic/backend/arm64/emit_arm64_a32_coprocessor.cpp
+@@ -27,7 +27,12 @@ static void CallCoprocCallback(oaknut::CodeGenerator& code, EmitContext& ctx, A3
+     ctx.reg_alloc.PrepareForCall({}, arg0, arg1);
+ 
+     if (callback.user_arg) {
+-        code.MOV(X0, reinterpret_cast<u64>(*callback.user_arg));
++        if (*callback.user_arg != nullptr && ctx.conf.link_coprocessor_user_arg) {
++            code.LDR(X0, Xstate, offsetof(A32JitState, coprocessor_user_arg_link));
++            code.LDR(X0, X0);
++        } else {
++            code.MOV(X0, reinterpret_cast<u64>(*callback.user_arg));
++        }
+     }
+ 
+     code.MOV(Xscratch0, reinterpret_cast<u64>(callback.function));
+diff --git a/src/dynarmic/backend/arm64/emit_arm64_memory.cpp b/src/dynarmic/backend/arm64/emit_arm64_memory.cpp
+index 7708720e..981119ba 100644
+--- a/src/dynarmic/backend/arm64/emit_arm64_memory.cpp
++++ b/src/dynarmic/backend/arm64/emit_arm64_memory.cpp
+@@ -138,6 +138,22 @@ LinkTarget ExclusiveWriteMemoryLinkTarget(size_t bitsize) {
+     UNREACHABLE();
+ }
+ 
++void EmitZeroExtendCallbackResult(oaknut::CodeGenerator& code, oaknut::WReg destination, oaknut::WReg source, size_t bitsize) {
++    switch (bitsize) {
++    case 8:
++        code.AND(destination, source, 0xff);
++        break;
++    case 16:
++        code.AND(destination, source, 0xffff);
++        break;
++    case 32:
++        code.MOV(destination, source);
++        break;
++    default:
++        UNREACHABLE();
++    }
++}
++
+ template<size_t bitsize>
+ void CallbackOnlyEmitReadMemory(oaknut::CodeGenerator& code, EmitContext& ctx, IR::Inst* inst) {
+     auto args = ctx.reg_alloc.GetArgumentInfo(inst);
+@@ -153,6 +169,9 @@ void CallbackOnlyEmitReadMemory(oaknut::CodeGenerator& code, EmitContext& ctx, I
+         code.MOV(Q8.B16(), Q0.B16());
+         ctx.reg_alloc.DefineAsRegister(inst, Q8);
+     } else {
++        if constexpr (bitsize < 64) {
++            EmitZeroExtendCallbackResult(code, W0, W0, bitsize);
++        }
+         ctx.reg_alloc.DefineAsRegister(inst, X0);
+     }
+ }
+@@ -174,6 +193,9 @@ void CallbackOnlyEmitExclusiveReadMemory(oaknut::CodeGenerator& code, EmitContex
+         code.MOV(Q8.B16(), Q0.B16());
+         ctx.reg_alloc.DefineAsRegister(inst, Q8);
+     } else {
++        if constexpr (bitsize < 64) {
++            EmitZeroExtendCallbackResult(code, W0, W0, bitsize);
++        }
+         ctx.reg_alloc.DefineAsRegister(inst, X0);
+     }
+ }
+@@ -198,6 +220,7 @@ void CallbackOnlyEmitSwapMemory(oaknut::CodeGenerator& code, EmitContext& ctx, I
+     auto args = ctx.reg_alloc.GetArgumentInfo(inst);
+     ctx.reg_alloc.PrepareForCall({}, args[1], args[2]);
+     EmitRelocation(code, ctx, SwapMemoryLinkTarget(bitsize));
++    EmitZeroExtendCallbackResult(code, W0, W0, bitsize);
+     ctx.reg_alloc.DefineAsRegister(inst, X0);
+ }
+ 
+@@ -220,6 +243,7 @@ void CallbackOnlyEmitExclusiveWriteMemory(oaknut::CodeGenerator& code, EmitConte
+     if (ordered) {
+         code.DMB(oaknut::BarrierOp::ISH);
+     }
++    code.MOV(W0, W0);
+     code.l(end);
+     ctx.reg_alloc.DefineAsRegister(inst, X0);
+ }
+@@ -269,7 +293,7 @@ void EmitDetectMisalignedVAddr(oaknut::CodeGenerator& code, EmitContext& ctx, oa
+ // Address to read/write = [ret0 + ret1], ret0 is always Xscratch0 and ret1 is either Xaddr or Xscratch1
+ // Trashes NZCV
+ template<size_t bitsize>
+-std::pair<oaknut::XReg, oaknut::XReg> InlinePageTableEmitVAddrLookup(oaknut::CodeGenerator& code, EmitContext& ctx, oaknut::XReg Xaddr, const SharedLabel& fallback, u64 page_table_pointer) {
++std::pair<oaknut::XReg, oaknut::XReg> InlinePageTableEmitVAddrLookup(oaknut::CodeGenerator& code, EmitContext& ctx, oaknut::XReg Xaddr, const SharedLabel& fallback, u64 page_table_pointer, bool read_access) {
+     const size_t valid_page_index_bits = ctx.conf.page_table_address_space_bits - page_bits;
+     const size_t unused_top_bits = 64 - ctx.conf.page_table_address_space_bits;
+ 
+@@ -283,7 +307,9 @@ std::pair<oaknut::XReg, oaknut::XReg> InlinePageTableEmitVAddrLookup(oaknut::Cod
+         code.B(NE, *fallback);
+     }
+ 
+-    if (page_table_pointer == ctx.conf.page_table_pointer) {
++    if (read_access && ctx.conf.read_page_table_in_register) {
++        code.LDR(Xscratch0, Xreadpagetable, Xscratch0, LSL, 3);
++    } else if (page_table_pointer == ctx.conf.page_table_pointer) {
+         code.LDR(Xscratch0, Xpagetable, Xscratch0, LSL, 3);
+     } else {
+         code.MOV(Xscratch1, page_table_pointer);
+@@ -444,7 +470,7 @@ void InlinePageTableEmitReadMemory(oaknut::CodeGenerator& code, EmitContext& ctx
+     SharedLabel fallback = GenSharedLabel(), end = GenSharedLabel();
+ 
+     const auto [Xbase, Xoffset] = InlinePageTableEmitVAddrLookup<bitsize>(
+-        code, ctx, Xaddr, fallback, ctx.conf.read_page_table_pointer);
++        code, ctx, Xaddr, fallback, ctx.conf.read_page_table_pointer, true);
+     EmitMemoryLdr<bitsize>(code, Rvalue->index(), Xbase, Xoffset, ordered);
+ 
+     ctx.deferred_emits.emplace_back([&code, &ctx, inst, Xaddr = *Xaddr, Rvalue = *Rvalue, ordered, fallback, end] {
+@@ -456,8 +482,10 @@ void InlinePageTableEmitReadMemory(oaknut::CodeGenerator& code, EmitContext& ctx
+         }
+         if constexpr (bitsize == 128) {
+             code.MOV(Rvalue.B16(), Q0.B16());
+-        } else {
++        } else if constexpr (bitsize == 64) {
+             code.MOV(Rvalue.toX(), Xscratch0);
++        } else {
++            EmitZeroExtendCallbackResult(code, Rvalue.toW(), Wscratch0, bitsize);
+         }
+         ctx.conf.emit_check_memory_abort(code, ctx, inst, *end);
+         code.B(*end);
+@@ -485,7 +513,7 @@ void InlinePageTableEmitWriteMemory(oaknut::CodeGenerator& code, EmitContext& ct
+     SharedLabel fallback = GenSharedLabel(), end = GenSharedLabel();
+ 
+     const auto [Xbase, Xoffset] = InlinePageTableEmitVAddrLookup<bitsize>(
+-        code, ctx, Xaddr, fallback, ctx.conf.page_table_pointer);
++        code, ctx, Xaddr, fallback, ctx.conf.page_table_pointer, false);
+     EmitMemoryStr<bitsize>(code, Rvalue->index(), Xbase, Xoffset, ordered);
+ 
+     ctx.deferred_emits.emplace_back([&code, &ctx, inst, Xaddr = *Xaddr, Rvalue = *Rvalue, ordered, fallback, end] {
+@@ -586,8 +614,10 @@ void FastmemEmitReadMemory(oaknut::CodeGenerator& code, EmitContext& ctx, IR::In
+         }
+         if constexpr (bitsize == 128) {
+             code.MOV(Rvalue.B16(), Q0.B16());
+-        } else {
++        } else if constexpr (bitsize == 64) {
+             code.MOV(Rvalue.toX(), Xscratch0);
++        } else {
++            EmitZeroExtendCallbackResult(code, Rvalue.toW(), Wscratch0, bitsize);
+         }
+         ctx.conf.emit_check_memory_abort(code, ctx, inst, *end);
+         code.B(*end);
+diff --git a/src/dynarmic/backend/arm64/exclusive_monitor.cpp b/src/dynarmic/backend/arm64/exclusive_monitor.cpp
+index 5e49cc41..db7a2dc3 100644
+--- a/src/dynarmic/backend/arm64/exclusive_monitor.cpp
++++ b/src/dynarmic/backend/arm64/exclusive_monitor.cpp
+@@ -30,9 +30,9 @@ void ExclusiveMonitor::Unlock() {
+ }
+ 
+ bool ExclusiveMonitor::CheckAndClear(size_t processor_id, VAddr address) {
+-    const VAddr masked_address = address & RESERVATION_GRANULE_MASK;
+-
+     Lock();
++    const VAddr masked_address =
++        ResolveAddress(processor_id, address) & RESERVATION_GRANULE_MASK;
+     if (exclusive_addresses[processor_id] != masked_address) {
+         Unlock();
+         return false;
+diff --git a/src/dynarmic/backend/block_range_information.cpp b/src/dynarmic/backend/block_range_information.cpp
+index 22708130..f7bf5585 100644
+--- a/src/dynarmic/backend/block_range_information.cpp
++++ b/src/dynarmic/backend/block_range_information.cpp
+@@ -45,8 +45,16 @@ template<typename ProgramCounterType>
+ tsl::robin_set<IR::LocationDescriptor> BlockRangeInformation<ProgramCounterType>::InvalidateRanges(const boost::icl::interval_set<ProgramCounterType>& ranges) {
+     tsl::robin_set<IR::LocationDescriptor> erase_locations;
+     for (auto invalidate_interval : ranges) {
+-        auto pair = block_ranges.equal_range(invalidate_interval);
+-        for (auto it = pair.first; it != pair.second; ++it) {
++        // equal_range only reaches the first block of the range: the blocks
++        // inside it all compare equivalent to the range while staying ordered
++        // among themselves, which is not a strict weak ordering.
++        const auto first = boost::icl::first(invalidate_interval);
++        const auto last = boost::icl::last(invalidate_interval);
++        for (auto it = block_ranges.lower_bound(Interval::closed(first, first));
++             it != block_ranges.end(); ++it) {
++            if (boost::icl::first(it->first) > last) {
++                break;
++            }
+             for (const auto& descriptor : it->second) {
+                 erase_locations.insert(descriptor);
+             }
+-- 
+2.54.0 (Apple Git-157)
+

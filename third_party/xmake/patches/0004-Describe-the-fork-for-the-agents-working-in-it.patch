@@ -1,0 +1,148 @@
+From 05c05b828a654e17fe295bbda325c5a34b4153f2 Mon Sep 17 00:00:00 2001
+From: kern0x1b <kern0x1b@users.noreply.github.com>
+Date: Wed, 23 Sep 2026 17:57:50 +0200
+Subject: [PATCH 04/11] Describe the fork for the agents working in it
+
+AGENTS.md says what the fork is (branch charon from tag v3.1.1, the
+release the machine runs), where the addon code and its tests live,
+how to build into our own prefix through heavy.sh, how to run the tests
+with their own XMAKE_GLOBALDIR and how to run the control without our
+fixes. .claude/settings.json is the one the other repositories of the
+workspace carry; upstream's .gitignore ignores .claude, so it is added
+explicitly.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+---
+ .claude/settings.json | 17 ++++++++
+ AGENTS.md             | 95 +++++++++++++++++++++++++++++++++++++++++++
+ 2 files changed, 112 insertions(+)
+ create mode 100644 .claude/settings.json
+ create mode 100644 AGENTS.md
+
+diff --git a/.claude/settings.json b/.claude/settings.json
+new file mode 100644
+index 000000000..98d246355
+--- /dev/null
++++ b/.claude/settings.json
+@@ -0,0 +1,17 @@
++{
++  "env": {
++    "BASH_DEFAULT_TIMEOUT_MS": "600000",
++    "BASH_MAX_TIMEOUT_MS": "600000"
++  },
++  "permissions": {
++    "deny": [
++      "Bash(git reset --hard *)",
++      "Bash(git push --force *)",
++      "Bash(git push -f *)",
++      "Bash(git push --force-with-lease *)",
++      "Bash(git checkout -- *)",
++      "Bash(git clean -f *)"
++    ]
++  },
++  "autoMemoryEnabled": false
++}
+diff --git a/AGENTS.md b/AGENTS.md
+new file mode 100644
+index 000000000..c3bd89136
+--- /dev/null
++++ b/AGENTS.md
+@@ -0,0 +1,95 @@
++# xmake: our fork
++
++## What this is
++
++Our fork of [xmake](https://github.com/xmake-io/xmake), `github.com/kern0x1b/xmake`. The working
++branch `charon` starts at tag `v3.1.1`, the release the machine runs (Homebrew `xmake 3.1.1`), and
++carries only our fixes on top, so the machine gets the same xmake plus them. `dev` is upstream's
++default branch, left as forked. Nothing goes to `xmake-io` as a pull request (workspace
++`AGENTS.md` §4); `upstream` is fetch-only.
++
++What our commits change and why is in their messages: `git log v3.1.1..charon`. Upstream's own
++documents: `README.md`, `CONTRIBUTING.md`, <https://xmake.io>.
++
++## Layout
++
++- `core/src/` — the C core (`xmake/`, `cli/`) and its dependencies. `tbox`, `luajit`, `lua`,
++  `lua-cjson`, `lz4`, `sv` and `pdcurses` are git submodules.
++- `xmake/` — the Lua scripts the binary runs (`core/`, `modules/`, `actions/`, `plugins/`, `rules/`,
++  ...). Installed as `<prefix>/share/xmake`; almost every fix lands here.
++- `tests/` — xmake's own test system: `tests/run.lua <filter>` runs every `test.lua` under the
++  matching directory, each `test_*` function with the helpers in `tests/test_utils/`.
++- Addons, where our fixes are so far:
++  - `xmake/core/package/addon.lua` — the registry `~/.xmake/addons/addons.conf`, the `active`
++    version of each addon, the per-process pins;
++  - `xmake/core/project/addons.lua` and `xmake/core/project/project.lua` — a project's
++    `xmake-addons.lock`, its auto-fetch and pinning;
++  - `xmake/modules/private/action/addon/impl/install_addons.lua` — the auto-fetch installer, it
++    writes the lock;
++  - `xmake/modules/private/action/require/impl/actions/install.lua` (`_register_addon`) — the
++    registration after an install;
++  - `tests/actions/addon/` — their tests, fixtures and fixture projects.
++- Generated, never source: `build/` and `makefile` (from `./configure`).
++
++## Build and check
++
++Clone with `--recurse-submodules`; after checking out another tag or branch run
++`git submodule update --init --recursive` (tag `v3.1.1` pins another `tbox` than `dev`).
++
++Build and install into our own prefix, never over Homebrew, and only through the slots:
++
++```
++$HOME/Git/projects/ios/coordination/heavy.sh sh -c "./configure --prefix=$HOME/.local/xmake-kern && make -j8 && make install"
++$HOME/.local/xmake-kern/bin/xmake --version     # xmake v3.1.1+charon.<commit>
++```
++
++The default `./configure` builds the Lua runtime, like Homebrew's. The fleet runs this binary only
++after the owner switches to it.
++
++Tests. They install and remove addons and register repositories in the global directory, so
++always give them their own:
++
++```
++export XMAKE_GLOBALDIR=$PWD/.agent-work/runs/<task>/global
++XMAKE_PROGRAM_DIR=$PWD/xmake xmake lua -v tests/run.lua actions/addon
++```
++
++- `XMAKE_PROGRAM_DIR=$PWD/xmake` runs the scripts of this tree with the installed 3.1.1 binary;
++  the C core of `charon` is that of `v3.1.1`, so no build is needed for a Lua change.
++- The control, without our fixes: `XMAKE_PROGRAM_DIR=/opt/homebrew/Cellar/xmake/3.1.1/share/xmake`
++  (the same scripts as tag `v3.1.1`), or a detached worktree at an earlier commit.
++- The built binary: `env -u XMAKE_PROGRAM_DIR PATH=$HOME/.local/xmake-kern/bin:$PATH xmake lua -v
++  tests/run.lua actions/addon`. The tests run `xmake` from `PATH`, so set it for that command only.
++- The first run clones xmake-repo into the new global directory (network, about 30 MB).
++
++## Conventions
++
++- Work goes on `charon`, forward only. Upstream fixes come in from `upstream` only when the owner
++  decides; moving `charon` to a newer upstream release is the owner's call.
++- Commits: an imperative subject, no prefix; the body says the cause, the change, and the test and
++  its control. Trailer `Co-Authored-By`.
++- Upstream's code style: four spaces, `-- @note` / `-- @see` comments above the code, the helpers
++  of `core.base.*` rather than new ones.
++- Every fix has a test in `tests/`, and the test is shown to fail without the fix (the control
++  above) and pass with it.
++- Push only `charon` to `origin`, only after the owner's word and the reviewer's verdict. The
++  commit hooks are `$HOME/Git/projects/ios/coordination/hooks`; never `--no-verify`.
++
++## Traps
++
++- A test run without `XMAKE_GLOBALDIR` writes the shared `~/.xmake` (`addons.conf`, the repository
++  cache) → always set it; the shared store is every band's.
++- Never `xrepo`/`xmake require --force` against the shared store and never edit
++  `~/.xmake/addons/addons.conf` by hand → the fleet builds from them; that needs the coordinator.
++- `XMAKE_PROGRAM_DIR` left in the environment overrides the installed binary's own scripts →
++  `env -u XMAKE_PROGRAM_DIR` when checking the built binary.
++- In the sandbox `semver.select` raises when nothing matches and `semver.satisfies` raises on a
++  range that does not parse, e.g. `latest` → a caller that expects no match wraps them in `try`.
++
++## Workspace
++
++Workspace procedures, by path: `$HOME/Git/projects/ios/.agents/skills/self-review/SKILL.md`
++(before every hand-over), `.../session-handoff/SKILL.md` (at 200k context or at the end),
++`.../worktree-sweep/SKILL.md`. Heavy jobs: `$HOME/Git/projects/ios/coordination/heavy.sh`.
++The charon gate that checks this binary: `$HOME/Git/projects/ios/coordination/build-gate.lua`,
++run as in charon's skill `backports-gate`, with the fork's binary in place of `xmake`.
+-- 
+2.54.0 (Apple Git-157)
+

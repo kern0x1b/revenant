@@ -1,0 +1,63 @@
+From cca85846bcca0cc22fd8a0fa0d20854365d25fb2 Mon Sep 17 00:00:00 2001
+From: kern0x1b <kern0x1b@users.noreply.github.com>
+Date: Sat, 19 Sep 2026 19:26:32 +0200
+Subject: [PATCH 2/3] tests: Implement the swap callbacks in the A32 test
+ environments
+
+MemorySwap8 and MemorySwap32 became pure virtual callbacks with the
+arm64 backend, and neither test environment implemented them, so the
+test suite did not compile. The tests run one thread, so a read followed
+by a write is the indivisible swap the callbacks ask for.
+
+122 test cases pass again.
+
+Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>
+---
+ tests/A32/testenv.h | 24 ++++++++++++++++++++++++
+ 1 file changed, 24 insertions(+)
+
+diff --git a/tests/A32/testenv.h b/tests/A32/testenv.h
+index 4345663b..cbd23862 100644
+--- a/tests/A32/testenv.h
++++ b/tests/A32/testenv.h
+@@ -95,6 +95,18 @@ public:
+         MemoryWrite32(vaddr + 4, static_cast<u32>(value >> 32));
+     }
+ 
++    // The tests run one thread, so a read followed by a write is indivisible.
++    std::uint8_t MemorySwap8(u32 vaddr, std::uint8_t value) override {
++        const std::uint8_t previous = MemoryRead8(vaddr);
++        MemoryWrite8(vaddr, value);
++        return previous;
++    }
++    std::uint32_t MemorySwap32(u32 vaddr, std::uint32_t value) override {
++        const std::uint32_t previous = MemoryRead32(vaddr);
++        MemoryWrite32(vaddr, value);
++        return previous;
++    }
++
+     void InterpreterFallback(u32 pc, size_t num_instructions) override { ASSERT_MSG(false, "InterpreterFallback({:08x}, {}) code = {:08x}", pc, num_instructions, *MemoryReadCode(pc)); }
+ 
+     void CallSVC(std::uint32_t swi) override { ASSERT_MSG(false, "CallSVC({})", swi); }
+@@ -165,6 +177,18 @@ public:
+         write(vaddr, value);
+     }
+ 
++    // The tests run one thread, so a read followed by a write is indivisible.
++    std::uint8_t MemorySwap8(std::uint32_t vaddr, std::uint8_t value) override {
++        const std::uint8_t previous = MemoryRead8(vaddr);
++        MemoryWrite8(vaddr, value);
++        return previous;
++    }
++    std::uint32_t MemorySwap32(std::uint32_t vaddr, std::uint32_t value) override {
++        const std::uint32_t previous = MemoryRead32(vaddr);
++        MemoryWrite32(vaddr, value);
++        return previous;
++    }
++
+     bool MemoryWriteExclusive8(std::uint32_t vaddr, std::uint8_t value, [[maybe_unused]] std::uint8_t expected) override {
+         MemoryWrite8(vaddr, value);
+         return true;
+-- 
+2.54.0 (Apple Git-157)
+
