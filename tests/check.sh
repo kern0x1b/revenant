@@ -5,7 +5,7 @@
 # Usage: tests/check.sh PROJECT_DIR SCENARIO_DIR PLUGIN_DIR [EVIDENCE_DIR]
 set -u
 abs() { (cd "$1" 2>/dev/null && pwd); }
-project=$1 scenario=$(abs "$2") plugin=$(abs "$3") evidence=${4:+$(abs "$4")}
+project=$1 scenario=$(abs "$2") plugin=$(abs "$3") evidence=${4:+$(abs "$4")} tests=$(abs "$(dirname "$0")")
 # shellcheck disable=SC1091
 . "$scenario/scenario.conf"   # RELEASE DEVICE ARCH LANGUAGE
 failed=0
@@ -30,35 +30,7 @@ esac
 #    (8+ characters after trimming) that also appears in the plugin's own text. The scenarios
 #    are the user's input and are not part of what is compared.
 if find . "${prune[@]}" -name SKILL.md -print | grep -q .; then fail "a SKILL.md is in the project"; else ok "no SKILL.md in the project"; fi
-copied=$(python3 - "$plugin" <<'EOF'
-import os, sys
-plugin = sys.argv[1]
-def windows(path):
-    try:
-        text = open(path, encoding="utf-8").read()
-    except (UnicodeDecodeError, OSError):
-        return set()
-    lines = [" ".join(l.split()) for l in text.splitlines()]
-    lines = [l for l in lines if len(l) >= 8]
-    return {tuple(lines[i:i + 5]) for i in range(len(lines) - 4)}
-def walk(root, skip):
-    for d, dirs, files in os.walk(root):
-        dirs[:] = [x for x in dirs if x not in skip]
-        for f in files:
-            yield os.path.join(d, f)
-known = {}
-for f in walk(plugin, {".git", "scenarios", ".agent-work"}):
-    for w in windows(f):
-        known.setdefault(w, os.path.relpath(f, plugin))
-for f in walk(".", {"build", ".xmake", ".logs", ".git"}):
-    if os.path.basename(f) == "answers.md":
-        continue
-    for w in windows(f):
-        if w in known:
-            print(f"{f} repeats {known[w]}: {w[0][:60]}")
-            break
-EOF
-)
+copied=$(xmake l "$tests/copied_text.lua" "$plugin" .)
 [ -z "$copied" ] && ok "no 5-line run shared with the plugin" || { fail "text copied from the plugin:"; printf '      %s\n' "$copied"; }
 
 # 3. xmake.lua targets the scenario's release.
