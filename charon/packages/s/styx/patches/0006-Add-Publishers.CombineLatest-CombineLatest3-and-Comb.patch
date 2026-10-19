@@ -1,0 +1,236 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: kern0x1b <kern0x1b@users.noreply.github.com>
+Date: Mon, 19 Oct 2026 20:41:13 +0200
+Subject: [PATCH 6/9] Add Publishers.CombineLatest, CombineLatest3 and
+ CombineLatest4
+
+Apple's interface declares them with the combineLatest operators and
+their equality; OpenCombine has none of them. They run on the machinery
+MergeKit.swift holds.
+---
+ .../Publishers/Publishers.CombineLatest.swift | 213 ++++++++++++++++++
+ 1 file changed, 213 insertions(+)
+ create mode 100644 Sources/OpenCombine/Publishers/Publishers.CombineLatest.swift
+
+diff --git a/Sources/OpenCombine/Publishers/Publishers.CombineLatest.swift b/Sources/OpenCombine/Publishers/Publishers.CombineLatest.swift
+new file mode 100644
+index 0000000..058e081
+--- /dev/null
++++ b/Sources/OpenCombine/Publishers/Publishers.CombineLatest.swift
+@@ -0,0 +1,213 @@
++extension Publishers {
++
++    public struct CombineLatest<A: Publisher, B: Publisher>: Publisher
++        where A.Failure == B.Failure
++    {
++        public typealias Output = (A.Output, B.Output)
++
++        public typealias Failure = A.Failure
++
++        public let a: A
++
++        public let b: B
++
++        public init(_ a: A, _ b: B) {
++            self.a = a
++            self.b = b
++        }
++
++        public func receive<Downstream: Subscriber>(subscriber: Downstream)
++            where B.Failure == Downstream.Failure, Downstream.Input == (A.Output, B.Output)
++        {
++            let inner = Inner(downstream: subscriber)
++            inner.connect(a, b)
++        }
++
++        private final class Inner<Downstream: Subscriber>: CombineLatestInner<Output, Failure, Downstream>
++            where Downstream.Input == (A.Output, B.Output), Downstream.Failure == Failure
++        {
++            private var a: CombineLatestChild<A.Output, Output, Failure, Downstream>!
++            private var b: CombineLatestChild<B.Output, Output, Failure, Downstream>!
++
++            init(downstream: Downstream) {
++                super.init(downstream: downstream, upstreamCount: 2)
++            }
++
++            func connect(_ a: A, _ b: B) {
++                self.a = connectChild(a)
++                self.b = connectChild(b)
++            }
++
++            override func combinedValue() -> Output {
++                return (a.takeValue(), b.takeValue())
++            }
++        }
++    }
++
++    public struct CombineLatest3<A: Publisher, B: Publisher, C: Publisher>: Publisher
++        where A.Failure == B.Failure,
++              B.Failure == C.Failure
++    {
++        public typealias Output = (A.Output, B.Output, C.Output)
++
++        public typealias Failure = A.Failure
++
++        public let a: A
++
++        public let b: B
++
++        public let c: C
++
++        public init(_ a: A, _ b: B, _ c: C) {
++            self.a = a
++            self.b = b
++            self.c = c
++        }
++
++        public func receive<Downstream: Subscriber>(subscriber: Downstream)
++            where C.Failure == Downstream.Failure, Downstream.Input == (A.Output, B.Output, C.Output)
++        {
++            let inner = Inner(downstream: subscriber)
++            inner.connect(a, b, c)
++        }
++
++        private final class Inner<Downstream: Subscriber>: CombineLatestInner<Output, Failure, Downstream>
++            where Downstream.Input == (A.Output, B.Output, C.Output), Downstream.Failure == Failure
++        {
++            private var a: CombineLatestChild<A.Output, Output, Failure, Downstream>!
++            private var b: CombineLatestChild<B.Output, Output, Failure, Downstream>!
++            private var c: CombineLatestChild<C.Output, Output, Failure, Downstream>!
++
++            init(downstream: Downstream) {
++                super.init(downstream: downstream, upstreamCount: 3)
++            }
++
++            func connect(_ a: A, _ b: B, _ c: C) {
++                self.a = connectChild(a)
++                self.b = connectChild(b)
++                self.c = connectChild(c)
++            }
++
++            override func combinedValue() -> Output {
++                return (a.takeValue(), b.takeValue(), c.takeValue())
++            }
++        }
++    }
++
++    public struct CombineLatest4<A: Publisher, B: Publisher, C: Publisher, D: Publisher>: Publisher
++        where A.Failure == B.Failure,
++              B.Failure == C.Failure,
++              C.Failure == D.Failure
++    {
++        public typealias Output = (A.Output, B.Output, C.Output, D.Output)
++
++        public typealias Failure = A.Failure
++
++        public let a: A
++
++        public let b: B
++
++        public let c: C
++
++        public let d: D
++
++        public init(_ a: A, _ b: B, _ c: C, _ d: D) {
++            self.a = a
++            self.b = b
++            self.c = c
++            self.d = d
++        }
++
++        public func receive<Downstream: Subscriber>(subscriber: Downstream)
++            where D.Failure == Downstream.Failure, Downstream.Input == (A.Output, B.Output, C.Output, D.Output)
++        {
++            let inner = Inner(downstream: subscriber)
++            inner.connect(a, b, c, d)
++        }
++
++        private final class Inner<Downstream: Subscriber>: CombineLatestInner<Output, Failure, Downstream>
++            where Downstream.Input == (A.Output, B.Output, C.Output, D.Output), Downstream.Failure == Failure
++        {
++            private var a: CombineLatestChild<A.Output, Output, Failure, Downstream>!
++            private var b: CombineLatestChild<B.Output, Output, Failure, Downstream>!
++            private var c: CombineLatestChild<C.Output, Output, Failure, Downstream>!
++            private var d: CombineLatestChild<D.Output, Output, Failure, Downstream>!
++
++            init(downstream: Downstream) {
++                super.init(downstream: downstream, upstreamCount: 4)
++            }
++
++            func connect(_ a: A, _ b: B, _ c: C, _ d: D) {
++                self.a = connectChild(a)
++                self.b = connectChild(b)
++                self.c = connectChild(c)
++                self.d = connectChild(d)
++            }
++
++            override func combinedValue() -> Output {
++                return (a.takeValue(), b.takeValue(), c.takeValue(), d.takeValue())
++            }
++        }
++    }
++
++}
++
++extension Publishers.CombineLatest: Equatable where A: Equatable, B: Equatable {
++
++    public static func == (lhs: Publishers.CombineLatest<A, B>, rhs: Publishers.CombineLatest<A, B>) -> Bool {
++        return lhs.a == rhs.a && lhs.b == rhs.b
++    }
++}
++
++extension Publishers.CombineLatest3: Equatable where A: Equatable, B: Equatable, C: Equatable {
++
++    public static func == (lhs: Publishers.CombineLatest3<A, B, C>, rhs: Publishers.CombineLatest3<A, B, C>) -> Bool {
++        return lhs.a == rhs.a && lhs.b == rhs.b && lhs.c == rhs.c
++    }
++}
++
++extension Publishers.CombineLatest4: Equatable where A: Equatable, B: Equatable, C: Equatable, D: Equatable {
++
++    public static func == (lhs: Publishers.CombineLatest4<A, B, C, D>, rhs: Publishers.CombineLatest4<A, B, C, D>) -> Bool {
++        return lhs.a == rhs.a && lhs.b == rhs.b && lhs.c == rhs.c && lhs.d == rhs.d
++    }
++}
++
++extension Publisher {
++
++    public func combineLatest<P>(_ p: P) -> Publishers.CombineLatest<Self, P>
++        where P: Publisher, Self.Failure == P.Failure
++    {
++        return Publishers.CombineLatest<Self, P>(self, p)
++    }
++
++    public func combineLatest<P, Result>(_ p: P, _ transform: @escaping (Self.Output, P.Output) -> Result) -> Publishers.Map<Publishers.CombineLatest<Self, P>, Result>
++        where P: Publisher, Self.Failure == P.Failure
++    {
++        return Publishers.Map(upstream: Publishers.CombineLatest<Self, P>(self, p), transform: transform)
++    }
++
++    public func combineLatest<P, Q>(_ p: P, _ q: Q) -> Publishers.CombineLatest3<Self, P, Q>
++        where P: Publisher, Self.Failure == P.Failure, Q: Publisher, Self.Failure == Q.Failure
++    {
++        return Publishers.CombineLatest3<Self, P, Q>(self, p, q)
++    }
++
++    public func combineLatest<P, Q, Result>(_ p: P, _ q: Q, _ transform: @escaping (Self.Output, P.Output, Q.Output) -> Result) -> Publishers.Map<Publishers.CombineLatest3<Self, P, Q>, Result>
++        where P: Publisher, Self.Failure == P.Failure, Q: Publisher, Self.Failure == Q.Failure
++    {
++        return Publishers.Map(upstream: Publishers.CombineLatest3<Self, P, Q>(self, p, q), transform: transform)
++    }
++
++    public func combineLatest<P, Q, R>(_ p: P, _ q: Q, _ r: R) -> Publishers.CombineLatest4<Self, P, Q, R>
++        where P: Publisher, Self.Failure == P.Failure, Q: Publisher, Self.Failure == Q.Failure, R: Publisher, Self.Failure == R.Failure
++    {
++        return Publishers.CombineLatest4<Self, P, Q, R>(self, p, q, r)
++    }
++
++    public func combineLatest<P, Q, R, Result>(_ p: P, _ q: Q, _ r: R, _ transform: @escaping (Self.Output, P.Output, Q.Output, R.Output) -> Result) -> Publishers.Map<Publishers.CombineLatest4<Self, P, Q, R>, Result>
++        where P: Publisher, Self.Failure == P.Failure, Q: Publisher, Self.Failure == Q.Failure, R: Publisher, Self.Failure == R.Failure
++    {
++        return Publishers.Map(upstream: Publishers.CombineLatest4<Self, P, Q, R>(self, p, q, r), transform: transform)
++    }
++}
+-- 
+2.54.0 (Apple Git-157)
+

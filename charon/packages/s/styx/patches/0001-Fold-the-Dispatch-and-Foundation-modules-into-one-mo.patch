@@ -1,0 +1,3280 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: kern0x1b <kern0x1b@users.noreply.github.com>
+Date: Mon, 19 Oct 2026 20:41:13 +0200
+Subject: [PATCH 1/9] Fold the Dispatch and Foundation modules into one module
+ named Combine
+
+Apple ships Combine as one module, and code written against it says
+`import Combine` and nothing else. The three source folders are compiled
+together as that one module, so the imports of OpenCombine from the
+Dispatch and Foundation folders go, and every qualifier that named the
+module (`OpenCombine.Publisher`, `OpenCombine.Subscriber`, ...) names it
+as `Combine`.
+
+The OCombine namespaces existed only so that OpenCombine could sit beside
+a system Combine that declares the same names on Foundation's types. In
+one module named Combine they are a second spelling of Apple's API, so
+the declarations move to where Apple's interface puts them:
+Optional.Publisher, Result.Publisher, NotificationCenter.Publisher and
+NotificationCenter.publisher(for:object:), Timer.TimerPublisher and
+Timer.publish, and DispatchQueue, RunLoop and OperationQueue conforming
+to Scheduler themselves with their SchedulerTimeType and
+SchedulerOptions. The ocombine accessors, the typealiases that pointed
+the plain names at the namespaced ones and the `!canImport(Combine)`
+guards around them go with the namespaces. Just and Publishers.Sequence
+name the publishers at their new place.
+---
+ Sources/OpenCombine/AnySubscriber.swift       |   4 +-
+ .../OpenCombine/GENERATED-RootProtocols.swift |   4 +-
+ .../OpenCombine/Helpers/SubscriberTap.swift   |   4 +-
+ Sources/OpenCombine/Published.swift           |   2 +-
+ Sources/OpenCombine/Publisher+Subscribe.swift |   4 +-
+ Sources/OpenCombine/Publishers/Just.swift     |  40 +-
+ .../Publishers/Optional.Publisher.swift       | 171 ++----
+ .../Publishers/Publishers.Sequence.swift      |  40 +-
+ .../Publishers/Result.Publisher.swift         | 182 ++----
+ Sources/OpenCombine/RootProtocols.swift.gyb   |   2 +-
+ .../DispatchQueue+Scheduler.swift             | 517 ++++++-----------
+ .../OpenCombineFoundation/JSONEncoder.swift   |   1 -
+ .../NotificationCenter.swift                  | 129 +----
+ .../OperationQueue+Scheduler.swift            | 542 +++++++-----------
+ .../PropertyListEncoder.swift                 |   1 -
+ .../RunLoop+Scheduler.swift                   | 344 ++++-------
+ .../Timer+Publisher.swift                     | 285 ++++-----
+ 17 files changed, 837 insertions(+), 1435 deletions(-)
+
+diff --git a/Sources/OpenCombine/AnySubscriber.swift b/Sources/OpenCombine/AnySubscriber.swift
+index e2ef8ad..8e339c1 100644
+--- a/Sources/OpenCombine/AnySubscriber.swift
++++ b/Sources/OpenCombine/AnySubscriber.swift
+@@ -42,7 +42,7 @@ public struct AnySubscriber<Input, Failure: Error>: Subscriber,
+     /// - Parameter s: The subscriber to type-erase.
+     @inline(__always)
+     @inlinable
+-    public init<Subscriber: OpenCombine.Subscriber>(_ subscriber: Subscriber)
++    public init<Subscriber: Combine.Subscriber>(_ subscriber: Subscriber)
+         where Input == Subscriber.Input, Failure == Subscriber.Failure
+     {
+         if let erased = subscriber as? AnySubscriber<Input, Failure> {
+@@ -76,7 +76,7 @@ public struct AnySubscriber<Input, Failure: Error>: Subscriber,
+         }
+     }
+ 
+-    public init<Subject: OpenCombine.Subject>(_ subject: Subject)
++    public init<Subject: Combine.Subject>(_ subject: Subject)
+         where Input == Subject.Output, Failure == Subject.Failure
+     {
+         self.init(SubjectSubscriber(subject))
+diff --git a/Sources/OpenCombine/GENERATED-RootProtocols.swift b/Sources/OpenCombine/GENERATED-RootProtocols.swift
+index 486222b..2ff67c4 100644
+--- a/Sources/OpenCombine/GENERATED-RootProtocols.swift
++++ b/Sources/OpenCombine/GENERATED-RootProtocols.swift
+@@ -67,7 +67,7 @@ public protocol Publisher<Output, Failure> {
+     ///
+     /// - Parameter subscriber: The subscriber to attach to this publisher. After
+     ///   attaching, the subscriber can start to receive values.
+-    func receive<Subscriber: OpenCombine.Subscriber>(subscriber: Subscriber)
++    func receive<Subscriber: Combine.Subscriber>(subscriber: Subscriber)
+         where Failure == Subscriber.Failure, Output == Subscriber.Input
+ }
+ 
+@@ -273,7 +273,7 @@ public protocol Publisher {
+     ///
+     /// - Parameter subscriber: The subscriber to attach to this publisher. After
+     ///   attaching, the subscriber can start to receive values.
+-    func receive<Subscriber: OpenCombine.Subscriber>(subscriber: Subscriber)
++    func receive<Subscriber: Combine.Subscriber>(subscriber: Subscriber)
+         where Failure == Subscriber.Failure, Output == Subscriber.Input
+ }
+ 
+diff --git a/Sources/OpenCombine/Helpers/SubscriberTap.swift b/Sources/OpenCombine/Helpers/SubscriberTap.swift
+index 63e0c0c..d1a2bbc 100644
+--- a/Sources/OpenCombine/Helpers/SubscriberTap.swift
++++ b/Sources/OpenCombine/Helpers/SubscriberTap.swift
+@@ -9,8 +9,8 @@ internal protocol SubscriberTapMarker {
+     var inner: Any { mutating get }
+ }
+ 
+-internal struct SubscriberTap<Subscriber: OpenCombine.Subscriber>
+-: OpenCombine.Subscriber,
++internal struct SubscriberTap<Subscriber: Combine.Subscriber>
++: Combine.Subscriber,
+   CustomStringConvertible,
+   SubscriberTapMarker
+ {
+diff --git a/Sources/OpenCombine/Published.swift b/Sources/OpenCombine/Published.swift
+index f1d4927..f69c35b 100644
+--- a/Sources/OpenCombine/Published.swift
++++ b/Sources/OpenCombine/Published.swift
+@@ -84,7 +84,7 @@ extension Publisher where Failure == Never {
+ public struct Published<Value> {
+ 
+     /// A publisher for properties marked with the `@Published` attribute.
+-    public struct Publisher: OpenCombine.Publisher {
++    public struct Publisher: Combine.Publisher {
+ 
+         public typealias Output = Value
+ 
+diff --git a/Sources/OpenCombine/Publisher+Subscribe.swift b/Sources/OpenCombine/Publisher+Subscribe.swift
+index 6d4252a..d856ac6 100644
+--- a/Sources/OpenCombine/Publisher+Subscribe.swift
++++ b/Sources/OpenCombine/Publisher+Subscribe.swift
+@@ -17,7 +17,7 @@ extension Publisher {
+     /// - Parameters:
+     ///     - subscriber: The subscriber to attach to this `Publisher`. After attaching,
+     ///       the subscriber can start to receive values.
+-    public func subscribe<Subscriber: OpenCombine.Subscriber>(_ subscriber: Subscriber)
++    public func subscribe<Subscriber: Combine.Subscriber>(_ subscriber: Subscriber)
+         where Failure == Subscriber.Failure, Output == Subscriber.Input
+     {
+         if let hook = DebugHook.getGlobalHook() {
+@@ -41,7 +41,7 @@ extension Publisher {
+     /// Attaches the specified subject to this publisher.
+     ///
+     /// - Parameter subject: The subject to attach to this publisher.
+-    public func subscribe<Subject: OpenCombine.Subject>(
++    public func subscribe<Subject: Combine.Subject>(
+         _ subject: Subject
+     ) -> AnyCancellable
+         where Failure == Subject.Failure, Output == Subject.Output
+diff --git a/Sources/OpenCombine/Publishers/Just.swift b/Sources/OpenCombine/Publishers/Just.swift
+index d42507f..232d01c 100644
+--- a/Sources/OpenCombine/Publishers/Just.swift
++++ b/Sources/OpenCombine/Publishers/Just.swift
+@@ -65,7 +65,7 @@ extension Just {
+ 
+     public func tryAllSatisfy(
+         _ predicate: (Output) throws -> Bool
+-    ) -> Result<Bool, Error>.OCombine.Publisher {
++    ) -> Result<Bool, Error>.Publisher {
+         return .init(Result { try predicate(output) })
+     }
+ 
+@@ -75,7 +75,7 @@ extension Just {
+ 
+     public func tryContains(
+         where predicate: (Output) throws -> Bool
+-    ) -> Result<Bool, Error>.OCombine.Publisher {
++    ) -> Result<Bool, Error>.Publisher {
+         return .init(Result { try predicate(output) })
+     }
+ 
+@@ -99,14 +99,14 @@ extension Just {
+         return .init(1)
+     }
+ 
+-    public func dropFirst(_ count: Int = 1) -> Optional<Output>.OCombine.Publisher {
++    public func dropFirst(_ count: Int = 1) -> Optional<Output>.Publisher {
+         precondition(count >= 0, "count must not be negative")
+         return .init(count > 0 ? nil : self.output)
+     }
+ 
+     public func drop(
+         while predicate: (Output) -> Bool
+-    ) -> Optional<Output>.OCombine.Publisher {
++    ) -> Optional<Output>.Publisher {
+         return .init(predicate(output) ? nil : output)
+     }
+ 
+@@ -116,7 +116,7 @@ extension Just {
+ 
+     public func first(
+         where predicate: (Output) -> Bool
+-    ) -> Optional<Output>.OCombine.Publisher {
++    ) -> Optional<Output>.Publisher {
+         return .init(predicate(output) ? output : nil)
+     }
+ 
+@@ -126,7 +126,7 @@ extension Just {
+ 
+     public func last(
+         where predicate: (Output) -> Bool
+-    ) -> Optional<Output>.OCombine.Publisher {
++    ) -> Optional<Output>.Publisher {
+         return .init(predicate(output) ? output : nil)
+     }
+ 
+@@ -142,30 +142,30 @@ extension Just {
+ 
+     public func tryMap<ElementOfResult>(
+         _ transform: (Output) throws -> ElementOfResult
+-    ) -> Result<ElementOfResult, Error>.OCombine.Publisher {
++    ) -> Result<ElementOfResult, Error>.Publisher {
+         return .init(Result { try transform(output) })
+     }
+ 
+     public func compactMap<ElementOfResult>(
+         _ transform: (Output) -> ElementOfResult?
+-    ) -> Optional<ElementOfResult>.OCombine.Publisher {
++    ) -> Optional<ElementOfResult>.Publisher {
+         return .init(transform(output))
+     }
+ 
+     public func filter(
+         _ isIncluded: (Output) -> Bool
+-    ) -> Optional<Output>.OCombine.Publisher {
++    ) -> Optional<Output>.Publisher {
+         return .init(isIncluded(output) ? output : nil)
+     }
+ 
+-    public func output(at index: Int) -> Optional<Output>.OCombine.Publisher {
++    public func output(at index: Int) -> Optional<Output>.Publisher {
+         precondition(index >= 0, "index must not be negative")
+         return .init(index == 0 ? output : nil)
+     }
+ 
+     public func output<RangeExpression: Swift.RangeExpression>(
+         in range: RangeExpression
+-    ) -> Optional<Output>.OCombine.Publisher where RangeExpression.Bound == Int {
++    ) -> Optional<Output>.Publisher where RangeExpression.Bound == Int {
+         // TODO: Broken in Apple's Combine? (FB6169621)
+         // Empty range should result in a nil
+         let range = range.relative(to: 0..<Int.max)
+@@ -176,26 +176,26 @@ extension Just {
+         // return .init(range.contains(0) ? output : nil)
+     }
+ 
+-    public func prefix(_ maxLength: Int) -> Optional<Output>.OCombine.Publisher {
++    public func prefix(_ maxLength: Int) -> Optional<Output>.Publisher {
+         precondition(maxLength >= 0, "maxLength must not be negative")
+         return .init(maxLength > 0 ? output : nil)
+     }
+ 
+     public func prefix(
+         while predicate: (Output) -> Bool
+-    ) -> Optional<Output>.OCombine.Publisher {
++    ) -> Optional<Output>.Publisher {
+         return .init(predicate(output) ? output : nil)
+     }
+ 
+     public func setFailureType<Failure: Error>(
+         to failureType: Failure.Type
+-    ) -> Result<Output, Failure>.OCombine.Publisher {
++    ) -> Result<Output, Failure>.Publisher {
+         return .init(output)
+     }
+ 
+     public func mapError<Failure: Error>(
+         _ transform: (Never) -> Failure
+-    ) -> Result<Output, Failure>.OCombine.Publisher {
++    ) -> Result<Output, Failure>.Publisher {
+         return .init(output)
+     }
+ 
+@@ -207,7 +207,7 @@ extension Just {
+ 
+     public func tryRemoveDuplicates(
+         by predicate: (Output, Output) throws -> Bool
+-    ) -> Result<Output, Error>.OCombine.Publisher {
++    ) -> Result<Output, Error>.Publisher {
+         return .init(Result { try _ = predicate(output, output); return output })
+     }
+ 
+@@ -226,28 +226,28 @@ extension Just {
+     public func reduce<Accumulator>(
+         _ initialResult: Accumulator,
+         _ nextPartialResult: (Accumulator, Output) -> Accumulator
+-    ) -> Result<Accumulator, Never>.OCombine.Publisher {
++    ) -> Result<Accumulator, Never>.Publisher {
+         return .init(nextPartialResult(initialResult, output))
+     }
+ 
+     public func tryReduce<Accumulator>(
+         _ initialResult: Accumulator,
+         _ nextPartialResult: (Accumulator, Output) throws -> Accumulator
+-    ) -> Result<Accumulator, Error>.OCombine.Publisher {
++    ) -> Result<Accumulator, Error>.Publisher {
+         return .init(Result { try nextPartialResult(initialResult, output) })
+     }
+ 
+     public func scan<ElementOfResult>(
+         _ initialResult: ElementOfResult,
+         _ nextPartialResult: (ElementOfResult, Output) -> ElementOfResult
+-    ) -> Result<ElementOfResult, Never>.OCombine.Publisher {
++    ) -> Result<ElementOfResult, Never>.Publisher {
+         return .init(nextPartialResult(initialResult, output))
+     }
+ 
+     public func tryScan<ElementOfResult>(
+         _ initialResult: ElementOfResult,
+         _ nextPartialResult: (ElementOfResult, Output) throws -> ElementOfResult
+-    ) -> Result<ElementOfResult, Error>.OCombine.Publisher {
++    ) -> Result<ElementOfResult, Error>.Publisher {
+         return .init(Result { try nextPartialResult(initialResult, output) })
+     }
+ 
+diff --git a/Sources/OpenCombine/Publishers/Optional.Publisher.swift b/Sources/OpenCombine/Publishers/Optional.Publisher.swift
+index 7b88039..fcfb081 100644
+--- a/Sources/OpenCombine/Publishers/Optional.Publisher.swift
++++ b/Sources/OpenCombine/Publishers/Optional.Publisher.swift
+@@ -7,85 +7,6 @@
+ 
+ extension Optional {
+ 
+-    /// A namespace for disambiguation when both OpenCombine and Combine are imported.
+-    ///
+-    /// Combine extends `Optional` with a nested type `Publisher`.
+-    /// If you import both OpenCombine and Combine (either explicitly or implicitly,
+-    /// e. g. when importing Foundation), you will not be able to write
+-    /// `Optional<Int>.Publisher`, because Swift is unable to understand
+-    /// which `Publisher` you're referring to.
+-    ///
+-    /// So you have to write `Optional<Int>.OCombine.Publisher`.
+-    ///
+-    /// This bug is tracked [here](https://bugs.swift.org/browse/SR-11183).
+-    ///
+-    /// You can omit this whenever Combine is not available (e. g. on Linux).
+-    public struct OCombine {
+-
+-        fileprivate let optional: Optional
+-
+-        fileprivate init(_ optional: Optional) {
+-            self.optional = optional
+-        }
+-
+-        public var publisher: Publisher {
+-            return Publisher(optional)
+-        }
+-
+-        /// The type of a Combine publisher that publishes the value of a Swift optional
+-        /// instance to each subscriber exactly once, if the instance has any value at
+-        /// all.
+-        ///
+-        /// In contrast with the `Just` publisher, which always produces a single value,
+-        /// this publisher might not send any values and instead finish normally,
+-        /// if `output` is `nil`.
+-        public struct Publisher: OpenCombine.Publisher {
+-
+-            /// The kind of value published by this publisher.
+-            ///
+-            /// This publisher produces the type wrapped by the optional.
+-            public typealias Output = Wrapped
+-
+-            /// The kind of error this publisher might publish.
+-            ///
+-            /// The optional publisher never produces errors.
+-            public typealias Failure = Never
+-
+-            /// The output to deliver to each subscriber.
+-            public let output: Wrapped?
+-
+-            /// Creates a publisher to emit the value of the optional, or to finish
+-            /// immediately if the optional doesn't have a value.
+-            ///
+-            /// - Parameter output: The result to deliver to each subscriber.
+-            public init(_ output: Output?) {
+-                self.output = output
+-            }
+-
+-            /// Implements the Publisher protocol by accepting the subscriber and
+-            /// immediately publishing the optional’s value if it has one, or finishing
+-            /// normally if it doesn’t.
+-            ///
+-            /// - Parameter subscriber: The subscriber to add.
+-            public func receive<Downstream: Subscriber>(subscriber: Downstream)
+-                where Output == Downstream.Input, Failure == Downstream.Failure
+-            {
+-                if let output = output {
+-                    subscriber.receive(subscription: Inner(value: output,
+-                                                           downstream: subscriber))
+-                } else {
+-                    subscriber.receive(subscription: Subscriptions.empty)
+-                    subscriber.receive(completion: .finished)
+-                }
+-            }
+-        }
+-    }
+-
+-    public var ocombine: OCombine {
+-        return .init(self)
+-    }
+-
+-#if !canImport(Combine)
+     /// The type of a Combine publisher that publishes the value of a Swift optional
+     /// instance to each subscriber exactly once, if the instance has any value at
+     /// all.
+@@ -93,15 +14,37 @@ extension Optional {
+     /// In contrast with the `Just` publisher, which always produces a single value,
+     /// this publisher might not send any values and instead finish normally,
+     /// if `output` is `nil`.
+-    public typealias Publisher = OCombine.Publisher
++    public struct Publisher: Combine.Publisher {
++
++        public typealias Output = Wrapped
++
++        public typealias Failure = Never
++
++        public let output: Wrapped?
++
++        public init(_ output: Output?) {
++            self.output = output
++        }
++
++        public func receive<Downstream: Subscriber>(subscriber: Downstream)
++            where Output == Downstream.Input, Failure == Downstream.Failure
++        {
++            if let output = output {
++                subscriber.receive(subscription: Inner(value: output,
++                                                       downstream: subscriber))
++            } else {
++                subscriber.receive(subscription: Subscriptions.empty)
++                subscriber.receive(completion: .finished)
++            }
++        }
++    }
+ 
+     public var publisher: Publisher {
+         return Publisher(self)
+     }
+-#endif
+ }
+ 
+-extension Optional.OCombine {
++extension Optional {
+     private final class Inner<Downstream: Subscriber>
+         : Subscription,
+           CustomStringConvertible,
+@@ -141,104 +84,104 @@ extension Optional.OCombine {
+     }
+ }
+ 
+-extension Optional.OCombine.Publisher: Equatable where Wrapped: Equatable {}
++extension Optional.Publisher: Equatable where Wrapped: Equatable {}
+ 
+-extension Optional.OCombine.Publisher where Wrapped: Equatable {
++extension Optional.Publisher where Wrapped: Equatable {
+ 
+-    public func contains(_ output: Output) -> Optional<Bool>.OCombine.Publisher {
++    public func contains(_ output: Output) -> Optional<Bool>.Publisher {
+         return .init(self.output.map { $0 == output })
+     }
+ 
+-    public func removeDuplicates() -> Optional<Wrapped>.OCombine.Publisher {
++    public func removeDuplicates() -> Optional<Wrapped>.Publisher {
+         return self
+     }
+ }
+ 
+-extension Optional.OCombine.Publisher where Wrapped: Comparable {
++extension Optional.Publisher where Wrapped: Comparable {
+ 
+-    public func min() -> Optional<Wrapped>.OCombine.Publisher {
++    public func min() -> Optional<Wrapped>.Publisher {
+         return self
+     }
+ 
+-    public func max() -> Optional<Wrapped>.OCombine.Publisher {
++    public func max() -> Optional<Wrapped>.Publisher {
+         return self
+     }
+ }
+ 
+-extension Optional.OCombine.Publisher {
++extension Optional.Publisher {
+ 
+     public func allSatisfy(
+         _ predicate: (Output) -> Bool
+-    ) -> Optional<Bool>.OCombine.Publisher {
++    ) -> Optional<Bool>.Publisher {
+         return .init(self.output.map(predicate))
+     }
+ 
+-    public func collect() -> Optional<[Output]>.OCombine.Publisher {
++    public func collect() -> Optional<[Output]>.Publisher {
+         return .init(self.output.map { [$0] } ?? [])
+     }
+ 
+     public func compactMap<ElementOfResult>(
+         _ transform: (Output) -> ElementOfResult?
+-    ) -> Optional<ElementOfResult>.OCombine.Publisher {
++    ) -> Optional<ElementOfResult>.Publisher {
+         return .init(self.output.flatMap(transform))
+     }
+ 
+     public func min(
+         by areInIncreasingOrder: (Output, Output) -> Bool
+-    ) -> Optional<Output>.OCombine.Publisher {
++    ) -> Optional<Output>.Publisher {
+         return self
+     }
+ 
+     public func max(
+         by areInIncreasingOrder: (Output, Output) -> Bool
+-    ) -> Optional<Output>.OCombine.Publisher {
++    ) -> Optional<Output>.Publisher {
+         return self
+     }
+ 
+     public func contains(
+         where predicate: (Output) -> Bool
+-    ) -> Optional<Bool>.OCombine.Publisher {
++    ) -> Optional<Bool>.Publisher {
+         return .init(self.output.map(predicate))
+     }
+ 
+-    public func count() -> Optional<Int>.OCombine.Publisher {
++    public func count() -> Optional<Int>.Publisher {
+         return .init(self.output.map { _ in 1 })
+     }
+ 
+-    public func dropFirst(_ count: Int = 1) -> Optional<Output>.OCombine.Publisher {
++    public func dropFirst(_ count: Int = 1) -> Optional<Output>.Publisher {
+         precondition(count >= 0, "count must not be negative")
+         return .init(self.output.flatMap { count == 0 ? $0 : nil })
+     }
+ 
+     public func drop(
+         while predicate: (Output) -> Bool
+-    ) -> Optional<Output>.OCombine.Publisher {
++    ) -> Optional<Output>.Publisher {
+         return .init(self.output.flatMap { predicate($0) ? nil : $0 })
+     }
+ 
+-    public func first() -> Optional<Output>.OCombine.Publisher {
++    public func first() -> Optional<Output>.Publisher {
+         return self
+     }
+ 
+     public func first(
+         where predicate: (Output) -> Bool
+-    ) -> Optional<Output>.OCombine.Publisher {
++    ) -> Optional<Output>.Publisher {
+         return .init(output.flatMap { predicate($0) ? $0 : nil })
+     }
+ 
+-    public func last() -> Optional<Output>.OCombine.Publisher {
++    public func last() -> Optional<Output>.Publisher {
+         return self
+     }
+ 
+     public func last(
+         where predicate: (Output) -> Bool
+-    ) -> Optional<Output>.OCombine.Publisher {
++    ) -> Optional<Output>.Publisher {
+         return .init(output.flatMap { predicate($0) ? $0 : nil })
+     }
+ 
+     public func filter(
+         _ isIncluded: (Output) -> Bool
+-    ) -> Optional<Output>.OCombine.Publisher {
++    ) -> Optional<Output>.Publisher {
+         return .init(output.flatMap { isIncluded($0) ? $0 : nil })
+     }
+ 
+@@ -248,18 +191,18 @@ extension Optional.OCombine.Publisher {
+ 
+     public func map<ElementOfResult>(
+         _ transform: (Output) -> ElementOfResult
+-    ) -> Optional<ElementOfResult>.OCombine.Publisher {
++    ) -> Optional<ElementOfResult>.Publisher {
+         return .init(output.map(transform))
+     }
+ 
+-    public func output(at index: Int) -> Optional<Output>.OCombine.Publisher {
++    public func output(at index: Int) -> Optional<Output>.Publisher {
+         precondition(index >= 0, "index must not be negative")
+         return .init(output.flatMap { index == 0 ? $0 : nil })
+     }
+ 
+     public func output<RangeExpression: Swift.RangeExpression>(
+         in range: RangeExpression
+-    ) -> Optional<Output>.OCombine.Publisher where RangeExpression.Bound == Int {
++    ) -> Optional<Output>.Publisher where RangeExpression.Bound == Int {
+         let range = range.relative(to: 0 ..< Int.max)
+         precondition(range.lowerBound >= 0, "lowerBound must not be negative")
+ 
+@@ -270,38 +213,38 @@ extension Optional.OCombine.Publisher {
+         )
+     }
+ 
+-    public func prefix(_ maxLength: Int) -> Optional<Output>.OCombine.Publisher {
++    public func prefix(_ maxLength: Int) -> Optional<Output>.Publisher {
+         precondition(maxLength >= 0, "maxLength must not be negative")
+         return .init(output.flatMap { maxLength > 0 ? $0 : nil })
+     }
+ 
+     public func prefix(
+         while predicate: (Output) -> Bool
+-    ) -> Optional<Output>.OCombine.Publisher {
++    ) -> Optional<Output>.Publisher {
+         return .init(output.flatMap { predicate($0) ? $0 : nil })
+     }
+ 
+     public func reduce<Accumulator>(
+         _ initialResult: Accumulator,
+         _ nextPartialResult: (Accumulator, Output) -> Accumulator
+-    ) -> Optional<Accumulator>.OCombine.Publisher {
++    ) -> Optional<Accumulator>.Publisher {
+         return .init(output.map { nextPartialResult(initialResult, $0) })
+     }
+ 
+     public func scan<ElementOfResult>(
+         _ initialResult: ElementOfResult,
+         _ nextPartialResult: (ElementOfResult, Output) -> ElementOfResult
+-    ) -> Optional<ElementOfResult>.OCombine.Publisher {
++    ) -> Optional<ElementOfResult>.Publisher {
+         return .init(output.map { nextPartialResult(initialResult, $0) })
+     }
+ 
+     public func removeDuplicates(
+         by predicate: (Output, Output) -> Bool
+-    ) -> Optional<Output>.OCombine.Publisher {
++    ) -> Optional<Output>.Publisher {
+         return self
+     }
+ 
+-    public func replaceError(with output: Output) -> Optional<Output>.OCombine.Publisher {
++    public func replaceError(with output: Output) -> Optional<Output>.Publisher {
+         return self
+     }
+ 
+@@ -309,7 +252,7 @@ extension Optional.OCombine.Publisher {
+         return .init(self.output ?? output)
+     }
+ 
+-    public func retry(_ times: Int) -> Optional<Output>.OCombine.Publisher {
++    public func retry(_ times: Int) -> Optional<Output>.Publisher {
+         return self
+     }
+ }
+diff --git a/Sources/OpenCombine/Publishers/Publishers.Sequence.swift b/Sources/OpenCombine/Publishers/Publishers.Sequence.swift
+index c825fc0..06118ba 100644
+--- a/Sources/OpenCombine/Publishers/Publishers.Sequence.swift
++++ b/Sources/OpenCombine/Publishers/Publishers.Sequence.swift
+@@ -146,19 +146,19 @@ extension Publishers.Sequence where Failure == Never {
+ 
+     public func min(
+         by areInIncreasingOrder: (Elements.Element, Elements.Element) -> Bool
+-    ) -> Optional<Elements.Element>.OCombine.Publisher {
++    ) -> Optional<Elements.Element>.Publisher {
+         return .init(sequence.min(by: areInIncreasingOrder))
+     }
+ 
+     public func max(
+         by areInIncreasingOrder: (Elements.Element, Elements.Element) -> Bool
+-    ) -> Optional<Elements.Element>.OCombine.Publisher {
++    ) -> Optional<Elements.Element>.Publisher {
+         return .init(sequence.max(by: areInIncreasingOrder))
+     }
+ 
+     public func first(
+         where predicate: (Elements.Element) -> Bool
+-    ) -> Optional<Elements.Element>.OCombine.Publisher {
++    ) -> Optional<Elements.Element>.Publisher {
+         return .init(sequence.first(where: predicate))
+     }
+ }
+@@ -167,17 +167,17 @@ extension Publishers.Sequence {
+ 
+     public func allSatisfy(
+         _ predicate: (Elements.Element) -> Bool
+-    ) -> Result<Bool, Failure>.OCombine.Publisher {
++    ) -> Result<Bool, Failure>.Publisher {
+         return .init(sequence.allSatisfy(predicate))
+     }
+ 
+     public func tryAllSatisfy(
+         _ predicate: (Elements.Element) throws -> Bool
+-    ) -> Result<Bool, Error>.OCombine.Publisher {
++    ) -> Result<Bool, Error>.Publisher {
+         return .init(Result { try sequence.allSatisfy(predicate) })
+     }
+ 
+-    public func collect() -> Result<[Elements.Element], Failure>.OCombine.Publisher {
++    public func collect() -> Result<[Elements.Element], Failure>.Publisher {
+         return .init(Array(sequence))
+     }
+ 
+@@ -189,13 +189,13 @@ extension Publishers.Sequence {
+ 
+     public func contains(
+         where predicate: (Elements.Element) -> Bool
+-    ) -> Result<Bool, Failure>.OCombine.Publisher {
++    ) -> Result<Bool, Failure>.Publisher {
+         return .init(sequence.contains(where: predicate))
+     }
+ 
+     public func tryContains(
+         where predicate: (Elements.Element) throws -> Bool
+-    ) -> Result<Bool, Error>.OCombine.Publisher {
++    ) -> Result<Bool, Error>.Publisher {
+         return .init(Result { try sequence.contains(where: predicate) })
+     }
+ 
+@@ -242,7 +242,7 @@ extension Publishers.Sequence {
+     public func reduce<Accumulator>(
+         _ initialResult: Accumulator,
+         _ nextPartialResult: @escaping (Accumulator, Elements.Element) -> Accumulator
+-    ) -> Result<Accumulator, Failure>.OCombine.Publisher {
++    ) -> Result<Accumulator, Failure>.Publisher {
+         return .init(sequence.reduce(initialResult, nextPartialResult))
+     }
+ 
+@@ -250,7 +250,7 @@ extension Publishers.Sequence {
+         _ initialResult: Accumulator,
+         _ nextPartialResult:
+             @escaping (Accumulator, Elements.Element) throws -> Accumulator
+-    ) -> Result<Accumulator, Error>.OCombine.Publisher {
++    ) -> Result<Accumulator, Error>.Publisher {
+         return .init(Result { try sequence.reduce(initialResult, nextPartialResult) })
+     }
+ 
+@@ -295,38 +295,38 @@ extension Publishers.Sequence where Elements.Element: Equatable {
+ 
+     public func contains(
+         _ output: Elements.Element
+-    ) -> Result<Bool, Failure>.OCombine.Publisher {
++    ) -> Result<Bool, Failure>.Publisher {
+         return .init(sequence.contains(output))
+     }
+ }
+ 
+ extension Publishers.Sequence where Failure == Never, Elements.Element: Comparable {
+ 
+-    public func min() -> Optional<Elements.Element>.OCombine.Publisher {
++    public func min() -> Optional<Elements.Element>.Publisher {
+         return .init(sequence.min())
+     }
+ 
+-    public func max() -> Optional<Elements.Element>.OCombine.Publisher {
++    public func max() -> Optional<Elements.Element>.Publisher {
+         return .init(sequence.max())
+     }
+ }
+ 
+ extension Publishers.Sequence where Elements: Collection, Failure == Never {
+ 
+-    public func first() -> Optional<Elements.Element>.OCombine.Publisher {
++    public func first() -> Optional<Elements.Element>.Publisher {
+         return .init(sequence.first)
+     }
+ 
+     public func output(
+         at index: Elements.Index
+-    ) -> Optional<Elements.Element>.OCombine.Publisher {
++    ) -> Optional<Elements.Element>.Publisher {
+         return .init(sequence.indices.contains(index) ? sequence[index] : nil)
+     }
+ }
+ 
+ extension Publishers.Sequence where Elements: Collection {
+ 
+-    public func count() -> Result<Int, Failure>.OCombine.Publisher {
++    public func count() -> Result<Int, Failure>.Publisher {
+         return .init(sequence.count)
+     }
+ 
+@@ -339,13 +339,13 @@ extension Publishers.Sequence where Elements: Collection {
+ 
+ extension Publishers.Sequence where Elements: BidirectionalCollection, Failure == Never {
+ 
+-    public func last() -> Optional<Elements.Element>.OCombine.Publisher {
++    public func last() -> Optional<Elements.Element>.Publisher {
+         return .init(sequence.last)
+     }
+ 
+     public func last(
+         where predicate: (Elements.Element) -> Bool
+-    ) -> Optional<Elements.Element>.OCombine.Publisher {
++    ) -> Optional<Elements.Element>.Publisher {
+         return .init(sequence.last(where: predicate))
+     }
+ }
+@@ -354,7 +354,7 @@ extension Publishers.Sequence where Elements: RandomAccessCollection, Failure ==
+ 
+     public func output(
+         at index: Elements.Index
+-    ) -> Optional<Elements.Element>.OCombine.Publisher {
++    ) -> Optional<Elements.Element>.Publisher {
+         return .init(sequence.indices.contains(index) ? sequence[index] : nil)
+     }
+ 
+@@ -371,7 +371,7 @@ extension Publishers.Sequence where Elements: RandomAccessCollection {
+         return .init(sequence: Array(sequence[range]))
+     }
+ 
+-    public func count() -> Result<Int, Failure>.OCombine.Publisher {
++    public func count() -> Result<Int, Failure>.Publisher {
+         return .init(sequence.count)
+     }
+ }
+diff --git a/Sources/OpenCombine/Publishers/Result.Publisher.swift b/Sources/OpenCombine/Publishers/Result.Publisher.swift
+index 8ccaa2b..fc47652 100644
+--- a/Sources/OpenCombine/Publishers/Result.Publisher.swift
++++ b/Sources/OpenCombine/Publishers/Result.Publisher.swift
+@@ -7,115 +7,43 @@
+ 
+ extension Result {
+ 
+-    /// A namespace for disambiguation when both OpenCombine and Combine are imported.
+-    ///
+-    /// Combine extends `Result` with a nested type `Publisher`.
+-    /// If you import both OpenCombine and Combine (either explicitly or implicitly,
+-    /// e. g. when importing Foundation), you will not be able
+-    /// to write `Result<Int, Error>.Publisher`,
+-    /// because Swift is unable to understand which `Publisher` you're referring to.
+-    ///
+-    /// So you have to write `Result<Int, Error>.OCombine.Publisher`.
+-    ///
+-    /// This bug is tracked [here](https://bugs.swift.org/browse/SR-11183).
+-    ///
+-    /// You can omit this whenever Combine is not available (e. g. on Linux).
+-    public struct OCombine {
++    public struct Publisher: Combine.Publisher {
+ 
+-        fileprivate let result: Result
++        public typealias Output = Success
+ 
+-        fileprivate init(_ result: Result) {
++        public let result: Result
++
++        public init(_ result: Result) {
+             self.result = result
+         }
+ 
+-        public var publisher: Publisher {
+-            return Publisher(result)
++        public init(_ output: Output) {
++            self.init(.success(output))
+         }
+ 
+-        /// A publisher that publishes an output to each subscriber exactly once then
+-        /// finishes, or fails immediately without producing any elements.
+-        ///
+-        /// If `result` is `.success`, then `Once` waits until it receives a request for
+-        /// at least 1 value before sending the output. If `result` is `.failure`,
+-        /// then `Once` sends the failure immediately upon subscription.
+-        ///
+-        /// In contrast with `Just`, a `Once` publisher can terminate with an error
+-        /// instead of sending a value. In contrast with `Optional`, a `Once` publisher
+-        /// always sends one value (unless it terminates with an error).
+-        public struct Publisher: OpenCombine.Publisher {
++        public init(_ failure: Failure) {
++            self.init(.failure(failure))
++        }
+ 
+-            public typealias Output = Success
+-
+-            /// The result to deliver to each subscriber.
+-            public let result: Result
+-
+-            /// Creates a publisher that delivers the specified result.
+-            ///
+-            /// If the result is `.success`, the `Once` publisher sends the specified
+-            /// output to all subscribers and finishes normally. If the result is
+-            /// `.failure`, then the publisher fails immediately with the specified
+-            /// error.
+-            ///
+-            /// - Parameter result: The result to deliver to each subscriber.
+-            public init(_ result: Result) {
+-                self.result = result
+-            }
+-
+-            /// Creates a publisher that sends the specified output to all subscribers and
+-            /// finishes normally.
+-            ///
+-            /// - Parameter output: The output to deliver to each subscriber.
+-            public init(_ output: Output) {
+-                self.init(.success(output))
+-            }
+-
+-            /// Creates a publisher that immediately terminates upon subscription with
+-            /// the given failure.
+-            ///
+-            /// - Parameter failure: The failure to send when terminating.
+-            public init(_ failure: Failure) {
+-                self.init(.failure(failure))
+-            }
+-
+-            public func receive<Downstream: Subscriber>(subscriber: Downstream)
+-                where Downstream.Input == Success, Downstream.Failure == Failure
+-            {
+-                switch result {
+-                case .success(let value):
+-                    subscriber.receive(subscription: Inner(value: value,
+-                                                           downstream: subscriber))
+-                case .failure(let failure):
+-                    subscriber.receive(subscription: Subscriptions.empty)
+-                    subscriber.receive(completion: .failure(failure))
+-                }
++        public func receive<Downstream: Subscriber>(subscriber: Downstream)
++            where Downstream.Input == Success, Downstream.Failure == Failure
++        {
++            switch result {
++            case .success(let value):
++                subscriber.receive(subscription: Inner(value: value,
++                                                       downstream: subscriber))
++            case .failure(let failure):
++                subscriber.receive(subscription: Subscriptions.empty)
++                subscriber.receive(completion: .failure(failure))
+             }
+         }
+     }
+-
+-    public var ocombine: OCombine {
+-        return OCombine(self)
+-    }
+-
+-#if !canImport(Combine)
+-    /// A publisher that publishes an output to each subscriber exactly once then
+-    /// finishes, or fails immediately without producing any elements.
+-    ///
+-    /// If `result` is `.success`, then `Once` waits until it receives a request for
+-    /// at least 1 value before sending the output. If `result` is `.failure`, then `Once`
+-    /// sends the failure immediately upon subscription.
+-    ///
+-    /// In contrast with `Just`, a `Once` publisher can terminate with an error instead of
+-    /// sending a value. In contrast with `Optional`, a `Once` publisher always sends one
+-    /// value (unless it terminates with an error).
+-    public typealias Publisher = OCombine.Publisher
+-
+     public var publisher: Publisher {
+         return Publisher(self)
+     }
+-#endif
+ }
+ 
+-extension Result.OCombine {
++extension Result {
+     private final class Inner<Downstream: Subscriber>
+         : Subscription,
+           CustomStringConvertible,
+@@ -155,96 +83,96 @@ extension Result.OCombine {
+     }
+ }
+ 
+-extension Result.OCombine.Publisher: Equatable
++extension Result.Publisher: Equatable
+     where Output: Equatable, Failure: Equatable
+ {
+ }
+ 
+-extension Result.OCombine.Publisher where Output: Equatable {
++extension Result.Publisher where Output: Equatable {
+ 
+-    public func contains(_ output: Output) -> Result<Bool, Failure>.OCombine.Publisher {
++    public func contains(_ output: Output) -> Result<Bool, Failure>.Publisher {
+         return .init(result.map { $0 == output })
+     }
+ 
+-    public func removeDuplicates() -> Result<Output, Failure>.OCombine.Publisher {
++    public func removeDuplicates() -> Result<Output, Failure>.Publisher {
+         return self
+     }
+ }
+ 
+-extension Result.OCombine.Publisher where Output: Comparable {
++extension Result.Publisher where Output: Comparable {
+ 
+-    public func min() -> Result<Output, Failure>.OCombine.Publisher {
++    public func min() -> Result<Output, Failure>.Publisher {
+         return self
+     }
+ 
+-    public func max() -> Result<Output, Failure>.OCombine.Publisher {
++    public func max() -> Result<Output, Failure>.Publisher {
+         return self
+     }
+ }
+ 
+-extension Result.OCombine.Publisher {
++extension Result.Publisher {
+ 
+     public func allSatisfy(
+         _ predicate: (Output) -> Bool
+-    ) -> Result<Bool, Failure>.OCombine.Publisher {
++    ) -> Result<Bool, Failure>.Publisher {
+         return .init(result.map(predicate))
+     }
+ 
+     public func tryAllSatisfy(
+         _ predicate: (Output) throws -> Bool
+-    ) -> Result<Bool, Error>.OCombine.Publisher {
++    ) -> Result<Bool, Error>.Publisher {
+         return .init(result.tryMap(predicate))
+     }
+ 
+     public func contains(
+         where predicate: (Output) -> Bool
+-    ) -> Result<Bool, Failure>.OCombine.Publisher {
++    ) -> Result<Bool, Failure>.Publisher {
+         return .init(result.map(predicate))
+     }
+ 
+     public func tryContains(
+         where predicate: (Output) throws -> Bool
+-    ) -> Result<Bool, Error>.OCombine.Publisher {
++    ) -> Result<Bool, Error>.Publisher {
+         return .init(result.tryMap(predicate))
+     }
+ 
+-    public func collect() -> Result<[Output], Failure>.OCombine.Publisher {
++    public func collect() -> Result<[Output], Failure>.Publisher {
+         return .init(result.map { [$0] })
+     }
+ 
+     public func min(
+         by areInIncreasingOrder: (Output, Output) -> Bool
+-    ) -> Result<Output, Failure>.OCombine.Publisher {
++    ) -> Result<Output, Failure>.Publisher {
+         return self
+     }
+ 
+     public func tryMin(
+         by areInIncreasingOrder: (Output, Output) throws -> Bool
+-    ) -> Result<Output, Error>.OCombine.Publisher {
++    ) -> Result<Output, Error>.Publisher {
+         return .init(result.tryMap { _ = try areInIncreasingOrder($0, $0); return $0 })
+     }
+ 
+     public func max(
+         by areInIncreasingOrder: (Output, Output
+-    ) -> Bool) -> Result<Output, Failure>.OCombine.Publisher {
++    ) -> Bool) -> Result<Output, Failure>.Publisher {
+         return self
+     }
+ 
+     public func tryMax(
+         by areInIncreasingOrder: (Output, Output) throws -> Bool
+-    ) -> Result<Output, Error>.OCombine.Publisher {
++    ) -> Result<Output, Error>.Publisher {
+         return .init(result.tryMap { _ = try areInIncreasingOrder($0, $0); return $0 })
+     }
+ 
+-    public func count() -> Result<Int, Failure>.OCombine.Publisher {
++    public func count() -> Result<Int, Failure>.Publisher {
+         return .init(result.map { _ in 1 })
+     }
+ 
+-    public func first() -> Result<Output, Failure>.OCombine.Publisher {
++    public func first() -> Result<Output, Failure>.Publisher {
+         return self
+     }
+ 
+-    public func last() -> Result<Output, Failure>.OCombine.Publisher {
++    public func last() -> Result<Output, Failure>.Publisher {
+         return self
+     }
+ 
+@@ -254,84 +182,84 @@ extension Result.OCombine.Publisher {
+ 
+     public func map<ElementOfResult>(
+         _ transform: (Output) -> ElementOfResult
+-    ) -> Result<ElementOfResult, Failure>.OCombine.Publisher {
++    ) -> Result<ElementOfResult, Failure>.Publisher {
+         return .init(result.map(transform))
+     }
+ 
+     public func tryMap<ElementOfResult>(
+         _ transform: (Output) throws -> ElementOfResult
+-    ) -> Result<ElementOfResult, Error>.OCombine.Publisher {
++    ) -> Result<ElementOfResult, Error>.Publisher {
+         return .init(result.tryMap(transform))
+     }
+ 
+     public func mapError<TransformedFailure: Error>(
+         _ transform: (Failure) -> TransformedFailure
+-    ) -> Result<Output, TransformedFailure>.OCombine.Publisher {
++    ) -> Result<Output, TransformedFailure>.Publisher {
+         return .init(result.mapError(transform))
+     }
+ 
+     public func removeDuplicates(
+         by predicate: (Output, Output) -> Bool
+-    ) -> Result<Output, Failure>.OCombine.Publisher {
++    ) -> Result<Output, Failure>.Publisher {
+         return self
+     }
+ 
+     public func tryRemoveDuplicates(
+         by predicate: (Output, Output) throws -> Bool
+-    ) -> Result<Output, Error>.OCombine.Publisher {
++    ) -> Result<Output, Error>.Publisher {
+         return .init(result.tryMap { _ = try predicate($0, $0); return $0 })
+     }
+ 
+     public func replaceError(
+         with output: Output
+-    ) -> Result<Output, Never>.OCombine.Publisher {
++    ) -> Result<Output, Never>.Publisher {
+         return .init(.success(result.unwrapOr(output)))
+     }
+ 
+     public func replaceEmpty(
+         with output: Output
+-    ) -> Result<Output, Failure>.OCombine.Publisher {
++    ) -> Result<Output, Failure>.Publisher {
+         return self
+     }
+ 
+-    public func retry(_ times: Int) -> Result<Output, Failure>.OCombine.Publisher {
++    public func retry(_ times: Int) -> Result<Output, Failure>.Publisher {
+         return self
+     }
+ 
+     public func reduce<Accumulator>(
+         _ initialResult: Accumulator,
+         _ nextPartialResult: (Accumulator, Output) -> Accumulator
+-    ) -> Result<Accumulator, Failure>.OCombine.Publisher {
++    ) -> Result<Accumulator, Failure>.Publisher {
+         return .init(result.map { nextPartialResult(initialResult, $0) })
+     }
+ 
+     public func tryReduce<Accumulator>(
+         _ initialResult: Accumulator,
+         _ nextPartialResult: (Accumulator, Output) throws -> Accumulator
+-    ) -> Result<Accumulator, Error>.OCombine.Publisher{
++    ) -> Result<Accumulator, Error>.Publisher{
+         return .init(result.tryMap { try nextPartialResult(initialResult, $0) })
+     }
+ 
+     public func scan<ElementOfResult>(
+         _ initialResult: ElementOfResult,
+         _ nextPartialResult: (ElementOfResult, Output) -> ElementOfResult
+-    ) -> Result<ElementOfResult, Failure>.OCombine.Publisher {
++    ) -> Result<ElementOfResult, Failure>.Publisher {
+         return .init(result.map { nextPartialResult(initialResult, $0) })
+     }
+ 
+     public func tryScan<ElementOfResult>(
+         _ initialResult: ElementOfResult,
+         _ nextPartialResult: (ElementOfResult, Output) throws -> ElementOfResult
+-    ) -> Result<ElementOfResult, Error>.OCombine.Publisher {
++    ) -> Result<ElementOfResult, Error>.Publisher {
+         return .init(result.tryMap { try nextPartialResult(initialResult, $0) })
+     }
+ }
+ 
+-extension Result.OCombine.Publisher where Failure == Never {
++extension Result.Publisher where Failure == Never {
+ 
+     public func setFailureType<Failure: Error>(
+         to failureType: Failure.Type
+-    ) -> Result<Output, Failure>.OCombine.Publisher {
++    ) -> Result<Output, Failure>.Publisher {
+         return .init(result.success)
+     }
+ }
+diff --git a/Sources/OpenCombine/RootProtocols.swift.gyb b/Sources/OpenCombine/RootProtocols.swift.gyb
+index ccda79c..8d5da07 100644
+--- a/Sources/OpenCombine/RootProtocols.swift.gyb
++++ b/Sources/OpenCombine/RootProtocols.swift.gyb
+@@ -66,7 +66,7 @@ public protocol Publisher${'<Output, Failure>' if primary_associated_types_suppo
+     ///
+     /// - Parameter subscriber: The subscriber to attach to this publisher. After
+     ///   attaching, the subscriber can start to receive values.
+-    func receive<Subscriber: OpenCombine.Subscriber>(subscriber: Subscriber)
++    func receive<Subscriber: Combine.Subscriber>(subscriber: Subscriber)
+         where Failure == Subscriber.Failure, Output == Subscriber.Input
+ }
+ 
+diff --git a/Sources/OpenCombineDispatch/DispatchQueue+Scheduler.swift b/Sources/OpenCombineDispatch/DispatchQueue+Scheduler.swift
+index 125397b..997a7be 100644
+--- a/Sources/OpenCombineDispatch/DispatchQueue+Scheduler.swift
++++ b/Sources/OpenCombineDispatch/DispatchQueue+Scheduler.swift
+@@ -6,134 +6,83 @@
+ //
+ 
+ import Dispatch
+-import OpenCombine
+ 
+-extension DispatchQueue {
++extension DispatchQueue: Combine.Scheduler {
+ 
+-    /// A namespace for disambiguation when both OpenCombine and Combine are imported.
+-    ///
+-    /// Combine extends `DispatchQueue` with new methods and nested types.
+-    /// If you import both OpenCombine and Combine (either explicitly or implicitly,
+-    /// e. g. when importing Foundation), you will not be able
+-    /// to write `DispatchQueue.SchedulerTimeType`,
+-    /// because Swift is unable to understand which `SchedulerTimeType`
+-    /// you're referring to.
+-    ///
+-    /// So you have to write `DispatchQueue.OCombine.SchedulerTimeType`.
+-    ///
+-    /// This bug is tracked [here](https://bugs.swift.org/browse/SR-11183).
+-    ///
+-    /// You can omit this whenever Combine is not available (e. g. on Linux).
+-    public struct OCombine: Scheduler {
++    public struct SchedulerTimeType: Strideable, Codable, Hashable {
+ 
+-        public let queue: DispatchQueue
++        public var dispatchTime: DispatchTime
+ 
+-        public init(_ queue: DispatchQueue) {
+-            self.queue = queue
++        public init(_ time: DispatchTime) {
++            dispatchTime = time
+         }
+ 
+-        /// The scheduler time type used by the dispatch queue.
+-        public struct SchedulerTimeType: Strideable, Codable, Hashable {
++        public func distance(to other: SchedulerTimeType) -> Stride {
++            return Stride(dispatchTime.polyfillDistance(to: other.dispatchTime))
++        }
+ 
+-            /// The dispatch time represented by this type.
+-            public var dispatchTime: DispatchTime
++        public func advanced(by stride: Stride) -> SchedulerTimeType {
++            return stride.magnitude == .max
++                ? .init(.distantFuture)
++                : .init(dispatchTime + stride.timeInterval)
++        }
+ 
+-            /// Creates a dispatch queue time type instance.
+-            ///
+-            /// - Parameter time: The dispatch time to represent.
+-            public init(_ time: DispatchTime) {
+-                dispatchTime = time
+-            }
++        public func hash(into hasher: inout Hasher) {
++            hasher.combine(dispatchTime.rawValue)
++        }
+ 
+-            /// Returns the distance to another dispatch queue time.
+-            ///
+-            /// - Parameter other: Another dispatch queue time.
+-            /// - Returns: The time interval between this time and the provided time.
+-            public func distance(to other: SchedulerTimeType) -> Stride {
+-                return Stride(dispatchTime.polyfillDistance(to: other.dispatchTime))
+-            }
++        public func encode(to encoder: Encoder) throws {
++            var container = encoder.singleValueContainer()
++            try container.encode(dispatchTime.uptimeNanoseconds)
++        }
+ 
+-            /// Returns a dispatch queue scheduler time calculated by advancing
+-            /// this instance’s time by the given interval.
+-            ///
+-            /// - Parameter n: A time interval to advance.
+-            /// - Returns: A dispatch queue time advanced by the given
+-            ///   interval from this instance’s time.
+-            public func advanced(by stride: Stride) -> SchedulerTimeType {
+-                return stride.magnitude == .max
+-                    ? .init(.distantFuture)
+-                    : .init(dispatchTime + stride.timeInterval)
+-            }
++        public init(from decoder: Decoder) throws {
++            let container = try decoder.singleValueContainer()
++            dispatchTime = try .init(uptimeNanoseconds: container.decode(UInt64.self))
++        }
+ 
+-            public func hash(into hasher: inout Hasher) {
+-                hasher.combine(dispatchTime.rawValue)
+-            }
++        public struct Stride: SchedulerTimeIntervalConvertible,
++                              Comparable,
++                              SignedNumeric,
++                              ExpressibleByFloatLiteral,
++                              Hashable,
++                              Codable {
+ 
+-            public func encode(to encoder: Encoder) throws {
+-                var container = encoder.singleValueContainer()
+-                try container.encode(dispatchTime.uptimeNanoseconds)
+-            }
++            public typealias FloatLiteralType = Double
+ 
+-            public init(from decoder: Decoder) throws {
+-                let container = try decoder.singleValueContainer()
+-                dispatchTime = try .init(uptimeNanoseconds: container.decode(UInt64.self))
+-            }
++            public typealias IntegerLiteralType = Int
+ 
+-            /// A type that represents the distance between two values.
+-            public struct Stride: SchedulerTimeIntervalConvertible,
+-                                  Comparable,
+-                                  SignedNumeric,
+-                                  ExpressibleByFloatLiteral,
+-                                  Hashable,
+-                                  Codable {
++            public typealias Magnitude = Int
+ 
+-                /// If created via floating point literal, the value is
+-                /// converted to nanoseconds via multiplication.
+-                public typealias FloatLiteralType = Double
++            private var _nanoseconds: Int64
+ 
+-                /// Nanoseconds, same as DispatchTimeInterval.
+-                public typealias IntegerLiteralType = Int
+-
+-                /// A type that can represent the absolute value of any possible
+-                /// value of the conforming type.
+-                public typealias Magnitude = Int
+-
+-                private var _nanoseconds: Int64
+-
+-                /// The value of this time interval in nanoseconds.
+-                public var magnitude: Int {
+-                    get {
+-                        return Int(_nanoseconds)
+-                    }
+-                    set {
+-                        _nanoseconds = Int64(newValue)
+-                    }
++            public var magnitude: Int {
++                get {
++                    return Int(_nanoseconds)
+                 }
+-
+-                /// A `DispatchTimeInterval` created with the value of this type
+-                /// in nanoseconds.
+-                public var timeInterval: DispatchTimeInterval {
+-                    return .nanoseconds(magnitude)
++                set {
++                    _nanoseconds = Int64(newValue)
+                 }
++            }
+ 
+-                private init(magnitude: Int64) {
+-                    _nanoseconds = magnitude
+-                }
++            public var timeInterval: DispatchTimeInterval {
++                return .nanoseconds(magnitude)
++            }
+ 
+-                /// Creates a dispatch queue time interval from the given
+-                /// dispatch time interval.
+-                ///
+-                /// - Parameter timeInterval: A dispatch time interval.
+-                public init(_ timeInterval: DispatchTimeInterval) {
+-                    switch timeInterval {
+-                    case .seconds(let seconds):
+-                        self = .seconds(seconds)
+-                    case .milliseconds(let milliseconds):
+-                        self = .milliseconds(milliseconds)
+-                    case .microseconds(let microseconds):
+-                        self = .microseconds(microseconds)
+-                    case .nanoseconds(let nanoseconds):
+-                        self = .nanoseconds(nanoseconds)
++            private init(magnitude: Int64) {
++                _nanoseconds = magnitude
++            }
++
++            public init(_ timeInterval: DispatchTimeInterval) {
++                switch timeInterval {
++                case .seconds(let seconds):
++                    self = .seconds(seconds)
++                case .milliseconds(let milliseconds):
++                    self = .milliseconds(milliseconds)
++                case .microseconds(let microseconds):
++                    self = .microseconds(microseconds)
++                case .nanoseconds(let nanoseconds):
++                    self = .nanoseconds(nanoseconds)
+ // This dance is to avoid the warning 'default will never be executed'
+ // on non-Darwin platforms.
+ // There really shouldn't be a warning.
+@@ -141,259 +90,163 @@ extension DispatchQueue {
+ //
+ // Thanks to Jeremy David Giesbrecht for suggesting this workaround.
+ #if canImport(Darwin)
+-                    case .never:
+-                        self = .nanoseconds(.max)
+-                    @unknown default:
+-                        self.init(__guessFromUnknown: timeInterval)
++                case .never:
++                    self = .nanoseconds(.max)
++                @unknown default:
++                    self.init(__guessFromUnknown: timeInterval)
+ #else
+-                    default:
+-                        if case .never = timeInterval {
+-                            self = .nanoseconds(.max)
+-                        } else {
+-                            self.init(__guessFromUnknown: timeInterval)
+-                        }
++                default:
++                    if case .never = timeInterval {
++                        self = .nanoseconds(.max)
++                    } else {
++                        self.init(__guessFromUnknown: timeInterval)
++                    }
+ #endif
+-                    }
+-                }
+-
+-                public // testable
+-                init(__guessFromUnknown timeInterval: DispatchTimeInterval) {
+-                    // Let's take some reference time,
+-                    // add `timeInterval` to it, take the `rawValue` from the result
+-                    // and subtract the `rawValue` of the reference time.
+-                    //
+-                    // We won't be able to provide the exact implementation though,
+-                    // because something will definitely overflow.
+-                    //
+-                    // However, we can try to support as wide a range of values
+-                    // as possible.
+-                    //
+-                    // By trial and error I got that the `rawValue` of `UInt64.max / 13`
+-                    // gives us probably the widest range of supported values:
+-                    // from `Int.min / 6.5` to `Int.max / 2.889` nanoseconds.
+-                    // That's with Int being 64 bits. Since here only UInt64 can overflow,
+-                    // when Int is 32 bits, we don't have this issue.
+-                    // It should be more than enough.
+-
+-                    let referenceTime = DispatchTime(uptimeNanoseconds: .max / 13)
+-                    self = SchedulerTimeType(referenceTime)
+-                        .distance(to: SchedulerTimeType(referenceTime + timeInterval))
+-                }
+-
+-                /// Creates a dispatch queue time interval from a floating-point
+-                /// seconds value.
+-                ///
+-                /// - Parameter value: The number of seconds, as a `Double`.
+-                public init(floatLiteral value: Double) {
+-                    self = .seconds(value)
+-                }
+-
+-                /// Creates a dispatch queue time interval from an integer seconds value.
+-                ///
+-                /// - Parameter value: The number of seconds, as an `Int`.
+-                public init(integerLiteral value: Int) {
+-                    self = .seconds(value)
+-                }
+-
+-                /// Creates a dispatch queue time interval from a binary integer type.
+-                ///
+-                /// If `exactly` cannot convert to an `Int`, the resulting time interval
+-                /// is `nil`.
+-                /// 
+-                /// - Parameter exactly: A binary integer representing a time interval.
+-                public init?<Source: BinaryInteger>(exactly source: Source) {
+-                    guard let value = Int(exactly: source) else { return nil }
+-                    self = .seconds(value)
+-                }
+-
+-                public static func < (lhs: Stride, rhs: Stride) -> Bool {
+-                    return lhs._nanoseconds < rhs._nanoseconds
+-                }
+-
+-                public static func * (lhs: Stride, rhs: Stride) -> Stride {
+-                    return Stride(magnitude: 0)
+-                }
+-
+-                public static func + (lhs: Stride, rhs: Stride) -> Stride {
+-                    return Stride(magnitude: lhs._nanoseconds + rhs._nanoseconds)
+-                }
+-
+-                public static func - (lhs: Stride, rhs: Stride) -> Stride {
+-                    return Stride(magnitude: lhs._nanoseconds - rhs._nanoseconds)
+-                }
+-
+-                public static func -= (lhs: inout Stride, rhs: Stride) {
+-                    lhs._nanoseconds -= rhs._nanoseconds
+-                }
+-
+-                public static func *= (lhs: inout Stride, rhs: Stride) {
+-                    lhs._nanoseconds = 0
+-                }
+-
+-                public static func += (lhs: inout Stride, rhs: Stride) {
+-                    lhs._nanoseconds += rhs._nanoseconds
+-                }
+-
+-                public static func seconds(_ value: Double) -> Stride {
+-                    let nanoseconds = value * 1_000_000_000
+-                    if nanoseconds >= Double(Int64.max) {
+-                        return Stride(magnitude: .max)
+-                    }
+-                    if nanoseconds <= Double(Int64.min) {
+-                        return Stride(magnitude: .min)
+-                    }
+-                    return Stride(magnitude: Int64(nanoseconds))
+-                }
+-
+-                public static func seconds(_ value: Int) -> Stride {
+-                    return Stride(magnitude: clampedIntProduct(Int64(value),
+-                                                               1_000_000_000))
+-                }
+-
+-                public static func milliseconds(_ value: Int) -> Stride {
+-                    return Stride(magnitude: clampedIntProduct(Int64(value), 1_000_000))
+-                }
+-
+-                public static func microseconds(_ value: Int) -> Stride {
+-                    return Stride(magnitude: clampedIntProduct(Int64(value), 1_000))
+-                }
+-
+-                public static func nanoseconds(_ value: Int) -> Stride {
+-                    return Stride(magnitude: Int64(value))
+                 }
+             }
+-        }
+ 
+-        /// Options that affect the operation of the dispatch queue scheduler.
+-        public struct SchedulerOptions {
++            public
++            init(__guessFromUnknown timeInterval: DispatchTimeInterval) {
+ 
+-            /// The dispatch queue quality of service.
+-            public var qos: DispatchQoS
++                let referenceTime = DispatchTime(uptimeNanoseconds: .max / 13)
++                self = SchedulerTimeType(referenceTime)
++                    .distance(to: SchedulerTimeType(referenceTime + timeInterval))
++            }
+ 
+-            /// The dispatch queue work item flags.
+-            public var flags: DispatchWorkItemFlags
++            public init(floatLiteral value: Double) {
++                self = .seconds(value)
++            }
+ 
+-            /// The dispatch group, if any, that should be used for performing actions.
+-            public var group: DispatchGroup?
++            public init(integerLiteral value: Int) {
++                self = .seconds(value)
++            }
+ 
+-            public init(qos: DispatchQoS = .unspecified,
+-                        flags: DispatchWorkItemFlags = [],
+-                        group: DispatchGroup? = nil) {
+-                self.qos = qos
+-                self.flags = flags
+-                self.group = group
++            public init?<Source: BinaryInteger>(exactly source: Source) {
++                guard let value = Int(exactly: source) else { return nil }
++                self = .seconds(value)
++            }
++
++            public static func < (lhs: Stride, rhs: Stride) -> Bool {
++                return lhs._nanoseconds < rhs._nanoseconds
++            }
++
++            public static func * (lhs: Stride, rhs: Stride) -> Stride {
++                return Stride(magnitude: 0)
++            }
++
++            public static func + (lhs: Stride, rhs: Stride) -> Stride {
++                return Stride(magnitude: lhs._nanoseconds + rhs._nanoseconds)
++            }
++
++            public static func - (lhs: Stride, rhs: Stride) -> Stride {
++                return Stride(magnitude: lhs._nanoseconds - rhs._nanoseconds)
++            }
++
++            public static func -= (lhs: inout Stride, rhs: Stride) {
++                lhs._nanoseconds -= rhs._nanoseconds
++            }
++
++            public static func *= (lhs: inout Stride, rhs: Stride) {
++                lhs._nanoseconds = 0
++            }
++
++            public static func += (lhs: inout Stride, rhs: Stride) {
++                lhs._nanoseconds += rhs._nanoseconds
++            }
++
++            public static func seconds(_ value: Double) -> Stride {
++                let nanoseconds = value * 1_000_000_000
++                if nanoseconds >= Double(Int64.max) {
++                    return Stride(magnitude: .max)
++                }
++                if nanoseconds <= Double(Int64.min) {
++                    return Stride(magnitude: .min)
++                }
++                return Stride(magnitude: Int64(nanoseconds))
++            }
++
++            public static func seconds(_ value: Int) -> Stride {
++                return Stride(magnitude: clampedIntProduct(Int64(value),
++                                                           1_000_000_000))
++            }
++
++            public static func milliseconds(_ value: Int) -> Stride {
++                return Stride(magnitude: clampedIntProduct(Int64(value), 1_000_000))
++            }
++
++            public static func microseconds(_ value: Int) -> Stride {
++                return Stride(magnitude: clampedIntProduct(Int64(value), 1_000))
++            }
++
++            public static func nanoseconds(_ value: Int) -> Stride {
++                return Stride(magnitude: Int64(value))
+             }
+         }
+-
+-        public var minimumTolerance: SchedulerTimeType.Stride {
+-            return .nanoseconds(0)
+-        }
+-
+-        public var now: SchedulerTimeType {
+-            return .init(.now())
+-        }
+-
+-        public func schedule(options: SchedulerOptions?,
+-                             _ action: @escaping () -> Void) {
+-            let options = options ?? .init()
+-            queue.async(group: options.group,
+-                        qos: options.qos,
+-                        flags: options.flags,
+-                        execute: action)
+-        }
+-
+-        public func schedule(after date: SchedulerTimeType,
+-                             tolerance: SchedulerTimeType.Stride,
+-                             options: SchedulerOptions?,
+-                             _ action: @escaping () -> Void) {
+-            let options = options ?? .init()
+-            queue.asyncAfter(deadline: date.dispatchTime,
+-                             qos: options.qos,
+-                             flags: options.flags,
+-                             execute: action)
+-        }
+-
+-        /// Performs the action at some time after the specified date, at the specified
+-        /// frequency, optionally taking into account tolerance if possible.
+-        public func schedule(after date: SchedulerTimeType,
+-                             interval: SchedulerTimeType.Stride,
+-                             tolerance: SchedulerTimeType.Stride,
+-                             options: SchedulerOptions?,
+-                             _ action: @escaping () -> Void) -> Cancellable {
+-            let options = options ?? .init()
+-            let timer = DispatchSource.makeTimerSource(queue: queue)
+-            timer.setEventHandler(qos: options.qos,
+-                                  flags: options.flags,
+-                                  handler: action)
+-            timer.schedule(deadline: date.dispatchTime,
+-                           repeating: interval.timeInterval,
+-                           leeway: tolerance.timeInterval)
+-            timer.resume()
+-            return AnyCancellable(timer.cancel)
+-        }
+     }
+ 
+-    /// A namespace for disambiguation when both OpenCombine and Combine are imported.
+-    ///
+-    /// Combine extends `DispatchQueue` with new methods and nested types.
+-    /// If you import both OpenCombine and Combine (either explicitly or implicitly,
+-    /// e. g. when importing Foundation), you will not be able
+-    /// to write `DispatchQueue.main.schedule { doThings() }`,
+-    /// because Swift is unable to understand which `schedule` method
+-    /// you're referring to.
+-    ///
+-    /// So you have to write `DispatchQueue.main.ocombine.schedule { doThings() }`.
+-    ///
+-    /// This bug is tracked [here](https://bugs.swift.org/browse/SR-11183).
+-    ///
+-    /// You can omit this whenever Combine is not available (e. g. on Linux).
+-    public var ocombine: OCombine {
+-        return OCombine(self)
+-    }
+-}
+-
+-#if !canImport(Combine)
+-extension DispatchQueue: OpenCombine.Scheduler {
+-
+     /// Options that affect the operation of the dispatch queue scheduler.
+-    public typealias SchedulerOptions = OCombine.SchedulerOptions
++    public struct SchedulerOptions {
+ 
+-    /// The scheduler time type used by the dispatch queue.
+-    public typealias SchedulerTimeType = OCombine.SchedulerTimeType
++        public var qos: DispatchQoS
+ 
+-    public var minimumTolerance: OCombine.SchedulerTimeType.Stride {
+-        return ocombine.minimumTolerance
++        public var flags: DispatchWorkItemFlags
++
++        public var group: DispatchGroup?
++
++        public init(qos: DispatchQoS = .unspecified,
++                    flags: DispatchWorkItemFlags = [],
++                    group: DispatchGroup? = nil) {
++            self.qos = qos
++            self.flags = flags
++            self.group = group
++        }
+     }
+ 
+-    public var now: OCombine.SchedulerTimeType {
+-        return ocombine.now
++    public var minimumTolerance: SchedulerTimeType.Stride {
++        return .nanoseconds(0)
+     }
+ 
+-    public func schedule(options: OCombine.SchedulerOptions?,
++    public var now: SchedulerTimeType {
++        return .init(.now())
++    }
++
++    public func schedule(options: SchedulerOptions?,
+                          _ action: @escaping () -> Void) {
+-        ocombine.schedule(options: options, action)
++        let options = options ?? SchedulerOptions()
++        async(group: options.group,
++              qos: options.qos,
++              flags: options.flags,
++              execute: action)
+     }
+ 
+-    public func schedule(after date: OCombine.SchedulerTimeType,
+-                         tolerance: OCombine.SchedulerTimeType.Stride,
+-                         options: OCombine.SchedulerOptions?,
++    public func schedule(after date: SchedulerTimeType,
++                         tolerance: SchedulerTimeType.Stride,
++                         options: SchedulerOptions?,
+                          _ action: @escaping () -> Void) {
+-        ocombine.schedule(after: date, tolerance: tolerance, options: options, action)
++        let options = options ?? SchedulerOptions()
++        asyncAfter(deadline: date.dispatchTime,
++                   qos: options.qos,
++                   flags: options.flags,
++                   execute: action)
+     }
+ 
+-    public func schedule(after date: OCombine.SchedulerTimeType,
+-                         interval: OCombine.SchedulerTimeType.Stride,
+-                         tolerance: OCombine.SchedulerTimeType.Stride,
+-                         options: OCombine.SchedulerOptions?,
++    public func schedule(after date: SchedulerTimeType,
++                         interval: SchedulerTimeType.Stride,
++                         tolerance: SchedulerTimeType.Stride,
++                         options: SchedulerOptions?,
+                          _ action: @escaping () -> Void) -> Cancellable {
+-        return ocombine.schedule(after: date,
+-                                 interval: interval,
+-                                 tolerance: tolerance,
+-                                 options: options,
+-                                 action)
++        let options = options ?? SchedulerOptions()
++        let timer = DispatchSource.makeTimerSource(queue: self)
++        timer.setEventHandler(qos: options.qos,
++                              flags: options.flags,
++                              handler: action)
++        timer.schedule(deadline: date.dispatchTime,
++                       repeating: interval.timeInterval,
++                       leeway: tolerance.timeInterval)
++        timer.resume()
++        return AnyCancellable(timer.cancel)
+     }
+ }
+-#endif
+ 
+ // This function is taken from swift-corelibs-libdispatch:
+ // https://github.com/apple/swift-corelibs-libdispatch/blob/c992dacf3ca114806e6ac9ffc9113b19255be9fe/src/swift/Time.swift#L134-L144
+diff --git a/Sources/OpenCombineFoundation/JSONEncoder.swift b/Sources/OpenCombineFoundation/JSONEncoder.swift
+index 5cb3ff6..fb1aad7 100644
+--- a/Sources/OpenCombineFoundation/JSONEncoder.swift
++++ b/Sources/OpenCombineFoundation/JSONEncoder.swift
+@@ -6,7 +6,6 @@
+ //
+ 
+ import Foundation
+-import OpenCombine
+ 
+ extension JSONEncoder: TopLevelEncoder {
+   public typealias Output = Data
+diff --git a/Sources/OpenCombineFoundation/NotificationCenter.swift b/Sources/OpenCombineFoundation/NotificationCenter.swift
+index 2309b5c..27dcf6e 100644
+--- a/Sources/OpenCombineFoundation/NotificationCenter.swift
++++ b/Sources/OpenCombineFoundation/NotificationCenter.swift
+@@ -6,112 +6,40 @@
+ //
+ 
+ import Foundation
+-import OpenCombine
+ 
+ extension NotificationCenter {
+ 
+-    /// A namespace for disambiguation when both OpenCombine and Foundation are imported.
+-    ///
+-    /// Foundation extends `NotificationCenter` with new methods and nested types.
+-    /// If you import both OpenCombine and Foundation, you will not be able
+-    /// to write `NotificationCenter.Publisher`,
+-    /// because Swift is unable to understand which `Publisher`
+-    /// you're referring to — the one declared in Foundation or in OpenCombine.
+-    ///
+-    /// So you have to write `NotificationCenter.OCombine.Publisher`.
+-    ///
+-    /// This bug is tracked [here](https://bugs.swift.org/browse/SR-11183).
+-    ///
+-    /// You can omit this whenever Combine is not available (e. g. on Linux).
+-    public struct OCombine {
++    public struct Publisher: Combine.Publisher {
++
++        public typealias Output = Notification
++
++        public typealias Failure = Never
+ 
+         public let center: NotificationCenter
+ 
+-        public init(_ center: NotificationCenter) {
++        public let name: Notification.Name
++
++        public let object: AnyObject?
++
++        public init(center: NotificationCenter,
++                    name: Notification.Name,
++                    object: AnyObject? = nil) {
+             self.center = center
++            self.name = name
++            self.object = object
+         }
+ 
+-        /// A publisher that emits elements when broadcasting notifications.
+-        public struct Publisher: OpenCombine.Publisher {
+-
+-            public typealias Output = Notification
+-
+-            public typealias Failure = Never
+-
+-            /// The notification center this publisher uses as a source.
+-            public let center: NotificationCenter
+-
+-            /// The name of notifications published by this publisher.
+-            public let name: Notification.Name
+-
+-            /// The object posting the named notification.
+-            public let object: AnyObject?
+-
+-            /// Creates a publisher that emits events when broadcasting notifications.
+-            ///
+-            /// - Parameters:
+-            ///   - center: The notification center to publish notifications for.
+-            ///   - name: The name of the notification to publish.
+-            ///   - object: The object posting the named notification. If `nil`,
+-            ///     the publisher emits elements for any object producing a notification
+-            ///     with the given name.
+-            public init(center: NotificationCenter,
+-                        name: Notification.Name,
+-                        object: AnyObject? = nil) {
+-                self.center = center
+-                self.name = name
+-                self.object = object
+-            }
+-
+-            public func receive<Downstream: Subscriber>(subscriber: Downstream)
+-                where Downstream.Failure == Never, Downstream.Input == Notification
+-            {
+-                let subscription = Notification.Subscription(center: center,
+-                                                             name: name,
+-                                                             object: object,
+-                                                             downstream: subscriber)
+-                subscriber.receive(subscription: subscription)
+-            }
+-        }
+-
+-        /// Returns a publisher that emits events when broadcasting notifications.
+-        ///
+-        /// - Parameters:
+-        ///   - name: The name of the notification to publish.
+-        ///   - object: The object posting the named notification. If `nil`, the publisher
+-        ///     emits elements for any object producing a notification with the given
+-        ///     name.
+-        /// - Returns: A publisher that emits events when broadcasting notifications.
+-        public func publisher(for name: Notification.Name,
+-                              object: AnyObject? = nil) -> Publisher {
+-            return .init(center: center, name: name, object: object)
++        public func receive<Downstream: Subscriber>(subscriber: Downstream)
++            where Downstream.Failure == Never, Downstream.Input == Notification
++        {
++            let subscription = Notification.Subscription(center: center,
++                                                         name: name,
++                                                         object: object,
++                                                         downstream: subscriber)
++            subscriber.receive(subscription: subscription)
+         }
+     }
+ 
+-#if !canImport(Combine)
+-    /// A publisher that emits elements when broadcasting notifications.
+-    public typealias Publisher = OCombine.Publisher
+-#endif
+-}
+-
+-extension NotificationCenter {
+-
+-    /// A namespace for disambiguation when both OpenCombine and Foundation are imported.
+-    ///
+-    /// Foundation extends `NotificationCenter` with new methods and nested types.
+-    /// If you import both OpenCombine and Foundation, you will not be able
+-    /// to write `NotificationCenter.default.publisher(for: name)`,
+-    /// because Swift is unable to understand which `publisher` method
+-    /// you're referring to — the one declared in Foundation or in OpenCombine.
+-    ///
+-    /// So you have to write `NotificationCenter.default.ocombine.publisher(for: name)`.
+-    ///
+-    /// This bug is tracked [here](https://bugs.swift.org/browse/SR-11183).
+-    ///
+-    /// You can omit this whenever Combine is not available (e. g. on Linux).
+-    public var ocombine: OCombine { return .init(self) }
+-
+-#if !canImport(Combine)
+     /// Returns a publisher that emits events when broadcasting notifications.
+     ///
+     /// - Parameters:
+@@ -120,15 +48,14 @@ extension NotificationCenter {
+     ///     emits elements for any object producing a notification with the given name.
+     /// - Returns: A publisher that emits events when broadcasting notifications.
+     public func publisher(for name: Notification.Name,
+-                          object: AnyObject? = nil) -> OCombine.Publisher {
+-        return ocombine.publisher(for: name, object: object)
++                          object: AnyObject? = nil) -> Publisher {
++        return Publisher(center: self, name: name, object: object)
+     }
+-#endif
+ }
+ 
+-extension NotificationCenter.OCombine.Publisher: Equatable {
+-    public static func == (lhs: NotificationCenter.OCombine.Publisher,
+-                           rhs: NotificationCenter.OCombine.Publisher) -> Bool {
++extension NotificationCenter.Publisher: Equatable {
++    public static func == (lhs: NotificationCenter.Publisher,
++                           rhs: NotificationCenter.Publisher) -> Bool {
+         return lhs.center == rhs.center &&
+                lhs.name == rhs.name &&
+                lhs.object === rhs.object
+@@ -137,7 +64,7 @@ extension NotificationCenter.OCombine.Publisher: Equatable {
+ 
+ extension Notification {
+     fileprivate final class Subscription<Downstream: Subscriber>
+-        : OpenCombine.Subscription,
++        : Combine.Subscription,
+           CustomStringConvertible,
+           CustomReflectable,
+           CustomPlaygroundDisplayConvertible
+diff --git a/Sources/OpenCombineFoundation/OperationQueue+Scheduler.swift b/Sources/OpenCombineFoundation/OperationQueue+Scheduler.swift
+index b9a0769..f17db8e 100644
+--- a/Sources/OpenCombineFoundation/OperationQueue+Scheduler.swift
++++ b/Sources/OpenCombineFoundation/OperationQueue+Scheduler.swift
+@@ -6,375 +6,268 @@
+ //
+ 
+ import Foundation
+-import OpenCombine
+ 
+-extension OperationQueue {
++extension OperationQueue: Combine.Scheduler {
+ 
+-    /// A namespace for disambiguation when both OpenCombine and Combine are imported.
+-    ///
+-    /// Foundation overlay for Combine extends `OperationQueue` with new methods and
+-    /// nested types.
+-    /// If you import both OpenCombine and Foundation, you will not be able
+-    /// to write `OperationQueue.SchedulerTimeType`,
+-    /// because Swift is unable to understand which `SchedulerTimeType`
+-    /// you're referring to.
+-    ///
+-    /// So you have to write `OperationQueue.OCombine.SchedulerTimeType`.
+-    ///
+-    /// This bug is tracked [here](https://bugs.swift.org/browse/SR-11183).
+-    ///
+-    /// You can omit this whenever Combine is not available (e. g. on Linux).
+-    public struct OCombine: Scheduler {
++    public struct SchedulerTimeType: Strideable, Codable, Hashable {
+ 
+-        public let queue: OperationQueue
++        public var date: Date
+ 
+-        public init(_ queue: OperationQueue) {
+-            self.queue = queue
++        public init(_ date: Date) {
++            self.date = date
+         }
+ 
+-        /// The scheduler time type used by the operation queue.
+-        public struct SchedulerTimeType: Strideable, Codable, Hashable {
+-
+-            /// The date represented by this type.
+-            public var date: Date
+-
+-            /// Initializes a operation queue scheduler time with the given date.
+-            ///
+-            /// - Parameter date: The date to represent.
+-            public init(_ date: Date) {
+-                self.date = date
+-            }
+-
+-            /// Returns the distance to another operation queue scheduler time.
+-            ///
+-            /// - Parameter other: Another operation queue time.
+-            /// - Returns: The time interval between this time and the provided time.
+-            public func distance(to other: SchedulerTimeType) -> Stride {
+-                let absoluteSelf = date.timeIntervalSinceReferenceDate
+-                let absoluteOther = other.date.timeIntervalSinceReferenceDate
+-                return Stride(absoluteSelf.distance(to: absoluteOther))
+-            }
+-
+-            /// Returns an operation queue scheduler time calculated by advancing this
+-            /// instance’s time by the given interval.
+-            ///
+-            /// - Parameter n: A time interval to advance.
+-            /// - Returns: An operation queue time advanced by the given interval from
+-            ///   this instance’s time.
+-            public func advanced(by value: Stride) -> SchedulerTimeType {
+-                return SchedulerTimeType(date + value.magnitude)
+-            }
+-
+-            /// The interval by which operation queue times advance.
+-            public struct Stride: SchedulerTimeIntervalConvertible,
+-                                  Comparable,
+-                                  SignedNumeric,
+-                                  ExpressibleByFloatLiteral,
+-                                  Codable {
+-
+-                public typealias FloatLiteralType = TimeInterval
+-
+-                public typealias IntegerLiteralType = TimeInterval
+-
+-                public typealias Magnitude = TimeInterval
+-
+-                /// The value of this time interval in seconds.
+-                public var magnitude: TimeInterval
+-
+-                /// The value of this time interval in seconds.
+-                public var timeInterval: TimeInterval {
+-                    return magnitude
+-                }
+-
+-                public init(integerLiteral value: TimeInterval) {
+-                    magnitude = value
+-                }
+-
+-                public init(floatLiteral value: TimeInterval) {
+-                    magnitude = value
+-                }
+-
+-                public init(_ timeInterval: TimeInterval) {
+-                    magnitude = timeInterval
+-                }
+-
+-                public init?<Source: BinaryInteger>(exactly source: Source) {
+-                    guard let value = TimeInterval(exactly: source) else { return nil }
+-                    magnitude = value
+-                }
+-
+-                public static func < (lhs: Stride, rhs: Stride) -> Bool {
+-                    return lhs.magnitude < rhs.magnitude
+-                }
+-
+-                public static func * (lhs: Stride, rhs: Stride) -> Stride {
+-                    return Stride(lhs.magnitude * rhs.magnitude)
+-                }
+-
+-                public static func + (lhs: Stride, rhs: Stride) -> Stride {
+-                    return Stride(lhs.magnitude + rhs.magnitude)
+-                }
+-
+-                public static func - (lhs: Stride, rhs: Stride) -> Stride {
+-                    return Stride(lhs.magnitude - rhs.magnitude)
+-                }
+-
+-                public static func *= (lhs: inout Stride, rhs: Stride) {
+-                    lhs.magnitude *= rhs.magnitude
+-                }
+-
+-                public static func += (lhs: inout Stride, rhs: Stride) {
+-                    lhs.magnitude += rhs.magnitude
+-                }
+-
+-                public static func -= (lhs: inout Stride, rhs: Stride) {
+-                    lhs.magnitude -= rhs.magnitude
+-                }
+-
+-                public static func seconds(_ value: Int) -> Stride {
+-                    return Stride(TimeInterval(value))
+-                }
+-
+-                public static func seconds(_ value: Double) -> Stride {
+-                    return Stride(TimeInterval(value))
+-                }
+-
+-                public static func milliseconds(_ value: Int) -> Stride {
+-                    return Stride(TimeInterval(value) / 1_000)
+-                }
+-
+-                public static func microseconds(_ value: Int) -> Stride {
+-                    return Stride(TimeInterval(value) / 1_000_000)
+-                }
+-
+-                public static func nanoseconds(_ value: Int) -> Stride {
+-                    return Stride(TimeInterval(value) / 1_000_000_000)
+-                }
+-            }
++        public func distance(to other: SchedulerTimeType) -> Stride {
++            let absoluteSelf = date.timeIntervalSinceReferenceDate
++            let absoluteOther = other.date.timeIntervalSinceReferenceDate
++            return Stride(absoluteSelf.distance(to: absoluteOther))
+         }
+ 
+-        /// Options that affect the operation of the operation queue scheduler.
+-        public struct SchedulerOptions {
++        public func advanced(by value: Stride) -> SchedulerTimeType {
++            return SchedulerTimeType(date + value.magnitude)
+         }
+ 
+-        private final class DelayReadyOperation: Operation, Cancellable {
++        public struct Stride: SchedulerTimeIntervalConvertible,
++                              Comparable,
++                              SignedNumeric,
++                              ExpressibleByFloatLiteral,
++                              Codable {
+ 
+-            fileprivate final class CancellationContext: Cancellable {
+-                let lock = UnfairLock.allocate()
+-                weak var operation: DelayReadyOperation?
++            public typealias FloatLiteralType = TimeInterval
+ 
+-                deinit {
+-                    lock.deallocate()
+-                }
++            public typealias IntegerLiteralType = TimeInterval
+ 
+-                func cancel() {
+-                    lock.lock()
+-                    guard let operation = self.operation else {
+-                        lock.unlock()
+-                        return
+-                    }
+-                    lock.unlock()
+-                    operation.action = nil
+-                    operation.queue = nil
+-                    operation.context = nil
+-                    operation.cancel()
+-                }
++            public typealias Magnitude = TimeInterval
++
++            public var magnitude: TimeInterval
++
++            public var timeInterval: TimeInterval {
++                return magnitude
+             }
+ 
+-            private static let readySchedulingQueue =
+-                DispatchQueue(label: "DelayReadyOperation")
+-
+-            private let readyFromAfterLock = UnfairLock.allocate()
+-            private var action: (() -> Void)?
+-            private var readyFromAfter = false
+-            private var queue: OperationQueue?
+-            private let interval: SchedulerTimeType.Stride
+-            private var context: CancellationContext?
+-
+-            init(action: @escaping () -> Void,
+-                 queue: OperationQueue?,
+-                 interval: SchedulerTimeType.Stride,
+-                 context: CancellationContext?) {
+-                self.action = action
+-                self.queue = queue
+-                self.interval = interval
+-                self.context = context
+-                super.init()
++            public init(integerLiteral value: TimeInterval) {
++                magnitude = value
+             }
+ 
++            public init(floatLiteral value: TimeInterval) {
++                magnitude = value
++            }
++
++            public init(_ timeInterval: TimeInterval) {
++                magnitude = timeInterval
++            }
++
++            public init?<Source: BinaryInteger>(exactly source: Source) {
++                guard let value = TimeInterval(exactly: source) else { return nil }
++                magnitude = value
++            }
++
++            public static func < (lhs: Stride, rhs: Stride) -> Bool {
++                return lhs.magnitude < rhs.magnitude
++            }
++
++            public static func * (lhs: Stride, rhs: Stride) -> Stride {
++                return Stride(lhs.magnitude * rhs.magnitude)
++            }
++
++            public static func + (lhs: Stride, rhs: Stride) -> Stride {
++                return Stride(lhs.magnitude + rhs.magnitude)
++            }
++
++            public static func - (lhs: Stride, rhs: Stride) -> Stride {
++                return Stride(lhs.magnitude - rhs.magnitude)
++            }
++
++            public static func *= (lhs: inout Stride, rhs: Stride) {
++                lhs.magnitude *= rhs.magnitude
++            }
++
++            public static func += (lhs: inout Stride, rhs: Stride) {
++                lhs.magnitude += rhs.magnitude
++            }
++
++            public static func -= (lhs: inout Stride, rhs: Stride) {
++                lhs.magnitude -= rhs.magnitude
++            }
++
++            public static func seconds(_ value: Int) -> Stride {
++                return Stride(TimeInterval(value))
++            }
++
++            public static func seconds(_ value: Double) -> Stride {
++                return Stride(TimeInterval(value))
++            }
++
++            public static func milliseconds(_ value: Int) -> Stride {
++                return Stride(TimeInterval(value) / 1_000)
++            }
++
++            public static func microseconds(_ value: Int) -> Stride {
++                return Stride(TimeInterval(value) / 1_000_000)
++            }
++
++            public static func nanoseconds(_ value: Int) -> Stride {
++                return Stride(TimeInterval(value) / 1_000_000_000)
++            }
++        }
++    }
++
++    public struct SchedulerOptions {
++    }
++
++    private final class DelayReadyOperation: Operation, Cancellable {
++
++        fileprivate final class CancellationContext: Cancellable {
++            let lock = UnfairLock.allocate()
++            weak var operation: DelayReadyOperation?
++
+             deinit {
+-                readyFromAfterLock.deallocate()
++                lock.deallocate()
+             }
+ 
+-            static func once(action: @escaping () -> Void,
+-                             after: SchedulerTimeType) -> DelayReadyOperation {
+-                let operation = DelayReadyOperation(action: action,
+-                                                    queue: nil,
+-                                                    interval: 0,
+-                                                    context: nil)
+-                operation.becomeReady(after: after.date.timeIntervalSinceNow,
+-                                      from: .now())
+-                return operation
++            func cancel() {
++                lock.lock()
++                guard let operation = self.operation else {
++                    lock.unlock()
++                    return
++                }
++                lock.unlock()
++                operation.action = nil
++                operation.queue = nil
++                operation.context = nil
++                operation.cancel()
++            }
++        }
++
++        private static let readySchedulingQueue =
++            DispatchQueue(label: "DelayReadyOperation")
++
++        private let readyFromAfterLock = UnfairLock.allocate()
++        private var action: (() -> Void)?
++        private var readyFromAfter = false
++        private var queue: OperationQueue?
++        private let interval: SchedulerTimeType.Stride
++        private var context: CancellationContext?
++
++        init(action: @escaping () -> Void,
++             queue: OperationQueue?,
++             interval: SchedulerTimeType.Stride,
++             context: CancellationContext?) {
++            self.action = action
++            self.queue = queue
++            self.interval = interval
++            self.context = context
++            super.init()
++        }
++
++        deinit {
++            readyFromAfterLock.deallocate()
++        }
++
++        static func once(action: @escaping () -> Void,
++                         after: SchedulerTimeType) -> DelayReadyOperation {
++            let operation = DelayReadyOperation(action: action,
++                                                queue: nil,
++                                                interval: 0,
++                                                context: nil)
++            operation.becomeReady(after: after.date.timeIntervalSinceNow,
++                                  from: .now())
++            return operation
++        }
++
++        static func repeating(
++            action: @escaping () -> Void,
++            after: SchedulerTimeType,
++            queue: OperationQueue,
++            interval: SchedulerTimeType.Stride,
++            context: CancellationContext
++        ) -> DelayReadyOperation {
++            let operation = DelayReadyOperation(action: action,
++                                                queue: queue,
++                                                interval: interval,
++                                                context: context)
++            operation.becomeReady(after: after.date.timeIntervalSinceNow,
++                                  from: .now())
++            return operation
++        }
++
++        override func main() {
++            guard let action = self.action.take() else { return }
++            action()
++
++            guard let queue = self.queue.take(),
++                  let context = self.context.take()
++            else {
++                self.queue = nil
++                self.context = nil
++                return
+             }
+ 
+-            static func repeating(
+-                action: @escaping () -> Void,
+-                after: SchedulerTimeType,
+-                queue: OperationQueue,
+-                interval: SchedulerTimeType.Stride,
+-                context: CancellationContext
+-            ) -> DelayReadyOperation {
+-                let operation = DelayReadyOperation(action: action,
++            context.lock.lock()
++            if context.operation == nil {
++                context.lock.unlock()
++                return
++            }
++            let nextOperation = DelayReadyOperation(action: action,
+                                                     queue: queue,
+                                                     interval: interval,
+                                                     context: context)
+-                operation.becomeReady(after: after.date.timeIntervalSinceNow,
+-                                      from: .now())
+-                return operation
+-            }
++            context.operation = nextOperation
++            queue.addOperation(nextOperation)
++            context.lock.unlock()
++            nextOperation.becomeReady(after: interval.timeInterval, from: .now())
++        }
+ 
+-            override func main() {
+-                guard let action = self.action.take() else { return }
+-                action()
+-
+-                guard let queue = self.queue.take(),
+-                      let context = self.context.take()
+-                else {
+-                    self.queue = nil
+-                    self.context = nil
+-                    return
++        private func becomeReady(after: TimeInterval, from time: DispatchTime) {
++            DelayReadyOperation.readySchedulingQueue
++                .asyncAfter(deadline: time + after) { [weak self] in
++                    self?.becomeReady()
+                 }
++        }
+ 
+-                context.lock.lock()
+-                if context.operation == nil {
+-                    context.lock.unlock()
+-                    return
+-                }
+-                let nextOperation = DelayReadyOperation(action: action,
+-                                                        queue: queue,
+-                                                        interval: interval,
+-                                                        context: context)
+-                context.operation = nextOperation
+-                queue.addOperation(nextOperation)
+-                context.lock.unlock()
+-                nextOperation.becomeReady(after: interval.timeInterval, from: .now())
+-            }
+-
+-            private func becomeReady(after: TimeInterval, from time: DispatchTime) {
+-                DelayReadyOperation.readySchedulingQueue
+-                    .asyncAfter(deadline: time + after) { [weak self] in
+-                        self?.becomeReady()
+-                    }
+-            }
+-
+-            private func becomeReady() {
++        private func becomeReady() {
+ // Smart key paths don't work with NSOperation in swift-corelibs-foundation prior to
+ // Swift 5.1 and on OS version prior to iOS 11.
+ // The string key paths work fine everywhere on Darwin platforms.
+ #if canImport(Darwin) || swift(<5.1)
+-                willChangeValue(forKey: "isReady")
++            willChangeValue(forKey: "isReady")
+ #else
+-                willChangeValue(for: \.isReady)
++            willChangeValue(for: \.isReady)
+ #endif
+ 
+-                readyFromAfterLock.lock()
+-                readyFromAfter = true
+-                readyFromAfterLock.unlock()
++            readyFromAfterLock.lock()
++            readyFromAfter = true
++            readyFromAfterLock.unlock()
+ 
+ // Smart key paths don't work with NSOperation in swift-corelibs-foundation prior to
+ // Swift 5.1 and on OS version prior to iOS 11.
+ // The string key paths work fine everywhere on Darwin platforms.
+ #if canImport(Darwin) || swift(<5.1)
+-                didChangeValue(forKey: "isReady")
++            didChangeValue(forKey: "isReady")
+ #else
+-                didChangeValue(for: \.isReady)
++            didChangeValue(for: \.isReady)
+ #endif
+-            }
+-
+-            override var isReady: Bool {
+-                guard super.isReady else { return false }
+-                readyFromAfterLock.lock()
+-                defer { readyFromAfterLock.unlock() }
+-                return readyFromAfter
+-            }
+         }
+ 
+-        public func schedule(options: SchedulerOptions?,
+-                             _ action: @escaping () -> Void) {
+-            let op = BlockOperation(block: action)
+-            queue.addOperation(op)
+-        }
+-
+-        public func schedule(after date: SchedulerTimeType,
+-                             tolerance: SchedulerTimeType.Stride,
+-                             options: SchedulerOptions?,
+-                             _ action: @escaping () -> Void) {
+-            let op = DelayReadyOperation.once(action: action, after: date)
+-            queue.addOperation(op)
+-        }
+-
+-        public func schedule(after date: SchedulerTimeType,
+-                             interval: SchedulerTimeType.Stride,
+-                             tolerance: SchedulerTimeType.Stride,
+-                             options: SchedulerOptions?,
+-                             _ action: @escaping () -> Void) -> Cancellable {
+-            let context = DelayReadyOperation.CancellationContext()
+-            let op = DelayReadyOperation.repeating(action: action,
+-                                                   after: date,
+-                                                   queue: queue,
+-                                                   interval: interval,
+-                                                   context: context)
+-            context.operation = op
+-            queue.addOperation(op)
+-            return AnyCancellable(context)
+-        }
+-
+-        public var now: SchedulerTimeType {
+-            return .init(Date())
+-        }
+-
+-        public var minimumTolerance: SchedulerTimeType.Stride {
+-            return .init(0.0)
++        override var isReady: Bool {
++            guard super.isReady else { return false }
++            readyFromAfterLock.lock()
++            defer { readyFromAfterLock.unlock() }
++            return readyFromAfter
+         }
+     }
+ 
+-    /// A namespace for disambiguation when both OpenCombine and Foundation are imported.
+-    ///
+-    /// Foundation overlay for Combine extends `OperationQueue` with new methods and
+-    /// nested types.
+-    /// If you import both OpenCombine and Foundation, you will not be able
+-    /// to write `OperationQueue.main.schedule { doThings() }`,
+-    /// because Swift is unable to understand which `schedule` method
+-    /// you're referring to.
+-    ///
+-    /// So you have to write `OperationQueue.main.ocombine.schedule { doThings() }`.
+-    ///
+-    /// This bug is tracked [here](https://bugs.swift.org/browse/SR-11183).
+-    ///
+-    /// You can omit this whenever Combine is not available (e. g. on Linux).
+-    public var ocombine: OCombine {
+-        return OCombine(self)
+-    }
+-}
+-
+-#if !canImport(Combine)
+-extension OperationQueue: OpenCombine.Scheduler {
+-
+-    /// Options that affect the operation of the run loop scheduler.
+-    public typealias SchedulerOptions = OCombine.SchedulerOptions
+-
+-    /// The scheduler time type used by the run loop.
+-    public typealias SchedulerTimeType = OCombine.SchedulerTimeType
+-
+     public func schedule(options: SchedulerOptions?, _ action: @escaping () -> Void) {
+-        ocombine.schedule(options: options, action)
++        let op = BlockOperation(block: action)
++        addOperation(op)
+     }
+ 
+     public func schedule(after date: SchedulerTimeType,
+                          tolerance: SchedulerTimeType.Stride,
+                          options: SchedulerOptions?,
+                          _ action: @escaping () -> Void) {
+-        ocombine.schedule(after: date, tolerance: tolerance, options: options, action)
++        let op = DelayReadyOperation.once(action: action, after: date)
++        addOperation(op)
+     }
+ 
+     public func schedule(after date: SchedulerTimeType,
+@@ -382,19 +275,22 @@ extension OperationQueue: OpenCombine.Scheduler {
+                          tolerance: SchedulerTimeType.Stride,
+                          options: SchedulerOptions?,
+                          _ action: @escaping () -> Void) -> Cancellable {
+-        return ocombine.schedule(after: date,
+-                                 interval: interval,
+-                                 tolerance: tolerance,
+-                                 options: options,
+-                                 action)
++        let context = DelayReadyOperation.CancellationContext()
++        let op = DelayReadyOperation.repeating(action: action,
++                                               after: date,
++                                               queue: self,
++                                               interval: interval,
++                                               context: context)
++        context.operation = op
++        addOperation(op)
++        return AnyCancellable(context)
+     }
+ 
+     public var now: SchedulerTimeType {
+-        return ocombine.now
++        return .init(Date())
+     }
+ 
+     public var minimumTolerance: SchedulerTimeType.Stride {
+-        return ocombine.minimumTolerance
++        return .init(0.0)
+     }
+ }
+-#endif
+diff --git a/Sources/OpenCombineFoundation/PropertyListEncoder.swift b/Sources/OpenCombineFoundation/PropertyListEncoder.swift
+index 05eefb2..ffb595c 100644
+--- a/Sources/OpenCombineFoundation/PropertyListEncoder.swift
++++ b/Sources/OpenCombineFoundation/PropertyListEncoder.swift
+@@ -6,7 +6,6 @@
+ //
+ 
+ import Foundation
+-import OpenCombine
+ 
+ // PropertyListEncoder and PropertyListDecoder are unavailable in 
+ // swift-corelibs-foundation prior to Swift 5.1.
+diff --git a/Sources/OpenCombineFoundation/RunLoop+Scheduler.swift b/Sources/OpenCombineFoundation/RunLoop+Scheduler.swift
+index 3369861..39fa5a0 100644
+--- a/Sources/OpenCombineFoundation/RunLoop+Scheduler.swift
++++ b/Sources/OpenCombineFoundation/RunLoop+Scheduler.swift
+@@ -6,233 +6,128 @@
+ //
+ 
+ import Foundation
+-import OpenCombine
+ 
+-extension RunLoop {
+-
+-    /// A namespace for disambiguation when both OpenCombine and Combine are imported.
+-    ///
+-    /// Foundation overlay for Combine extends `RunLoop` with new methods and nested
+-    /// types.
+-    /// If you import both OpenCombine and Foundation, you will not be able
+-    /// to write `RunLoop.SchedulerTimeType`,
+-    /// because Swift is unable to understand which `SchedulerTimeType`
+-    /// you're referring to.
+-    ///
+-    /// So you have to write `RunLoop.OCombine.SchedulerTimeType`.
+-    ///
+-    /// This bug is tracked [here](https://bugs.swift.org/browse/SR-11183).
+-    ///
+-    /// You can omit this whenever Combine is not available (e. g. on Linux).
+-    public struct OCombine: Scheduler {
+-
+-        public let runLoop: RunLoop
+-
+-        public init(_ runLoop: RunLoop) {
+-            self.runLoop = runLoop
+-        }
+-
+-        /// The scheduler time type used by the run loop.
+-        public struct SchedulerTimeType: Strideable, Codable, Hashable {
+-
+-            /// The date represented by this type.
+-            public var date: Date
+-
+-            /// Initializes a run loop scheduler time with the given date.
+-            ///
+-            /// - Parameter date: The date to represent.
+-            public init(_ date: Date) {
+-                self.date = date
+-            }
+-
+-            /// Returns the distance to another run loop scheduler time.
+-            ///
+-            /// - Parameter other: Another run loop time.
+-            /// - Returns: The time interval between this time and the provided time.
+-            public func distance(to other: SchedulerTimeType) -> Stride {
+-                let absoluteSelf = date.timeIntervalSinceReferenceDate
+-                let absoluteOther = other.date.timeIntervalSinceReferenceDate
+-                return Stride(absoluteSelf.distance(to: absoluteOther))
+-            }
+-
+-            /// Returns a run loop scheduler time calculated by advancing this instance’s
+-            /// time by the given interval.
+-            ///
+-            /// - Parameter value: A time interval to advance.
+-            /// - Returns: A run loop time advanced by the given interval from this
+-            ///   instance’s time.
+-            public func advanced(by value: Stride) -> SchedulerTimeType {
+-                return SchedulerTimeType(date + value.magnitude)
+-            }
+-
+-            /// The interval by which run loop times advance.
+-            public struct Stride: SchedulerTimeIntervalConvertible,
+-                                  Comparable,
+-                                  SignedNumeric,
+-                                  ExpressibleByFloatLiteral,
+-                                  Codable {
+-
+-                public typealias FloatLiteralType = TimeInterval
+-
+-                public typealias IntegerLiteralType = TimeInterval
+-
+-                /// A type that can represent the absolute value of any possible value
+-                /// of the conforming type.
+-                public typealias Magnitude = TimeInterval
+-
+-                /// The value of this time interval in seconds.
+-                public var magnitude: TimeInterval
+-
+-                /// The value of this time interval in seconds.
+-                public var timeInterval: TimeInterval { return magnitude }
+-
+-                public init(integerLiteral value: TimeInterval) {
+-                    self.magnitude = value
+-                }
+-
+-                public init(floatLiteral value: TimeInterval) {
+-                    self.magnitude = value
+-                }
+-
+-                public init(_ timeInterval: TimeInterval) {
+-                    self.magnitude = timeInterval
+-                }
+-
+-                public init?<Source: BinaryInteger>(exactly source: Source) {
+-                    guard let value = TimeInterval(exactly: source) else { return nil }
+-                    magnitude = value
+-                }
+-
+-                public static func < (lhs: Stride, rhs: Stride) -> Bool {
+-                    return lhs.magnitude < rhs.magnitude
+-                }
+-
+-                public static func * (lhs: Stride, rhs: Stride) -> Stride {
+-                    return Stride(lhs.magnitude * rhs.magnitude)
+-                }
+-
+-                public static func + (lhs: Stride, rhs: Stride) -> Stride {
+-                    return Stride(lhs.magnitude + rhs.magnitude)
+-                }
+-
+-                public static func - (lhs: Stride, rhs: Stride) -> Stride {
+-                    return Stride(lhs.magnitude - rhs.magnitude)
+-                }
+-
+-                public static func *= (lhs: inout Stride, rhs: Stride) {
+-                    lhs.magnitude *= rhs.magnitude
+-                }
+-
+-                public static func += (lhs: inout Stride, rhs: Stride) {
+-                    lhs.magnitude += rhs.magnitude
+-                }
+-
+-                public static func -= (lhs: inout Stride, rhs: Stride) {
+-                    lhs.magnitude -= rhs.magnitude
+-                }
+-
+-                public static func seconds(_ value: Int) -> Stride {
+-                    return Stride(TimeInterval(value))
+-                }
+-
+-                public static func seconds(_ value: Double) -> Stride {
+-                    return Stride(TimeInterval(value))
+-                }
+-
+-                public static func milliseconds(_ value: Int) -> Stride {
+-                    return Stride(TimeInterval(value) / 1_000)
+-                }
+-
+-                public static func microseconds(_ value: Int) -> Stride {
+-                    return Stride(TimeInterval(value) / 1_000_000)
+-                }
+-
+-                public static func nanoseconds(_ value: Int) -> Stride {
+-                    return Stride(TimeInterval(value) / 1_000_000_000)
+-                }
+-            }
+-        }
+-
+-        /// Options that affect the operation of the run loop scheduler.
+-        public struct SchedulerOptions {
+-        }
+-
+-        public func schedule(options: SchedulerOptions?, _ action: @escaping () -> Void) {
+-            runLoop.performBlockPortably(action)
+-        }
+-
+-        public func schedule(after date: SchedulerTimeType,
+-                             tolerance: SchedulerTimeType.Stride,
+-                             options: SchedulerOptions?,
+-                             _ action: @escaping () -> Void) {
+-            let timer = Timer(fire: date.date,
+-                              interval: 0,
+-                              repeats: false,
+-                              block: { _ in action() })
+-            timer.tolerance = tolerance.timeInterval
+-            runLoop.add(timer, forMode: .default)
+-        }
+-
+-        public func schedule(after date: SchedulerTimeType,
+-                             interval: SchedulerTimeType.Stride,
+-                             tolerance: SchedulerTimeType.Stride,
+-                             options: SchedulerOptions?,
+-                             _ action: @escaping () -> Void) -> Cancellable {
+-            let timer = Timer(fire: date.date,
+-                              interval: interval.timeInterval,
+-                              repeats: true,
+-                              block: { _ in action() })
+-            timer.tolerance = tolerance.timeInterval
+-            runLoop.add(timer, forMode: .default)
+-            return AnyCancellable { timer.invalidate() }
+-        }
+-
+-        public var now: SchedulerTimeType {
+-            return .init(Date())
+-        }
+-
+-        public var minimumTolerance: SchedulerTimeType.Stride {
+-            return .init(0)
+-        }
+-    }
+-
+-    /// A namespace for disambiguation when both OpenCombine and Foundation are imported.
+-    ///
+-    /// Foundation overlay for Combine extends `RunLoop` with new methods and nested
+-    /// types.
+-    /// If you import both OpenCombine and Foundation, you will not be able
+-    /// to write `RunLoop.main.schedule { doThings() }`,
+-    /// because Swift is unable to understand which `schedule` method
+-    /// you're referring to.
+-    ///
+-    /// So you have to write `RunLoop.main.ocombine.schedule { doThings() }`.
+-    ///
+-    /// This bug is tracked [here](https://bugs.swift.org/browse/SR-11183).
+-    ///
+-    /// You can omit this whenever Combine is not available (e. g. on Linux).
+-    public var ocombine: OCombine {
+-        return OCombine(self)
+-    }
+-}
+-
+-#if !canImport(Combine)
+-extension RunLoop: OpenCombine.Scheduler {
+-
+-    /// Options that affect the operation of the run loop scheduler.
+-    public typealias SchedulerOptions = OCombine.SchedulerOptions
++extension RunLoop: Combine.Scheduler {
+ 
+     /// The scheduler time type used by the run loop.
+-    public typealias SchedulerTimeType = OCombine.SchedulerTimeType
++    public struct SchedulerTimeType: Strideable, Codable, Hashable {
++
++        public var date: Date
++
++        public init(_ date: Date) {
++            self.date = date
++        }
++
++        public func distance(to other: SchedulerTimeType) -> Stride {
++            let absoluteSelf = date.timeIntervalSinceReferenceDate
++            let absoluteOther = other.date.timeIntervalSinceReferenceDate
++            return Stride(absoluteSelf.distance(to: absoluteOther))
++        }
++
++        public func advanced(by value: Stride) -> SchedulerTimeType {
++            return SchedulerTimeType(date + value.magnitude)
++        }
++
++        public struct Stride: SchedulerTimeIntervalConvertible,
++                              Comparable,
++                              SignedNumeric,
++                              ExpressibleByFloatLiteral,
++                              Codable {
++
++            public typealias FloatLiteralType = TimeInterval
++
++            public typealias IntegerLiteralType = TimeInterval
++
++            public typealias Magnitude = TimeInterval
++
++            public var magnitude: TimeInterval
++
++            public var timeInterval: TimeInterval { return magnitude }
++
++            public init(integerLiteral value: TimeInterval) {
++                self.magnitude = value
++            }
++
++            public init(floatLiteral value: TimeInterval) {
++                self.magnitude = value
++            }
++
++            public init(_ timeInterval: TimeInterval) {
++                self.magnitude = timeInterval
++            }
++
++            public init?<Source: BinaryInteger>(exactly source: Source) {
++                guard let value = TimeInterval(exactly: source) else { return nil }
++                magnitude = value
++            }
++
++            public static func < (lhs: Stride, rhs: Stride) -> Bool {
++                return lhs.magnitude < rhs.magnitude
++            }
++
++            public static func * (lhs: Stride, rhs: Stride) -> Stride {
++                return Stride(lhs.magnitude * rhs.magnitude)
++            }
++
++            public static func + (lhs: Stride, rhs: Stride) -> Stride {
++                return Stride(lhs.magnitude + rhs.magnitude)
++            }
++
++            public static func - (lhs: Stride, rhs: Stride) -> Stride {
++                return Stride(lhs.magnitude - rhs.magnitude)
++            }
++
++            public static func *= (lhs: inout Stride, rhs: Stride) {
++                lhs.magnitude *= rhs.magnitude
++            }
++
++            public static func += (lhs: inout Stride, rhs: Stride) {
++                lhs.magnitude += rhs.magnitude
++            }
++
++            public static func -= (lhs: inout Stride, rhs: Stride) {
++                lhs.magnitude -= rhs.magnitude
++            }
++
++            public static func seconds(_ value: Int) -> Stride {
++                return Stride(TimeInterval(value))
++            }
++
++            public static func seconds(_ value: Double) -> Stride {
++                return Stride(TimeInterval(value))
++            }
++
++            public static func milliseconds(_ value: Int) -> Stride {
++                return Stride(TimeInterval(value) / 1_000)
++            }
++
++            public static func microseconds(_ value: Int) -> Stride {
++                return Stride(TimeInterval(value) / 1_000_000)
++            }
++
++            public static func nanoseconds(_ value: Int) -> Stride {
++                return Stride(TimeInterval(value) / 1_000_000_000)
++            }
++        }
++    }
++
++    public struct SchedulerOptions {
++    }
+ 
+     public func schedule(options: SchedulerOptions?, _ action: @escaping () -> Void) {
+-        ocombine.schedule(options: options, action)
++        performBlockPortably(action)
+     }
+ 
+     public func schedule(after date: SchedulerTimeType,
+                          tolerance: SchedulerTimeType.Stride,
+                          options: SchedulerOptions?,
+                          _ action: @escaping () -> Void) {
+-        ocombine.schedule(after: date, tolerance: tolerance, options: options, action)
++        let timer = Timer(fire: date.date,
++                          interval: 0,
++                          repeats: false,
++                          block: { _ in action() })
++        timer.tolerance = tolerance.timeInterval
++        add(timer, forMode: .default)
+     }
+ 
+     public func schedule(after date: SchedulerTimeType,
+@@ -240,19 +135,20 @@ extension RunLoop: OpenCombine.Scheduler {
+                          tolerance: SchedulerTimeType.Stride,
+                          options: SchedulerOptions?,
+                          _ action: @escaping () -> Void) -> Cancellable {
+-        return ocombine.schedule(after: date,
+-                                 interval: interval,
+-                                 tolerance: tolerance,
+-                                 options: options,
+-                                 action)
++        let timer = Timer(fire: date.date,
++                          interval: interval.timeInterval,
++                          repeats: true,
++                          block: { _ in action() })
++        timer.tolerance = tolerance.timeInterval
++        add(timer, forMode: .default)
++        return AnyCancellable { timer.invalidate() }
+     }
+ 
+     public var now: SchedulerTimeType {
+-        return ocombine.now
++        return .init(Date())
+     }
+ 
+     public var minimumTolerance: SchedulerTimeType.Stride {
+-        return ocombine.minimumTolerance
++        return .init(0)
+     }
+ }
+-#endif
+diff --git a/Sources/OpenCombineFoundation/Timer+Publisher.swift b/Sources/OpenCombineFoundation/Timer+Publisher.swift
+index 81d11bf..b64cee8 100644
+--- a/Sources/OpenCombineFoundation/Timer+Publisher.swift
++++ b/Sources/OpenCombineFoundation/Timer+Publisher.swift
+@@ -6,7 +6,6 @@
+ //
+ 
+ import Foundation
+-import OpenCombine
+ 
+ extension Foundation.Timer {
+ 
+@@ -27,197 +26,159 @@ extension Foundation.Timer {
+         tolerance _: TimeInterval? = nil,
+         on runLoop: RunLoop,
+         in mode: RunLoop.Mode,
+-        options: RunLoop.OCombine.SchedulerOptions? = nil
+-    ) -> OCombine.TimerPublisher {
++        options: RunLoop.SchedulerOptions? = nil
++    ) -> TimerPublisher {
+         // A bug in Combine: tolerance is ignored.
+         return .init(interval: interval, runLoop: runLoop, mode: mode, options: options)
+     }
+ 
+-    /// A namespace for disambiguation when both OpenCombine and Combine are imported.
+-    ///
+-    /// Foundation overlay for Combine extends `Timer` with new methods and nested
+-    /// types.
+-    /// If you import both OpenCombine and Foundation, you will not be able
+-    /// to write `Timer.TimerPublisher`,
+-    /// because Swift is unable to understand which `TimerPublisher`
+-    /// you're referring to.
+-    ///
+-    /// So you have to write `Timer.OCombine.TimerPublisher`.
+-    ///
+-    /// This bug is tracked [here](https://bugs.swift.org/browse/SR-11183).
+-    ///
+-    /// You can omit this whenever Combine is not available (e. g. on Linux).
+-    public enum OCombine {
++    public final class TimerPublisher: ConnectablePublisher {
++        public typealias Output = Date
++        public typealias Failure = Never
+ 
+-        /// A publisher that repeatedly emits the current date on a given interval.
+-        public final class TimerPublisher: ConnectablePublisher {
+-            public typealias Output = Date
+-            public typealias Failure = Never
++        public let interval: TimeInterval
++        public let tolerance: TimeInterval?
++        public let runLoop: RunLoop
++        public let mode: RunLoop.Mode
++        public let options: RunLoop.SchedulerOptions?
+ 
+-            public let interval: TimeInterval
+-            public let tolerance: TimeInterval?
+-            public let runLoop: RunLoop
+-            public let mode: RunLoop.Mode
+-            public let options: RunLoop.OCombine.SchedulerOptions?
++        private var sides = [CombineIdentifier : Side]()
+ 
+-            private var sides = [CombineIdentifier : Side]()
++        private let lock = UnfairLock.allocate()
++
++        public init(
++            interval: TimeInterval,
++            tolerance: TimeInterval? = nil,
++            runLoop: RunLoop,
++            mode: RunLoop.Mode,
++            options: RunLoop.SchedulerOptions? = nil
++        ) {
++            self.interval = interval
++            self.tolerance = tolerance
++            self.runLoop = runLoop
++            self.mode = mode
++            self.options = options
++        }
++
++        deinit {
++            lock.deallocate()
++        }
++
++        public func receive<Downstream: Subscriber>(subscriber: Downstream)
++            where Failure == Downstream.Failure, Output == Downstream.Input
++        {
++            let inner = Inner(parent: self, downstream: subscriber)
++            lock.lock()
++            sides[inner.combineIdentifier] = Side(inner)
++            lock.unlock()
++            subscriber.receive(subscription: inner)
++        }
++
++        public func connect() -> Cancellable {
++            let timer = Timer(timeInterval: interval, repeats: true, block: fire)
++            timer.tolerance = tolerance ?? 0
++            runLoop.add(timer, forMode: mode)
++            return CancellableTimer(timer: timer, publisher: self)
++        }
++
++        private func fire(_ timer: Timer) {
++            lock.lock()
++            let sides = self.sides
++            lock.unlock()
++            let now = Date()
++            for side in sides.values {
++                side.send(now)
++            }
++        }
++
++        private func disconnectAll() {
++            lock.lock()
++            sides = [:]
++            lock.unlock()
++        }
++
++        private func disconnect(_ innerID: CombineIdentifier) {
++            lock.lock()
++            sides[innerID] = nil
++            lock.unlock()
++        }
++
++        private struct Side {
++            let send: (Date) -> Void
++
++            init<Downstream: Subscriber>(_ inner: Inner<Downstream>)
++                where Downstream.Input == Date, Downstream.Failure == Never
++            {
++                send = inner.send
++            }
++        }
++
++        private struct CancellableTimer: Cancellable {
++            let timer: Timer
++            let publisher: TimerPublisher
++
++            func cancel() {
++                publisher.disconnectAll()
++                timer.invalidate()
++            }
++        }
++
++        private final class Inner<Downstream: Subscriber>: Subscription
++            where Downstream.Input == Date, Downstream.Failure == Never
++        {
++            private var downstream: Downstream?
++
++            private var pending = Subscribers.Demand.none
++
++            private weak var parent: TimerPublisher?
+ 
+             private let lock = UnfairLock.allocate()
+ 
+-            /// Creates a publisher that repeatedly emits the current date
+-            /// on the given interval.
+-            ///
+-            /// - Parameters:
+-            ///   - interval: The interval on which to publish events.
+-            ///   - tolerance: The allowed timing variance when emitting events.
+-            ///     Defaults to `nil`, which allows any variance.
+-            ///   - runLoop: The run loop on which the timer runs.
+-            ///   - mode: The run loop mode in which to run the timer.
+-            ///   - options: Scheduler options passed to the timer. Defaults to `nil`.
+-            public init(
+-                interval: TimeInterval,
+-                tolerance: TimeInterval? = nil,
+-                runLoop: RunLoop,
+-                mode: RunLoop.Mode,
+-                options: RunLoop.OCombine.SchedulerOptions? = nil
+-            ) {
+-                self.interval = interval
+-                self.tolerance = tolerance
+-                self.runLoop = runLoop
+-                self.mode = mode
+-                self.options = options
++            init(parent: TimerPublisher, downstream: Downstream) {
++                self.parent = parent
++                self.downstream = downstream
+             }
+ 
+             deinit {
+                 lock.deallocate()
+             }
+ 
+-            public func receive<Downstream: Subscriber>(subscriber: Downstream)
+-                where Failure == Downstream.Failure, Output == Downstream.Input
+-            {
+-                let inner = Inner(parent: self, downstream: subscriber)
++            func send(_ date: Date) {
+                 lock.lock()
+-                sides[inner.combineIdentifier] = Side(inner)
++                guard let downstream = self.downstream, pending != .none else {
++                    lock.unlock()
++                    return
++                }
++                pending -= 1
+                 lock.unlock()
+-                subscriber.receive(subscription: inner)
+-            }
+-
+-            public func connect() -> Cancellable {
+-                let timer = Timer(timeInterval: interval, repeats: true, block: fire)
+-                timer.tolerance = tolerance ?? 0
+-                runLoop.add(timer, forMode: mode)
+-                return CancellableTimer(timer: timer, publisher: self)
+-            }
+-
+-            // MARK: Private
+-
+-            private func fire(_ timer: Timer) {
+-                lock.lock()
+-                let sides = self.sides
+-                lock.unlock()
+-                let now = Date()
+-                for side in sides.values {
+-                    side.send(now)
++                let newDemand = downstream.receive(date)
++                if newDemand == .none {
++                    return
+                 }
+-            }
+-
+-            private func disconnectAll() {
+                 lock.lock()
+-                sides = [:]
++                pending += newDemand
+                 lock.unlock()
+             }
+ 
+-            private func disconnect(_ innerID: CombineIdentifier) {
++            func request(_ demand: Subscribers.Demand) {
+                 lock.lock()
+-                sides[innerID] = nil
++                if downstream == nil {
++                    lock.unlock()
++                    return
++                }
++                pending += demand
+                 lock.unlock()
+             }
+ 
+-            private struct Side {
+-                let send: (Date) -> Void
+-
+-                init<Downstream: Subscriber>(_ inner: Inner<Downstream>)
+-                    where Downstream.Input == Date, Downstream.Failure == Never
+-                {
+-                    send = inner.send
+-                }
+-            }
+-
+-            private struct CancellableTimer: Cancellable {
+-                let timer: Timer
+-                let publisher: TimerPublisher
+-
+-                func cancel() {
+-                    publisher.disconnectAll()
+-                    timer.invalidate()
+-                }
+-            }
+-
+-            private final class Inner<Downstream: Subscriber>: Subscription
+-                where Downstream.Input == Date, Downstream.Failure == Never
+-            {
+-                private var downstream: Downstream?
+-
+-                private var pending = Subscribers.Demand.none
+-
+-                private weak var parent: TimerPublisher?
+-
+-                private let lock = UnfairLock.allocate()
+-
+-                init(parent: TimerPublisher, downstream: Downstream) {
+-                    self.parent = parent
+-                    self.downstream = downstream
+-                }
+-
+-                deinit {
+-                    lock.deallocate()
+-                }
+-
+-                func send(_ date: Date) {
+-                    lock.lock()
+-                    guard let downstream = self.downstream, pending != .none else {
+-                        lock.unlock()
+-                        return
+-                    }
+-                    pending -= 1
+-                    lock.unlock()
+-                    let newDemand = downstream.receive(date)
+-                    if newDemand == .none {
+-                        return
+-                    }
+-                    lock.lock()
+-                    pending += newDemand
++            func cancel() {
++                lock.lock()
++                if downstream.take() == nil {
+                     lock.unlock()
++                    return
+                 }
+-
+-                func request(_ demand: Subscribers.Demand) {
+-                    lock.lock()
+-                    if downstream == nil {
+-                        lock.unlock()
+-                        return
+-                    }
+-                    pending += demand
+-                    lock.unlock()
+-                }
+-
+-                func cancel() {
+-                    lock.lock()
+-                    if downstream.take() == nil {
+-                        lock.unlock()
+-                        return
+-                    }
+-                    lock.unlock()
+-                    parent?.disconnect(combineIdentifier)
+-                }
++                lock.unlock()
++                parent?.disconnect(combineIdentifier)
+             }
+         }
+     }
+ }
+-
+-#if !canImport(Combine)
+-extension Foundation.Timer {
+-
+-    /// A publisher that repeatedly emits the current date on a given interval.
+-    public typealias TimerPublisher = OCombine.TimerPublisher
+-}
+-#endif
+-- 
+2.54.0 (Apple Git-157)
+

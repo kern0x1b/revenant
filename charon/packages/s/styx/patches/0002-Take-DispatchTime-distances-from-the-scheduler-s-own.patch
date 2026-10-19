@@ -1,0 +1,35 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: kern0x1b <kern0x1b@users.noreply.github.com>
+Date: Mon, 19 Oct 2026 20:41:13 +0200
+Subject: [PATCH 2/9] Take DispatchTime distances from the scheduler's own
+ arithmetic
+
+The polyfill called DispatchTime.distance(to:) where the release has it
+(iOS 15, macOS 12). The SDK the armv7 build compiles against declares no
+such method for the 5.4 Dispatch overlay the module is built with, so the
+module did not typecheck, and a supplement declaring the method in the
+module would shadow the system's own on every release. The polyfill's
+arithmetic on rawValue is what every platform now runs.
+---
+ Sources/OpenCombineDispatch/DispatchQueue+Scheduler.swift | 5 -----
+ 1 file changed, 5 deletions(-)
+
+diff --git a/Sources/OpenCombineDispatch/DispatchQueue+Scheduler.swift b/Sources/OpenCombineDispatch/DispatchQueue+Scheduler.swift
+index 997a7be..276720d 100644
+--- a/Sources/OpenCombineDispatch/DispatchQueue+Scheduler.swift
++++ b/Sources/OpenCombineDispatch/DispatchQueue+Scheduler.swift
+@@ -266,11 +266,6 @@ private func clampedIntProduct(_ lhs: Int64, _ rhs: Int64) -> Int64 {
+ extension DispatchTime {
+ 
+     fileprivate func polyfillDistance(to other: DispatchTime) -> DispatchTimeInterval {
+-#if canImport(Darwin) && compiler(>=5.1)
+-        if #available(macOS 12.0, iOS 15.0, watchOS 8.0, tvOS 15.0, *) {
+-            return distance(to: other)
+-        }
+-#endif
+         let start = rawValue
+         let end = other.rawValue
+         if end >= start {
+-- 
+2.54.0 (Apple Git-157)
+

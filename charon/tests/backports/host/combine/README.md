@@ -22,12 +22,12 @@ cancellation. The time-based cases use `TestScheduler` in `Harness.swift`, a typ
 to the public `Scheduler` protocol whose time the case drives, so a time-based operator is
 the same on both sides whatever the host's clock is doing.
 
-Every rule `packages/s/styx/files/CombineKit` implements was taken from this table, and
-`packages/s/styx/facts/Combine/CombineKit.md` has each rule with what the host does.
+Every rule patches `0005` to `0008` of `packages/s/styx/patches` implement was taken from this
+table, and `packages/s/styx/facts/Combine/CombineKit.md` has each rule with what the host does.
 
 ## What it builds, and what it cannot
 
-The module is built here, from the fork's own sources and this repository's layer, before
+The module is built here, from the patched sources an installed `charon@styx` holds, before
 either probe is built against it. **That is the point.** A run that linked a prebuilt object
 would measure the object, so a change to the module's Swift could sit in the sources and the
 run would answer `identical`: a mutation of the source read as a pass, which is the one
@@ -40,32 +40,19 @@ its interface carries, and the two sets of classes then collide; `run.sh` refuse
 own types with the module's own prefix, which only resolves when the module carries that
 name, so the staged copy has that prefix rewritten.
 
-The Foundation integration is not in the host copy — `Sources/Combine/Foundation` and
-`Sources/Combine/Schedulers` are removed — for the same reason: it is where
+The Foundation integration is not in the host copy — `src/Combine/Foundation` and
+`src/Combine/Schedulers` are removed — for the same reason: it is where
 `NotificationCenter.Publisher`, `Timer.publish`, the run loop and operation queue schedulers
 and KVO live. Those are measured on the device instead, by the probe in
 `packages/s/styx/facts/Combine/CombineKit.md`.
 
-## One source of each file
+## A module that does not build
 
-The layer is ours (`packages/s/styx/files/CombineKit`); the rest is the fork's. If the fork's
-tree also carried a file of one of the layer's names, the copy would put two different files
-at one name and the build would compile whichever the compiler picked — so a change to the
-fork's copy would be measured as if nothing had changed. `run.sh` refuses that, by name,
-before it builds anything:
+is `exit 1` with `the module did not build; there is nothing to compare`, checked where the
+build is made rather than left to the shell. A clean run prints how much it compiled:
 
 ```
-the fork's sources carry a file of the layer's name, so one of them would be compiled
-in place of the other and the run would measure whichever the compiler picked:
-MergeKit.swift: .../Sources/Combine/Publishers/MergeKit.swift
-```
-
-and a module that does not build is `exit 1` with `the module did not build; there is nothing
-to compare`, checked where the build is made rather than left to the shell. A clean run
-prints how much it compiled, so the two sources are visible in the verdict:
-
-```
-module: 109 Swift files, 6 of them ours
+module: 108 Swift files
 cases: cases 40
 DIFFERENTIAL: identical
 ```
@@ -115,7 +102,7 @@ Line restored, `./run.sh` alone again: `DIFFERENTIAL: identical`.
 
 ## Where the module's own sources come from
 
-They are not in this repository; `packages/s/styx/xmake.lua` fetches them. `run.sh` takes
-them from the xmake source cache when `charon@styx` has been built, or from
-`$COMBINE_SOURCES` pointed at the `Sources/Combine` directory of `kern0x1b/styx` at the
-commit that recipe pins. It says so and stops if it has neither.
+They are not in this repository; `packages/s/styx/xmake.lua` fetches OpenCombine and applies
+the patches, and an installed `charon@styx` keeps the patched tree under `src/`. `run.sh` and
+`coverage.sh` take the newest one under `~/.xmake/packages/s/styx`, or `$COMBINE_SOURCES`
+pointed at such a `src/`. They say so and stop if there is neither.
