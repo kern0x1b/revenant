@@ -148,7 +148,7 @@ device's package manager holds the downloaded index to.
 Serve the directory and fetch everything a device will ask for:
 
 ```
-python3 -m http.server 8000 --bind 127.0.0.1      # in <repo>, in the background
+npx --yes http-server -a 127.0.0.1 -p 8000        # in <repo>, in the background
 for f in Release Packages.bz2 Packages.gz Packages CydiaIcon.png $(grep '^Filename:' Packages | cut -d' ' -f2) \
          depictions/<package>.html icons/<package>.png; do
   curl -s -o /dev/null -w "%{http_code} $f\n" "http://127.0.0.1:8000/$f"

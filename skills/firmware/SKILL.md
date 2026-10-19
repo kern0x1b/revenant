@@ -93,7 +93,7 @@ xmake firmware -y --arch=armv7 --output=.logs/classes-6.0.json classes 6.0
 It prints `…/classes-6.0.json: the Objective-C classes of iOS 6.0 for armv7`. The JSON has
 `release`, `architecture` and `classes`: each class with `superclass`, `image`, `instance` and
 `class` methods and `protocols`, categories merged in. Look a class up in it (for example with
-`python3 -c` and `json`) before using it on that release. Without `--output` it goes beside the
+`jq`) before using it on that release. Without `--output` it goes beside the
 cache as `classes_<arch>.json`. The SDK's headers are iOS 16.4 and do not tell what a release
 has; this file and the import check do.
 
