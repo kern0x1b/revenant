@@ -1,0 +1,45 @@
+MIT License
+
+Copyright (c) 2019 Sergej Jaskiewicz
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+---
+
+The notice above is OpenCombine's, and it covers the work this repository is
+based on: <https://github.com/OpenCombine/OpenCombine>, pinned at
+1c6f02c7ed8140c0ba7a783aaddb6e0685a0037b. It travels with these sources
+unchanged, and it is the notice a copy of this software must carry.
+
+This repository is a fork of OpenCombine, under the same MIT terms and with no
+other claim over Sergej Jaskiewicz's work. The changes are ours, and they are:
+
+- the core, the Dispatch scheduler and the Foundation integration folded into a
+  single module named `Combine`;
+- the C++ locking helper and its module map;
+- the adaptations iOS 6 and earlier need, among them the run loop timer's
+  tolerance read and set only behind `#available`;
+- a layer of our own, `files/CombineKit`, that carries what OpenCombine does not
+  have: `Publishers.Merge` through `Merge8` and `MergeMany`,
+  `Publishers.CombineLatest` through `CombineLatest4`,
+  `Publishers.CollectByTime` with `Publishers.TimeGroupingStrategy` and
+  `collect(_:options:)`, the equality and hashing Apple's own interface declares
+  in the open, and `Publishers.MapError`'s labelled initializer.
+
+Copyright (c) 2026 kern0x1b
