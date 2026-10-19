@@ -1,0 +1,41 @@
+<!doctype html><meta charset=utf-8><meta name=viewport content="width=320">
+<style>
+ body{margin:0;font:14px -apple-system,Helvetica;background:#fff}
+ .post{border-bottom:1px solid #eee;padding:10px;display:flex}
+ .avatar{width:36px;height:36px;border-radius:18px;background:#ddd;flex:0 0 36px;margin-right:8px}
+ .body{flex:1}
+ .name{font-weight:600}
+ .row{display:flex;margin-top:6px}
+ .row span{margin-right:16px;color:#888}
+ #out{position:fixed;top:0;left:0;background:#000;color:#0f0;font:10px monospace;padding:2px;z-index:9}
+</style>
+<body><div id=feed></div><div id=out>building</div>
+<script>
+/* A feed the size of a long session, built in batches the way an infinite
+ * scroll builds it, so the engine allocates the same shapes in the same order
+ * every run. The site's own feed varies with what the server sends, which makes
+ * every memory comparison against it worthless. */
+var BATCHES = 20, PER_BATCH = 100, batch = 0, started = Date.now();
+var feed = document.getElementById('feed'), out = document.getElementById('out');
+function build() {
+  var html = [];
+  for (var i = 0; i < PER_BATCH; i++) {
+    var n = batch * PER_BATCH + i;
+    html.push('<div class=post><div class=avatar></div><div class=body>' +
+      '<div class=name>user_' + n + '</div>' +
+      '<div class=text>Post ' + n + ' with a couple of lines of text so that layout, style and text measurement all have work to do on every item in the feed.</div>' +
+      '<div class=row><span>' + (n*7%900) + '</span><span>' + (n*3%90) + '</span><span>' + (n%9) + '</span></div>' +
+      '</div></div>');
+  }
+  feed.insertAdjacentHTML('beforeend', html.join(''));
+  document.body.offsetHeight;
+  window.scrollTo(0, document.documentElement.scrollHeight);
+  batch++;
+  out.textContent = 'batch ' + batch + '/' + BATCHES + ' posts ' + (batch*PER_BATCH) +
+    ' height ' + document.documentElement.scrollHeight + ' ms ' + (Date.now()-started);
+  if (batch < BATCHES) setTimeout(build, 60);
+  else out.textContent = 'done ' + (batch*PER_BATCH) + ' posts, height ' +
+    document.documentElement.scrollHeight + ', ' + (Date.now()-started) + ' ms';
+}
+build();
+</script>

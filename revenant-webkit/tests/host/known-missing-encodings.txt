@@ -1,0 +1,4 @@
+# Encodings WebKit asks ICU for that ICU 74 does not ship a converter for.
+# Verified absent from the untrimmed icudt74l.dat.full, so this is upstream,
+# not something the trim removed. Listed here so the check stays visible.
+ISO-8859-16

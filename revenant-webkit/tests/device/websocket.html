@@ -1,0 +1,29 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>websocket</title><script src="report.js"></script></head>
+<body>
+<script>
+var pending = 2;
+function connect(name, scheme) {
+    var settled = false;
+    function settle(pass, detail) {
+        if (settled) return;
+        settled = true;
+        report(name, pass, detail);
+        if (--pending === 0) reportDone();
+    }
+    try {
+        var ws = new WebSocket(scheme + '://' + location.host + '/socket');
+        ws.onerror = function () { settle(true, 'refused by a server that speaks no WebSocket'); };
+        ws.onclose = function (e) { settle(true, 'closed, code ' + e.code); };
+        ws.onopen = function () { settle(false, 'opened against a plain HTTP server'); };
+        setTimeout(function () { settle(false, 'no answer, readyState ' + ws.readyState); }, 8000);
+    } catch (e) {
+        settle(false, 'threw ' + e.name);
+    }
+}
+setTimeout(function () {
+    connect('ws-connection-fails-cleanly', 'ws');
+    connect('wss-connection-fails-cleanly', 'wss');
+}, 500);
+</script>
+</body></html>

@@ -1,0 +1,35 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Web Share</title>
+<style>
+body { margin: 0; font: 16px -apple-system, sans-serif; }
+button { display: block; width: 100%; height: 120px; font-size: 20px; }
+#out { padding: 10px; }
+</style>
+</head>
+<body>
+<button id="share">Share this page</button>
+<div id="out">idle</div>
+<script>
+function report(text) {
+    document.getElementById("out").textContent = text;
+    new Image().src = "/report?" + encodeURIComponent(text) + "&r=" + Math.random();
+}
+
+report("secure=" + window.isSecureContext + " share=" + (typeof navigator.share));
+
+document.getElementById("share").addEventListener("click", function () {
+    if (typeof navigator.share !== "function") {
+        report("no share");
+        return;
+    }
+    navigator.share({ title: "Revenant", text: "hello from the phone", url: "https://example.com/" })
+        .then(function () { report("resolved"); },
+              function (error) { report("rejected " + error.name); });
+});
+</script>
+</body>
+</html>

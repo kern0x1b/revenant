@@ -1,0 +1,50 @@
+<!doctype html><meta charset=utf-8><title>svg-image-filters</title>
+<meta name=viewport content="width=device-width,initial-scale=1">
+<body style="font:13px sans-serif;padding:6px">
+<p>Known bad: this page has taken the browser down with it. See tests/device/README.md.</p>
+<script src="report.js"></script>
+<script>
+function paintFiltered(svg, callback) {
+    var image = new Image();
+    image.onload = function () {
+        var canvas = document.createElement('canvas');
+        canvas.width = canvas.height = 24;
+        var context = canvas.getContext('2d');
+        context.drawImage(image, 0, 0);
+        callback(context.getImageData(12, 12, 1, 1).data);
+    };
+    image.onerror = function () { callback(null); };
+    image.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+}
+
+function filteredSquare(filterMarkup, filterAttribute) {
+    return '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24">'
+        + '<defs><filter id="f" x="0" y="0" width="100%" height="100%" ' + (filterAttribute || '') + '>'
+        + filterMarkup + '</filter></defs>'
+        + '<rect width="24" height="24" fill="rgb(192,64,64)" filter="url(#f)"/></svg>';
+}
+
+var checks = [
+    ['saturate-linear', filteredSquare('<feColorMatrix type="saturate" values="0"/>'),
+        function (p) { return p && Math.abs(p[0] - 109) <= 4 && p[0] === p[1] && p[1] === p[2]; }, 109],
+    ['saturate-srgb', filteredSquare('<feColorMatrix type="saturate" values="0"/>', 'color-interpolation-filters="sRGB"'),
+        function (p) { return p && Math.abs(p[0] - 92) <= 4; }, 92],
+    ['identity-is-exact', filteredSquare('<feColorMatrix type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 1 0"/>'),
+        function (p) { return p && p[0] === 192 && p[1] === 64 && p[2] === 64; }, '192,64,64'],
+    ['plain-svg-image-is-exact', '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"><rect width="24" height="24" fill="rgb(192,64,64)"/></svg>',
+        function (p) { return p && p[0] === 192 && p[1] === 64 && p[2] === 64; }, '192,64,64'],
+    ['feoffset-image-is-exact', filteredSquare('<feOffset dx="0" dy="0"/>'),
+        function (p) { return p && p[0] === 192 && p[1] === 64 && p[2] === 64; }, '192,64,64']
+];
+
+var index = 0;
+(function next() {
+    if (index >= checks.length) { reportDone(); return; }
+    var check = checks[index++];
+    paintFiltered(check[1], function (pixel) {
+        var detail = pixel ? ('got ' + pixel[0] + ',' + pixel[1] + ',' + pixel[2] + ',' + pixel[3] + ' want ' + check[3]) : 'no pixels';
+        report(check[0], !!(pixel && check[2](pixel)), detail);
+        next();
+    });
+})();
+</script>

@@ -1,0 +1,61 @@
+<!doctype html><meta charset=utf-8><meta name=viewport content="width=320">
+<style>
+ body{margin:0;font:14px -apple-system,Helvetica;background:#fff}
+ .post{border-bottom:1px solid #eee;padding:10px;display:flex}
+ .avatar{width:36px;height:36px;border-radius:18px;background:#ddd;flex:0 0 36px;margin-right:8px}
+ .body{flex:1}
+ .name{font-weight:600}
+ .row{display:flex;margin-top:6px}
+ .row span{margin-right:16px;color:#888}
+</style>
+<body><div id=feed></div><div id=out style="position:fixed;top:0;left:0;background:#000;color:#0f0;font:11px monospace;padding:2px;z-index:9">running</div>
+<script>
+var results = {};
+function mark(name, ms){ results[name] = Math.round(ms); document.getElementById('out').textContent = JSON.stringify(results); }
+
+// 1. building a feed: allocation, style, layout
+var t = Date.now();
+var feed = document.getElementById('feed'), html = [];
+for (var i = 0; i < 400; i++) {
+  html.push('<div class=post><div class=avatar></div><div class=body>' +
+    '<div class=name>user_' + i + '</div>' +
+    '<div class=text>Post number ' + i + ' with some text that wraps onto a couple of lines so layout has work to do.</div>' +
+    '<div class=row><span>' + (i*7%900) + '</span><span>' + (i*3%90) + '</span><span>' + (i%9) + '</span></div>' +
+    '</div></div>');
+}
+feed.innerHTML = html.join('');
+document.body.offsetHeight;
+mark('build', Date.now() - t);
+
+// 2. property access on many shapes: what megamorphic inline caches cost
+t = Date.now();
+var objects = [], sum = 0;
+for (var k = 0; k < 300; k++) {
+  var o = {};
+  o['f' + (k % 40)] = k; o.common = k; o['g' + (k % 25)] = k;
+  objects.push(o);
+}
+for (var pass = 0; pass < 2000; pass++)
+  for (var j = 0; j < objects.length; j++) sum += objects[j].common;
+mark('properties', Date.now() - t);
+
+// 3. allocation churn: strings and objects, the shape of a React render
+t = Date.now();
+var kept = [];
+for (var a = 0; a < 60000; a++) {
+  var s = { id: a, key: 'k' + a, text: 'value ' + (a % 500), items: [a, a+1, a+2] };
+  if (a % 20 === 0) kept.push(s);
+}
+mark('allocation', Date.now() - t);
+
+// 4. relayout: touching styles that force layout again
+t = Date.now();
+var posts = document.getElementsByClassName('post');
+for (var r = 0; r < 12; r++) {
+  posts[r * 30].style.paddingTop = (10 + r) + 'px';
+  document.body.offsetHeight;
+}
+mark('relayout', Date.now() - t);
+
+mark('total', results.build + results.properties + results.allocation + results.relayout);
+</script>

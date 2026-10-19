@@ -1,0 +1,26 @@
+<!doctype html><meta charset=utf-8><title>image-draw-cost</title>
+<meta name=viewport content="width=device-width,initial-scale=1">
+<body style="font:13px sans-serif;padding:6px">
+<script src="report.js"></script>
+<script>
+var image = new Image();
+image.onload = function () {
+    var canvas = document.createElement('canvas');
+    canvas.width = 320; canvas.height = 240;
+    var context = canvas.getContext('2d');
+
+    for (var w = 0; w < 20; w++)
+        context.drawImage(image, 0, 0, 64, 64, 0, 0, 64, 64);
+
+    var draws = 600, start = Date.now();
+    for (var i = 0; i < draws; i++) {
+        var sx = (i * 13) % 500, sy = (i * 7) % 350;
+        context.drawImage(image, sx, sy, 120, 120, (i % 4) * 80, (i % 3) * 80, 80, 80);
+    }
+    var elapsed = Date.now() - start;
+    report('cropped-draws-cost', true, draws + ' cropped draws in ' + elapsed + ' ms');
+    reportDone();
+};
+image.onerror = function () { report('cropped-draws-cost', false, 'image did not load'); reportDone(); };
+image.src = 'sample.jpg';
+</script>

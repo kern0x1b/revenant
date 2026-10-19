@@ -1,0 +1,57 @@
+<!doctype html><html><head><meta charset="utf-8"><title>conformance runner</title>
+<style>body{margin:0;font:12px -apple-system} iframe{width:320px;height:200px;border:1px solid #ccc}</style></head>
+<body>
+<div id="out">loading list</div>
+<iframe id="frame"></iframe>
+<script>
+function report(s){ document.getElementById("out").textContent = s; new Image().src = "/report?" + encodeURIComponent(s) + "&r=" + Math.random(); }
+
+var tests = decodeURIComponent((location.search.match(/[?&]tests=([^&]*)/) || [])[1] || "").split(",").filter(function(t){ return t; });
+var frame = document.getElementById("frame");
+var index = 0;
+
+function finishOne(name, verdict){
+  report(name + " :: " + verdict);
+  index++;
+  setTimeout(next, 400);
+}
+
+function next(){
+  if (index >= tests.length) { report("RUNNER DONE " + tests.length); return; }
+  var name = tests[index];
+  var started = Date.now(), settled = false;
+
+  function check(){
+    if (settled) return;
+    var doc = null;
+    try { doc = frame.contentDocument; } catch (e) { doc = null; }
+    var text = doc && doc.body ? doc.body.innerText : "";
+    var done = /TEST COMPLETE/.test(text);
+    var timedOut = Date.now() - started > 30000;
+    if (!done && !timedOut) { setTimeout(check, 500); return; }
+    settled = true;
+    var lines = text.split("\n");
+    var pass = 0, fails = [];
+    for (var i = 0; i < lines.length; i++) {
+      var line = lines[i];
+      if (/^\s*PASS\b/.test(line)) pass++;
+      else if (/^\s*FAIL\b/.test(line)) {
+        var detail = lines[i + 1] && !/^\s*(PASS|FAIL)\b/.test(lines[i + 1]) ? " " + lines[i + 1] : "";
+        fails.push((line + detail).replace(/\s+/g, " ").slice(0, 220));
+      }
+    }
+    var kinds = {};
+    for (var k = 0; k < fails.length; k++) kinds[fails[k]] = (kinds[fails[k]] || 0) + 1;
+    var summary = [];
+    for (var key in kinds) summary.push(kinds[key] + "x " + key);
+    summary.sort();
+    finishOne(name, (timedOut ? "timeout " : "") + "pass=" + pass + " fail=" + fails.length + (summary.length ? " | " + summary.slice(0, 4).join(" | ") : ""));
+  }
+
+  frame.src = name;
+  setTimeout(check, 800);
+}
+
+if (!tests.length) report("no tests given"); else { report("running " + tests.length); next(); }
+</script>
+</body></html>

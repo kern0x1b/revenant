@@ -1,0 +1,31 @@
+{
+    "version": "0.5",
+    "requires": [
+        "woff2/1.0.2+13.gfb9c337@revenant/stable#7e1e68a381c849bc0257fd0c1a1c27c2%1789581123.451479",
+        "wasm3/0.9.1-beta.1+7.gdeeaca9@revenant/stable#9643e95206d5a2fb89a34ff4c1e2e600%1789581123.4795809",
+        "openssl/4.0.2@revenant/stable#a49a061a0db773957aa5fd8e8439ae22%1789581123.2362182",
+        "libxslt/1.1.45@revenant/stable#a5285c798b70a95c570931e3bde5d8c2%1789581123.389667",
+        "libxml2/2.15.4@revenant/stable#f56ce87f12223622b8d78c70aab86c86%1789581123.313216",
+        "libwebp/1.6.0+258.g6ff2f43@revenant/stable#be5f805ebaf8ea1fc79e31b49aae997b%1789581123.2900789",
+        "libpsl/0.23.3+5.ga629c83@revenant/stable#a8a4277f809254cc3b495cc91a919189%1789581123.427063",
+        "libcxx/23.1.1@charon/stable#e6ff55649666bf8f37dfef16815c7a5d%1789581123.359746",
+        "icu/78.3@revenant/stable#0627eb1d7c3c6c61ddc1b3838e4225b7%1789581123.336728",
+        "brotli/1.2.0+161.g85c2aaf@revenant/stable#eb9ec0d3cf54cfe38b9fb4cfe617ebf6%1789581123.266752",
+        "apple-compat/1.0@charon/stable#a2bad74ff4ba342cc8b8e17e4ed4c977%1789583519.963192"
+    ],
+    "build_requires": [
+        "openssl/4.0.2#b700c658ab174d6ef1bbd719ca441236%1787920035.586",
+        "ninja/1.13.2#c8c5dc2a52ed6e4e42a66d75b4717ceb%1764096931.974",
+        "libplist/2.7.0@charon/stable#f48e959040f0874fb55265b9121fe238%1789583226.943558",
+        "ldid/2.1.5-procursus7+23.gaf86971@charon/stable#55aedc292b316e3276c6a6f1280fe9c8%1789583250.870324",
+        "ld64/956.6@charon/stable#12f94a06eae9d5bb1ef23b1c2ca8dd2a%1789581123.211091",
+        "iphoneos-sdk/16.4@charon/stable#9d6b688286fe2f791e3f15c93fbf3888%1789581123.1663308",
+        "dyld-imports-check/1.0@charon/stable#8f44bf7da0225b2d06f8e71f32151f55%1789581123.585574",
+        "cmake/4.4.3#c5b4d075979c7cb5d9649861acad0efe%1788855208.145"
+    ],
+    "python_requires": [
+        "charon-base/1.0@charon/stable#939e5bc5e0a3583e28d2d0379faeb81f%1789583519.498336",
+        "charon-apple/1.0@charon/stable#c12f719327ba4c563bd795fbcd2e07cf%1789581123.088861"
+    ],
+    "config_requires": []
+}

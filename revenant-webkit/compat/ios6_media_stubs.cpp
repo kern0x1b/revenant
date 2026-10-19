@@ -1,0 +1,60 @@
+#include <stdio.h>
+
+extern "C" long webkitIOS6MediaEngineUnavailable()
+{
+    static bool reported;
+    if (!reported) {
+        reported = true;
+        fprintf(stderr, "[ios6] AVFoundation media engine is not available\n");
+    }
+    return 0;
+}
+
+asm(
+    ".globl __ZN7WebCore18SourceBufferParser29setCallOnClientThreadCallbackEON3WTF8FunctionIFvONS2_IFvvEEEEEE\n"
+    "__ZN7WebCore18SourceBufferParser29setCallOnClientThreadCallbackEON3WTF8FunctionIFvONS2_IFvvEEEEEE = _webkitIOS6MediaEngineUnavailable\n"
+    ".globl __ZN7WebCore19ImageDecoderAVFObjC13canDecodeTypeERKN3WTF6StringE\n"
+    "__ZN7WebCore19ImageDecoderAVFObjC13canDecodeTypeERKN3WTF6StringE = _webkitIOS6MediaEngineUnavailable\n"
+    ".globl __ZN7WebCore19ImageDecoderAVFObjC17supportsMediaTypeENS_12ImageDecoder9MediaTypeE\n"
+    "__ZN7WebCore19ImageDecoderAVFObjC17supportsMediaTypeENS_12ImageDecoder9MediaTypeE = _webkitIOS6MediaEngineUnavailable\n"
+    ".globl __ZN7WebCore19ImageDecoderAVFObjC21supportsContainerTypeERKN3WTF6StringE\n"
+    "__ZN7WebCore19ImageDecoderAVFObjC21supportsContainerTypeERKN3WTF6StringE = _webkitIOS6MediaEngineUnavailable\n"
+    ".globl __ZN7WebCore19ImageDecoderAVFObjC6createERKNS_22FragmentedSharedBufferERKN3WTF6StringENS_11AlphaOptionENS_26GammaAndColorProfileOptionENS_15ProcessIdentityE\n"
+    "__ZN7WebCore19ImageDecoderAVFObjC6createERKNS_22FragmentedSharedBufferERKN3WTF6StringENS_11AlphaOptionENS_26GammaAndColorProfileOptionENS_15ProcessIdentityE = _webkitIOS6MediaEngineUnavailable\n"
+    ".globl __ZN7WebCore21ARKitBadgeSystemImage18createWithoutImageEv\n"
+    "__ZN7WebCore21ARKitBadgeSystemImage18createWithoutImageEv = _webkitIOS6MediaEngineUnavailable\n"
+    ".globl __ZN7WebCore22SourceBufferParserWebM10appendDataEON3WTF3RefIKNS_12SharedBufferENS1_12RawPtrTraitsIS4_EENS1_21DefaultRefDerefTraitsIS4_EEEENS_18SourceBufferParser11AppendFlagsE\n"
+    "__ZN7WebCore22SourceBufferParserWebM10appendDataEON3WTF3RefIKNS_12SharedBufferENS1_12RawPtrTraitsIS4_EENS1_21DefaultRefDerefTraitsIS4_EEEENS_18SourceBufferParser11AppendFlagsE = _webkitIOS6MediaEngineUnavailable\n"
+    ".globl __ZN7WebCore22SourceBufferParserWebM24flushPendingAudioSamplesEv\n"
+    "__ZN7WebCore22SourceBufferParserWebM24flushPendingAudioSamplesEv = _webkitIOS6MediaEngineUnavailable\n"
+    ".globl __ZN7WebCore22SourceBufferParserWebM6createEv\n"
+    "__ZN7WebCore22SourceBufferParserWebM6createEv = _webkitIOS6MediaEngineUnavailable\n"
+    ".globl __ZN7WebCore22SourceBufferParserWebM9setLoggerERKN3WTF6LoggerEy\n"
+    "__ZN7WebCore22SourceBufferParserWebM9setLoggerERKN3WTF6LoggerEy = _webkitIOS6MediaEngineUnavailable\n"
+    ".globl __ZN7WebCore25AudioVideoRendererAVFObjC6createERKN3WTF6LoggerEy\n"
+    "__ZN7WebCore25AudioVideoRendererAVFObjC6createERKN3WTF6LoggerEy = _webkitIOS6MediaEngineUnavailable\n"
+    ".globl __ZN7WebCore26SpatialAudioPlaybackHelper44supportsSpatialAudioPlaybackForConfigurationERKNS_26PlatformMediaConfigurationE\n"
+    "__ZN7WebCore26SpatialAudioPlaybackHelper44supportsSpatialAudioPlaybackForConfigurationERKNS_26PlatformMediaConfigurationE = _webkitIOS6MediaEngineUnavailable\n"
+    ".globl __ZN7WebCore27ISOFairPlayStreamingPsshBox16fairPlaySystemIDEv\n"
+    "__ZN7WebCore27ISOFairPlayStreamingPsshBox16fairPlaySystemIDEv = _webkitIOS6MediaEngineUnavailable\n"
+    ".globl __ZN7WebCore29CDMSessionAVContentKeySession11isAvailableEv\n"
+    "__ZN7WebCore29CDMSessionAVContentKeySession11isAvailableEv = _webkitIOS6MediaEngineUnavailable\n"
+    ".globl __ZN7WebCore29NetworkExtensionContentFilter6createERKNS_21PlatformContentFilter16FilterParametersE\n"
+    "__ZN7WebCore29NetworkExtensionContentFilter6createERKNS_21PlatformContentFilter16FilterParametersE = _webkitIOS6MediaEngineUnavailable\n"
+    ".globl __ZN7WebCore34MediaPlayerPrivateAVFoundationObjC19registerMediaEngineEPFvONSt3__110unique_ptrINS_18MediaPlayerFactoryENS1_14default_deleteIS3_EEEEE\n"
+    "__ZN7WebCore34MediaPlayerPrivateAVFoundationObjC19registerMediaEngineEPFvONSt3__110unique_ptrINS_18MediaPlayerFactoryENS1_14default_deleteIS3_EEEEE = _webkitIOS6MediaEngineUnavailable\n"
+    ".globl __ZN7WebCore35CDMInstanceFairPlayStreamingAVFObjC22supportsPersistentKeysEv\n"
+    "__ZN7WebCore35CDMInstanceFairPlayStreamingAVFObjC22supportsPersistentKeysEv = _webkitIOS6MediaEngineUnavailable\n"
+    ".globl __ZN7WebCore35CDMInstanceFairPlayStreamingAVFObjC23supportsMediaCapabilityERKNS_18CDMMediaCapabilityE\n"
+    "__ZN7WebCore35CDMInstanceFairPlayStreamingAVFObjC23supportsMediaCapabilityERKNS_18CDMMediaCapabilityE = _webkitIOS6MediaEngineUnavailable\n"
+    ".globl __ZN7WebCore35CDMInstanceFairPlayStreamingAVFObjC24supportsPersistableStateEv\n"
+    "__ZN7WebCore35CDMInstanceFairPlayStreamingAVFObjC24supportsPersistableStateEv = _webkitIOS6MediaEngineUnavailable\n"
+    ".globl __ZN7WebCore35CDMInstanceFairPlayStreamingAVFObjC6createERKNS_27CDMPrivateFairPlayStreamingE\n"
+    "__ZN7WebCore35CDMInstanceFairPlayStreamingAVFObjC6createERKNS_27CDMPrivateFairPlayStreamingE = _webkitIOS6MediaEngineUnavailable\n"
+    ".globl __ZN7WebCore36MediaPlayerPrivateMediaSourceAVFObjC19registerMediaEngineEPFvONSt3__110unique_ptrINS_18MediaPlayerFactoryENS1_14default_deleteIS3_EEEEE\n"
+    "__ZN7WebCore36MediaPlayerPrivateMediaSourceAVFObjC19registerMediaEngineEPFvONSt3__110unique_ptrINS_18MediaPlayerFactoryENS1_14default_deleteIS3_EEEEE = _webkitIOS6MediaEngineUnavailable\n"
+    ".globl __ZN7WebCore36MediaPlayerPrivateMediaSourceAVFObjC21supportsTypeAndCodecsERKNS_28MediaEngineSupportParametersE\n"
+    "__ZN7WebCore36MediaPlayerPrivateMediaSourceAVFObjC21supportsTypeAndCodecsERKNS_28MediaEngineSupportParametersE = _webkitIOS6MediaEngineUnavailable\n"
+    ".globl __ZTVN7WebCore21ARKitBadgeSystemImageE\n"
+    "__ZTVN7WebCore21ARKitBadgeSystemImageE = _webkitIOS6MediaEngineUnavailable\n"
+);

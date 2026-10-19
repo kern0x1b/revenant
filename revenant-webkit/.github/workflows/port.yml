@@ -1,0 +1,66 @@
+name: port
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+defaults:
+  run:
+    working-directory: port
+
+jobs:
+  checks:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          path: port
+
+      - uses: actions/checkout@v7
+        with:
+          repository: kern0x1b/charon
+          path: charon
+
+      - uses: conan-io/setup-conan@v1.4.0
+        with:
+          version: 2.32.0
+          cache_packages: true
+
+      - name: Register the toolchain and the port's recipes
+        run: |
+          conan config install "$GITHUB_WORKSPACE/charon/config"
+          ln -sf "$(conan config home)/extensions/charon/charon" /usr/local/bin/charon
+          charon setup "$GITHUB_WORKSPACE/charon"
+
+      - name: The declaration parses
+        run: python3 -c 'import tomllib; tomllib.load(open("charon.toml","rb")); print("charon.toml parses")'
+
+      - name: Every Python file compiles
+        run: git ls-files -z '*.py' | xargs -0 python3 -m py_compile
+
+      - name: The checks that need neither a phone nor a build
+        run: charon test --tier scripts
+
+      - name: The application's trust store is the reviewed one
+        run: scripts/check-cacert.py
+
+      - name: The engine at the pinned commit, as far as the carry manifest reads it
+        run: |
+          git init -q webkit-254
+          git -C webkit-254 remote add origin "$(git config -f .gitmodules submodule.webkit-254.url)"
+          scripts/carry-check.py --paths | git -C webkit-254 sparse-checkout set --no-cone --stdin
+          git -C webkit-254 fetch -q --depth 1 --filter=blob:none origin "$(git rev-parse HEAD:webkit-254)"
+          git -C webkit-254 checkout -q FETCH_HEAD
+
+      - name: The engine still carries what the port depends on
+        run: scripts/carry-check.py
+
+      - name: conan.lock pins what the declaration resolves to
+        run: |
+          charon generate
+          conan graph info build/system/charon -pr:h build/system/charon/profile -pr:b default --lockfile=conan.lock
+
+      - name: ICU as the engine uses it
+        run: charon test --tier host

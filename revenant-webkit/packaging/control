@@ -1,0 +1,13 @@
+Package: space.kern0x1b.rev
+Name: Revenant WebKit
+Architecture: iphoneos-arm
+Description: A modern WebKit engine underneath the phone's own Safari.
+ Builds WebKit 2.54 for armv7 / iOS 6.1.3 and loads it beneath Mobile Safari, so
+ the browser renders today's web: modern CSS and layout, Web Crypto, WebAssembly,
+ inline video and audio, and TLS this release cannot otherwise speak.
+Depends: mobilesubstrate, preferenceloader, firmware (>= 6.0), firmware (<< 7.0)
+Section: Tweaks
+Priority: optional
+Author: kern0x1b
+Maintainer: kern0x1b
+Icon: file:///Library/PreferenceBundles/RevPrefs.bundle/icon@2x.png

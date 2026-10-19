@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RevWebViewHost</title>
+<style>
+body { font: 15px/1.5 -apple-system, "Helvetica Neue", sans-serif; margin: 20px; color: #222; }
+h1 { font-size: 20px; margin: 0 0 12px; }
+dt { font-weight: 600; margin-top: 10px; }
+dd { margin: 0; color: #444; }
+code { background: #f2f2f2; padding: 1px 4px; border-radius: 3px; }
+</style>
+</head>
+<body>
+<h1>RevWebViewHost</h1>
+<p>The engine is running. This page is in the application bundle, so the host
+starts without reaching the network.</p>
+<dl>
+  <dt>User agent</dt><dd id="ua"></dd>
+  <dt>Viewport</dt><dd id="viewport"></dd>
+  <dt>Another page</dt>
+  <dd>Write the address into <code>/tmp/rev-url.txt</code> before launching.</dd>
+</dl>
+<script>
+document.getElementById("ua").textContent = navigator.userAgent;
+document.getElementById("viewport").textContent =
+    innerWidth + " x " + innerHeight + " at " + (devicePixelRatio || 1) + "x";
+</script>
+</body>
+</html>

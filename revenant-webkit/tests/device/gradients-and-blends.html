@@ -1,0 +1,39 @@
+<!doctype html><meta charset=utf-8><title>gradients-and-blends</title>
+<meta name=viewport content="width=device-width,initial-scale=1">
+<body style="font:13px sans-serif;padding:6px">
+<script src="report.js"></script>
+<script>
+var canvas = document.createElement('canvas');
+canvas.width = 64; canvas.height = 1;
+var context = canvas.getContext('2d');
+var gradient = context.createLinearGradient(0, 0, 64, 0);
+gradient.addColorStop(0, 'rgba(255,0,0,1)');
+gradient.addColorStop(1, 'rgba(255,0,0,0)');
+context.fillStyle = gradient;
+context.fillRect(0, 0, 64, 1);
+var middle = context.getImageData(32, 0, 1, 1).data;
+report('gradient-fade-keeps-its-hue', middle[0] > 200 && middle[1] < 40 && middle[2] < 40,
+    'middle rgba ' + middle[0] + ',' + middle[1] + ',' + middle[2] + ',' + middle[3]);
+
+function blended(mode) {
+    var canvas = document.createElement('canvas');
+    canvas.width = canvas.height = 8;
+    var context = canvas.getContext('2d');
+    context.fillStyle = 'rgb(224,160,32)';
+    context.fillRect(0, 0, 8, 8);
+    context.globalCompositeOperation = mode;
+    context.fillStyle = 'rgb(64,128,192)';
+    context.fillRect(0, 0, 8, 8);
+    var pixel = context.getImageData(4, 4, 1, 1).data;
+    return [pixel[0], pixel[1], pixel[2]];
+}
+
+var plain = blended('source-over');
+['multiply', 'screen', 'overlay', 'hue', 'saturation', 'color', 'luminosity'].forEach(function (mode) {
+    var got = blended(mode);
+    report('canvas-blend-' + mode + '-blends', got.join(',') !== plain.join(','),
+        got.join(',') + ' vs unblended ' + plain.join(','));
+});
+
+reportDone();
+</script>

@@ -1,0 +1,7 @@
+#!/bin/sh
+# The engine is loaded when an injected app launches, so the browser has to be
+# restarted for a new one to take effect. A respring is not needed and would
+# re-lock the device; killing Safari is enough.
+killall MobileSafari 2>/dev/null
+killall Preferences 2>/dev/null
+exit 0

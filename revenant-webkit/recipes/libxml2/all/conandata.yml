@@ -1,0 +1,4 @@
+sources:
+  "2.15.4":
+    url: "https://gitlab.gnome.org/GNOME/libxml2.git"
+    commit: "96498992efa48d52b0e8b83058bd88dbdaf153c1"

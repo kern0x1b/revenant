@@ -1,0 +1,4 @@
+sources:
+  1.2.0+161.g85c2aaf:
+    commit: 85c2aaf13a19c9594f577a854bb4abb5fd5441a7
+    url: https://github.com/google/brotli.git

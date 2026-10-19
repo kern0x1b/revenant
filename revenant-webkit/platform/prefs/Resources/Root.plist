@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>title</key>
+	<string>RevWebKit</string>
+	<key>items</key>
+	<array>
+		<dict>
+			<key>cell</key><string>PSGroupCell</string>
+			<key>label</key><string>New Tab</string>
+			<key>footerText</key><string>When a blank tab opens, show your bookmarks as a start page. Turn this off to leave new tabs blank.</string>
+		</dict>
+		<dict>
+			<key>cell</key><string>PSSwitchCell</string>
+			<key>label</key><string>Bookmarks start page</string>
+			<key>defaults</key><string>space.kern0x1b.rev</string>
+			<key>key</key><string>NewTabStartPage</string>
+			<key>default</key><true/>
+			<key>id</key><string>NewTabStartPage</string>
+		</dict>
+		<dict>
+			<key>cell</key><string>PSGroupCell</string>
+			<key>label</key><string>Custom Home URL</string>
+			<key>footerText</key><string>Open a fixed page on every new tab instead of the bookmarks. A URL with no scheme is opened over https.</string>
+			<key>id</key><string>customGroup</string>
+		</dict>
+		<dict>
+			<key>cell</key><string>PSSwitchCell</string>
+			<key>label</key><string>Use custom URL</string>
+			<key>defaults</key><string>space.kern0x1b.rev</string>
+			<key>key</key><string>CustomURLEnabled</string>
+			<key>default</key><false/>
+			<key>id</key><string>CustomURLEnabled</string>
+		</dict>
+		<dict>
+			<key>cell</key><string>PSEditTextCell</string>
+			<key>label</key><string>URL</string>
+			<key>defaults</key><string>space.kern0x1b.rev</string>
+			<key>key</key><string>CustomURL</string>
+			<key>placeholder</key><string>example.com</string>
+			<key>autoCapitalizationType</key><integer>0</integer>
+			<key>autoCorrectionType</key><integer>1</integer>
+			<key>keyboardType</key><integer>3</integer>
+			<key>id</key><string>CustomURL</string>
+		</dict>
+		<dict>
+			<key>cell</key><string>PSGroupCell</string>
+			<key>label</key><string>Apps</string>
+			<key>footerText</key><string>Choose which apps run on the RevWebKit engine.</string>
+		</dict>
+		<dict>
+			<key>cell</key><string>PSLinkCell</string>
+			<key>label</key><string>Per-App Injection</string>
+			<key>detail</key><string>RevAppsListController</string>
+			<key>isController</key><true/>
+		</dict>
+		<dict>
+			<key>cell</key><string>PSGroupCell</string>
+			<key>label</key><string>Diagnostics</string>
+			<key>footerText</key><string>Write what a page logs to the console — including its errors — to /tmp/rev-safari-stderr.log, with the file and line each came from. Off unless you are debugging a site: a chatty page writes a lot.</string>
+		</dict>
+		<dict>
+			<key>cell</key><string>PSSwitchCell</string>
+			<key>label</key><string>Log page console</string>
+			<key>defaults</key><string>space.kern0x1b.rev</string>
+			<key>key</key><string>ConsoleLog</string>
+			<key>default</key><false/>
+			<key>id</key><string>ConsoleLog</string>
+		</dict>
+		<dict>
+			<key>cell</key><string>PSGroupCell</string>
+			<key>label</key><string>Actions</string>
+			<key>footerText</key><string>Settings apply on the next new tab. If they do not, close and reopen the app; if they still do not, respring.</string>
+		</dict>
+		<dict>
+			<key>cell</key><string>PSButtonCell</string>
+			<key>label</key><string>Respring</string>
+			<key>action</key><string>respring</string>
+		</dict>
+		<dict>
+			<key>cell</key><string>PSGroupCell</string>
+			<key>label</key><string>About</string>
+			<key>footerText</key><string>RevWebKit puts a modern WebKit engine under the stock browser on iOS 6, so pages the built-in engine can no longer open load and behave the way a current phone would render them — current HTML, CSS and JavaScript, TLS 1.2/1.3, and WebAssembly. The engine runs in-process; nothing leaves the device.</string>
+		</dict>
+		<dict>
+			<key>cell</key><string>PSTitleValueCell</string>
+			<key>label</key><string>Engine</string>
+			<key>defaults</key><string>space.kern0x1b.rev</string>
+			<key>key</key><string>_aboutEngine</string>
+			<key>default</key><string>WebKit 2.54</string>
+		</dict>
+		<dict>
+			<key>cell</key><string>PSTitleValueCell</string>
+			<key>label</key><string>Renders as</string>
+			<key>defaults</key><string>space.kern0x1b.rev</string>
+			<key>key</key><string>_aboutUA</string>
+			<key>default</key><string>AppleWebKit/605</string>
+		</dict>
+		<dict>
+			<key>cell</key><string>PSTitleValueCell</string>
+			<key>label</key><string>Tweak version</string>
+			<key>defaults</key><string>space.kern0x1b.rev</string>
+			<key>key</key><string>_aboutVersion</string>
+			<key>default</key><string>1.0</string>
+		</dict>
+	</array>
+</dict>
+</plist>

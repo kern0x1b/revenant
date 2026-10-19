@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="58" height="58" viewBox="0 0 58 58">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#5AB0F7"/>
+      <stop offset="1" stop-color="#1466D8"/>
+    </linearGradient>
+    <linearGradient id="gloss" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.38"/>
+      <stop offset="0.5" stop-color="#ffffff" stop-opacity="0.06"/>
+      <stop offset="0.5" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+    <clipPath id="rr"><rect x="1" y="1" width="56" height="56" rx="12.5" ry="12.5"/></clipPath>
+  </defs>
+  <g clip-path="url(#rr)">
+    <rect x="0" y="0" width="58" height="58" fill="url(#bg)"/>
+    <g fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round">
+      <circle cx="29" cy="29" r="15"/>
+      <ellipse cx="29" cy="29" rx="6.4" ry="15"/>
+      <line x1="14" y1="29" x2="44" y2="29"/>
+      <path d="M16.5 21 Q29 26 41.5 21"/>
+      <path d="M16.5 37 Q29 32 41.5 37"/>
+    </g>
+    <rect x="0" y="0" width="58" height="29" fill="url(#gloss)"/>
+  </g>
+</svg>

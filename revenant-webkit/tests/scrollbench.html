@@ -1,0 +1,176 @@
+<!doctype html><meta charset=utf-8><meta name=viewport content="width=320">
+<title>scrollbench</title>
+<!--
+  A feed that does not change between runs.
+
+  The live site cannot be used to compare two builds. Its content varies per
+  load, resident memory tracks that content at r = 0.98 (8.6 MB per thousand
+  elements), and it rate-limits. Measured consequence: the same engine
+  configuration produced 29, 107 and 122 stalls across three soaks, and three
+  runs that reached an identical JIT state scrolled at 15.5, 7.0 and 8.0 fps.
+  Every threshold conclusion drawn against it was noise.
+
+  So this page fixes the two variables that mattered. The content is generated
+  from a seeded sequence, so run N and run N+1 lay out the same boxes. And the
+  script load is a MessageChannel self-post loop, which is what React's
+  scheduler does on the real site - the profile put
+  MessagePort::drainOneLocalMessage on 44.1% of every web-thread stack - so the
+  engine is asked the same question it is asked in production.
+
+  The shape is copied from what was measured on threads.com rather than
+  invented: hundreds of small per-card grids, an avatar column and a content
+  column, track templates like 48px/248px, not one large grid. Text is the
+  dominant content. Nothing here is the product; it is an instrument.
+-->
+<style>
+ body{margin:0;font:14px -apple-system,Helvetica;background:#fff;-webkit-text-size-adjust:none}
+ .post{display:grid;grid-template-columns:48px 248px;grid-template-rows:21px 24px auto auto;
+       border-bottom:1px solid #eee;padding:8px 6px;column-gap:8px}
+ .avatar{grid-row:1/4;width:36px;height:36px;border-radius:18px;background:#dcdcdc}
+ .name{font-weight:600}
+ .meta{color:#8e8e8e;font-size:12px}
+ .text{grid-column:2;line-height:19px}
+ .row{grid-column:2;display:flex;margin-top:6px}
+ .row span{margin-right:18px;color:#888;font-size:12px}
+ .media{grid-column:2;height:150px;background:linear-gradient(#eee,#e0e0e0);border-radius:6px;margin-top:6px}
+ #hud{position:fixed;top:0;left:0;right:0;background:#000;color:#0f0;font:11px monospace;padding:3px;z-index:9;white-space:pre-wrap}
+</style>
+<body><div id=hud>building</div><div id=feed></div>
+<script>
+// Seeded so the DOM is byte-identical between runs; Math.random() would put the
+// variance back that this page exists to remove.
+var seed = 12345;
+function rnd() { seed = (seed * 1103515245 + 12345) & 0x7fffffff; return seed / 0x7fffffff; }
+
+var WORDS = ('the quick brown fox jumps over a lazy dog while several other ' +
+  'animals watch from a distance and consider whether any of this is worth ' +
+  'their attention on a warm afternoon near the river').split(' ');
+
+function sentence(n) {
+  var out = [];
+  for (var i = 0; i < n; i++) out.push(WORDS[(rnd() * WORDS.length) | 0]);
+  return out.join(' ');
+}
+
+// The memory regime is part of what is being measured, not a side effect. At 400
+// posts the collector stays in its cheap band all run - footprint 100-139 MB,
+// eden collections, 4-21 ms pauses - and the emergency policy that costs the real
+// site 600-900 ms pauses never engages. The real site reaches 204-244 MB because
+// it delivers content, at roughly 8.6 MB per thousand elements. So the post count
+// is a knob: ?posts=1400 puts this page in the same band and makes that regime
+// reproducible for the first time.
+var POSTS = (function () {
+  var m = /[?&]posts=(\d+)/.exec(location.search);
+  return m ? Math.max(50, Math.min(4000, parseInt(m[1], 10))) : 400;
+})();
+// The DOM is not what puts the real site at 204-244 MB. Measured there: a 51 MB
+// JavaScript heap, ~55 MB of graphics surfaces, decoded images - against which
+// this page's DOM is 2.2 MB of heap even at 1400 posts, so the collector never
+// leaves its cheap band and the emergency policy under test never engages.
+//
+// So the heap is a knob too. ?heap=40 retains roughly forty megabytes of live
+// objects in the shape a component tree has - a per-post record holding strings
+// and a child array - which is what the collector actually has to mark. Without
+// this the bench measures a configuration the product never runs in.
+var HEAP_MB = (function () {
+  var m = /[?&]heap=(\d+)/.exec(location.search);
+  return m ? Math.max(0, Math.min(120, parseInt(m[1], 10))) : 0;
+})();
+var retained = [];
+
+var results = {};
+function mark(name, value) {
+  results[name] = value;
+  document.getElementById('hud').textContent = JSON.stringify(results);
+}
+
+var t0 = Date.now();
+var html = [];
+for (var i = 0; i < POSTS; i++) {
+  html.push('<div class=post><div class=avatar></div>' +
+    '<div class=name>user_' + i + '</div>' +
+    '<div class=meta>' + ((i * 7) % 24) + 'h</div>' +
+    '<div class=text>' + sentence(12 + ((i * 3) % 20)) + '</div>' +
+    (i % 4 === 0 ? '<div class=media></div>' : '') +
+    '<div class=row><span>' + ((i * 7) % 900) + '</span><span>' + ((i * 3) % 90) +
+    '</span><span>' + (i % 9) + '</span></div></div>');
+}
+document.getElementById('feed').innerHTML = html.join('');
+document.body.offsetHeight;
+mark('buildMs', Date.now() - t0);
+mark('elements', document.getElementsByTagName('*').length);
+mark('scrollH', document.body.scrollHeight);
+
+if (HEAP_MB) {
+  // Roughly 240 bytes per record on this 32-bit build, measured against the
+  // engine's own heap figure rather than assumed.
+  var records = (HEAP_MB * 1048576 / 240) | 0;
+  for (var r = 0; r < records; r++) {
+    retained.push({
+      id: r,
+      key: 'post-' + r,
+      text: WORDS[r % WORDS.length] + '-' + r,
+      props: { index: r, seen: false, height: (r % 200) + 40 },
+      children: r % 8 ? null : [r, r + 1, r + 2]
+    });
+  }
+  mark('retained', retained.length);
+}
+
+// The site's own work loop, reproduced: a MessageChannel posting to itself to
+// yield to the browser between slices, exactly as React's scheduler does. Each
+// slice does a little DOM reading and allocation, so the engine sees the same
+// mix of script, style reads and garbage it sees in production.
+var chan = new MessageChannel();
+var slices = 0, sliceWork = 0;
+var running = false;
+var cards = [].slice.call(document.getElementsByClassName('post'));
+chan.port1.onmessage = function () {
+  if (!running) return;
+  var end = Date.now() + 4;
+  do {
+    var idx = (rnd() * POSTS) | 0;
+    var el = cards[idx];
+    if (el) { sliceWork += el.offsetHeight; el.className = 'post'; }
+    var junk = [];
+    for (var k = 0; k < 40; k++) junk.push({ i: k, s: 'x' + k });
+  } while (Date.now() < end);
+  slices++;
+  chan.port2.postMessage(null);
+};
+
+// Frames are counted the way the reader experiences them: gaps between
+// animation callbacks, not an average over the run.
+var frames = [], lastFrame = 0;
+function frame(now) {
+  if (lastFrame) frames.push(now - lastFrame);
+  lastFrame = now;
+  requestAnimationFrame(frame);
+}
+
+window.benchStart = function () {
+  frames = []; lastFrame = 0; slices = 0; running = true;
+  chan.port2.postMessage(null);
+  requestAnimationFrame(frame);
+  return 'started';
+};
+
+window.benchStop = function () {
+  running = false;
+  frames.sort(function (a, b) { return a - b; });
+  var n = frames.length;
+  if (!n) return JSON.stringify({ error: 'no frames' });
+  var pct = function (p) { return Math.round(frames[Math.min(n - 1, (n * p / 100) | 0)]); };
+  // The gap distribution, not a mean: on this device the mean is dominated by
+  // whichever windows happened to be idle.
+  return JSON.stringify({
+    build: results.buildMs, elements: results.elements, scrollH: results.scrollH,
+    frames: n, slices: slices,
+    gapMedianMs: pct(50), gap90Ms: pct(90), gap99Ms: pct(99), gapMaxMs: Math.round(frames[n - 1]),
+    over100ms: frames.filter(function (g) { return g > 100; }).length,
+    over400ms: frames.filter(function (g) { return g > 400; }).length
+  });
+};
+
+mark('ready', 1);
+</script>

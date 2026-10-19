@@ -1,0 +1,377 @@
+[port]
+name = "revenant-webkit"
+version = "0.1.0"
+description = "WebKit for armv7 / iOS 6"
+index = "revenant"
+engine = "webkit-254"
+licenses = ["LICENSE", "THIRD-PARTY.md"]
+
+[platform]
+use = "apple-ios"
+arch = "armv7"
+os-version = "6.0"
+distribution = "jailbreak"
+
+[target]
+cppstd = 23
+cpu = "cortex-a9"
+fpu = "neon"
+defines = ["-DWEBKIT_IOS6_NO_READLINE"]
+
+[requires]
+openssl = "4.0.2@revenant/stable"
+brotli = "1.2.0+161.g85c2aaf@revenant/stable"
+libwebp = "1.6.0+258.g6ff2f43@revenant/stable"
+libxml2 = "2.15.4@revenant/stable"
+libxslt = "1.1.45@revenant/stable"
+libpsl = "0.23.3+5.ga629c83@revenant/stable"
+icu = "78.3@revenant/stable"
+woff2 = "1.0.2+13.gfb9c337@revenant/stable"
+libcxx = "23.1.1@charon/stable"
+wasm3 = "0.9.1-beta.1+7.gdeeaca9@revenant/stable"
+
+[tools]
+cmake = "4.4.3"
+ninja = "1.13.2"
+ldid = "2.1.5-procursus7+23.gaf86971@charon/stable"
+
+[integrate]
+before-build = ["task:carry-check", "task:port-delta"]
+
+[variants.system]
+
+[variants.prefixed]
+options = ["prefixed=True"]
+prefix-header = "ios6_class_prefix.h"
+exports = "{build}/WebKitLegacy-iOS-rev.exp"
+
+[variants.prefixed.engine-options]
+ENABLE_MEDIA_STREAM = "OFF"
+ENABLE_NOTIFICATIONS = "OFF"
+ENABLE_WEBGL = "OFF"
+
+[engine]
+cmake = "webkit-254"
+find-packages = ["icu", "libcxx", "libxml2", "libxslt", "openssl", "wasm3"]
+project-name = "WebKit"
+config-packages = ["LibXml2", "LibXslt"]
+prefix-header = "ios6_class_names.h"
+exports = "{source}/Source/WebKitLegacy/WebKitLegacy-iOS.exp"
+exports-binary = "{build}/WebKitLegacy.framework/WebKitLegacy"
+stubs = "compat/stubs"
+
+[flags]
+common = "-flto=thin -mllvm -hot-cold-split=false -target {triple} {tuning} -isysroot {sdk}"
+defines = "-DWEBKIT_IOS6=1 -DENABLE_UNFAIR_LOCK=0 -DWEBKIT_IOS6_NO_READLINE -DU_STATIC_IMPLEMENTATION"
+cxx = "{common} -nostdinc++ -isystem {include:libcxx} -isystem {stubs} -include {stubs}/ios6_dispatch_compat.h -include {stubs}/{prefix-header} -D_LIBCPP_DISABLE_AVAILABILITY {defines}"
+c = "{common} -isystem {stubs} -include {stubs}/{prefix-header} {defines}"
+objcxx = "{cxx} -DWEBKIT_IOS6_OBJC_EXTRAS"
+objc = "{c} -DWEBKIT_IOS6_OBJC_EXTRAS"
+shared-link = "-B{bin:ld64} -flto=thin -Wl,-compatibility_version,1.0.0 -Wl,-current_version,1.0.0 {libdirs:libxslt,woff2} {lib:brotli:brotlidec} {lib:brotli:brotlicommon} {lib:libpsl:psl}"
+exe-link = "-B{bin:ld64} {lib:libpsl:psl} -Wl,-rpath,@executable_path/Frameworks"
+module-link = "-B{bin:ld64} {lib:libpsl:psl}"
+
+[engine.options]
+PORT = "Cocoa"
+DEVELOPER_MODE = "OFF"
+SWIFT_REQUIRED = "OFF"
+WEBKIT_IOS6 = "ON"
+WEBKIT_IOS6_SIZE_OPTIMIZED = "ON"
+WEBKIT_NO_AVAILABILITY_OVERLAY = "ON"
+CMAKE_DISABLE_PRECOMPILE_HEADERS = "OFF"
+WEBKIT_IOS6_CRYPTO_LIB = "{lib:openssl:crypto}"
+WEBKIT_IOS6_COMPAT_LIB = "{target:ios6compat}"
+WEBKIT_IOS6_EXPORTS = "{exports}"
+WEBKIT_IOS6_LIBCXX_DIR = "{pkg:libcxx}"
+USE_WEBP = "ON"
+WebP_INCLUDE_DIR = "{include:libwebp}"
+WebP_LIBRARY = "{lib:libwebp:webp}"
+WebP_DEMUX_LIBRARY = "{lib:libwebp:webpdemux}"
+USE_WOFF2 = "ON"
+WOFF2_INCLUDE_DIR = "{include:woff2}"
+WOFF2_DEC_INCLUDE_DIR = "{include:woff2}"
+WOFF2_LIBRARY = "{lib:woff2:woff2common}"
+WOFF2_DEC_LIBRARY = "{lib:woff2:woff2dec}"
+ENABLE_WEBKIT_LEGACY = "ON"
+ENABLE_WEBKIT = "OFF"
+ENABLE_TOUCH_EVENTS = "ON"
+ENABLE_IOS_TOUCH_EVENTS = "OFF"
+ENABLE_WEBKIT_OVERFLOW_SCROLLING_CSS_PROPERTY = "ON"
+ENABLE_NOTIFICATIONS = "ON"
+ENABLE_FULLSCREEN_API = "ON"
+ENABLE_XSLT = "ON"
+ENABLE_WEBGL = "ON"
+ENABLE_MEDIA_STREAM = "ON"
+ENABLE_WIRELESS_PLAYBACK_TARGET = "ON"
+ENABLE_WIRELESS_PLAYBACK_TARGET_AVAILABILITY_API = "ON"
+ENABLE_JIT = "ON"
+ENABLE_DFG_JIT = "ON"
+ENABLE_C_LOOP = "OFF"
+ENABLE_FTL_JIT = "OFF"
+USE_SYSTEM_MALLOC = "ON"
+ENABLE_WEBGPU = "OFF"
+ENABLE_WEBDRIVER = "OFF"
+ENABLE_WEBINSPECTORUI = "OFF"
+ENABLE_API_TESTS = "OFF"
+ENABLE_MINIBROWSER = "OFF"
+ENABLE_WEB_RTC = "OFF"
+USE_LIBWEBRTC = "OFF"
+ENABLE_MEDIA_RECORDER = "OFF"
+ENABLE_WEB_CODECS = "OFF"
+ENABLE_COCOA_WEBM_PLAYER = "OFF"
+ENABLE_AV1 = "OFF"
+ENABLE_SPEECH_SYNTHESIS = "OFF"
+ENABLE_WEB_SPEECH = "OFF"
+ENABLE_GAMEPAD = "OFF"
+ENABLE_PIXEL_FORMAT_RGBA16F = "OFF"
+ENABLE_COMPRESSION_STREAM = "OFF"
+ENABLE_APPLE_PAY = "OFF"
+ENABLE_APPLE_PAY_COUPON_CODE = "OFF"
+ENABLE_APPLE_PAY_SESSION_V3 = "OFF"
+USE_ANGLE_EGL = "OFF"
+ENABLE_MEDIA_SOURCE = "OFF"
+ENABLE_MEDIA_SOURCE_IN_WORKERS = "OFF"
+ENABLE_ENCRYPTED_MEDIA = "OFF"
+ENABLE_LEGACY_ENCRYPTED_MEDIA = "OFF"
+ENABLE_WEB_AUTHN = "OFF"
+ENABLE_WRITING_TOOLS = "OFF"
+ENABLE_PAYMENT_REQUEST = "OFF"
+ENABLE_IMAGE_DIFF = "OFF"
+BROWSERENGINECORE_LIBRARY = "BROWSERENGINECORE_LIBRARY-NOTFOUND"
+BROWSERENGINEKIT_LIBRARY = "BROWSERENGINEKIT_LIBRARY-NOTFOUND"
+UNIFORMTYPEIDENTIFIERS_LIBRARY = "UNIFORMTYPEIDENTIFIERS_LIBRARY-NOTFOUND"
+
+[[static-library]]
+name = "ios6compat"
+produces = "libios6compat.a"
+standard = 23
+sources = [
+    "compat/ios6_compat.c",
+    "compat/ios6_missing.c",
+    "compat/ios6_missing_constants.c",
+    "compat/ios6_coretext.c",
+    "compat/ios6_coregraphics.c",
+    "compat/ios6_missing_classes.m",
+    "compat/ios6_uttype.m",
+    "compat/ios6_palswift.m",
+    "compat/ios6_uicolor.m",
+    "compat/ios6_avaudio.m",
+    "compat/ios6_media_stubs.cpp",
+]
+include-system = [
+    "compat/stubs",
+    '$<$<COMPILE_LANGUAGE:CXX>:${WEBKIT_IOS6_LIBCXX_DIR}/include/c++/v1>',
+]
+source-include = { "compat/ios6_compat.c" = '${LIBPSL_INCLUDE_DIR}' }
+options = [
+    "-O2",
+    "-fno-objc-arc",
+    "-Wno-builtin-requires-header",
+    "-Wno-protocol",
+    "-Wno-objc-designated-initializers",
+    '"$<$<COMPILE_LANGUAGE:OBJC,CXX>:SHELL:-include ${CHARON_PORT}/compat/stubs/ios6_dispatch_compat.h>"',
+    '"$<$<COMPILE_LANGUAGE:CXX>:-nostdinc++>"',
+]
+definitions = [
+    "$<$<COMPILE_LANGUAGE:OBJC>:WEBKIT_IOS6_OBJC_EXTRAS>",
+    "$<$<COMPILE_LANGUAGE:CXX>:_LIBCPP_DISABLE_AVAILABILITY>",
+]
+cache = { WEBKIT_IOS6_LIBCXX_DIR = "{pkg:libcxx}", LIBPSL_INCLUDE_DIR = "{include:libpsl}" }
+
+[[device-library]]
+name = "RevSafari"
+sources = ["platform/safari/rev-safari-tweak.c"]
+install = "/Library/MobileSubstrate/DynamicLibraries"
+installs-into = "stage"
+options = ["-Wall", "-O2"]
+frameworks = ["CoreFoundation"]
+resources = [{ from = "platform/safari/rev-safari.plist", as = "RevSafari.plist" }]
+
+[[device-library]]
+name = "rev-safari-compat"
+sources = ["platform/safari/safari-compat.mm", "platform/safari/RevWasm.m"]
+install = "/usr/lib"
+installs-into = "stage"
+packages = ["wasm3"]
+options = [
+    "-Wall",
+    "-O2",
+    "-fno-objc-arc",
+    "-Wno-deprecated-declarations",
+    "-Wno-unused",
+    "-U_FORTIFY_SOURCE",
+    "-D_FORTIFY_SOURCE=0",
+]
+link-options = ["-nostdlib++"]
+frameworks = ["Foundation", "CoreFoundation"]
+libraries = ["objc", "sqlite3", "wasm3::wasm3"]
+
+[[device-library]]
+name = "rev-TLS"
+sources = ["platform/safari/tls-openssl.c"]
+install = "/usr/lib"
+installs-into = "stage"
+packages = ["openssl"]
+options = ["-Wall", "-O2"]
+frameworks = ["CoreFoundation", "Security"]
+libraries = ["openssl::openssl"]
+
+[[device-library]]
+name = "RevPrefs"
+sources = ["platform/prefs/RevRootListController.m", "platform/prefs/RevAppsListController.m"]
+install = "/Library/PreferenceBundles/RevPrefs.bundle"
+installs-into = "stage"
+suffix = ""
+include = ["platform/prefs"]
+options = ["-Wall", "-Os", "-fno-objc-arc", "-Wno-deprecated-declarations", "-Wno-unused"]
+link-options = ["-undefined", "dynamic_lookup", "-flat_namespace"]
+frameworks = ["Foundation", "CoreFoundation", "UIKit"]
+libraries = ["objc"]
+resources = [
+    { from = "platform/prefs/Resources/", as = "." },
+    { from = "platform/prefs/entry.plist", as = "/Library/PreferenceLoader/Preferences/RevWebKit.plist" },
+]
+
+[application]
+name = "RevWebViewHost"
+variant = "prefixed"
+sources = ["app/rev-webview-host.m", "app/ModernTLSURLProtocol.m", "app/WebKitUIKitDelegate.m"]
+packages = ["openssl"]
+include-system = [
+    '${ENGINE_BUILD}/WebKitLegacy/Headers',
+    '${ENGINE_BUILD}/WebCore.framework/PrivateHeaders',
+    '${ENGINE_BUILD}/WTF/Headers',
+]
+options = ["-g", "-fno-objc-arc", '"SHELL:-include ${CLASS_PREFIX_HEADER}"', '-F${ENGINE_BUILD}']
+link-options = ['-F${ENGINE_BUILD}', "-Wl,-dead_strip", "-Wl,-rpath,@executable_path/Frameworks"]
+frameworks = [
+    "WebKitLegacy",
+    "UIKit",
+    "Foundation",
+    "QuartzCore",
+    "CoreGraphics",
+    "ImageIO",
+    "MobileCoreServices",
+]
+libraries = ["openssl::openssl", "z"]
+resources = ["app/cacert.pem", "app/start.html"]
+cache = { ENGINE_BUILD = "{build}", CLASS_PREFIX_HEADER = "{stubs}/ios6_class_prefix.h" }
+entitlements = "app/entitlements.xml"
+log = "/tmp/rev-webview-host.log"
+first-page = "/tmp/rev-url.txt"
+
+[application.plist]
+CFBundleIdentifier = "space.kern0x1b.revwebviewhost"
+CFBundlePackageType = "APPL"
+CFBundleSupportedPlatforms = ["iPhoneOS"]
+UIDeviceFamily = [1]
+UISupportedInterfaceOrientations = ["UIInterfaceOrientationPortrait"]
+url-scheme = "revwebviewhost"
+
+[stage]
+engine-location = "usr/lib/rev-fw"
+runtime-from = "libcxx"
+
+[stage.frameworks.JavaScriptCore]
+as = "JavaScriptCore"
+replaces = "/System/Library/PrivateFrameworks/JavaScriptCore.framework/JavaScriptCore"
+compatibility-version = "1.0.0"
+
+[stage.frameworks.WebCore]
+as = "WebCore"
+replaces = "/System/Library/PrivateFrameworks/WebCore.framework/WebCore"
+compatibility-version = "1.0.0"
+resources = true
+omit = ["WebCore", "Headers", "PrivateHeaders", "Modules", "_CodeSignature"]
+flatten = [{ from = "modern-media-controls/images/iOS", into = "modern-media-controls/images", patterns = ["*.svg", "*.png"] }]
+
+[stage.frameworks.WebKitLegacy]
+as = "WebKit"
+replaces = "/System/Library/PrivateFrameworks/WebKit.framework/WebKit"
+compatibility-version = "1.0.0"
+
+[stage.runtime]
+"libc++.1.0.dylib" = "librev-c++.1.dylib"
+"libc++abi.1.0.dylib" = "librev-c++abi.1.dylib"
+
+[package]
+control = "packaging/control"
+variant = "system"
+maintainer-scripts = "packaging/DEBIAN"
+
+[tasks.carry-check]
+script = "scripts/carry-check.py"
+
+[tasks.port-delta]
+script = "scripts/port-delta.py"
+
+[tasks.compat-audit]
+script = "tools/compat-audit.py"
+args = "--compat {target:ios6compat} --engine-build {build} --icu {pkg:icu}"
+
+[tasks.symbol-check]
+script = "tools/symbol-check.py"
+args = "--build {build}"
+
+[tasks.prefix-exports]
+script = "tools/prefix-exports.py"
+args = "{stubs}/ios6_class_prefix.h {engine-exports} {exports}"
+
+[pipeline]
+system = [
+    "task:carry-check",
+    "build:static-library",
+    "build:engine",
+    "check:exports",
+    "task:compat-audit",
+    "task:symbol-check",
+    "stage:clear",
+    "build:device-library",
+    "stage:frameworks",
+    "stage:plists-to-binary",
+    "check:no-encryption-info",
+    "check:imports",
+]
+prefixed = [
+    "task:carry-check",
+    "task:prefix-exports",
+    "build:static-library",
+    "build:engine",
+    "check:exports",
+    "task:compat-audit",
+    "build:application",
+    "sign:application",
+    "check:imports",
+]
+
+[tests]
+transport = "tests/device/harness.py:bind"
+
+[tests.scripts]
+runs = ["tests/scripts/build-lookup.py"]
+needs = []
+
+[tests.flags]
+runs = [
+    "tests/scripts/flag-paths-exist.py",
+    "tests/scripts/staged-plists-are-processed.py",
+    "tests/scripts/project-include-is-applied.py",
+]
+needs = ["build"]
+
+[tests.host]
+runs = ["tests/run-tests.py:run_host_tests"]
+needs = []
+packages = { icu = "[*]@revenant/stable" }
+
+[tests.gate]
+runs = ["tests/device/run.py:run_gate"]
+needs = ["device"]
+
+[tests.imports]
+runs = ["tests/device/hold-shared-cache.py:hold_cache"]
+needs = ["device"]
+
+[tests.batteries]
+runs = ["tests/run-tests.py:run_device_tests"]
+needs = ["device", "build"]

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- Raising this process's memory high-water mark. The kernel accepts the
+	     call from root and refuses it from the user an application runs as. -->
+	<key>com.apple.private.memorystatus</key>
+	<true/>
+	<key>com.apple.private.jetsam.modify-priority</key>
+	<true/>
+	<key>platform-application</key>
+	<true/>
+</dict>
+</plist>

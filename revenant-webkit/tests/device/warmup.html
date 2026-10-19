@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<title>warm-up</title>
+<p>Loaded before the measured pages. Safari does not always come back from a
+restart with the tweak injected, and the page a freshly launched Safari loads
+first does not have its window-object hook in place yet; either way the bridges
+the tweak installs - WebAssembly among them - are missing, and a measured page
+that landed there would report the engine broken. This page reports whether the
+bridge is in place so the suite can restart Safari and try again.</p>
+<script>
+var state = (typeof window.__revwasm === "object") ? "yes" : "no";
+var img = new Image();
+img.src = "/warm-up-state?bridge=" + state + "&token=" + (location.search.split("token=")[1] || "0");
+</script>

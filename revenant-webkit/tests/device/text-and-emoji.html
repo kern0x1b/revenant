@@ -1,0 +1,38 @@
+<!doctype html><meta charset=utf-8><title>text-and-emoji</title>
+<meta name=viewport content="width=device-width,initial-scale=1">
+<body style="font:13px sans-serif;padding:6px">
+<script src="report.js"></script>
+<script>
+var c = document.createElement('canvas'), x = c.getContext('2d');
+function w(font, text) { x.font = font; return x.measureText(text).width; }
+
+var single = w('26px "Apple Color Emoji"', '\u{1F680}');
+var astronaut = w('26px "Apple Color Emoji"', '\u{1F9D1}‍\u{1F680}');
+report('zwj-astronaut-is-one-glyph', Math.abs(astronaut - single) < 2, 'joined ' + astronaut.toFixed(1) + ' vs single ' + single.toFixed(1));
+
+var family = w('26px "Apple Color Emoji"', '\u{1F468}‍\u{1F469}‍\u{1F467}');
+report('zwj-family-is-one-glyph', Math.abs(family - single) < 2, 'family ' + family.toFixed(1));
+
+var thumb = w('26px "Apple Color Emoji"', '\u{1F44D}');
+var thumbDark = w('26px "Apple Color Emoji"', '\u{1F44D}\u{1F3FF}');
+report('skin-tone-composes', Math.abs(thumbDark - thumb) < 2, 'toned ' + thumbDark.toFixed(1) + ' vs plain ' + thumb.toFixed(1));
+
+var modern = w('26px "Apple Color Emoji"', '\u{1F951}');
+report('emoji-font-covers-these-sequences', modern > 20, 'a Unicode 9 glyph measures ' + modern.toFixed(1) + '; the three checks above need a font that has these sequences');
+
+try {
+    var count = 0, seg = new Intl.Segmenter(undefined, { granularity: 'grapheme' });
+    for (var piece of seg.segment('\u{1F9D1}‍\u{1F680}')) count++;
+    report('icu-says-one-grapheme', count === 1, 'graphemes ' + count);
+} catch (e) {
+    report('icu-says-one-grapheme', false, 'no Intl.Segmenter: ' + e);
+}
+
+var sys400 = w('400 22px -apple-system', 'Wg'), sys700 = w('700 22px -apple-system', 'Wg');
+report('system-font-takes-a-weight', sys700 > sys400 + 0.5, '400 ' + sys400.toFixed(1) + ' vs 700 ' + sys700.toFixed(1));
+
+var sans400 = w('22px sans-serif', 'Wg'), sans700 = w('bold 22px sans-serif', 'Wg');
+report('sans-serif-takes-a-weight', sans700 > sans400 + 0.5, '400 ' + sans400.toFixed(1) + ' vs bold ' + sans700.toFixed(1));
+
+reportDone();
+</script>

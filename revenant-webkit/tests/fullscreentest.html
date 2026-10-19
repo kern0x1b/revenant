@@ -1,0 +1,92 @@
+<!doctype html><meta charset=utf-8><meta name=viewport content="width=320">
+<title>fullscreentest</title>
+<!--
+  A local, self-contained probe for element.requestFullscreen(), independent of
+  any live site. Two cases on one page: a plain <div> (the case this port
+  actually implements - the whole WebView grown over the status bar, through
+  willShowFullScreenForElement/didHideFullScreenForElement in
+  app/WebKitUIKitDelegate.m) and a <canvas> that keeps drawing while fullscreen,
+  to show the compositing layer is still live and not just a frozen snapshot.
+
+  Both buttons are tapped by hand, or through tools/revtouch at the fixed screen
+  points they sit at: a script-evaluated requestFullscreen() has no user gesture
+  and DocumentFullscreen requires one, so the page cannot drive itself.
+-->
+<style>
+ html,body{margin:0;padding:0;background:#222;color:#fff;font:16px -apple-system,Helvetica;-webkit-text-size-adjust:none}
+ #hud{position:fixed;top:0;left:0;right:0;background:#000;color:#0f0;font:12px monospace;padding:4px;z-index:30;white-space:pre-wrap;min-height:2.4em}
+ #stage{position:relative;margin-top:40px;height:360px;background:#0088cc;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+ #stage:fullscreen{background:#dd3333}
+ #stage:fullscreen canvas{display:block}
+ canvas{display:none;margin-top:12px;background:#111;border:2px solid #fff}
+ button{font-size:17px;padding:12px 22px;border-radius:8px;border:none;background:#fff;color:#000}
+ #enterBtn{position:absolute;left:100px;top:410px;width:120px}
+ #exitBtn{position:absolute;left:20px;top:20px;display:none;z-index:31}
+ #stage:fullscreen #exitBtn{display:block}
+</style>
+<body>
+<div id=hud>ready</div>
+<div id=stage>
+  <div id=label>FULLSCREEN TEST STAGE</div>
+  <canvas id=spinner width=120 height=120></canvas>
+  <button id=exitBtn>Exit</button>
+</div>
+<button id=enterBtn>Go Fullscreen</button>
+<script>
+function log(msg) {
+  document.getElementById('hud').textContent = msg;
+  document.title = msg;
+}
+
+var stage = document.getElementById('stage');
+var canvas = document.getElementById('spinner');
+var ctx = canvas.getContext('2d');
+var angle = 0;
+function draw() {
+  ctx.clearRect(0, 0, 120, 120);
+  ctx.save();
+  ctx.translate(60, 60);
+  ctx.rotate(angle);
+  ctx.fillStyle = '#0f0';
+  ctx.fillRect(-40, -6, 80, 12);
+  ctx.restore();
+  angle += 0.08;
+  requestAnimationFrame(draw);
+}
+draw();
+
+document.getElementById('enterBtn').addEventListener('click', function () {
+  if (!stage.requestFullscreen) {
+    log('requestFullscreen: not supported');
+    return;
+  }
+  var result = stage.requestFullscreen();
+  if (result && result.then) {
+    result.then(function () { log('requestFullscreen: resolved'); })
+          .catch(function (e) { log('requestFullscreen: rejected - ' + e); });
+  } else {
+    log('requestFullscreen: called (no promise returned)');
+  }
+});
+
+document.getElementById('exitBtn').addEventListener('click', function () {
+  var result = document.exitFullscreen();
+  if (result && result.then) {
+    result.then(function () { log('exitFullscreen: resolved'); })
+          .catch(function (e) { log('exitFullscreen: rejected - ' + e); });
+  }
+});
+
+document.addEventListener('fullscreenchange', function () {
+  var el = document.fullscreenElement;
+  log('fullscreenchange: element=' + (el ? el.id : 'none') +
+      ' inner=' + window.innerWidth + 'x' + window.innerHeight +
+      ' outer=' + window.outerWidth + 'x' + window.outerHeight);
+});
+document.addEventListener('fullscreenerror', function () {
+  log('fullscreenerror');
+});
+
+log('ready, fullscreenEnabled=' + document.fullscreenEnabled +
+    ' inner=' + window.innerWidth + 'x' + window.innerHeight);
+</script>
