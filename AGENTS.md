@@ -22,7 +22,7 @@ named `SwiftUI` because every symbol an app takes from SwiftUI is mangled with t
 - `eidolon/xmake.lua`, `eidolon/control`, `eidolon/Info.plist` — the Charon port: the same demo sources built as two
   applications (`EidolonDemo`, and `EidolonSnapshots`, whose Info.plist carries `EidolonSnapshots` so it renders the
   scenarios) and the engine tests as `EidolonTests`, each a Debian package `xmake emulate` installs into the image.
-- `bridge/` — the typed API diff and the invented-name gate (`api-surface.sh`, `api-diff.py`, `api-invented.py`).
+- `bridge/` — the typed API diff and the invented-name gate (`api-surface.sh`, `api-diff.lua`, `api-invented.lua`).
 - `combine/` — the pre-Styx port of OpenCombine and its upstream test suite on iOS 6 (`build.sh`, `emu-loop.sh`,
   `gentests.py`, `stage-pkg.sh`), with results in `combine/RESULTS.md`. Historical: Styx, the `Combine` module Eidolon
   actually links, carries its own tests now.

@@ -1,11 +1,11 @@
 #!/bin/bash
 # surface-swiftui.sh [SDK26] > apple-26-surface.tsv
-# Apple's 26.2 surface, for the gate in api-invented.py: the interfaces of the modules Eidolon declares
+# Apple's 26.2 surface, for the gate in api-invented.lua: the interfaces of the modules Eidolon declares
 # against, and of every module those reach through their `@_exported import` lines, which the walker
 # follows itself. The entry list is where the walk starts, not what it reads: a module SwiftUI
 # re-exports and the list does not name is walked anyway.
 #
-# The output is a data file. api-invented.py is an error without it — a gate that quietly swapped its
+# The output is a data file. api-invented.lua is an error without it — a gate that quietly swapped its
 # own oracle would be a gate nobody could trust — and this script is how it is written.
 set -e
 cd "$(dirname "$0")"
