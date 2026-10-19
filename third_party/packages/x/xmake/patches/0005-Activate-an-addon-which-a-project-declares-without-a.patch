@@ -22,60 +22,54 @@ on the previous commits, it fails: the active version stays 2.0.0.
 
 Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
 ---
- .../autofetch-lockbare/xmake-addons.lock      |  9 ++++++
- .../projects/autofetch-lockbare/xmake.lua     |  8 +++++
- tests/actions/addon/test.lua                  | 17 ++++++++++
- .../action/addon/impl/install_addons.lua      |  6 ++--
- .../action/require/impl/actions/install.lua   | 31 +++++++++++++++++--
- 5 files changed, 67 insertions(+), 4 deletions(-)
+ .../autofetch-lockbare/xmake-addons.lock      |  8 +++++++
+ .../projects/autofetch-lockbare/xmake.lua     |  6 ++++++
+ tests/actions/addon/test.lua                  | 14 +++++++++++++
+ .../action/addon/impl/install_addons.lua      |  3 ++-
+ .../action/require/impl/actions/install.lua   | 21 +++++++++++++++++--
+ 5 files changed, 49 insertions(+), 3 deletions(-)
  create mode 100644 tests/actions/addon/projects/autofetch-lockbare/xmake-addons.lock
  create mode 100644 tests/actions/addon/projects/autofetch-lockbare/xmake.lua
 
 diff --git a/tests/actions/addon/projects/autofetch-lockbare/xmake-addons.lock b/tests/actions/addon/projects/autofetch-lockbare/xmake-addons.lock
 new file mode 100644
-index 000000000..038a0de6e
+index 0000000..c216ee0
 --- /dev/null
 +++ b/tests/actions/addon/projects/autofetch-lockbare/xmake-addons.lock
-@@ -0,0 +1,9 @@
+@@ -0,0 +1,8 @@
 +{
 +    __meta__ = {
 +        version = "1.0"
 +    },
-+    -- this version is not installed yet, the machine has only installed and activated 2.0.0
 +    ["custom-include"] = {
 +        version = "1.0.0"
 +    }
 +}
 diff --git a/tests/actions/addon/projects/autofetch-lockbare/xmake.lua b/tests/actions/addon/projects/autofetch-lockbare/xmake.lua
 new file mode 100644
-index 000000000..a4ce7d093
+index 0000000..2b53059
 --- /dev/null
 +++ b/tests/actions/addon/projects/autofetch-lockbare/xmake.lua
-@@ -0,0 +1,8 @@
-+-- this project needs the addon without a version, its lock has chosen one, the machine may have activated another one
+@@ -0,0 +1,6 @@
 +add_addons("custom-include")
 +
-+-- it tells us which version is really loaded, @see _release() in tests/actions/addon/test.lua
 +includes("@addon/custom-include/release")
 +
 +target("test")
 +    set_kind("phony")
 diff --git a/tests/actions/addon/test.lua b/tests/actions/addon/test.lua
-index 999a81890..08b28056b 100644
+index 8c51d6b..d854d4e 100644
 --- a/tests/actions/addon/test.lua
 +++ b/tests/actions/addon/test.lua
-@@ -621,6 +621,23 @@ function test_autofetch_keep_active_version(t)
+@@ -598,6 +598,20 @@ function test_autofetch_keep_active_version(t)
      end)
  end
  
-+-- a project which declares an addon without a version leaves the choice to the machine, so the version
-+-- which it installs becomes the active one like `xmake addon --install` does, even if its lock has chosen it
 +function test_autofetch_lock_bare_declaration(t)
 +    _with_releases("custom-include", {"1.0.0", "2.0.0"}, function ()
 +        os.runv("xmake", {"addon", "--install", "-y", "custom-include 2.0.0"})
 +        _with_project("autofetch-lockbare", function (projectdir)
 +
-+            -- the locked version is not installed yet, the project installs, keeps and loads it
 +            local output = os.iorunv("xmake", {"config", "-y"})
 +            t:require(output:find("this project needs the addons", 1, true))
 +            t:require(output:find("custom-include: release 1.0.0 is loaded", 1, true))
@@ -89,18 +83,12 @@ index 999a81890..08b28056b 100644
  --
  -- @note the auto-fetch installs the locked version, but the commands which do not load
 diff --git a/xmake/modules/private/action/addon/impl/install_addons.lua b/xmake/modules/private/action/addon/impl/install_addons.lua
-index da18d4636..def2e3c27 100644
+index 0c9e8d5..1095620 100644
 --- a/xmake/modules/private/action/addon/impl/install_addons.lua
 +++ b/xmake/modules/private/action/addon/impl/install_addons.lua
-@@ -160,14 +160,16 @@ function main(projectdir, datafile, opt)
+@@ -144,10 +144,11 @@ function main(projectdir, datafile, opt)
+ 
      -- install them with xrepo, it installs the packages in its own working directory
-     --
-     -- @note we install them for this project only, it locks them, so the installer must not
--    -- activate the versions which it names for the whole machine, @see _register_addon() in
-+    -- activate the versions which it declares for the whole machine, and we pass the declarations,
-+    -- the requires may name the locked versions instead of them, @see _register_addon() in
-     -- private/action/require/impl/actions/install.lua
-     --
      local requires = _get_requires(declared, locked)
 +    local envs = {XMAKE_IN_ADDONS_AUTOFETCH = string.serialize(declared, {strip = true, indent = false})}
      try
@@ -112,7 +100,7 @@ index da18d4636..def2e3c27 100644
          finally
          {
 diff --git a/xmake/modules/private/action/require/impl/actions/install.lua b/xmake/modules/private/action/require/impl/actions/install.lua
-index c0c7f6089..059f3abc1 100644
+index 5c52e0b..b76ea44 100644
 --- a/xmake/modules/private/action/require/impl/actions/install.lua
 +++ b/xmake/modules/private/action/require/impl/actions/install.lua
 @@ -23,6 +23,7 @@ import("core.base.option")
@@ -123,20 +111,10 @@ index c0c7f6089..059f3abc1 100644
  import("core.project.target")
  import("core.project.project")
  import("core.platform.platform")
-@@ -284,9 +285,35 @@ function _merge_staticlibs(package)
+@@ -284,9 +285,25 @@ function _merge_staticlibs(package)
      end
  end
  
-+-- get the version range which the project declares for the given addon, e.g. "1.0.x", "latest"
-+--
-+-- @note we must get it from the declaration, not from the require which we are installing,
-+-- the installer requires the locked version instead of it, e.g. `add_addons("esp32")` is
-+-- installed as `esp32 1.0.3` if the project has locked it, @see _get_requires() in
-+-- xmake/modules/private/action/addon/impl/install_addons.lua
-+--
-+-- @return      the declared range, `latest` if it declares no version, or nil if we are not
-+--              installing the addons which a project declares
-+--
 +function _declared_range(package)
 +    local declarations = os.getenv("XMAKE_IN_ADDONS_AUTOFETCH")
 +    if not declarations then

@@ -52,10 +52,10 @@ from the repositories and fails ("package(custom-rule) not found").
  7 files changed, 195 insertions(+), 11 deletions(-)
 
 diff --git a/tests/actions/addon/test.lua b/tests/actions/addon/test.lua
-index 3d0cf3042..4b4e1ae73 100644
+index 528e833..3e3b9b6 100644
 --- a/tests/actions/addon/test.lua
 +++ b/tests/actions/addon/test.lua
-@@ -714,6 +714,47 @@ function test_inherited_pin_missing_version(t)
+@@ -680,6 +680,47 @@ function test_inherited_pin_missing_version(t)
      end)
  end
  
@@ -104,7 +104,7 @@ index 3d0cf3042..4b4e1ae73 100644
  function test_autofetch_invalid(t)
      _with_project("autofetch-badname", function ()
 diff --git a/xmake/actions/addon/main.lua b/xmake/actions/addon/main.lua
-index f28f5e6c9..4dc1fd52f 100644
+index f28f5e6..4dc1fd5 100644
 --- a/xmake/actions/addon/main.lua
 +++ b/xmake/actions/addon/main.lua
 @@ -21,6 +21,7 @@
@@ -125,7 +125,7 @@ index f28f5e6c9..4dc1fd52f 100644
                            repository_configs = project.extraconf("repositories")}
      assert(#declarations.addons > 0, "no addons are declared in this project, e.g. add_addons(\"esp32-devel\")!")
 diff --git a/xmake/core/main.lua b/xmake/core/main.lua
-index c921c6e69..39da38ed7 100644
+index c921c6e..39da38e 100644
 --- a/xmake/core/main.lua
 +++ b/xmake/core/main.lua
 @@ -51,12 +51,13 @@ local menu =
@@ -148,7 +148,7 @@ index c921c6e69..39da38ed7 100644
          return task.menu(tasks)
      end
 diff --git a/xmake/core/package/addon.lua b/xmake/core/package/addon.lua
-index f71bacfa1..0b0a6dc5e 100644
+index 596ac37..7c6c8fd 100644
 --- a/xmake/core/package/addon.lua
 +++ b/xmake/core/package/addon.lua
 @@ -85,6 +85,10 @@ function addon._save(registry)
@@ -184,8 +184,8 @@ index f71bacfa1..0b0a6dc5e 100644
      -- the installed addons, e.g. ~/.xmake/addons/<name>/<version>/...
      local installdir = path.absolute(addon.installdir())
      if scriptdir:startswith(installdir .. path.sep()) then
-@@ -525,6 +535,83 @@ function addon.pin(name, version, opt)
-     end
+@@ -515,6 +525,83 @@ function addon._inherited()
+     return inherited
  end
  
 +function addon._load_sourcedir(name, sourcedir)
@@ -268,7 +268,7 @@ index f71bacfa1..0b0a6dc5e 100644
  -- get all the installed versions of the given addon, e.g. {"1.0.2", "1.0.3"}
  function addon.versions(name)
      local addoninfo = addon._registry()[addon.dirname(name)]
-@@ -593,6 +680,9 @@ function addon.addons(opt)
+@@ -574,6 +661,9 @@ function addon.addons(opt)
                  addons[dirname] = versioninfo
              end
          end
@@ -278,7 +278,7 @@ index f71bacfa1..0b0a6dc5e 100644
          addon._ADDONS = addons
      end
      return addons
-@@ -606,7 +696,7 @@ function addon.addondir(name, version)
+@@ -587,7 +677,7 @@ function addon.addondir(name, version)
          if addoninfo == nil then
              return nil
          end
@@ -287,7 +287,7 @@ index f71bacfa1..0b0a6dc5e 100644
      end
      return path.join(addon.installdir(), dirname, version)
  end
-@@ -625,7 +715,7 @@ function addon.globalmodules()
+@@ -606,7 +696,7 @@ function addon.globalmodules()
          globalmodules = {}
          for dirname, addoninfo in pairs(addon.addons()) do
              for _, name in ipairs(addoninfo.globalmodules or {}) do
@@ -296,7 +296,7 @@ index f71bacfa1..0b0a6dc5e 100644
              end
          end
          addon._GLOBALMODULES = globalmodules
-@@ -690,7 +780,7 @@ function addon.payloadinfos(kind)
+@@ -671,7 +761,7 @@ function addon.payloadinfos(kind)
              table.insert(payloadinfos, {
                  name = name,
                  version = addoninfo.version,
@@ -306,7 +306,7 @@ index f71bacfa1..0b0a6dc5e 100644
      end
      return payloadinfos
 diff --git a/xmake/core/project/addons.lua b/xmake/core/project/addons.lua
-index b7d098b43..9e9a5516d 100644
+index b7d098b..9e9a551 100644
 --- a/xmake/core/project/addons.lua
 +++ b/xmake/core/project/addons.lua
 @@ -82,6 +82,16 @@ function addons.requirename(requirestr)
@@ -327,7 +327,7 @@ index b7d098b43..9e9a5516d 100644
  --
  -- @note the declaration is authoritative, the lock only pins a version inside it,
 diff --git a/xmake/core/project/project.lua b/xmake/core/project/project.lua
-index a208567b0..78698c9bc 100644
+index a208567..78698c9 100644
 --- a/xmake/core/project/project.lua
 +++ b/xmake/core/project/project.lua
 @@ -263,6 +263,33 @@ function project._pin_addons()
@@ -403,7 +403,7 @@ index a208567b0..78698c9bc 100644
  
      -- load the root info of the target
 diff --git a/xmake/core/sandbox/modules/import/core/project/addons.lua b/xmake/core/sandbox/modules/import/core/project/addons.lua
-index ff2fe14c0..a6ee4f5ec 100644
+index ff2fe14..a6ee4f5 100644
 --- a/xmake/core/sandbox/modules/import/core/project/addons.lua
 +++ b/xmake/core/sandbox/modules/import/core/project/addons.lua
 @@ -30,6 +30,7 @@ sandbox_core_project_addons.lockfile_version = addons.lockfile_version
