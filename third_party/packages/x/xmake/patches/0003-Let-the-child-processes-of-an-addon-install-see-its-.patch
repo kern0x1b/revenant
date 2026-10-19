@@ -1,7 +1,7 @@
-From 10c7f2c33043c61883ea60d5f721abc273a19dde Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: kern0x1b <kern0x1b@users.noreply.github.com>
-Date: Wed, 23 Sep 2026 17:38:37 +0200
-Subject: [PATCH 03/11] Let the child processes of an addon install see its
+Date: Mon, 19 Oct 2026 18:09:28 +0200
+Subject: [PATCH 3/7] Let the child processes of an addon install see its
  version
 
 The previous commit pins a version installed for a project only in the
@@ -31,10 +31,10 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
  3 files changed, 40 insertions(+), 11 deletions(-)
 
 diff --git a/tests/actions/addon/test.lua b/tests/actions/addon/test.lua
-index 6507f99d2..3c0bf6b03 100644
+index 25d0783b0..999a81890 100644
 --- a/tests/actions/addon/test.lua
 +++ b/tests/actions/addon/test.lua
-@@ -110,7 +110,8 @@ end
+@@ -153,7 +153,8 @@ end
  --
  -- every version is a commit of a git repository which only differs by `includes/release`,
  -- so a project can tell which version it really loads, e.g. includes("@addon/custom-include/release"),
@@ -44,7 +44,7 @@ index 6507f99d2..3c0bf6b03 100644
  --
  -- @note the repository is created in the given directory, the caller needs to remove it
  --
-@@ -135,7 +136,10 @@ function _release(name, versions, gitdir)
+@@ -181,7 +182,10 @@ function _release(name, versions, gitdir)
          local addoninfo = addon.addons()[%q]
          assert(addoninfo and addoninfo.version == package:version_str(), "the addon sees %%s while installing %%s!",
              addoninfo and addoninfo.version, package:version_str())
@@ -57,7 +57,7 @@ index 6507f99d2..3c0bf6b03 100644
  
  -- run the given function with a repository which distributes the given releases of an addon fixture
 diff --git a/xmake/core/package/addon.lua b/xmake/core/package/addon.lua
-index e5498c252..db919bbaf 100644
+index 6d0f4cbce..971ae5dda 100644
 --- a/xmake/core/package/addon.lua
 +++ b/xmake/core/package/addon.lua
 @@ -474,19 +474,40 @@ function addon._registry(opt)
@@ -124,10 +124,10 @@ index e5498c252..db919bbaf 100644
                  addons[dirname] = versioninfo
              end
 diff --git a/xmake/modules/private/action/require/impl/actions/install.lua b/xmake/modules/private/action/require/impl/actions/install.lua
-index 262601e1c..e0bb84bbb 100644
+index f5c258da2..c0c7f6089 100644
 --- a/xmake/modules/private/action/require/impl/actions/install.lua
 +++ b/xmake/modules/private/action/require/impl/actions/install.lua
-@@ -338,9 +338,10 @@ function _register_addon(package)
+@@ -342,9 +342,10 @@ function _register_addon(package)
           manifest_deps = manifest and manifest.deps or nil,
           globalmodules = manifest and #manifest.globalmodules > 0 and manifest.globalmodules or nil})
  

@@ -1,0 +1,419 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: kern0x1b <kern0x1b@users.noreply.github.com>
+Date: Mon, 19 Oct 2026 18:02:38 +0200
+Subject: [PATCH 7/7] Use an addon from a folder of the project without
+ installing it
+
+xmake loads an addon only from its global addons directory, so a project
+which carries an addon in its own tree, e.g. a monorepo with the addon next
+to the targets that use it, had to install that folder globally first, and
+the install made it the machine's active version for every other project.
+
+add_addons() now takes a sourcedir, relative to the project directory:
+
+    add_addons("charon", {sourcedir = "charon"})
+
+The project uses the addon in that folder as it is, in this process only,
+and nothing is installed, locked or activated. Its manifest and payload
+root are read as an install reads them (addon.lua, set_sourcedir, the src
+layout), and the addon is checked for conflicts like an installed one.
+
+addon.use() records the folder in the addons view of the process, which
+overrides an installed version of the same name, and the payload
+directories come from addon._rootdir(), so every reference resolves to the
+folder: @addon/<name>/<rule|toolchain|include|template>,
+import("@addon.<name>.<module>"), @self inside the addon, the global modules
+of its manifest, and its plugins. The menu loads the project tasks before
+the plugins now, so a plugin of such an addon is a command of the project;
+loading the project also pins the versions which its lock names, so a
+project which locks another version of an installed addon than the active
+one runs the plugins of the locked version too.
+The folders are passed on to the child processes in
+XMAKE_ADDONS_SOURCEDIRS, so an xmake started by the build, e.g. a package
+built with xmake or an on_test script, sees the same addon. The auto-fetch
+and `xmake addon --upgrade` leave these declarations out
+(addons.installable()). `xmake -v` prints the folder of each one once.
+
+test_sourcedir_addons declares five fixtures by their folders and checks a
+rule which imports @self, an includes file, a module import, a toolchain
+and a global module of the src layout, a module import in a child xmake,
+and a plugin, that nothing is installed or fetched, that the plugin is
+gone outside the project, and that a folder holding another addon is
+refused. Without the change the project tries to install the fixtures
+from the repositories and fails ("package(custom-rule) not found").
+---
+ tests/actions/addon/test.lua                  | 41 ++++++++
+ xmake/actions/addon/main.lua                  |  3 +-
+ xmake/core/main.lua                           | 11 ++-
+ xmake/core/package/addon.lua                  | 98 ++++++++++++++++++-
+ xmake/core/project/addons.lua                 | 10 ++
+ xmake/core/project/project.lua                | 42 +++++++-
+ .../modules/import/core/project/addons.lua    |  1 +
+ 7 files changed, 195 insertions(+), 11 deletions(-)
+
+diff --git a/tests/actions/addon/test.lua b/tests/actions/addon/test.lua
+index 3d0cf3042..4b4e1ae73 100644
+--- a/tests/actions/addon/test.lua
++++ b/tests/actions/addon/test.lua
+@@ -714,6 +714,47 @@ function test_inherited_pin_missing_version(t)
+     end)
+ end
+ 
++function test_sourcedir_addons(t)
++    local names = {"custom-rule", "custom-include", "custom-module", "custom-toolchain", "custom-plugin"}
++    local declarations = {}
++    for _, name in ipairs(names) do
++        _remove(name)
++        table.insert(declarations, ("add_addons(%q, {sourcedir = %q})"):format(name, _addondir(name)))
++    end
++    local projectfile = table.concat(declarations, "\n") .. [[
++
++includes("@addon/custom-include/check")
++target("test")
++    set_kind("phony")
++    add_rules("@addon/custom-rule/hello")
++    on_config(function (target)
++        import("core.package.addon")
++        import("core.tool.toolchain")
++        import("core.tools.mycl6x")
++        import("@addon.custom-module.greeting")
++        assert(mycl6x.compargv)
++        print(greeting("project"))
++        print(toolchain.load("@addon/custom-toolchain/my-c6000"):get("description"))
++        local script = "import(\"@addon.custom-module.greeting\"); print(greeting(\"child\"))"
++        print(os.iorunv("xmake", {"lua", "-c", script}, {curdir = addon.workdir()}))
++    end)
++]]
++    local output = _config_project(projectfile)
++    t:require(output:find("custom-include: includes check is loaded", 1, true))
++    t:require(output:find("custom-rule: hello from custom-rule: test", 1, true))
++    t:require(output:find("hello from custom-module: project", 1, true))
++    t:require(output:find("the custom toolchain of the tests", 1, true))
++    t:require(output:find("hello from custom-module: child", 1, true))
++    t:require_not(output:find("this project needs the addons", 1, true))
++    t:require(_run_project(projectfile, {"hello_addon", "-n", "xmake"}):find("hello from custom-plugin: xmake", 1, true))
++    for _, name in ipairs(names) do
++        t:require_not(os.isdir(path.join(global.directory(), "addons", name)))
++    end
++    t:require_not(try { function () os.runv("xmake", {"hello_addon"}); return true end })
++    local mismatched = ("add_addons(\"custom-rule\", {sourcedir = %q})"):format(_addondir("custom-include"))
++    t:require_not(try { function () _config_project(mismatched); return true end })
++end
++
+ -- the declared addons are checked, e.g. the reserved names
+ function test_autofetch_invalid(t)
+     _with_project("autofetch-badname", function ()
+diff --git a/xmake/actions/addon/main.lua b/xmake/actions/addon/main.lua
+index f28f5e6c9..4dc1fd52f 100644
+--- a/xmake/actions/addon/main.lua
++++ b/xmake/actions/addon/main.lua
+@@ -21,6 +21,7 @@
+ -- imports
+ import("core.base.option")
+ import("core.package.addon")
++import("core.project.addons")
+ import("core.project.project")
+ import("devel.git")
+ import("private.action.addon.impl.install_addons")
+@@ -231,7 +232,7 @@ end
+ 
+ -- upgrade the addons which the current project declares, e.g. add_addons("esp32-devel 1.0.x")
+ function _upgrade()
+-    local declarations = {addons = table.wrap(project.get("addons")),
++    local declarations = {addons = addons.installable(table.wrap(project.get("addons")), project.extraconf("addons")),
+                           repositories = table.wrap(project.get("repositories")),
+                           repository_configs = project.extraconf("repositories")}
+     assert(#declarations.addons > 0, "no addons are declared in this project, e.g. add_addons(\"esp32-devel\")!")
+diff --git a/xmake/core/main.lua b/xmake/core/main.lua
+index c921c6e69..39da38ed7 100644
+--- a/xmake/core/main.lua
++++ b/xmake/core/main.lua
+@@ -51,12 +51,13 @@ local menu =
+ 
+     -- the tasks: xmake [task]
+ ,   function ()
+-        local tasks = task.tasks() or {}
++        local ok, project_tasks = false, nil
+         if xmake.in_main_thread() then
+-            local ok, project_tasks = pcall(project.tasks)
+-            if ok then
+-                table.join2(tasks, project_tasks)
+-            end
++            ok, project_tasks = pcall(project.tasks)
++        end
++        local tasks = task.tasks() or {}
++        if ok then
++            table.join2(tasks, project_tasks)
+         end
+         return task.menu(tasks)
+     end
+diff --git a/xmake/core/package/addon.lua b/xmake/core/package/addon.lua
+index f71bacfa1..0b0a6dc5e 100644
+--- a/xmake/core/package/addon.lua
++++ b/xmake/core/package/addon.lua
+@@ -85,6 +85,10 @@ function addon._save(registry)
+     end
+ end
+ 
++function addon._rootdir(dirname, addoninfo)
++    return addoninfo.rootdir or path.join(addon.installdir(), dirname, addoninfo.version)
++end
++
+ -- get the payload directory of the given addon
+ --
+ -- @param name  the addon name, e.g. "esp32"
+@@ -95,7 +99,7 @@ function addon._payloaddir(name, kind)
+     local dirname = addon.dirname(name)
+     local addoninfo = addon.addons()[dirname]
+     if addoninfo and table.contains(addoninfo.payloads or {}, kind) then
+-        return path.join(addon.installdir(), dirname, addoninfo.version, kind)
++        return path.join(addon._rootdir(dirname, addoninfo), kind)
+     end
+ end
+ 
+@@ -357,6 +361,12 @@ function addon.owner(scriptdir)
+     end
+     scriptdir = path.absolute(scriptdir)
+ 
++    for dirname, addoninfo in pairs(addon._used()) do
++        if scriptdir == addoninfo.rootdir or scriptdir:startswith(addoninfo.rootdir .. path.sep()) then
++            return addoninfo.name or dirname, addoninfo.rootdir
++        end
++    end
++
+     -- the installed addons, e.g. ~/.xmake/addons/<name>/<version>/...
+     local installdir = path.absolute(addon.installdir())
+     if scriptdir:startswith(installdir .. path.sep()) then
+@@ -525,6 +535,83 @@ function addon.pin(name, version, opt)
+     end
+ end
+ 
++function addon._load_sourcedir(name, sourcedir)
++    local manifest, errors = addon.manifest(sourcedir)
++    if errors then
++        return nil, errors
++    end
++    local dirname = addon.dirname(name)
++    if manifest and addon.dirname(manifest.name) ~= dirname then
++        return nil, string.format("addon(%s): %s provides the addon(%s)!", name, sourcedir, manifest.name)
++    end
++    local rootdir = addon.payloadroot(sourcedir)
++    if not rootdir then
++        return nil, string.format("addon(%s): no payload directory found in %s, e.g. plugins!", name, sourcedir)
++    end
++    local addoninfo = {version = "latest",
++                       name = name ~= dirname and name or nil,
++                       description = manifest and manifest.description,
++                       globalmodules = manifest and #manifest.globalmodules > 0 and manifest.globalmodules or nil,
++                       sourcedir = sourcedir,
++                       rootdir = rootdir,
++                       payloads = addon.payloads_of(rootdir),
++                       plugins = addon._plugins_of(rootdir),
++                       templates = addon._templates_of(rootdir)}
++    errors = addon._check_conflicts(dirname, addoninfo)
++    if errors then
++        return nil, errors
++    end
++    return addoninfo
++end
++
++function addon._used()
++    local used = addon._USED
++    if used == nil then
++        used = {}
++        addon._USED = used
++        local envsourcedirs = os.getenv("XMAKE_ADDONS_SOURCEDIRS")
++        if envsourcedirs then
++            local sourcedirs, errors = envsourcedirs:deserialize()
++            if not sourcedirs then
++                utils.warning("XMAKE_ADDONS_SOURCEDIRS(%s) is ignored, %s", envsourcedirs, errors or "it is invalid")
++            end
++            for name, sourcedir in pairs(sourcedirs or {}) do
++                local addoninfo, errors = addon._load_sourcedir(name, sourcedir)
++                if addoninfo then
++                    used[addon.dirname(name)] = addoninfo
++                else
++                    utils.warning(errors)
++                end
++            end
++            addon._ADDONS = nil
++            addon._GLOBALMODULES = nil
++        end
++    end
++    return used
++end
++
++function addon.use(name, sourcedir)
++    sourcedir = path.absolute(sourcedir)
++    local dirname = addon.dirname(name)
++    local used = addon._used()
++    if used[dirname] and used[dirname].sourcedir == sourcedir then
++        return false
++    end
++    local addoninfo, errors = addon._load_sourcedir(name, sourcedir)
++    if not addoninfo then
++        return nil, errors
++    end
++    used[dirname] = addoninfo
++    addon._ADDONS = nil
++    addon._GLOBALMODULES = nil
++    local sourcedirs = {}
++    for usedname, usedinfo in pairs(used) do
++        sourcedirs[usedinfo.name or usedname] = usedinfo.sourcedir
++    end
++    os.setenv("XMAKE_ADDONS_SOURCEDIRS", string.serialize(sourcedirs, {strip = true, indent = false}))
++    return true
++end
++
+ -- get all the installed versions of the given addon, e.g. {"1.0.2", "1.0.3"}
+ function addon.versions(name)
+     local addoninfo = addon._registry()[addon.dirname(name)]
+@@ -593,6 +680,9 @@ function addon.addons(opt)
+                 addons[dirname] = versioninfo
+             end
+         end
++        for dirname, addoninfo in pairs(addon._used()) do
++            addons[dirname] = addoninfo
++        end
+         addon._ADDONS = addons
+     end
+     return addons
+@@ -606,7 +696,7 @@ function addon.addondir(name, version)
+         if addoninfo == nil then
+             return nil
+         end
+-        version = addoninfo.version
++        return addon._rootdir(dirname, addoninfo)
+     end
+     return path.join(addon.installdir(), dirname, version)
+ end
+@@ -625,7 +715,7 @@ function addon.globalmodules()
+         globalmodules = {}
+         for dirname, addoninfo in pairs(addon.addons()) do
+             for _, name in ipairs(addoninfo.globalmodules or {}) do
+-                globalmodules[name] = path.join(addon.installdir(), dirname, addoninfo.version, "modules")
++                globalmodules[name] = path.join(addon._rootdir(dirname, addoninfo), "modules")
+             end
+         end
+         addon._GLOBALMODULES = globalmodules
+@@ -690,7 +780,7 @@ function addon.payloadinfos(kind)
+             table.insert(payloadinfos, {
+                 name = name,
+                 version = addoninfo.version,
+-                dir = path.join(addon.installdir(), name, addoninfo.version, kind)})
++                dir = path.join(addon._rootdir(name, addoninfo), kind)})
+         end
+     end
+     return payloadinfos
+diff --git a/xmake/core/project/addons.lua b/xmake/core/project/addons.lua
+index b7d098b43..9e9a5516d 100644
+--- a/xmake/core/project/addons.lua
++++ b/xmake/core/project/addons.lua
+@@ -82,6 +82,16 @@ function addons.requirename(requirestr)
+     return splitinfo[1], splitinfo[2]
+ end
+ 
++function addons.installable(requires, configs)
++    local result = {}
++    for _, requirestr in ipairs(requires) do
++        if not (configs and configs[requirestr] and configs[requirestr].sourcedir) then
++            table.insert(result, requirestr)
++        end
++    end
++    return result
++end
++
+ -- is the locked version still valid for the given declaration?
+ --
+ -- @note the declaration is authoritative, the lock only pins a version inside it,
+diff --git a/xmake/core/project/project.lua b/xmake/core/project/project.lua
+index a208567b0..78698c9bc 100644
+--- a/xmake/core/project/project.lua
++++ b/xmake/core/project/project.lua
+@@ -263,6 +263,33 @@ function project._pin_addons()
+     end
+ end
+ 
++function project._use_addons(rootinfo)
++    local used = false
++    local printed = false
++    local configs = rootinfo:extraconf("addons") or {}
++    for _, requirestr in ipairs(table.wrap(rootinfo:get("addons"))) do
++        local sourcedir = configs[requirestr] and configs[requirestr].sourcedir
++        if sourcedir then
++            local name = addons.requirename(requirestr)
++            local ok, errors = addon.use(name, path.absolute(sourcedir, os.projectdir()))
++            if ok == nil then
++                return nil, errors
++            end
++            if baseoption.get("verbose") and not project._ADDONS_PRINTED then
++                utils.print("addon(%s): %s", name, addon.addondir(name))
++                printed = true
++            end
++            used = used or ok
++        end
++    end
++    project._ADDONS_PRINTED = project._ADDONS_PRINTED or printed
++    if used then
++        rule.clear()
++        task.clear()
++    end
++    return used
++end
++
+ -- do install the addons which this project declares
+ -- install the addons which this project declares, e.g. add_addons("esp32-devel 1.0.x")
+ --
+@@ -279,6 +306,10 @@ function project._do_install_addons(rootinfo)
+     if not ok then
+         return {ok = false, errors = errors}
+     end
++    requires = addons.installable(requires, rootinfo:extraconf("addons"))
++    if #requires == 0 then
++        return {ok = true}
++    end
+ 
+     -- they have been installed already?
+     if addons.satisfied(requires) then
+@@ -401,16 +432,25 @@ function project._load(opt)
+     -- @note we do not install them for the option menu, it merges the project tasks in a
+     -- best-effort way and every command builds it, @see project._load_tasks()
+     --
++    local used, errors = project._use_addons(rootinfo)
++    if used == nil then
++        os.cd(oldir)
++        return false, errors
++    end
+     if not opt.skip_addons and not opt.addons_installed then
+         local result = project._install_addons(rootinfo)
+         if not result.ok then
+             os.cd(oldir)
+             return false, result.errors
+         end
+-        if result.installed then
++        if result.installed or used then
+             os.cd(oldir)
+             return project._load({force = true, disable_filter = opt.disable_filter, addons_installed = true})
+         end
++    elseif used then
++        os.cd(oldir)
++        return project._load({force = true, disable_filter = opt.disable_filter, skip_addons = opt.skip_addons,
++                              addons_installed = opt.addons_installed})
+     end
+ 
+     -- load the root info of the target
+diff --git a/xmake/core/sandbox/modules/import/core/project/addons.lua b/xmake/core/sandbox/modules/import/core/project/addons.lua
+index ff2fe14c0..a6ee4f5ec 100644
+--- a/xmake/core/sandbox/modules/import/core/project/addons.lua
++++ b/xmake/core/sandbox/modules/import/core/project/addons.lua
+@@ -30,6 +30,7 @@ sandbox_core_project_addons.lockfile_version = addons.lockfile_version
+ sandbox_core_project_addons.locked           = addons.locked
+ sandbox_core_project_addons.locked_valid     = addons.locked_valid
+ sandbox_core_project_addons.requirename      = addons.requirename
++sandbox_core_project_addons.installable      = addons.installable
+ 
+ -- return module
+ return sandbox_core_project_addons
+-- 
+2.54.0 (Apple Git-157)
+

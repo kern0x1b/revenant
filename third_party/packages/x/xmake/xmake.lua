@@ -5,18 +5,17 @@ package("xmake")
     set_license("Apache-2.0")
 
     add_urls("https://github.com/xmake-io/xmake.git")
-    add_versions("v3.1.1", "3ba37a0d4f6c7584fc662780f27ab29d50f95899")
+    add_versions("2026.10.17", "8158c5da2ec3d5e4bd6b8a83e376319e948120d0")
 
     for _, patch in ipairs({
-        {"0001-Lock-the-installed-addon-version-a-project-declares.patch", "3470649e6c468dc462e2dce37dcffe75856d62a6f62bc2818916a312b964119f"},
-        {"0002-Keep-the-active-addon-version-when-a-project-install.patch", "617c1322f7fbc0a8737c73a764611faa0a118a9864f561495ff954569a29db67"},
-        {"0003-Let-the-child-processes-of-an-addon-install-see-its-.patch", "b686f14114cc1124024fe4b034dfb2e78e7350464a37b3631179d39acfaf5ac3"},
-        {"0005-Warn-when-the-inherited-addon-pins-cannot-be-read.patch", "709d2371359cf7fe523a93a027c17c5f25f2afe1ef3e4b03a464a5ff740d53aa"},
-        {"0007-Activate-an-addon-which-a-project-declares-without-a.patch", "dd165793182e90ffc67ef05720a52bae94122ace80b65a643a5cdc97dc007089"},
-        {"0008-Say-why-the-inherited-addon-pins-do-no-harm.patch", "0e0a64d1127a14ada4baf5f97833c0e09207bfaf32486a850e627d2eaa3d7cc7"},
-        {"0009-Keep-a-project-s-addon-pin-strict-fall-back-only-for.patch", "7549f0cd0d20b7bc56058987cffa9cd1783a42cb21b7d4de5c534d05bffe7f44"},
-        {"0010-Pin-a-project-s-addons-before-loading-the-plugins.patch", "952b2da6995db46c7848e864182b20620d3b94e56d5049c544f583c41551d550"}}) do
-        add_patches("v3.1.1", path.join(os.scriptdir(), "patches", patch[1]), patch[2])
+        {"0001-Lock-the-installed-addon-version-a-project-declares.patch", "5e25a2030807b92717f794ef7a77d15d1d12eb1a9fd2da7989a9837f3fab9ae7"},
+        {"0002-Keep-the-active-addon-version-when-a-project-install.patch", "1e717aa7720b34cc85dbfe8b2ec375e7f5451523b0da1713d48a0251ced6e3cd"},
+        {"0003-Let-the-child-processes-of-an-addon-install-see-its-.patch", "22cee150af1ecf0ad657fca0fe5d874810f859eca530764b3e97629ac1f361e8"},
+        {"0004-Warn-when-the-inherited-addon-pins-cannot-be-read.patch", "b6e1e98acf7d23cb47720e7173aa478b1a1d559a068db3fea795e084b744e341"},
+        {"0005-Activate-an-addon-which-a-project-declares-without-a.patch", "4d38299407dc26a2f0efb25b020cf10b924380f51afe5a6201d2a394067d88d9"},
+        {"0006-Keep-a-project-s-addon-pin-strict-fall-back-only-for.patch", "e020c07ef45d0b74f2697564fa50b94d4548e49ef263652bf4951d09eb492901"},
+        {"0007-Use-an-addon-from-a-folder-of-the-project-without-in.patch", "06abf90250955694fc75937ca9e94245609d8e1877691a66cf3a994f5ce7238e"}}) do
+        add_patches("2026.10.17", path.join(os.scriptdir(), "patches", patch[1]), patch[2])
     end
 
     on_install("macosx", "linux", function (package)

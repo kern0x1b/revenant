@@ -1,48 +1,52 @@
-From 9c6a70c62e52c19a33cfca5eacb37d98e8415186 Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: kern0x1b <kern0x1b@users.noreply.github.com>
-Date: Wed, 23 Sep 2026 17:34:05 +0200
-Subject: [PATCH 01/11] Lock the installed addon version a project declares
+Date: Mon, 19 Oct 2026 18:27:26 +0200
+Subject: [PATCH 1/7] Lock the installed addon version a project declares
 
-A project that declares add_addons("name 1.0.0") locked the machine's
-active version of the addon instead: _lock_addons read
-addon.addons({unpinned = true}), which only holds the active version of
-each addon, and xrepo does not register a version that is already
-installed, so a version activated later by any other install (another
-project's auto-fetch, a test copy) went into the lock and the project
-loaded that code.
+_lock_addons() locks the active version of each addon it installed,
+addon.addons({unpinned = true}), and relies on the installer having
+activated the declared version. That holds only while every install
+activates what it installs; the next commit keeps the machine's active
+version when a project installs its own, and then a project declaring
+add_addons("name 1.0.0") would lock whatever version is active.
 
-The lock now takes the installed version which the installed
-requirement selects, with semver.select over the installed versions,
-the same selection xrepo makes over a recipe's versions; the local and
-git installs, which have no semantic version, are matched by name like
-branches. Only a requirement without a version (or `latest`, its
-spelling) takes the active version. The requirement is the one passed
-to xrepo, so a valid lock keeps its version on the next install.
+The lock now takes the installed version which the installed requirement
+selects, with semver.select over the installed versions, the same
+selection xrepo makes over a recipe's versions; the local and git
+installs, which have no semantic version, are matched by name like
+branches, and a declared commit takes the installed version which it
+starts with, the short commit that names it. Only a requirement without a version (or `latest`, its
+spelling) takes the active version. The requirement is the one passed to
+xrepo, so a valid lock keeps its version on the next install.
 
 addon.versioninfo() gives the registry entry of any installed version,
 not only the active one, for the repository which the lock records.
 
-test_autofetch_lock_declared_version releases custom-include as two
-git commits, activates 2.0.0 and checks that a project declaring 1.0.0
-loads and locks 1.0.0, after a forced reinstall of 2.0.0 and after
-`xmake addon --upgrade`. With the v3.1.1 scripts it fails at the first
-check: the project loads release 2.0.0.
+test_autofetch_lock_declared_version releases custom-include as two git
+commits, activates 2.0.0 and checks that a project declaring 1.0.0 loads
+and locks 1.0.0, after a forced reinstall of 2.0.0 and after
+`xmake addon --upgrade`. _release() first drops the cached sources of
+the addon, the package cache keeps a git source by its version only and
+would hand a release of an earlier test, e.g. the tagged 1.0.0 of
+test_autofetch_declared_version, to this one. On upstream alone it passes, because the
+installer activates the declared version; with the next commit and
+without this one it fails at the first check, the project locks 2.0.0.
 
 Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
 ---
- .../projects/autofetch-version/xmake.lua      |  8 ++
- tests/actions/addon/test.lua                  | 81 +++++++++++++++++++
- xmake/core/package/addon.lua                  |  9 +++
+ .../projects/autofetch-release/xmake.lua      |  8 ++
+ tests/actions/addon/test.lua                  | 84 +++++++++++++++++++
+ xmake/core/package/addon.lua                  |  9 ++
  .../modules/import/core/package/addon.lua     |  1 +
- .../action/addon/impl/install_addons.lua      | 46 +++++++++--
- 5 files changed, 139 insertions(+), 6 deletions(-)
- create mode 100644 tests/actions/addon/projects/autofetch-version/xmake.lua
+ .../action/addon/impl/install_addons.lua      | 49 +++++++++--
+ 5 files changed, 145 insertions(+), 6 deletions(-)
+ create mode 100644 tests/actions/addon/projects/autofetch-release/xmake.lua
 
-diff --git a/tests/actions/addon/projects/autofetch-version/xmake.lua b/tests/actions/addon/projects/autofetch-version/xmake.lua
+diff --git a/tests/actions/addon/projects/autofetch-release/xmake.lua b/tests/actions/addon/projects/autofetch-release/xmake.lua
 new file mode 100644
 index 000000000..7260a49c4
 --- /dev/null
-+++ b/tests/actions/addon/projects/autofetch-version/xmake.lua
++++ b/tests/actions/addon/projects/autofetch-release/xmake.lua
 @@ -0,0 +1,8 @@
 +-- this project needs a given version of the addon, the machine may have activated another one
 +add_addons("custom-include 1.0.0")
@@ -53,10 +57,10 @@ index 000000000..7260a49c4
 +target("test")
 +    set_kind("phony")
 diff --git a/tests/actions/addon/test.lua b/tests/actions/addon/test.lua
-index fcc5c2efc..36f483c8f 100644
+index f7c4e8135..6f78cfc3d 100644
 --- a/tests/actions/addon/test.lua
 +++ b/tests/actions/addon/test.lua
-@@ -106,6 +106,42 @@ function _with_repo(recipes, func)
+@@ -149,6 +149,45 @@ function _with_versions(name, versions, func)
      }
  end
  
@@ -68,6 +72,9 @@ index fcc5c2efc..36f483c8f 100644
 +-- @note the repository is created in the given directory, the caller needs to remove it
 +--
 +function _release(name, versions, gitdir)
++    for _, cachedir in ipairs(os.dirs(path.join(global.cachedir(), "packages", "*", name:sub(1, 1), name))) do
++        os.tryrm(cachedir)
++    end
 +    os.cp(_addondir(name), gitdir)
 +    local function git(argv)
 +        return os.iorunv("git", table.join({"-C", gitdir, "-c", "user.name=xmake", "-c", "user.email=xmake@localhost"}, argv))
@@ -99,7 +106,7 @@ index fcc5c2efc..36f483c8f 100644
  -- run the given command in a temporary project and return its output
  function _run_project(content, argv, opt)
      opt = opt or {}
-@@ -382,6 +418,51 @@ function test_autofetch_build(t)
+@@ -500,6 +539,51 @@ function test_autofetch_declared_version(t)
      end)
  end
  
@@ -117,7 +124,7 @@ index fcc5c2efc..36f483c8f 100644
 +                os.runv("xmake", {"addon", "--install", "-y", "custom-include 1.0.0"})
 +                os.runv("xmake", {"addon", "--install", "-y", "custom-include 2.0.0"})
 +                t:are_equal(_active_version("custom-include"), "2.0.0")
-+                _with_project("autofetch-version", function (projectdir)
++                _with_project("autofetch-release", function (projectdir)
 +
 +                    -- the declared version has been installed, so we only need to lock it and load it
 +                    t:require(os.iorunv("xmake", {"config", "-y"}):find("custom-include: release 1.0.0 is loaded", 1, true))
@@ -152,7 +159,7 @@ index fcc5c2efc..36f483c8f 100644
  --
  -- @note the auto-fetch installs the locked version, but the commands which do not load
 diff --git a/xmake/core/package/addon.lua b/xmake/core/package/addon.lua
-index d6798f56f..9524e01c1 100644
+index a274ceed3..0c81c82a6 100644
 --- a/xmake/core/package/addon.lua
 +++ b/xmake/core/package/addon.lua
 @@ -495,6 +495,15 @@ function addon.versions(name)
@@ -172,19 +179,19 @@ index d6798f56f..9524e01c1 100644
  --
  -- @param opt   the options, e.g. {force = true}, we need it to reload the registry
 diff --git a/xmake/core/sandbox/modules/import/core/package/addon.lua b/xmake/core/sandbox/modules/import/core/package/addon.lua
-index 9f080cc93..6c814527c 100644
+index 16b8620b7..d967738ca 100644
 --- a/xmake/core/sandbox/modules/import/core/package/addon.lua
 +++ b/xmake/core/sandbox/modules/import/core/package/addon.lua
-@@ -35,6 +35,7 @@ sandbox_core_package_addon.payloads_of       = addon.payloads_of
- sandbox_core_package_addon.payloadroot       = addon.payloadroot
+@@ -36,6 +36,7 @@ sandbox_core_package_addon.payloadroot       = addon.payloadroot
  sandbox_core_package_addon.addons            = addon.addons
  sandbox_core_package_addon.versions          = addon.versions
+ sandbox_core_package_addon.activate          = addon.activate
 +sandbox_core_package_addon.versioninfo       = addon.versioninfo
  sandbox_core_package_addon.unregister        = addon.unregister
  
  -- get the manifest of the given addon directory, e.g. <sourcedir>/addon.lua
 diff --git a/xmake/modules/private/action/addon/impl/install_addons.lua b/xmake/modules/private/action/addon/impl/install_addons.lua
-index 4cc5b0fba..c02e003f5 100644
+index 926a71957..3af303569 100644
 --- a/xmake/modules/private/action/addon/impl/install_addons.lua
 +++ b/xmake/modules/private/action/addon/impl/install_addons.lua
 @@ -19,6 +19,7 @@
@@ -195,7 +202,7 @@ index 4cc5b0fba..c02e003f5 100644
  import("core.package.addon")
  import("core.project.addons")
  import("private.action.addon.impl.xrepo", {alias = "xrepo_addon"})
-@@ -41,12 +42,42 @@ function _get_requires(declared, locked)
+@@ -41,12 +42,45 @@ function _get_requires(declared, locked)
      return requires
  end
  
@@ -223,6 +230,9 @@ index 4cc5b0fba..c02e003f5 100644
 +    local branches = {}
 +    for _, version in ipairs(addon.versions(name)) do
 +        table.insert(semver.is_valid(version) and versions or branches, version)
++        if #range >= 7 and range:match("^%x+$") and range:startswith(version) then
++            return version
++        end
 +    end
 +    return try { function () return semver.select(range, versions, {}, branches) end }
 +end
@@ -239,7 +249,7 @@ index 4cc5b0fba..c02e003f5 100644
      local lockinfo = {}
      local locked = addons.locked(projectdir) or {}
  
-@@ -54,9 +85,11 @@ function _lock_addons(projectdir, declared)
+@@ -54,9 +88,11 @@ function _lock_addons(projectdir, declared)
      -- and we must not see them through the locked versions, we are locking them right now,
      -- e.g. `xmake addon --upgrade` pins the old ones before loading this project
      local installed = addon.addons({force = true, unpinned = true})
@@ -253,7 +263,7 @@ index 4cc5b0fba..c02e003f5 100644
          local oldversion = locked[name] and locked[name].version
          if oldversion and oldversion ~= addoninfo.version then
              cprint("${color.success}upgrade ${bright}%s${clear}: %s -> %s", name, oldversion, addoninfo.version)
-@@ -118,10 +151,11 @@ function main(projectdir, datafile, opt)
+@@ -122,10 +158,11 @@ function main(projectdir, datafile, opt)
      end
  
      -- install them with xrepo, it installs the packages in its own working directory
@@ -266,7 +276,7 @@ index 4cc5b0fba..c02e003f5 100644
          end,
          finally
          {
-@@ -137,6 +171,6 @@ function main(projectdir, datafile, opt)
+@@ -141,6 +178,6 @@ function main(projectdir, datafile, opt)
          }
      }
  

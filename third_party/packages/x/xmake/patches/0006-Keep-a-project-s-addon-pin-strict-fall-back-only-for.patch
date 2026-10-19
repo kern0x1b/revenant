@@ -1,8 +1,8 @@
-From 39d7488ea52a0094470e1c0442f9099c3239db0a Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: kern0x1b <kern0x1b@users.noreply.github.com>
-Date: Wed, 23 Sep 2026 22:47:18 +0200
-Subject: [PATCH 09/11] Keep a project's addon pin strict, fall back only for
- an inherited one
+Date: Mon, 19 Oct 2026 18:11:23 +0200
+Subject: [PATCH 6/7] Keep a project's addon pin strict, fall back only for an
+ inherited one
 
 addon.addons() took `versions[pinned] or versions[active]` for every pin, so
 a version which the project had pinned from its lock and which was no longer
@@ -24,9 +24,8 @@ _lock_addons() prints it, e.g. "unable to select version for range '>=3.0'".
 Tests: test_autofetch_lock_removed_version, the project pins its locked
 1.0.0, then 1.0.0 is removed, the addon must be "not installed" and not the
 active 2.0.0; test_inherited_pin_missing_version, an inherited pin of 9.9.9
-falls back to the active version and says so. tests/actions/addon 23/23 with
-it. With the scripts of 0d1640df9 the first gets 2.0.0 and the second gets
-no warning.
+falls back to the active version and says so. Without this change, on the
+previous commits, the first gets 2.0.0 and the second gets no warning.
 
 Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
 ---
@@ -36,10 +35,10 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
  3 files changed, 94 insertions(+), 21 deletions(-)
 
 diff --git a/tests/actions/addon/test.lua b/tests/actions/addon/test.lua
-index 473588c4f..5f0de5f57 100644
+index 08b28056b..3d0cf3042 100644
 --- a/tests/actions/addon/test.lua
 +++ b/tests/actions/addon/test.lua
-@@ -531,6 +531,42 @@ function test_autofetch_lock_missing_version(t)
+@@ -678,6 +678,42 @@ target("hello")
      end)
  end
  
@@ -52,7 +51,7 @@ index 473588c4f..5f0de5f57 100644
 +    _with_releases("custom-include", {"1.0.0", "2.0.0"}, function ()
 +        os.runv("xmake", {"addon", "--install", "-y", "custom-include 1.0.0"})
 +        os.runv("xmake", {"addon", "--install", "-y", "custom-include 2.0.0"})
-+        _with_project("autofetch-version", function (projectdir)
++        _with_project("autofetch-release", function (projectdir)
 +            t:require(os.iorunv("xmake", {"config", "-y"}):find("custom-include: release 1.0.0 is loaded", 1, true))
 +            local script = [[
 +                import("core.package.addon")
@@ -83,7 +82,7 @@ index 473588c4f..5f0de5f57 100644
  function test_autofetch_invalid(t)
      _with_project("autofetch-badname", function ()
 diff --git a/xmake/core/package/addon.lua b/xmake/core/package/addon.lua
-index 15cfc8a77..2ee3d7db4 100644
+index 1283d7117..f71bacfa1 100644
 --- a/xmake/core/package/addon.lua
 +++ b/xmake/core/package/addon.lua
 @@ -474,27 +474,36 @@ function addon._registry(opt)
@@ -136,7 +135,7 @@ index 15cfc8a77..2ee3d7db4 100644
  end
  
  -- pin the active version of the given addon for this process
-@@ -517,7 +526,8 @@ function addon.pin(name, version, opt)
+@@ -511,7 +520,8 @@ function addon.pin(name, version, opt)
      pinned[addon.dirname(name)] = version
      addon._ADDONS = nil
      if opt and opt.inherit then
@@ -146,7 +145,7 @@ index 15cfc8a77..2ee3d7db4 100644
      end
  end
  
-@@ -566,13 +576,25 @@ function addon.addons(opt)
+@@ -560,13 +570,25 @@ function addon.addons(opt)
      if addons == nil then
          addons = {}
          local pinned = addon._pinned()
@@ -176,10 +175,10 @@ index 15cfc8a77..2ee3d7db4 100644
                  addons[dirname] = versioninfo
              end
 diff --git a/xmake/modules/private/action/addon/impl/install_addons.lua b/xmake/modules/private/action/addon/impl/install_addons.lua
-index 1f72e413f..800402682 100644
+index def2e3c27..87b4add58 100644
 --- a/xmake/modules/private/action/addon/impl/install_addons.lua
 +++ b/xmake/modules/private/action/addon/impl/install_addons.lua
-@@ -62,12 +62,27 @@ function _installed_version(requirestr, installed)
+@@ -62,6 +62,8 @@ function _installed_version(requirestr, installed)
  
      -- the local and git installs have no semantic version, e.g. `latest`, `master`,
      -- so we can only select them by their names like the branches
@@ -188,7 +187,9 @@ index 1f72e413f..800402682 100644
      local versions = {}
      local branches = {}
      for _, version in ipairs(addon.versions(name)) do
-         table.insert(semver.is_valid(version) and versions or branches, version)
+@@ -70,7 +72,20 @@ function _installed_version(requirestr, installed)
+             return version
+         end
      end
 -    return try { function () return semver.select(range, versions, {}, branches) end }
 +    local errors
@@ -208,7 +209,7 @@ index 1f72e413f..800402682 100644
  end
  
  -- lock the installed addons, so that we always get the same ones
-@@ -87,9 +102,9 @@ function _lock_addons(projectdir, requires)
+@@ -90,9 +105,9 @@ function _lock_addons(projectdir, requires)
      local installed = addon.addons({force = true, unpinned = true})
      for _, requirestr in ipairs(requires) do
          local name = addons.requirename(requirestr)

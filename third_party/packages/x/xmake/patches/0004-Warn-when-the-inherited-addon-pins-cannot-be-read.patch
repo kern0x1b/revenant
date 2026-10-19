@@ -1,7 +1,7 @@
-From a8fb9af37ac00b4d52e933b67f7e2219e5212bde Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: kern0x1b <kern0x1b@users.noreply.github.com>
-Date: Wed, 23 Sep 2026 17:58:52 +0200
-Subject: [PATCH 05/11] Warn when the inherited addon pins cannot be read
+Date: Mon, 19 Oct 2026 18:09:32 +0200
+Subject: [PATCH 4/7] Warn when the inherited addon pins cannot be read
 
 A process takes the addon versions its parent pinned from
 XMAKE_ADDONS_PINNED; a value that does not deserialize was dropped
@@ -14,7 +14,7 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
  1 file changed, 6 insertions(+), 1 deletion(-)
 
 diff --git a/xmake/core/package/addon.lua b/xmake/core/package/addon.lua
-index db919bbaf..ff37720e2 100644
+index 971ae5dda..1283d7117 100644
 --- a/xmake/core/package/addon.lua
 +++ b/xmake/core/package/addon.lua
 @@ -485,7 +485,12 @@ function addon._pinned()

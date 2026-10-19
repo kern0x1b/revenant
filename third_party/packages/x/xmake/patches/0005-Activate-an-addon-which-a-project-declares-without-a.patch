@@ -1,7 +1,7 @@
-From cd5edc5b727ed2b92f659375a56fe5a610bfe5ed Mon Sep 17 00:00:00 2001
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: kern0x1b <kern0x1b@users.noreply.github.com>
-Date: Wed, 23 Sep 2026 21:41:25 +0200
-Subject: [PATCH 07/11] Activate an addon which a project declares without a
+Date: Mon, 19 Oct 2026 18:10:38 +0200
+Subject: [PATCH 5/7] Activate an addon which a project declares without a
  version
 
 The installer decided whether to activate an addon from the require which it
@@ -11,15 +11,14 @@ version was not activated, while upstream activates it: a declaration without a
 version leaves the choice to the machine.
 
 The auto-fetch now passes the declarations themselves in
-XMAKE_IN_ADDONS_AUTOFETCH, and _register_addon() takes the declared range of the
-addon from them: only a toplevel addon declared with a version (not `latest`)
-stays inactive and pinned.
+XMAKE_IN_ADDONS_AUTOFETCH, and activates_addon() takes the declared range of the
+addon from them, for a new install and for an installed version alike: only a
+toplevel addon declared with a version (not `latest`) stays inactive and pinned.
 
 Test: test_autofetch_lock_bare_declaration, a project declares the addon
 without a version and locks 1.0.0, the machine has 2.0.0 active; the project
-installs, locks and loads 1.0.0, and 1.0.0 becomes active. tests/actions/addon
-21/21 with it; with the scripts of 170db1796 it fails, the active version stays
-2.0.0.
+installs, locks and loads 1.0.0, and 1.0.0 becomes active. Without this change,
+on the previous commits, it fails: the active version stays 2.0.0.
 
 Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
 ---
@@ -62,10 +61,10 @@ index 000000000..a4ce7d093
 +target("test")
 +    set_kind("phony")
 diff --git a/tests/actions/addon/test.lua b/tests/actions/addon/test.lua
-index 3c0bf6b03..473588c4f 100644
+index 999a81890..08b28056b 100644
 --- a/tests/actions/addon/test.lua
 +++ b/tests/actions/addon/test.lua
-@@ -500,6 +500,23 @@ function test_autofetch_keep_active_version(t)
+@@ -621,6 +621,23 @@ function test_autofetch_keep_active_version(t)
      end)
  end
  
@@ -90,10 +89,10 @@ index 3c0bf6b03..473588c4f 100644
  --
  -- @note the auto-fetch installs the locked version, but the commands which do not load
 diff --git a/xmake/modules/private/action/addon/impl/install_addons.lua b/xmake/modules/private/action/addon/impl/install_addons.lua
-index 2bb5a8f57..1f72e413f 100644
+index da18d4636..def2e3c27 100644
 --- a/xmake/modules/private/action/addon/impl/install_addons.lua
 +++ b/xmake/modules/private/action/addon/impl/install_addons.lua
-@@ -153,14 +153,16 @@ function main(projectdir, datafile, opt)
+@@ -160,14 +160,16 @@ function main(projectdir, datafile, opt)
      -- install them with xrepo, it installs the packages in its own working directory
      --
      -- @note we install them for this project only, it locks them, so the installer must not
@@ -113,7 +112,7 @@ index 2bb5a8f57..1f72e413f 100644
          finally
          {
 diff --git a/xmake/modules/private/action/require/impl/actions/install.lua b/xmake/modules/private/action/require/impl/actions/install.lua
-index e0bb84bbb..74be95e18 100644
+index c0c7f6089..059f3abc1 100644
 --- a/xmake/modules/private/action/require/impl/actions/install.lua
 +++ b/xmake/modules/private/action/require/impl/actions/install.lua
 @@ -23,6 +23,7 @@ import("core.base.option")
@@ -124,7 +123,7 @@ index e0bb84bbb..74be95e18 100644
  import("core.project.target")
  import("core.project.project")
  import("core.platform.platform")
-@@ -284,6 +285,32 @@ function _merge_staticlibs(package)
+@@ -284,9 +285,35 @@ function _merge_staticlibs(package)
      end
  end
  
@@ -154,20 +153,14 @@ index e0bb84bbb..74be95e18 100644
 +    end
 +end
 +
- -- register the installed addon, so that xmake can find its payloads, e.g. plugins
- --
- -- @note the addon manifest(addon.lua) is only read when installing it, everything which
-@@ -326,8 +353,8 @@ function _register_addon(package)
-     -- not locked by the project, so we activate them like `xmake addon --install` does
-     --
-     local version = package:version_str() or "latest"
--    local activate = not (os.getenv("XMAKE_IN_ADDONS_AUTOFETCH") and package:is_toplevel()
--                          and package:requireinfo().version ~= "latest")
+ function activates_addon(package)
+-    return not (os.getenv("XMAKE_IN_ADDONS_AUTOFETCH") and package:is_toplevel()
+-                and package:requireinfo().version ~= "latest")
 +    local range = package:is_toplevel() and _declared_range(package)
-+    local activate = not range or range == "latest"
++    return not range or range == "latest"
+ end
  
-     -- we also record where it comes from, so that the projects can lock it,
-     -- @see xmake/modules/private/action/addon/impl/install_addons.lua
+ -- register the installed addon, so that xmake can find its payloads, e.g. plugins
 -- 
 2.54.0 (Apple Git-157)
 
