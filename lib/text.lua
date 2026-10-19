@@ -69,6 +69,53 @@ function join(sep, list)
     return table.concat(list, sep)
 end
 
+-- Python's \w at p: a letter, a digit or an underscore. ASCII only: the sources these tools read are ASCII.
+function is_word(s, p)
+    local c = string.sub(s, p, p)
+    return c ~= "" and string.find(c, "^[%w_]") ~= nil
+end
+
+-- \b at p: the character before p is not a word character, or p is the start of the string
+function boundary(s, p)
+    return p == 1 or not is_word(s, p - 1)
+end
+
+-- every position where needle starts, in order, overlapping ones included
+function positions(s, needle)
+    local out, from = {}, 1
+    while true do
+        local at = string.find(s, needle, from, true)
+        if not at then
+            return out
+        end
+        out[#out + 1] = at
+        from = at + 1
+    end
+end
+
+-- re.search(r'\bWORD\b', s): whether the word stands on its own in s
+function has_word(s, word)
+    for _, at in ipairs(positions(s, word)) do
+        if boundary(s, at) and not is_word(s, at + #word) then
+            return true
+        end
+    end
+    return false
+end
+
+-- re.search(r'\bKEYWORD (\w+)', s) with the keyword's own trailing character given in keyword: the name, or nil
+function name_after(s, keyword)
+    for _, at in ipairs(positions(s, keyword)) do
+        if boundary(s, at) then
+            local name = string.match(s, "^[%w_]+", at + #keyword)
+            if name then
+                return name
+            end
+        end
+    end
+    return nil
+end
+
 -- Python's format spec `{s:N}`: left-justified and padded to N characters (never truncated), counted
 -- in code points as Python counts them
 function ljust(s, width)
