@@ -14,7 +14,7 @@
     },
     {
       "api": "CSSearchQueryErrorCode",
-      "kind": "enum",
+      "kind": "type",
       "introduced": "10.0",
       "minimum": "6.0",
       "status": "implemented",
