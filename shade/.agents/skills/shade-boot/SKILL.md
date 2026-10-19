@@ -1,19 +1,23 @@
 ---
 name: shade-boot
-description: Build this Shade checkout and boot a firmware root filesystem with it to check that a change works — the CMake build, `shade profile --list`, a headless boot at `--time-scale 10`, and reading the log for fatal CPU faults, frames and started processes; attach gdb or drive the guest over `--control-stdin`. Use after changing Shade, or when asked to build, boot or debug it.
+description: Build this Shade checkout and boot a firmware root filesystem with it to check that a change works — the xmake build, `shade profile --list`, a headless boot at `--time-scale 10`, and reading the log for fatal CPU faults, frames and started processes; attach gdb or drive the guest over `--control-stdin`. Use after changing Shade, or when asked to build, boot or debug it.
 ---
 
 # Build Shade and boot a root filesystem
 
 ## 1. Build
 
+From the top of hades:
+
 ```sh
-cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
-cmake --build build
+xmake f -y
+xmake build shade
+xmake test
 ```
 
-The program is `build/shade`. Options: `SHADE_ENABLE_SDL2`, `SHADE_ENABLE_VULKAN`,
-`SHADE_ENABLE_IPO`. `build/shade --help` lists the verbs.
+The program is `build/macosx/arm64/release/shade` (`build/shade` below stands for it). Options, given to
+`xmake f`: `--shade_vulkan`, `--shade_sdl`, `--shade_ffmpeg`, `--shade_lto`,
+`--shade_dynarmic_test_emit_failure`. `build/shade --help` lists the verbs.
 
 ## 2. Pick a device and a root filesystem
 

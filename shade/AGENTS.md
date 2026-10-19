@@ -7,13 +7,27 @@ Working notes for whoever is changing Shade, human or AI.
 An emulator that boots a legacy iOS firmware's own userland. It does not emulate
 hardware registers: it emulates an XNU kernel (system calls, Mach, IOKit) and the
 devices the firmware asks about, and lets the firmware's real launchd, daemons and
-frameworks run on top, on a JIT-translated ARM CPU (Dynarmic, pinned with our patches in hades'
-`third_party/dynarmic` and prepared under `.deps/dynarmic`).
+frameworks run on top, on a JIT-translated ARM CPU (Dynarmic: hades' `dynarmic` package, an upstream
+commit with our patches, in `third_party/packages/d/dynarmic`).
 
 ## Build and run
 
-The program is `build/shade`; the skill `shade-boot` (`.agents/skills/shade-boot/SKILL.md`)
+Shade builds with xmake from the top of hades: `xmake f -y`, `xmake build shade`, `xmake test`. Each
+module folder has an `xmake.lua` with its libraries; `shade/xmake.lua` holds the options, the packages
+and the two rules every target uses (`shade.module`: C++20, the warnings, the module's `include/` as its
+public include root, LTO in release; `shade.glsl`: the Vulkan shaders through glslc). The program is
+`build/macosx/arm64/release/shade`; the skill `shade-boot` (`.agents/skills/shade-boot/SKILL.md`)
 builds it, boots a root filesystem and reads the log.
+
+The kernel's libraries share `shade_kernel_api`, a target with no sources that carries the kernel's
+include root and the modules its headers name, so a kernel library gets the contract without linking
+back to `shade_kernel`. `shade_graphics` writes `boot_placeholder.hpp` (the PNG in `assets/` as a byte
+array) when it is configured, and only when the content changed. The guest probe in `tools/guest` is a
+target only when `--shade_guest_rootfs` and `--shade_armv6_ld` are given: it needs the cctools-port
+ARMv6 linker (`tools/bootstrap_armv6_ld.sh`) and a root filesystem to link against;
+`xmake build shade_install_guest_dns_probe` puts it and its launchd job into that root filesystem.
+Persistent IR artifacts are keyed on `DYNARMIC_BUILD_FINGERPRINT`, which the dynarmic package defines
+from its commit and its patches' checksums.
 
 Workspace-wide procedures are skills in `$HOME/Git/projects/ios/.agents/skills/`: `device-session` (claim, run, install, launch, tap on a real device), `canon-install`, `patch-merge`, `worktree-sweep`, `session-handoff`, `band-launch`, `band-supervise`. A session started inside this repository does not list them — read `<name>/SKILL.md` there.
 
@@ -31,9 +45,8 @@ Workspace-wide procedures are skills in `$HOME/Git/projects/ios/.agents/skills/`
   guest talks to; `src/host/` is what they use on the Mac.
 - `src/debug/` the gdb remote stub (`--gdb PORT`): registers, memory, software
   breakpoints, all processes as `pPID.TID`.
-- `external/` see `THIRD-PARTY.md`; do not edit the vendored trees. Dynarmic and Boost are not
-  vendored: a change to Dynarmic is a new patch in `../third_party/dynarmic/patches/`, never an edit
-  of `.deps/dynarmic`.
+- Nothing third-party is vendored (`THIRD-PARTY.md`): a change to Dynarmic is a new patch in
+  `third_party/packages/d/dynarmic/patches/`, listed in that recipe.
 
 ## Things that bite
 

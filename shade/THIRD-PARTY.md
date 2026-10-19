@@ -1,28 +1,25 @@
 # Third-party components
 
-## Bundled in the tree
+Nothing third-party is kept in this tree: every component is an xmake package the build installs.
 
-| Component | Version | License | Copyright | Where |
+## Pinned in hades' `third_party` package repository
+
+| Component | Version | License | Copyright | Package |
 | --- | --- | --- | --- | --- |
-| Vulkan Memory Allocator | 3.4.0 | MIT | 2017 - 2026 Advanced Micro Devices, Inc. | `external/vulkan-memory-allocator`, unmodified single header |
+| Dynarmic | MC-XiaoXiao/dynarmic at the pinned commit, with our patches | 0BSD | MerryMage and contributors (`LICENSE.txt` in its tree) | `third_party/packages/d/dynarmic` |
+| Boost libraries | 1.81.0 release | BSL-1.0 | the Boost authors | `third_party/packages/b/boost` |
 
-Each vendored tree keeps its license file and notices; do not edit them in place.
+Dynarmic builds libraries of its own from its `externals/` (fmt, mcl, oaknut, robin-map), each with
+its license; the package installs them beside it.
 
-## Pinned, not bundled
+## From other package repositories
 
-| Component | Version | License | Copyright | Pin |
+| Component | Version | License | Copyright | Package |
 | --- | --- | --- | --- | --- |
-| Dynarmic | MC-XiaoXiao/dynarmic at the pinned commit, with our patches | 0BSD | MerryMage and contributors (`LICENSE.txt` in its tree) | `../third_party/dynarmic` |
-| Boost libraries | 1.81.0 release | BSL-1.0 | the Boost authors | `../third_party/boost` |
+| Vulkan Memory Allocator | 3.4.0 | MIT | 2017 - 2026 Advanced Micro Devices, Inc. | xmake-repo `vulkan-memory-allocator`, unmodified single header |
 
-Their sources are prepared under `../.deps/` from the pins; Dynarmic vendors libraries of its own
-in its `externals/`, each with its license.
-
-## Linked, not bundled
-
-OpenSSL, libpng, libjpeg-turbo and libplist are linked; SDL2 and FFmpeg are
-optional. When Shade is built through Charon these come from Charon's own packages,
-which carry their licenses.
+OpenSSL and libplist come from charon's packages, libpng, libjpeg-turbo, the Vulkan headers and
+loader and shaderc from xmake-repo; SDL2 and FFmpeg are optional. Each package carries its license.
 
 A binary built from this tree carries the notices above with it; the MIT,
 BSD-3-Clause and BSL texts require that. `NOTICE` is the summary to ship.

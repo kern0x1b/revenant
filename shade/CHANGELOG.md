@@ -28,6 +28,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   together; a draw that outruns that fails with GL_INVALID_OPERATION and draws nothing.
 
 ### Changed
+- Shade builds with xmake as a member of hades (`xmake build shade`, `xmake test` at the top of hades):
+  one xmake target per former CMake library, the same include roots, tests and options
+  (`--shade_vulkan`, `--shade_sdl`, `--shade_ffmpeg`, `--shade_lto`,
+  `--shade_dynarmic_test_emit_failure`, the guest probe's `--shade_guest_rootfs` and
+  `--shade_armv6_ld`). The CMake files are gone. Every library is an xmake package: Dynarmic and Boost
+  from hades' `third_party` repository, OpenSSL and libplist from charon's, the rest from xmake's. The
+  vendored Vulkan Memory Allocator is the `vulkan-memory-allocator` 3.4.0 package now (the same header).
+  The IR artifact key takes the Dynarmic package's identity (its commit and patch checksums,
+  `DYNARMIC_BUILD_FINGERPRINT`), so artifacts saved before this are made again once.
 - The JIT core is Dynarmic again, under its own name: upstream (MC-XiaoXiao/dynarmic) at a
   pinned commit with our patches (the arm64 backend for A32 guests, the A32 test swap callbacks,
   the fault-injection hooks named for the core), kept in hades' `third_party/dynarmic`; Boost is
