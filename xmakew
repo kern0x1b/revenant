@@ -1,0 +1,61 @@
+#!/bin/sh
+set -eu
+
+root=$(cd "$(dirname "$0")" && pwd)
+package=$root/third_party/packages/x/xmake
+recipe=$package/xmake.lua
+
+url=$(sed -n 's/^ *add_urls("\([^"]*\)").*/\1/p' "$recipe")
+commit=$(sed -n 's/^ *add_versions("[^"]*", *"\([0-9a-f]*\)").*/\1/p' "$recipe")
+patches=$(sed -n 's/^ *{"\([^"]*\.patch\)", *"\([0-9a-f]*\)"}.*/\1 \2/p' "$recipe")
+if [ -z "$url" ] || [ -z "$commit" ]; then
+    echo "xmakew: no url or commit in $recipe" >&2
+    exit 1
+fi
+
+sha256() {
+    if command -v sha256sum >/dev/null 2>&1; then
+        sha256sum "$@"
+    else
+        shasum -a 256 "$@"
+    fi
+}
+
+key=$(printf '%s\n%s\n' "$commit" "$patches" | sha256 | cut -c1-16)
+cache=$HOME/.cache/hades/xmake
+prefix=$cache/$key
+
+if [ ! -x "$prefix/bin/xmake" ]; then
+    work=$cache/$key.build.$$
+    log=$cache/$key.log
+    mkdir -p "$work/src"
+    trap 'rm -rf "$work"' EXIT INT TERM
+    echo "xmakew: building xmake $commit with its patches into $prefix, log in $log" >&2
+    {
+        git -C "$work/src" init -q
+        git -C "$work/src" remote add origin "$url"
+        git -C "$work/src" fetch -q --depth 1 origin "$commit"
+        git -C "$work/src" -c advice.detachedHead=false checkout -q FETCH_HEAD
+        git -C "$work/src" submodule -q update --init --recursive --depth 1
+    } > "$log" 2>&1
+    printf '%s\n' "$patches" | while read -r name checksum; do
+        [ -n "$name" ] || continue
+        actual=$(sha256 "$package/patches/$name" | cut -d' ' -f1)
+        if [ "$actual" != "$checksum" ]; then
+            echo "xmakew: $name has the checksum $actual, the recipe says $checksum" >&2
+            exit 1
+        fi
+        git -C "$work/src" apply "$package/patches/$name"
+    done
+    (
+        cd "$work/src"
+        ./configure --prefix="$work/install"
+        make -j"$(getconf _NPROCESSORS_ONLN)"
+        make install
+    ) >> "$log" 2>&1
+    [ -e "$prefix" ] || mv "$work/install" "$prefix"
+    rm -rf "$work" "$log"
+    trap - EXIT INT TERM
+fi
+
+exec "$prefix/bin/xmake" "$@"
