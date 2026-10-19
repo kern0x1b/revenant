@@ -30,13 +30,7 @@ FOUNDATION=$SRC/Sources/OpenCombineFoundation
 if [ $MODE = pkg ]; then
   FOUNDATION=$O/src/OpenCombineFoundation; mkdir -p $O/src; cp -R $SRC/Sources/OpenCombineFoundation $FOUNDATION
   rm $FOUNDATION/URLSession.swift
-  python3 - $FOUNDATION/Helpers/Portability.swift <<'PY'
-import sys
-p = sys.argv[1]; s = open(p).read()
-s = s.replace("return CFRunLoopTimerGetTolerance(underlyingTimer)", "if #available(iOS 7.0, *) { return CFRunLoopTimerGetTolerance(underlyingTimer) }\n            return 0")
-s = s.replace("CFRunLoopTimerSetTolerance(underlyingTimer, newValue)", "if #available(iOS 7.0, *) { CFRunLoopTimerSetTolerance(underlyingTimer, newValue) }")
-open(p, "w").write(s)
-PY
+  xmake l patch-portability.lua $FOUNDATION/Helpers/Portability.swift
 fi
 lib OpenCombineFoundation $FOUNDATION
 lib XCTest xctest
@@ -48,6 +42,6 @@ fi
 $SWIFTC $SWFLAGS $TESTOPT -parse-as-library -wmo -module-name OpenCombineTests -I $H/include -I $O/mods -D Xcode \
   -emit-module -emit-module-path $O/sg/OpenCombineTests.swiftmodule -emit-symbol-graph -emit-symbol-graph-dir $O/sg \
   -symbol-graph-minimum-access-level private $TESTS 2>&1 | grep -E "error:" | head -40 || true
-python3 gentests.py $O/sg/OpenCombineTests.symbols.json $O/main.swift
+xmake l gentests.lua $O/sg/OpenCombineTests.symbols.json $O/main.swift
 $SWIFTC $SWFLAGS $TESTOPT -wmo -module-name OpenCombineTests -I $H/include -I $O/mods -D Xcode -c $TESTS $O/main.swift -o $O/obj/OpenCombineTests.o 2>&1 | grep -E "error:" | head -40 || true
 echo "built tests"
