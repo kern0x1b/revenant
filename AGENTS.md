@@ -8,8 +8,11 @@ The workspace contract (`$HOME/Git/projects/ios/AGENTS.md`) applies. Inside hade
 - A change that spans members is one series in hades, one commit per member it touches.
 - Nothing but the project lives in the hades folder: no scratch, logs, notes, run output or worktrees. Scratch goes
   to `$HOME/.cache/hades/<task>/` and is deleted when the task ends.
-- No comments in code, scripts or recipes. What a change does and why goes in its commit message and in the
-  member's README.
+- No comments in code, scripts or recipes; a licence header a licence requires is the only exception. What a change
+  does and why goes in its commit message; knowledge a reader of the code needs goes in the member's `docs/`.
+  `xmake l tools/comments.lua check [path ...]` finds comments, `strip` removes them, and `verify [rev]` proves that
+  the files changed since `rev` differ from it in comments only (clang's raw tokens, Swift's parse tree, Lua's
+  bytecode). Files that carry upstream text are marked `comments=upstream` in `.gitattributes`.
 - Third-party code is a package of `third_party/packages/<letter>/<name>/`: the upstream by url and commit or
   checksum, our changes as `git format-patch` files in its `patches/`, applied in order by `add_patches`. Never
   commit a copy of upstream code.

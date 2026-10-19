@@ -12,6 +12,10 @@ function checks.shade()
     os.execv(os.programfile(), {"test", "-P", root, "shade_*/*"}, {curdir = root})
 end
 
+function checks.comments()
+    os.execv(os.programfile(), {"l", path.join(root, "tools", "comments.lua"), "check"}, {curdir = root})
+end
+
 function main(...)
     local members = {...}
     if #members == 0 then
