@@ -11,7 +11,7 @@ the install made it the machine's active version for every other project.
 
 add_addons() now takes a sourcedir, relative to the project directory:
 
-    add_addons("charon", {sourcedir = "charon"})
+    add_addons("revenant", {sourcedir = "toolchain"})
 
 The project uses the addon in that folder as it is, in this process only,
 and nothing is installed, locked or activated. Its manifest and payload

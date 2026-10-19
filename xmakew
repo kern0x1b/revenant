@@ -22,7 +22,7 @@ sha256() {
 }
 
 key=$( (printf '%s\n%s\n' "$commit" "$patches"; cat "$root/xmakew") | sha256 | cut -c1-16)
-cache=$HOME/.cache/hades/xmake
+cache=$HOME/.revenant/cache/xmake
 prefix=$cache/$key
 
 if [ ! -x "$prefix/bin/xmake" ]; then

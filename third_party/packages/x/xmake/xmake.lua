@@ -1,7 +1,7 @@
 package("xmake")
     set_kind("binary")
     set_homepage("https://xmake.io")
-    set_description("A cross-platform build utility based on Lua, with hades' patches to its addon handling")
+    set_description("A cross-platform build utility based on Lua, with revenant's patches to its addon handling")
     set_license("Apache-2.0")
 
     add_urls("https://github.com/xmake-io/xmake.git")
@@ -14,7 +14,7 @@ package("xmake")
         {"0004-Warn-when-the-inherited-addon-pins-cannot-be-read.patch", "bea4356d8812c2eb6f284720b4592b2ea6dee24d986fd4f45aabe9a183c998ac"},
         {"0005-Activate-an-addon-which-a-project-declares-without-a.patch", "23738f076d027100c61c0fa94ccc820f95e1e28de7280bab75d42e209961a93a"},
         {"0006-Keep-a-project-s-addon-pin-strict-fall-back-only-for.patch", "d084001099fd0d33040ffe20127d38ad4c0ba790a37cc7aa5fff0556bd4ba0ab"},
-        {"0007-Use-an-addon-from-a-folder-of-the-project-without-in.patch", "ee887ec2e1961067dad726295c40e7d7db8763ec707752f2756afb8317b025a7"}}) do
+        {"0007-Use-an-addon-from-a-folder-of-the-project-without-in.patch", "cd99e18ad9599d0c793a437cd9a315f86f273ac08f738b1391a56e8818ae94a1"}}) do
         add_patches("2026.10.17", path.join(os.scriptdir(), "patches", patch[1]), patch[2])
     end
 
