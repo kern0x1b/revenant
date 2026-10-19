@@ -13,7 +13,7 @@ iOS 6.1.3's ImageIO exports `CGImageDestinationCopyTypeIdentifiers` and
 release can say what it writes.
 
 The strings the release's cache holds are the types it knows. Measured with a byte search of
-`$HOME/.charon/dyld/6.1.3/dyld_shared_cache_armv7`:
+`$HOME/.revenant/dyld/6.1.3/dyld_shared_cache_armv7`:
 
 | string | occurrences in the 6.1.3 cache |
 | --- | --- |

@@ -63,7 +63,7 @@ What it asserts about a merged tree:
   armv7, `USE(JSVALUE32_64)` reached by the armv7 configuration, the CMake
   entries that name the files above.
 - **The symbol surface**, in `carry-symbols.txt` and checked by
-  `tools/symbol-check.py` as a step of `charon build`: every symbol the three
+  `tools/symbol-check.py` as a step of `revenant build`: every symbol the three
   frameworks leave undefined - 6486 of them - and every Objective-C class they
   export by name. A *new* undefined symbol is the important one: it means an
   upstream change reached for API this system may not have, and dyld kills the
@@ -117,9 +117,9 @@ rather than screenshots.
 ## How an update actually runs
 
 ```sh
-charon integrate --ref upstream/webkitglib/2.54   # the series' own picks
-charon integrate --ref upstream/main              # the base change, when it is time
-charon integrate                                        # just run the gates on what is here
+revenant integrate --ref upstream/webkitglib/2.54   # the series' own picks
+revenant integrate --ref upstream/main              # the base change, when it is time
+revenant integrate                                        # just run the gates on what is here
 ```
 
 In order, stopping at the first failure that matters:
@@ -129,7 +129,7 @@ In order, stopping at the first failure that matters:
 2. `scripts/carry-check.py` — before a single file is compiled.
 3. `scripts/port-delta.py` — the delta and the guard census, against the new
    base, kept as the before-and-after of the merge.
-4. The armv7 build, `charon build`.
+4. The armv7 build, `revenant build`.
 5. `tools/symbol-check.py` against the pin, which the build runs itself.
 6. Host tests.
 7. Deploy, then the device suite — if the phone answers. If it does not, the run
@@ -154,7 +154,7 @@ Nothing here needs a service. One crontab line takes the series' own picks every
 Monday morning and leaves a log to read:
 
 ```
-0 9 * * 1  cd ~/path/to/port && charon integrate --ref upstream/webkitglib/2.54 >> ~/port-integration.log 2>&1
+0 9 * * 1  cd ~/path/to/port && revenant integrate --ref upstream/webkitglib/2.54 >> ~/port-integration.log 2>&1
 ```
 
 It stops at the first gate that fails, and a run that cannot reach the phone

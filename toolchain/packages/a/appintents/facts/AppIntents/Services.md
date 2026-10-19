@@ -8,19 +8,19 @@ and what a caller reads back. Nothing here pretends to have drawn, indexed, phon
 
 These are services, not frameworks: a daemon the release does not run, reached over XPC. The port
 cannot run them, and a caller that wants one installs the handler the module names. Measured:
-`~/.charon/dyld/6.1.3/` holds no `Siri`, `Shortcuts`, `knowledge` or `chronod` image, and the release's
+`~/.revenant/dyld/6.1.3/` holds no `Siri`, `Shortcuts`, `knowledge` or `chronod` image, and the release's
 own `SpringBoard` has no `SBIntents` class - the surfaces a shortcut would be reached through are all
 of iOS 9 and later.
 
 | the framework's call | the module's answer | the value a caller reads |
 | --- | --- | --- |
-| `AppShortcutsProvider.updateAppShortcutParameters()` | writes the app's shortcuts into `CharonShortcutStore` | `CharonShortcutStore.shared.appShortcuts()`, `.phrases()` |
+| `AppShortcutsProvider.updateAppShortcutParameters()` | writes the app's shortcuts into `RevenantShortcutStore` | `RevenantShortcutStore.shared.appShortcuts()`, `.phrases()` |
 | `IntentDonationManager.donate(intent:result:)` | appends an `IntentDonation` to a plist under Application Support | `IntentDonationManager.shared.donations()` |
 | `IntentDonationManager.deleteDonations(matching:)` | removes from the same plist what the predicate matches | the store, read back |
 | `RelevantIntentManager.updateRelevantIntents(_:)` | writes a plist beside the donations' | `RelevantIntentManager.shared.relevantIntents()` |
 | `AppIntent.requestConfirmation(...)` | the request is handed to `IntentConfirmationRequest.handler`; with no handler the run continues as the caller asked | the handler's own answer |
 | `AppIntent.requestChoice(between:dialog:)` | `IntentChoiceRequest.handler`; with no handler the first option | the handler's own answer |
-| `OpenURLIntent.perform()` | `CharonURL.open(_:)` hands the URL to `CharonURL.handler` | the handler's own answer |
+| `OpenURLIntent.perform()` | `RevenantURL.open(_:)` hands the URL to `RevenantURL.handler` | the handler's own answer |
 | `SetFocusFilterIntent.current` | `nil`: these releases have no focus filters, which is the framework's own answer for a device without them | `nil` |
 | `CSSearchableIndex.indexAppEntities(_:priority:)` and its two deletes | not in the module: the rows are AppIntents' own extensions on the three CoreSpotlight classes, which the port's headers (`tools/gen/cmd_headers.lua`) are what make visible to Swift. The classes themselves are carried by the CoreSpotlight backports, and the AppIntents side of that seam is left for the round that brings the port's headers to CoreSpotlight | - |
 | `NSUserActivity.widgetConfigurationIntent(of:)` and `.appEntityIdentifier` | not in the module: the same seam, for UIKit's iOS 17 `widgetConfigurationIntent` | - |
@@ -67,4 +67,4 @@ the same and says more:
 | `EntityProperty.wrappedValue` | a property the app gave no value for | the value is the entity's; the getter the app gave is the read |
 | a comparator declared with a mapping and no value | its `value` | there is nothing to compare before the query runs, which is what the framework's own declaration means by it |
 | `EntityQueryProperty` declared with no provider (the convenience init) | reading its entity stops | the query reads the entity through the provider it was given, when the keypath init is used |
-| `CharonURL.placeholder` | a URL string that is not one | a URL is not a string every time, and a caller that writes a broken one gets the scheme's own empty URL rather than a crash |
+| `RevenantURL.placeholder` | a URL string that is not one | a URL is not a string every time, and a caller that writes a broken one gets the scheme's own empty URL rather than a crash |

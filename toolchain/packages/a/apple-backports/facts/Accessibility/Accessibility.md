@@ -49,7 +49,7 @@ the `INPaymentMethodResolutionResult` red - has nothing to name for Accessibilit
 26.2 ships **thirteen** Accessibility headers and iPhoneOS 16.4 ships **seven**. The six that are new
 to 16.4 are `AXRequest.h`, `AXMathExpression.h`, `AXBrailleTranslator.h`, `AXFeatureOverrideSessionManager.h`,
 `AXSettings.h` and `AXTechnology.h`. Three of them are already transcribed in
-`Accessibility/CharonAccessibility.h`: the request, the feature-override session and the braille
+`Accessibility/RevenantAccessibility.h`: the request, the feature-override session and the braille
 classes, and with them `AXTechnology` - Apple's own `NSString *const` typedef, whose nine constants are
 externs, spelled out because a backport writes the declaration itself. One spelling is worth recording
 because it cost a compile and would cost the next person the same: an ivar of `AXTechnology` is a
@@ -58,12 +58,12 @@ accessor answers it unchanged.
 
 **The band a chart object lands in is measured, not read from the header.**
 `tools/release-split.lua` over the built objects answers 16.0 for all fourteen class symbols of
-`CharonChartDescriptors.o`, while Apple's header and the corpus both say 15.0:
+`RevenantChartDescriptors.o`, while Apple's header and the corpus both say 15.0:
 
 ```
 release-split: clean, every object file's symbols first-appear in one release (5 files, 26 symbols, 50 releases checked)
-CharonChartDescriptors.o	_OBJC_CLASS_$_AXChartDescriptor	16.0
-CharonChartDescriptors.o	_OBJC_METACLASS_$_AXChartDescriptor	16.0
+RevenantChartDescriptors.o	_OBJC_CLASS_$_AXChartDescriptor	16.0
+RevenantChartDescriptors.o	_OBJC_METACLASS_$_AXChartDescriptor	16.0
 ```
 
 The 16.0 is what the SDK the objects were compiled against can prove: its own interface file for the
@@ -77,8 +77,8 @@ no export in that interface file at all and come out `none`, and are placed by t
 header instead - which is why the two are named here and the 15.0 classes are not.
 
 **`AXMathExpression.h` is transcribed, and the fifteen classes it declares are carried.**
-`Accessibility/CharonAXMathExpression.h` holds the declarations and
-`Accessibility/CharonAXMathExpression.m` the 39 rows. **The earlier note in this file, and the one in
+`Accessibility/RevenantAXMathExpression.h` holds the declarations and
+`Accessibility/RevenantAXMathExpression.m` the 39 rows. **The earlier note in this file, and the one in
 `xmake.lua`'s `accessibility` description, said these classes are "an expression parser" and were not
 carried because "an ivar per property would answer a parse that never happened". Both were wrong, and
 the header is what says so**: `AXMathExpression.h` declares no method that takes a string, and no member
@@ -88,12 +88,12 @@ technology would be handed; turning it into speech or Braille is the system's ha
 has no assistive technology, so the container is the whole of the work. The registry rows said the same
 thing and are now `implemented`.
 
-**`AXCustomContent.h` is in 16.4 and needs no Charon header**, so the class is declared by the SDK the
-package compiles against - `Accessibility/CharonAXCustomContent.m` is code only. The one member of
+**`AXCustomContent.h` is in 16.4 and needs no toolchain header**, so the class is declared by the SDK the
+package compiles against - `Accessibility/RevenantAXCustomContent.m` is code only. The one member of
 `AXCustomContentProvider` that 16.4's copy lacks, `accessibilityCustomContentBlock` of 17.0 (26.2's copy
 adds six lines inside the protocol: a block-returning typedef, an `@optional` marker and the property),
 is a different matter and is the one row of the two this group did not take. A protocol **category** in a
-Charon header would be the way to add it without a second declaration of the protocol, and the port does
+toolchain header would be the way to add it without a second declaration of the protocol, and the port does
 not carry one: the member is unreachable on this release whatever the header says, because nothing on
 this release implements it - `NSProtocolFromString(@"AXCustomContentProvider")` answers nil here and
 answers nil on the host's own framework too, where the protocol is declared in a header and never
@@ -125,7 +125,7 @@ the same dump. This is also how the 27 `inert` class rows elsewhere in this regi
 **A request is the system's.** `+[AXRequest currentRequest]` is the request the system's assistive
 technology is serving, and `technology` is the one serving it. No assistive-technology service holds a
 request on this release, so `+currentRequest` is **nil** and the class is the container an application
-keeps its own request in: `-charon_withTechnology:` builds one, the coding and the copy carry it, and
+keeps its own request in: `-revenant_withTechnology:` builds one, the coding and the copy carry it, and
 `+currentRequest` says there is none.
 
 **A feature override is a service.** `beginOverrideSessionEnablingOptions:disablingOptions:error:` is
@@ -242,7 +242,7 @@ examines nothing:
 | --- | --- | --- |
 | `AXCustomContentImportanceDefault` = 0, `AXCustomContentImportanceHigh` = 1 | the two cases of the enumeration | the header, `AXCustomContent.h` of 16.4: it is an `NS_ENUM` and `Default` is its first case. Confirmed on the host: a fresh content answers 0 and one set to `High` answers 1 |
 | the four `AXCustomContent` properties are four spellings of two values | the storage model | measured on the host: `customContentWithLabel:value:` gives an `attributedLabel` whose `.string` is the string passed in, and `customContentWithAttributedLabel:attributedValue:` gives a `label` that **is** `attributedLabel.string` (identity, not equality) |
-| 18.2, and `visionos(2.2)` left off | what places the object | the `API_AVAILABLE` on each `@interface` in `CharonAXMathExpression.h`, which is what `introduced_version()` reads. The `visionos` argument is in Apple's copy of every one of those lines and is dropped because the SDK of 16.4 has no such platform and writing it does not compile (measured: 16 `expected ','` errors) |
+| 18.2, and `visionos(2.2)` left off | what places the object | the `API_AVAILABLE` on each `@interface` in `RevenantAXMathExpression.h`, which is what `introduced_version()` reads. The `visionos` argument is in Apple's copy of every one of those lines and is dropped because the SDK of 16.4 has no such platform and writing it does not compile (measured: 16 `expected ','` errors) |
 
 **The seven declared differences, and why the port does not follow the host on them.**
 `AXMathExpressionRow.expressions` and `AXMathExpressionTable.expressions` answer **nil** on the host,
@@ -259,7 +259,7 @@ only place in the two groups where the port does not follow the host.
 takes `baseExpression` as an **array** and its property is declared a **single** `AXMathExpression *`; the
 two cannot both be right. The host answers the array, unflattened and identity-preserved (measured:
 `__NSArrayI` holding the two elements the initialiser was given, and the very array it was given). The
-port does the same, and `CharonAXMathExpression.m` says why in a comment at the cast: the initialiser is
+port does the same, and `RevenantAXMathExpression.m` says why in a comment at the cast: the initialiser is
 the only source of the value and the property the only way to read it back, so answering one of the
 elements would throw away what the caller put in, and nothing in the header says which element that would
 be. The declaration is transcribed as Apple writes it and **not** corrected - a backport that fixed the
@@ -338,7 +338,7 @@ All four are fixed, and a mutant per class now holds each of them.
 `AXChart` and `AXDataAxisDescriptor` are rows of their own in the registry, and what the port carries for
 them is the declaration and the metadata: `modules/apple/backports.lua`'s `protocol_sources()` reads the
 two `implemented` protocol rows and writes `AccessibilityBackportsProtocols15.0.m`, which names each one
-so clang emits its metadata into that object. `Accessibility/CharonAccessibilityProtocols.h` is the
+so clang emits its metadata into that object. `Accessibility/RevenantAccessibilityProtocols.h` is the
 header that generated source imports, and it exists because without it the build stops on "file not
 found" - the light guard says so by name.
 
@@ -415,7 +415,7 @@ say-once: +[AXLiveAudioGraph updateValue] called 5 times, 1 line in the port's l
 say-once: +[AXLiveAudioGraph stop] called 2 times, 1 line in the port's log
 ```
 
-A mutant that takes the guard out of `CharonSayOnce.h` writes a line per call, and the run fails with
+A mutant that takes the guard out of `RevenantSayOnce.h` writes a line per call, and the run fails with
 "the port wrote 3 lines for +[AXLiveAudioGraph start], and the case called it 3 times". That is what the
 `inert` status now rests on rather than on a sentence.
 
@@ -424,7 +424,7 @@ A mutant that takes the guard out of `CharonSayOnce.h` writes a line per call, a
 A braille map is the state of a connected two-dimensional braille display: a grid of pins, each raised
 to a height or lowered, and a size. The release has neither the class nor the protocol
 (0 of the framework's 30 classes on 6.1.3 armv7, on 4.3 armv7 and on 3.0 armv6, control symbol found on
-all three), and it needs no Charon header: `AXBrailleMap.h` is in the SDK the package compiles against
+all three), and it needs no toolchain header: `AXBrailleMap.h` is in the SDK the package compiles against
 and is byte-identical to 26.2's copy.
 
 `tests/backports/host/accessibilitymap/run.sh` asks the system's class and the port's class the same
@@ -471,7 +471,7 @@ the same sequence in a binary with the two classes distinctly named, the port's 
 the alias and the probe compiled without it:
 
 ```
-the two classes are distinct: system=AXBrailleMap port=CharonPortAXBrailleMap
+the two classes are distinct: system=AXBrailleMap port=RevenantPortAXBrailleMap
 (2,0) after three writes in column 2	host=33	port=11	DIFFERENT, so this line can fail
 (2,1) after three writes in column 2	host=33	port=22	DIFFERENT, so this line can fail
 (2,9) after three writes in column 2	host=33	port=33	the same
@@ -518,7 +518,7 @@ write landing; what a port that took the write would have given is in the coordi
 
 **This is the one thing in the group this series does not resolve, and it reverses a row the last one
 claimed.** `nm` on the built library finds `__OBJC_$_PROTOCOL_INSTANCE_METHODS_OPT_` and the two
-property lists for the port's own `CharonPortAXBrailleMapRenderer`, so the protocol's metadata is
+property lists for the port's own `RevenantPortAXBrailleMapRenderer`, so the protocol's metadata is
 emitted - by the generated protocols object that `modules/apple/backports.lua` writes from the registry
 row, exactly as it is for the chart group's two protocols. And `objc_getProtocol` and
 `NSProtocolFromString` both answer **nil** for that name in a program that links the port, while the
@@ -535,10 +535,10 @@ on this group, and nothing here guesses at it.
 The header marks `-init` and `+new` unavailable and gives no other way to make a map, so on a real
 device nothing but the braille display service ever holds one, and no release this port carries has
 that service. A caller that wants a map has to be able to ask for one, so the port adds
-`+charon_mapWithDimensions:` in `Accessibility/CharonBrailleMap.h` - Charon's own spelling, the
-arrangement `CharonAccessibility.h` uses for the request's own methods for the same reason - and the
+`+revenant_mapWithDimensions:` in `Accessibility/RevenantBrailleMap.h` - Revenant's own spelling, the
+arrangement `RevenantAccessibility.h` uses for the request's own methods for the same reason - and the
 SDK's initialisers stay where they are. It gets a header of its own rather than a line in
-`CharonAccessibility.h`, because that file transcribes three braille classes and a program importing
+`RevenantAccessibility.h`, because that file transcribes three braille classes and a program importing
 both would have two declarations of each, which clang rejects by name.
 
 That factory cannot be compared against the system, which cannot be asked to build a map at all, so
@@ -555,7 +555,7 @@ counted by the run, which calls it once and fails if the port wrote a line per c
 ## The settings of 17.0, 18.0 and 26.1, and the hearing functions of 15.0
 
 Twelve rows, in four objects, one release a piece, and every answer in them comes from one measurement.
-`CharonAXSettings.h` declares the real names the port's applications write; `AXColorUtilities.h` and
+`RevenantAXSettings.h` declares the real names the port's applications write; `AXColorUtilities.h` and
 `AXHearingUtilities.h` are in the SDK the package compiles against, so the hearing group needed no
 header at all.
 
@@ -571,7 +571,7 @@ every library of the release, which is a different question:
   AX-prefixed exports: 1204, of which AXS-named: 362
 
 CONTROL __AXSInvertColorsEnabled, a name that is in the surface: found
-CONTROL __AXSCharonPlanted, a name that is not:                nil
+CONTROL __AXSRevenantPlanted, a name that is not:                nil
 ```
 
 And the five subjects, by the words a preference about them would be named with, every match printed:
@@ -704,9 +704,9 @@ held-by-a-run. That is the whole of what could be done here, and it is a program
 ### The Settings sections' availability, which is per case and was transcribed as if it were not
 
 `AXSettingsFeature` arrived with 18.0 as a type, and its cases did not all arrive with it: the second
-with **18.2** and the last three with **26.0**. The first version of `CharonAXSettings.h` gave the type
+with **18.2** and the last three with **26.0**. The first version of `RevenantAXSettings.h` gave the type
 its 18.0 and every case nothing, which is what its own preamble says it transcribes and what it did not
-do - and the knowledge sat in a comment in `CharonAXSettings18.m`, which is the one place a compiler
+do - and the knowledge sat in a comment in `RevenantAXSettings18.m`, which is the one place a compiler
 never reads. Given the type's annotation alone, a caller whose deployment target is 18.0 could use the
 26.0 cases and hear nothing at all, where the same caller against the SDK is told to guard the use.
 Measured on this tree, the same file, the same flags, before and after:
@@ -743,10 +743,10 @@ rest of the tree does not have.
 the rule one-object-one-release exists to hold. What it measures is not always what the header says:
 
 ```
-CharonAXSettings17.o  _AXAnimatedImagesEnabled and three siblings   18.0
-CharonAXSettings18.o  _AXAssistiveAccessEnabled and five siblings   18.0
-CharonAXSettings26.o  _AXPrefersActionSliderAlternative and three  none
-CharonHearing15.o     the three hearing functions                   16.0
+RevenantAXSettings17.o  _AXAnimatedImagesEnabled and three siblings   18.0
+RevenantAXSettings18.o  _AXAssistiveAccessEnabled and five siblings   18.0
+RevenantAXSettings26.o  _AXPrefersActionSliderAlternative and three  none
+RevenantHearing15.o     the three hearing functions                   16.0
 ```
 
 The 17.0 object measures at **18.0** and the hearing object at **16.0** because that is what the SDK
@@ -764,10 +764,10 @@ placements came out the same:
 
 ```
 release-split: clean, every object file's symbols first-appear in one release (9 files, 43 symbols, 50 releases checked)
-CharonAXSettings17.o   the four 17.0 symbols       18.0
-CharonAXSettings18.o   the six 18.0 symbols       18.0
-CharonAXSettings26.o   the four 26.1 symbols       none
-CharonHearing15.o      the three hearing symbols  16.0
+RevenantAXSettings17.o   the four 17.0 symbols       18.0
+RevenantAXSettings18.o   the six 18.0 symbols       18.0
+RevenantAXSettings26.o   the four 26.1 symbols       none
+RevenantHearing15.o      the three hearing symbols  16.0
 ```
 
 All nine sources of the library compile with the library flags for `armv7-apple-ios6.0` with no

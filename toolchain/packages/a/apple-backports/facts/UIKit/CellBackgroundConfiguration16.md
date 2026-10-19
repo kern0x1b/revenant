@@ -10,8 +10,8 @@ will use."
 Neither band end answers the name at all, so before this object a caller got nothing:
 
 ```
-CHARON_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua ~/.charon/dyld/6.1.3/dyld_shared_cache_armv7 > inv-6.1.3.tsv
-CHARON_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua ~/.charon/dyld/12.0/dyld_shared_cache_arm64  > inv-12.0.tsv
+REVENANT_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua ~/.revenant/dyld/6.1.3/dyld_shared_cache_armv7 > inv-6.1.3.tsv
+REVENANT_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua ~/.revenant/dyld/12.0/dyld_shared_cache_arm64  > inv-12.0.tsv
 awk -F'\t' '$2=="UICollectionViewCell" || $2=="UITableViewCell" || $2=="UITableViewHeaderFooterView" {print $2, $5}' inv-6.1.3.tsv
 ```
 
@@ -37,7 +37,7 @@ framework's category, not from UIKit's own `UITableView`, and no row of this fil
 
 The answer is a lookup, because the port already has everything the lookup reads:
 
-- **The list a collection view cell is in.** `-charon_layoutListConfiguration`
+- **The list a collection view cell is in.** `-revenant_layoutListConfiguration`
   (`UICollectionViewCompositionalLayout.h`) walks the cell's superviews to the `UICollectionView`,
   reads its layout, and takes the list configuration of the section the cell's index path names,
   falling back to the layout's own. It is the same lookup `UICollectionViewListCell.m` already uses to

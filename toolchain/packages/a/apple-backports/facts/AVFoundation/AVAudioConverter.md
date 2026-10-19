@@ -17,14 +17,14 @@ which Apple's own header restricts to "PCM-to-PCM conversions where there is no 
 conversion" - the same restriction this port's method carries, not a narrower one invented for it.
 `-convertToBuffer:error:withInputFromBlock:` maps onto `AudioConverterFillComplexBuffer`, which does
 support sample-rate conversion and packetized/compressed formats; this port's own C input proc
-(`CharonConverterInputProc`, `AVAudioConverter.m`) bridges it to the caller's Objective-C block,
+(`RevenantConverterInputProc`, `AVAudioConverter.m`) bridges it to the caller's Objective-C block,
 copying the block-returned `AVAudioBuffer`'s own buffer list into the converter's `ioData` rather
 than allocating a second copy.
 
 `AudioConverterComplexInputDataProc`'s C-level `OSStatus` return has no vocabulary for "no data
 *right now*, ask again" - only "stop, this is a real error" (Apple's own header: "If the callback
 returns an error ... `FillComplexBuffer` will stop producing output"). This port's bridge invents a
-private four-char sentinel (`kCharonConverterNoDataNow`, `'noda'`), returned only by this file's own
+private four-char sentinel (`kRevenantConverterNoDataNow`, `'noda'`), returned only by this file's own
 proc and inspected only by the wrapper that installed it, never surfaced past `AVAudioConverter.m`,
 to distinguish `AVAudioConverterInputStatus_NoDataNow` (temporarily starved, produces
 `AVAudioConverterOutputStatus_InputRanDry`) from `AVAudioConverterInputStatus_EndOfStream` (a real
@@ -60,7 +60,7 @@ PCM-to-linear only, demand-driven, no compressed encoder attempted yet). `bitRat
 ## Verification - measured, not assumed
 
 **`checks=8 failures=0`, `tests/backports/device/avaudioconverter.m`**, run through
-`xmake emulate -d iPhone4,1 -r 6.1.3 run /usr/libexec/charon-avaudioconverter-test`
+`xmake emulate -d iPhone4,1 -r 6.1.3 run /usr/libexec/revenant-avaudioconverter-test`
 (`pass ... in 0.1 guest s / 6.2 host s`): a known 440 Hz tone, Float32 at 44.1 kHz, converted down
 to Int16 at the same sample rate and back up to Float32, both hops through
 `-convertToBuffer:fromBuffer:error:` (same rate, no codec, the documented restriction this call

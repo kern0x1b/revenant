@@ -13,8 +13,8 @@ context, then reads a new `CGImage` back out of that context with `CGBitmapConte
 Core Graphics has no choice but to fully decode the source image to satisfy the draw, so the
 image handed back is backed by raw, already-decoded pixels: drawing it again does not touch the
 original compressed source. The new `UIImage` carries the receiver's scale, orientation,
-`capInsets`, `alignmentRectInsets`, `renderingMode` and Charon's own baseline association
-forward, the same way `UIImage+iOS13.m`'s `charon_image_copy` does for other image-returning
+`capInsets`, `alignmentRectInsets`, `renderingMode` and Revenant's own baseline association
+forward, the same way `UIImage+iOS13.m`'s `revenant_image_copy` does for other image-returning
 methods in this port. Multi-frame (`images.count > 0`) images are returned unchanged: forcing a
 decode of every frame is not this method's contract on the real release either (the header does
 not promise it touches animation), and re-encoding an animated image's frame sequence through a

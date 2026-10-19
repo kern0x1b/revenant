@@ -5,53 +5,53 @@ is the map.
 
 ## What this is
 
-Eidolon is an implementation of the SwiftUI API on the UIKit of iOS 6 (armv7), written from scratch. Apple's SwiftUI
+SwiftUI is an implementation of the SwiftUI API on the UIKit of iOS 6 (armv7), written from scratch. Apple's SwiftUI
 cannot be ported (no armv7 build, Metal, 400+ missing system images), so the API is re-implemented; the Swift module is
-named `SwiftUI` because every symbol an app takes from SwiftUI is mangled with that name. Combine is Styx (a fork of OpenCombine).
+named `SwiftUI` because every symbol an app takes from SwiftUI is mangled with that name. Combine is Combine (a fork of OpenCombine).
 
 ## Layout
 
-- `eidolon/Sources/SwiftUI/` — the module. `Core.swift`, `Graph.swift` (nodes, reconciler, scheduler), `Layout.swift`,
+- `SwiftUI/Sources/SwiftUI/` — the module. `Core.swift`, `Graph.swift` (nodes, reconciler, scheduler), `Layout.swift`,
   `Gestures.swift`, `AnimatableEngine.swift`, `Dialogs.swift`, `Hosting.swift`, and one file per area.
-- `eidolon/Tests/main.swift` — the engine tests (one flat file; identifiers are global, so prefix new ones).
-- `eidolon/Probe/`, `eidolon/Sources/SwiftUI/Probe.swift` — the headless probe: `_Probe` hosts a view without a
+- `SwiftUI/Tests/main.swift` — the engine tests (one flat file; identifiers are global, so prefix new ones).
+- `SwiftUI/Probe/`, `SwiftUI/Sources/SwiftUI/Probe.swift` — the headless probe: `_Probe` hosts a view without a
   window, dumps its tree, drives gestures, dialogs and animations for tests. `_Probe`, `_DialogDescription` and
   `_Unsupported` are `@_spi(Probe)`, not public API: a client of them says `@_spi(Probe) import SwiftUI`.
-- `eidolon/Demo/` — the demo app and its snapshot scenarios; `eidolon/Snapshots/reference/` — the tree references.
-- `eidolon/README.md` + `eidolon/coverage.lua` — the ledger and its checker.
-- `eidolon/xmake.lua`, `eidolon/control`, `eidolon/Info.plist` — the Charon port: the same demo sources built as two
-  applications (`EidolonDemo`, and `EidolonSnapshots`, whose Info.plist carries `EidolonSnapshots` so it renders the
-  scenarios) and the engine tests as `EidolonTests`, each a Debian package `xmake emulate` installs into the image.
+- `SwiftUI/Demo/` — the demo app and its snapshot scenarios; `SwiftUI/Snapshots/reference/` — the tree references.
+- `SwiftUI/README.md` + `SwiftUI/coverage.lua` — the ledger and its checker.
+- `SwiftUI/xmake.lua`, `SwiftUI/control`, `SwiftUI/Info.plist` — the toolchain port: the same demo sources built as two
+  applications (`SwiftUIDemo`, and `SwiftUISnapshots`, whose Info.plist carries `SwiftUISnapshots` so it renders the
+  scenarios) and the engine tests as `SwiftUITests`, each a Debian package `xmake emulate` installs into the image.
 - `bridge/` — the typed API diff and the invented-name gate (`api-surface.sh`, `api-diff.lua`, `api-invented.lua`).
-- `xmake.lua`, `eidolon/xmake.lua`, `rtpkg/xmake.lua` — the targets of this member in the hades project (the top
-  `xmake.lua` of hades includes them): `SwiftUI` on styx's `Combine`, the demo, snapshots, tests and `eidolonrt`.
+- `xmake.lua`, `SwiftUI/xmake.lua`, `rtpkg/xmake.lua` — the targets of this member in the revenant project (the top
+  `xmake.lua` of revenant includes them): `SwiftUI` on Combine's `Combine`, the demo, snapshots, tests and `swiftuirt`.
 - `device-run/` — probe output captured on hardware (`probe-ipad2.out`, `probe-iphone4s.out`), the source of the
-  performance numbers in `eidolon/README.md`.
+  performance numbers in `SwiftUI/README.md`.
 
 ## Build and test
 
 ```bash
-eidolon/build.sh                                    # begins with the ledger check
+SwiftUI/build.sh                                    # begins with the ledger check
 ../run-emu.sh                                       # the engine tests, in the emulator
-../snapshots.sh                                     # 38 rendered scenarios against eidolon/Snapshots/reference/
+../snapshots.sh                                     # 38 rendered scenarios against SwiftUI/Snapshots/reference/
 ```
 
-`run-emu.sh` and `snapshots.sh` drive the Charon emulator: `xmake f -c -P eidolon` (`-c`, so the package the pin names is the one installed), then `xmake emulate install` and
-either `emulate run /usr/libexec/EidolonTests` or `emulate launch space.kern0x1b.eidolon.snapshots until-exit`. The
-addon has to be one with `xmake emulate launch` (Charon v0.8.14 or later; `until-exit` holds until the application exits from v0.8.16), named by `CHARON_ADDON`; `CHARON_REPO`
-names a Charon checkout to take the packages from. The scenarios need a key window, so they run in the application,
+`run-emu.sh` and `snapshots.sh` drive the toolchain emulator: `xmake f -c -P SwiftUI` (`-c`, so the package the pin names is the one installed), then `xmake emulate install` and
+either `emulate run /usr/libexec/SwiftUITests` or `emulate launch space.kern0x1b.swiftui.snapshots until-exit`. The
+addon has to be one with `xmake emulate launch` (revenant v0.8.14 or later; `until-exit` holds until the application exits from v0.8.16), named by `REVENANT_ADDON`; `REVENANT_REPO`
+names a toolchain checkout to take the packages from. The scenarios need a key window, so they run in the application,
 through SpringBoard; the engine tests are a console binary and go through `run`.
 
 A change is done when the engine tests, every snapshot and the ledger check (`coverage.lua --check`, after
 `bridge/api-surface.sh`) pass. Anything that
 touches layout, gestures, animation, dialogs or navigation also gets a run on hardware (an iPad 2 or an iPhone 4S on
-iOS 6.1.3): the skill `eidolon-device` says how to reach one from here.
+iOS 6.1.3): the skill `swiftui-device` says how to reach one from here.
 
 ## Rules that matter
 
 - **No silent no-ops.** An API the engine does not honour either works, or is declared with `ignored(...)` (nothing to
   correspond to on iOS 6) or `_Unsupported.note(...)` (works with a named difference), and appears in
-  `eidolon/README.md`. `coverage.lua --check` fails the build otherwise. A protocol requirement that is only an
+  `SwiftUI/README.md`. `coverage.lua --check` fails the build otherwise. A protocol requirement that is only an
   *extension* member is not dispatched dynamically: put user-overridable members in the protocol.
 - **Do not measure completeness by names.** Use `bridge/api-surface.sh`; it compares declarations. When you add an
   overload, the gap count should fall.

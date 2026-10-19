@@ -1,7 +1,7 @@
-# charon@swift-data
+# revenant@swift-data
 
 The SwiftData module for the port's armv7 releases: a Swift module named `SwiftData`, built
-against the `charon@swift-runtime` a port carries, so a program writes `import SwiftData`.
+against the `revenant@swift-runtime` a port carries, so a program writes `import SwiftData`.
 
 The storage is the release's own Core Data - `NSPersistentContainer` and
 `NSPersistentStoreDescription` from iOS 6.0, the backports' `NSPersistentHistory*`,
@@ -13,7 +13,7 @@ What is measured about that substrate, and what the port does and does not have,
 cannot be built for the 4.3 band (the runtime's own `Swift` module has a floor of iOS 6.0, because
 every Core Data backport entry has `minimum: 6.0`), and `FetchDescriptor`'s predicate and sort
 order are `Foundation.Predicate` and `Foundation.SortDescriptor`, which arrive with
-`charon@swift-foundation` and are not on the port yet.
+`revenant@swift-foundation` and are not on the port yet.
 
 ## State of this package
 
@@ -30,7 +30,7 @@ generates a class, and the row's kind is about how the API table records the dec
 the expansion produces.
 
 **What is not done is the expansion, not the API.** `SwiftDataMacros` - the host executable
-`@Model` and the rest expand through - is not written, and it is waiting on `charon@swift-syntax`
+`@Model` and the rest expand through - is not written, and it is waiting on `revenant@swift-syntax`
 (6ae40d50), which publishes the host compiler and the swift-syntax build a plugin is compiled
 against. The rule that builds a plugin from sources is `rules/macro/xmake.lua`, from that series;
 this package will name it and nothing more.
@@ -84,10 +84,10 @@ and they are different jobs:
   SYMBOLS defined=2836 undefined=433
   ```
 - the **committed check** is `xmake l packages/s/swift-data/harness/symbols.lua` with
-  `CHARON_SWIFTDATA_OBJECT` naming an object or the installed `libSwiftData.a`, which prints the same
+  `REVENANT_SWIFTDATA_OBJECT` naming an object or the installed `libSwiftData.a`, which prints the same
   `SYMBOLS` and `UNDEFINED` lines and runs the ten-symbol check; and the package's `on_test`, which
   runs that check on what it installed. Its control is the same file with
-  `CHARON_SWIFTDATA_CONTROL=1`, which is how the check is shown to fail.
+  `REVENANT_SWIFTDATA_CONTROL=1`, which is how the check is shown to fail.
 
 And the build is against swift-runtime `29dd4454` (recipe digest `875c24e4...`), while this tree
 at `4d2e24e7` produces `0ccce571...` - the digest 4d2e24e7 regenerated for the backports' UIKit

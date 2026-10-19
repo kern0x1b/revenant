@@ -65,7 +65,7 @@ The order of the checks, and the line numbers of the user info, are the system's
 a data source's `-snapshot` hands back has none, since the data source drops the marks when it applies one. The order and the
 empty list after an apply follow the port's own bookkeeping and were not held against the system: no host oracle runs on this machine
 (Catalyst is not installed), and the device run is the last section. `objc.inventory` (`.agent-work/plan-and-analysis/b1314-flips/ladder-diffable.log`
-in the charon checkout the band used): the class is in neither the 6.1.3 nor the 12.0 cache, both getters are in 16.0 and 18.0; there is
+in the toolchain checkout the band used): the class is in neither the 6.1.3 nor the 12.0 cache, both getters are in 16.0 and 18.0; there is
 no 13-15 cache, so `introduced` stays the header's 15.0.
 - The generation UUID in `-description` is anew for a snapshot and copied by `-copy`; the port makes a new one when the sections change, and the
   rule of the system was not read. The host test does not compare it.

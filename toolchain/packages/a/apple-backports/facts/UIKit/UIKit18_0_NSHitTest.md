@@ -17,8 +17,8 @@ release lacks is the *public* two-argument spelling, which is what an applicatio
 Class-scoped, with the driver's own `apple.objc` reader, over both armv7 band ends:
 
 ```sh
-CHARON_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua ~/.charon/dyld/4.3/dyld_shared_cache_armv7   > inv-4.3.tsv
-CHARON_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua ~/.charon/dyld/6.1.3/dyld_shared_cache_armv7 > inv-6.1.3.tsv
+REVENANT_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua ~/.revenant/dyld/4.3/dyld_shared_cache_armv7   > inv-4.3.tsv
+REVENANT_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua ~/.revenant/dyld/6.1.3/dyld_shared_cache_armv7 > inv-6.1.3.tsv
 ```
 
 Each `inv-*.tsv` line is `class<TAB>name<TAB>superclass<TAB>image<TAB>instance selectors<TAB>class
@@ -66,7 +66,7 @@ a row from it.
    selectors, and `protocol` with 19, and the merged key reports 19. This is the trap that made the
    first two runs of this page report `NSObject` as carrying no accessibility selector at all.
 3. **The selector table and the class table disagree, and the class table is the one that answers.**
-   `~/.charon/dyld/4.3/selectors_armv7.txt` lists `accessibilityHitTest:withEvent:` — with the
+   `~/.revenant/dyld/4.3/selectors_armv7.txt` lists `accessibilityHitTest:withEvent:` — with the
    underscore, as a `__objc_methname` string — which reads at a glance as the row's own name. It is the
    private spelling, and a grep over that file is not a class-scoped measurement.
 

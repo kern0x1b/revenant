@@ -1,19 +1,19 @@
 ---
 name: emulate-port
-description: Run a charon port (a daemon, a test probe, an application, a package) on an emulated iOS device with `xmake emulate` instead of a phone — install, run, launch an app through SpringBoard and tap it, debug, log, shot, clean — and know what the emulator can and cannot prove. Use when a device is busy or not needed, for a fast loop on daemon-shaped code, to see an app's screen and output, or when asked to "run it in shade / the emulator".
+description: Run a toolchain port (a daemon, a test probe, an application, a package) on an emulated iOS device with `xmake emulate` instead of a phone — install, run, launch an app through SpringBoard and tap it, debug, log, shot, clean — and know what the emulator can and cannot prove. Use when a device is busy or not needed, for a fast loop on daemon-shaped code, to see an app's screen and output, or when asked to "run it in the emulator".
 ---
 
 # `xmake emulate`
 
-macOS arm64 hosts only. The emulator is Shade, built by the `charon@shade` package (pinned by
-commit, patches under `packages/s/shade/patches/`); the `shade` repository is its source, not what
-this command runs.
+macOS arm64 hosts only. The emulator is built by the `revenant@emulator` package (pinned by
+commit, patches under `packages/e/emulator/patches/`); the `emulator/` folder of the repository is its source,
+not what this command runs.
 
 ## Setup in the port's xmake.lua
 
 ```lua
-includes("@addon/charon/apple-ios")
-includes("@addon/charon/emulate")      -- after apple-ios; requires charon@shade, charon@swiftshader, charon@emulator-guest
+includes("@addon/revenant/apple-ios")
+includes("@addon/revenant/emulate")      -- after apple-ios; requires revenant@emulator, revenant@swiftshader, revenant@emulator-guest
 ```
 
 ## Commands (from the port's project directory)
@@ -30,7 +30,7 @@ xmake emulate clean                            # this port's images and every po
 ```
 
 Options: `-d DEVICE` (e.g. `iPhone3,1`; default the first catalog device of the configured
-architecture that Shade has a profile for), `-r RELEASE` (default `apple_minimum`),
+architecture that the emulator has a profile for), `-r RELEASE` (default `apple_minimum`),
 `-t/--timeout` (900 s for a whole boot), `-k/--keep` (keep the booted rootfs beside the log),
 `-n isolated|loopback|host`, `--scale` (guest time scale, default 10).
 
@@ -38,7 +38,7 @@ architecture that Shade has a profile for), `-r RELEASE` (default `apple_minimum
 - Configure the port (`xmake f -p iphoneos -a armv7 -y`) before `install`: the packages it copies
   must already be installed in the store.
 - Pass `-d`: the default device is the first of the catalog, for armv7 an iPhone2,1, whose firmware
-  is downloaded (about a gigabyte) and booted into a golden image first if it is not in `~/.charon`
+  is downloaded (about a gigabyte) and booted into a golden image first if it is not in `~/.revenant`
   yet. `-d iPhone4,1 -r 6.1.3` is the fleet's 4S and has a golden image.
 
 ## Launching an application
@@ -50,14 +50,14 @@ xmake emulate -d iPhone4,1 -r 6.1.3 launch org.example.app tap 160 260
 - The app needs a `CFBundleIdentifier` (`set_values("app.plist", "CFBundleIdentifier=...")`); `launch`
   refuses a bundle identifier the port's packages do not install and names the ones they do.
 - It prints the app's standard output and error (`printf` + `fflush`, and `NSLog`), then one
-  `app-N.png` per snapshot: `app-0.png` once the app is frontmost and Shade reports the screen still
+  `app-N.png` per snapshot: `app-0.png` once the app is frontmost and the emulator reports the screen still
   (`settle`, 60 display periods of guest time), then one after each step, settled the same way.
   They stay in the run folder; the log line names it.
 - Steps are in points (320x480 on an iPhone, 768x1024 on an iPad), portrait, the status bar
   included: a view at y in its controller is at y + 20 on the screen.
 - `until-exit` is the one step the emulator is not sent: it holds the guest until the application has
   ended, then settles and takes one more frame. Use it for an application that produces its result
-  over time (Eidolon's snapshot bundle renders 37 scenarios and then quits). The frame it takes is the
+  over time (SwiftUI's snapshot bundle renders 37 scenarios and then quits). The frame it takes is the
   screen as it was after the application ended — SpringBoard takes the screen back — so the frame of the
   application itself is the one before it. The hold ends at the first of two things, and the verdict
   and the last lines of the log say which: `held: exited` (the application ended, after N guest seconds
@@ -66,10 +66,10 @@ xmake emulate -d iPhone4,1 -r 6.1.3 launch org.example.app tap 160 260
   the host limit of the whole boot, which has to cover `-s` times the time scale: 2400 for `-s 240` at
   the default scale) rather than reading
   `deadline` as success. The runner's `verdict.json` is not what ends the hold: it is written when
-  `charon-sblaunch` returns, at launch. The whole run folder is kept
-  beside the log, and `/var/charon` is in it, so whatever the application wrote there comes out of the
+  `revenant-sblaunch` returns, at launch. The whole run folder is kept
+  beside the log, and `/var/revenant` is in it, so whatever the application wrote there comes out of the
   guest — that is how a port's own result files are read.
-- `-s` is how many guest seconds `charon-sblaunch` waits for SpringBoard to take the launch and make
+- `-s` is how many guest seconds `revenant-sblaunch` waits for SpringBoard to take the launch and make
   the app frontmost (at the default scale that is ten times as many host seconds) and, with `until-exit`,
   how many the application may then run (counted by the host's clock at the time scale, from the moment
   it is frontmost). While the screen
@@ -84,7 +84,7 @@ xmake emulate -d iPhone4,1 -r 6.1.3 launch org.example.app tap 160 260
 
 ## What it proves and what it does not
 
-- Daemons (`@addon/charon/daemon`, no `UIApplicationMain`) run: use it for them.
+- Daemons (`@addon/revenant/daemon`, no `UIApplicationMain`) run: use it for them.
 - A UIKit app started by `run` never reaches `application:didFinishLaunchingWithOptions:` — it
   bypasses SpringBoard's launch, and the frames drawn are SpringBoard's. Use `launch` for an app,
   which goes through SpringBoard but is not a tap on the icon: it runs with an environment of its
@@ -95,16 +95,16 @@ xmake emulate -d iPhone4,1 -r 6.1.3 launch org.example.app tap 160 260
 - No audio daemon: `kAudioSessionNotInitialized` there is the emulator, not the code.
 - Without a time scale the guest's own watchdogs expire (SpringBoard is lost to a mediaserverd
   timeout); keep the default `--scale 10`.
-- A device without a Shade profile, or a release whose Darwin Shade does not emulate, is refused
+- A device without an emulator profile, or a release whose Darwin the emulator does not emulate, is refused
   with the reason — not replaced by another.
 - Images, and a rootfs kept with `-k`, live in the emulator root beside the dyld caches
-  (`~/.charon/emulator`), not in the project; copy the log and verdict you need into
+  (`~/.revenant/emulator`), not in the project; copy the log and verdict you need into
   `.agent-work/runs/`. Do not run `xmake emulate clean` while other sessions use the emulator: it
   always removes the shared `tmp.noindex` and `cache.noindex` too, and every other port's next run
   starts cold.
 - `checking for Xcode SDK ... no` is not a failure. It is xmake's check of the *host* platform, which
   it prints once before it switches to the target, and it is there in every configure that succeeds.
-  The SDK and the linker a guest build uses come from `charon@iphoneos-sdk` and `charon@ld64` through
+  The SDK and the linker a guest build uses come from `revenant@iphoneos-sdk` and `revenant@ld64` through
   the addon's `apple-ios` toolchain, and `xmake show -t <target>` reads the paths: look for
   `-isysroot ~/.xmake/packages/i/iphoneos-sdk/...` and `-fuse-ld=~/.xmake/packages/l/ld64/.../ld`.
   There is no Xcode on this machine and a port does not need one; `set_allowedplats`/`set_allowedarchs`

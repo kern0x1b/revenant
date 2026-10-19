@@ -54,4 +54,4 @@ The function reads the domain, and an object is kept or reexported as a whole. O
 one release, and both of these are iOS 12.2 API whose first held exporting release is 13.4, so they
 sit in the same object and move together in every band. A function in one object calling a constant
 in another breaks in exactly the bands where the two land on opposite sides of that split
-(`charon/AGENTS.md`, "A C function shared between backport files").
+(`toolchain/AGENTS.md`, "A C function shared between backport files").

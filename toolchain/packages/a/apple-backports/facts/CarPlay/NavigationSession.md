@@ -65,14 +65,14 @@ which is how a band's reader can see that they are stored values and not message
 Command and verdict, for a reader who wants to repeat it:
 
 ```
-CHARON_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua ~/.charon/dyld/16.0/dyld_shared_cache_arm64e
-CHARON_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua ~/.charon/dyld/18.0/dyld_shared_cache_arm64e
+REVENANT_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua ~/.revenant/dyld/16.0/dyld_shared_cache_arm64e
+REVENANT_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua ~/.revenant/dyld/18.0/dyld_shared_cache_arm64e
 awk -F'\t' '$2=="CPNavigationSession"' <the two tsvs>
 ```
 
 (the arm64e caches are split: a 384 KB header and the bodies in `.01`, `.03`, …, and the reader takes
 the base path. The 16.0 inventory this repository already had was reused rather than rebuilt — it is
-`charon/.agent-work/runs/coreml-1/objc16.tsv`, 81 MB, and the 18.0 one is under this band's own
+`toolchain/.agent-work/runs/coreml-1/objc16.tsv`, 81 MB, and the 18.0 one is under this band's own
 `.agent-work/runs/carplay-1/objc18.tsv`, 104 MB.)
 
 ## What carrying the fourteen needs, and the three classes they reach for
@@ -116,7 +116,7 @@ are **not** in this band and are named here so the next one does not have to fin
 `CarPlay/CarPlayNavigationSession12.m` is the 12.0 object: the class, its seven members, and
 `-[CPMapTemplate startNavigationSessionForTrip:]` as a category on the map template. The class keeps its
 own storage for the session in `CarPlayTemplatesView12.m` — a category cannot add an ivar — and three
-`Charon`-prefixed accessors cross the file boundary, so nothing of them is in the library's exports.
+`revenant`-prefixed accessors cross the file boundary, so nothing of them is in the library's exports.
 `CarPlayNavigationSession154.m` is the 15.4 object and holds the one later method, which is the 12.0
 pause plus the turn card colour.
 
@@ -124,8 +124,8 @@ pause plus the turn card colour.
   and the template keeps it. A second call for the same trip hands back the session already running,
   because the header's guidance is per trip.
 - **no `-init`, no `+new`**: `CPNavigationSession.h:33-34` marks both `NS_UNAVAILABLE`, so the factory
-  is a class method that uses NSObject's own `-init` and two Charon methods that configure — a method
-  outside the init family may not assign to `self`, and a name in the `charon_` namespace keeps the
+  is a class method that uses NSObject's own `-init` and two Revenant methods that configure — a method
+  outside the init family may not assign to `self`, and a name in the `revenant_` namespace keeps the
   release's private `-initWithTrip:mapTemplate:` out of the exports.
 - **`trip`**, **`upcomingManeuvers`** (a copy, in the program's order), **`updateTravelEstimates:forManeuver:`**
   (kept per maneuver), **`pauseTripForReason:description:`**, **`finishTrip`**, **`cancelTrip`**: each

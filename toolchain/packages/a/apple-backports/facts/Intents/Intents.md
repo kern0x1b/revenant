@@ -21,18 +21,18 @@ say what they are instead of answering as though the system were there.
 
 The brief for this framework is that an application can donate, store and query interactions
 and resolve and handle in process. Both stores are real files under **this application's own**
-`Application Support/Charon/Intents`, written with
+`Application Support/Revenant/Intents`, written with
 `NSPropertyListSerialization` and read back through the same path
-(`CharonIntentsStore.m`), every write and every read on one serial queue, and every failure the
+(`RevenantIntentsStore.m`), every write and every read on one serial queue, and every failure the
 error the file system or the serialisation reported.
 
 * `INInteraction donateInteractionWithCompletion:` stamps the interaction's date interval with
   the moment of the donation, archives it into the store and calls the handler with `nil` — or
-  with the error the write failed with. The two `charon_interactions` accessors on
+  with the error the write failed with. The two `revenant_interactions` accessors on
   `INInteraction` read the store back, newest last, and the deletion methods remove by
   identifier, by group identifier and all of them.
 * `INVocabulary` writes the phrases an application offers, by type and in order, and
-  `charon_vocabularyStringsOfType:` reads a type back.
+  `revenant_vocabularyStringsOfType:` reads a type back.
 
 On a release that does carry `Intents.framework` the release's own framework is linked instead
 (`modules/apple/backports.lua`'s band drops this library's objects and re-exports the
@@ -43,9 +43,9 @@ framework's symbols), so none of this store is in a process that has the real th
 `INIntentResolutionResult` has no public accessors in the SDK, and none of its subclasses have
 any: on a release with Siri the system is the reader, so the result's value is a value the
 system reads and an application never sees. Here the application that resolves a parameter is
-the reader, so `CharonIntentsResolution.h` declares four accessors on the class — the resolved
+the reader, so `RevenantIntentsResolution.h` declares four accessors on the class — the resolved
 value, the values to disambiguate, the value to confirm, and which of the six answers this is —
-plus the one method every answer is built with. They are named as Charon's own, collide with
+plus the one method every answer is built with. They are named as Revenant's own, collide with
 nothing Apple has, and are absent on a release that carries the framework itself.
 
 A resolution result whose value is a value type rather than an object —
@@ -56,12 +56,12 @@ parameter was given.
 
 ## The classes whose behaviour is more than storage
 
-Ten classes are hand written in `CharonIntents100.m` (the iOS 10.0.1 group) and one in
-`CharonIntents110.m` (the 11.0 group); the other 104 of the 10.0.1 group, the 22 of the 10.3
+Ten classes are hand written in `RevenantIntents100.m` (the iOS 10.0.1 group) and one in
+`RevenantIntents110.m` (the 11.0 group); the other 104 of the 10.0.1 group, the 22 of the 10.3
 group and the 56 generated classes of the 11.0 group are generated into `IN10_0.m`, `IN10_3.m`
 and `IN11_0.m` by `tools/intents/gen-intents.lua` from the SDK's own declarations. The generated
 objects are built at build time into `.gen/Intents/` by `tools/intents/objects.lua` (from
-`CHARON_GEN_SDK`, the iPhoneOS 26.2 SDK) and are not committed; `IN17_0.m` and the hand-written
+`REVENANT_GEN_SDK`, the iPhoneOS 26.2 SDK) and are not committed; `IN17_0.m` and the hand-written
 files stay in the folder. What is hand written and why:
 
 * **`INIntent`** makes a UUID string `identifier` where the intent is made. The system assigns
@@ -112,7 +112,7 @@ files stay in the folder. What is hand written and why:
   **`INIntentResolutionResult`** are described in their registry entries; each of them either
   carries a derived answer (`INRideCompletionStatus`'s six flags and amounts, computed from the
   outcome its factory methods name) or a value Apple's own class keeps in a way this port names.
-* **`INParameter`** (iOS 11.0, `CharonIntents110.m`) is a class and a key path, which is all the
+* **`INParameter`** (iOS 11.0, `RevenantIntents110.m`) is a class and a key path, which is all the
   header's own two properties say, so that is what it keeps. `isEqualToParameter:` compares those
   two, and `setIndex:forSubKeyPath:` / `indexForSubKeyPath:` keep a real index per sub key path,
   answering `NSNotFound` for one that was never given an index — an `NSUInteger` return has no
@@ -129,14 +129,14 @@ Two shapes of resolution result the iOS 11.0 group adds:
   of that shape. The wrapper answers **what the result it was given answers**, status included,
   so its whole state is taken rather than re-derived: a caller that resolves a payee must get the
   answer the person result gave. That is one method on the base,
-  `-charon_adoptResolutionOf:`, and the generator emits the call when a parameter's type is a
+  `-revenant_adoptResolutionOf:`, and the generator emits the call when a parameter's type is a
   resolution result.
 * **`+unsupportedForReason:`** (also iOS 11.0, on those five and on every later group's
   equivalent). The reason is an enumeration and the classes expose **no reader for it in their own
   headers** — on the releases that added the method, the system is the only one who reads it, and
   this release has none. A result that swallowed the reason would answer "unsupported" with no way
   to say why, which is a different answer from the one the method's name promises, so the reason
-  is kept and read back through `-charon_unsupportedReason` beside the four other accessors.
+  is kept and read back through `-revenant_unsupportedReason` beside the four other accessors.
 
 ### One bare `-init` that the header declares *available*, and the loop that never visited it
 
@@ -193,7 +193,7 @@ each read off the header of iPhoneOS 16.4:
   price.
 * `INPerson`'s `contactSuggestion` is declared `getter=isContactSuggestion`, so the initialiser
   that spells its parameter `isContactSuggestion:` is matched through the getter's own name.
-The copy in the charon-coding package reads the property an ivar belongs to through the `V_` field
+The copy in the revenant-coding package reads the property an ivar belongs to through the `V_` field
 of its own attributes — the way the runtime pairs them, so a property whose ivar is not spelled
 after it is still found — and then reads the ownership out of the **field list** that follows the
 type field, one character at a time, skipping the `G…`/`S…`/`V…` payloads. A property is copied
@@ -301,7 +301,7 @@ The cause is one word in `tools/intents/generate.sh`: the 10.0.1 and 10.3 groups
 `newer: no`, so `gen-intents.py` reads only the port's own SDK for their classes, and a member
 only iPhoneOS 26.2 declares is invisible to them. The 12.0, 16.0 and 18.0 groups already run with
 `newer: yes`. Flipping it for the 10.0.1 group would generate these six where they belong - in
-`IN10_0_1.m`, beside the class, in the file's own `@implementation`, with the ivars the charon-coding
+`IN10_0_1.m`, beside the class, in the file's own `@implementation`, with the ivars the revenant-coding
 walker reads - but it rewrites `registry/Intents/ios10.json` and `IN10_0_1.m` whole, and both belong
 to other slices of the same file. Until it is flipped the six are answered by the category, and
 `coordination/crutches.md` carries the entry.
@@ -311,17 +311,17 @@ the run carries its own control - the 10.0.1 rung is in it and does carry `INMes
 6.1.3 and 4.3 is the release's and not the reader's:
 
 ```
-$ CHARON_ROOT=$PWD xmake l tools/corpus/cache-census.lua INMessage 6.1.3 4.3 10.0.1
+$ REVENANT_ROOT=$PWD xmake l tools/corpus/cache-census.lua INMessage 6.1.3 4.3 10.0.1
 # (cache paths below abbreviated to ~; the tool prints them absolute)
-6.1.3     ~/.charon/dyld/6.1.3/dyld_shared_cache_armv7
+6.1.3     ~/.revenant/dyld/6.1.3/dyld_shared_cache_armv7
          images 524, of which naming INMessage 0
          classes 11378, of which INMessage* 0
          protocols 1171, of which INMessage* 0
-4.3       ~/.charon/dyld/4.3/dyld_shared_cache_armv7
+4.3       ~/.revenant/dyld/4.3/dyld_shared_cache_armv7
          images 354, of which naming INMessage 0
          classes 7187, of which INMessage* 0
          protocols 564, of which INMessage* 0
-10.0.1    ~/.charon/dyld/10.0.1/dyld_shared_cache_armv7s
+10.0.1    ~/.revenant/dyld/10.0.1/dyld_shared_cache_armv7s
          images 1082, of which naming INMessage 0
          classes 39319, of which INMessage* 3 (INMessage INMessageAttributeOptionsResolutionResult INMessageAttributeResolutionResult)
          protocols 6111, of which INMessage* 1 (INMessageExport)
@@ -338,7 +338,7 @@ nothing else: `numberOfAttachments` reads 3.0 and `linkMetadata` reads 10.0.1, a
 $ printf '%s\n' 'initWithIdentifier:conversationIdentifier:content:dateSent:sender:recipients:groupName:messageType:serviceName:attachmentFiles:' \
     'initWithIdentifier:conversationIdentifier:content:dateSent:sender:recipients:groupName:serviceName:linkMetadata:' \
     'initWithIdentifier:conversationIdentifier:content:dateSent:sender:recipients:groupName:serviceName:messageType:numberOfAttachments:' \
-    attachmentFiles numberOfAttachments linkMetadata charonNoSuchSelector17Control \
+    attachmentFiles numberOfAttachments linkMetadata revenantNoSuchSelector17Control \
   | xmake l tools/cache-index/first-rung.lua
 initWithIdentifier:conversationIdentifier:content:dateSent:sender:recipients:groupName:messageType:serviceName:attachmentFiles:	18.0
 initWithIdentifier:conversationIdentifier:content:dateSent:sender:recipients:groupName:serviceName:linkMetadata:	18.0
@@ -346,7 +346,7 @@ initWithIdentifier:conversationIdentifier:content:dateSent:sender:recipients:gro
 attachmentFiles	18.0
 numberOfAttachments	3.0
 linkMetadata	10.0.1
-charonNoSuchSelector17Control	NONE
+revenantNoSuchSelector17Control	NONE
 ```
 
 The armv7 ladder ends at 10.3.4 and the three initialisers and `attachmentFiles` first appear at
@@ -369,7 +369,7 @@ Undefined symbols for architecture arm64:
 
 So the three live in an associated object each, and `-copyWithZone:`, `-encodeWithCoder:` and
 `-initWithCoder:` - the class's own three, which walk its ivar list through the one helper in
-`packages/c/charon-coding` - are answered in `IN17_0.m` beside them, under the keys that helper
+`packages/r/revenant-coding` - are answered in `IN17_0.m` beside them, under the keys that helper
 itself uses (`INMessage.attachmentFiles` and so on, which are the keys the class of iOS 17.0
 occupies for the same three). Without that a copy and an archive of an `INMessage` would carry
 ten of its thirteen values and drop exactly the three of 17.0. Those three methods are not API of
@@ -395,13 +395,13 @@ at 10.0.1 (116), 10.3 (22), 11.0 (55), 12.0 (17), 16.0 (95) and 18.0 (4), one ob
 group, and `registry/Intents/` has a file for each.
 
 Seven of those classes and the four declarations they are typed by are **newer than the SDK the
-port compiles against**: the toolchain's `charon@iphoneos-sdk` is iPhoneOS 16.4, and
+port compiles against**: the toolchain's `revenant@iphoneos-sdk` is iPhoneOS 16.4, and
 `INMessageLinkMetadata` (iOS 17), `INUnsendMessagesIntent`/`INUnsendMessagesIntentResponse` and
 `INEditMessageIntent`/`INEditMessageIntentResponse` (iOS 17), `INMessageReaction` and `INSticker`
 (iOS 18) appear first in the SDK of 17.0 and 18.0. Their contracts are read from the headers of
 **iPhoneOS 26.2** (the SDK that `tools/intents/generate.sh` asks for as `SDK_262`, which the coordinator
 keeps unpacked and a worktree sweep will delete) and the
-declaration the implementation compiles against is `CharonIntents262.h` — the seven classes, the
+declaration the implementation compiles against is `RevenantIntents262.h` — the seven classes, the
 two enumerations two of them are typed by, and the two response codes the two responses are typed
 by. That is what a backport writes for API its SDK does not have, and the same generator builds
 their bodies from the same declarations it builds every other class's from.
@@ -446,7 +446,7 @@ IntentsUI (58 rows, 43 of them entries, 15 absent with a reason each) is a libra
 
 ## INMessage of iOS 18: four rows that are `implemented`, and the measurement that moved them
 
-Four rows of `registry/Intents/ios10.json` and one object, `Intents/CharonIntents180.m`:
+Four rows of `registry/Intents/ios10.json` and one object, `Intents/RevenantIntents180.m`:
 
 | row | kind | what answers it |
 | --- | --- | --- |
@@ -465,8 +465,8 @@ in the arm64e cache of iOS 18.0, so a release does answer them.
 case - a member that no exported symbol answers, which is every method of a category, because
 `nm -gU` on such a file returns nothing:
 
-    strings -a ~/.charon/dyld/18.0/* > strings-18.0.txt      # 22522030 lines, 552128265 bytes
-    strings -a ~/.charon/dyld/6.1.3/* > strings-6.1.3.txt    #  4134954 lines,  73318374 bytes
+    strings -a ~/.revenant/dyld/18.0/* > strings-18.0.txt      # 22522030 lines, 552128265 bytes
+    strings -a ~/.revenant/dyld/6.1.3/* > strings-6.1.3.txt    #  4134954 lines,  73318374 bytes
     grep -x -c -F -e "$SELECTOR" strings-18.0.txt strings-6.1.3.txt
 
 Both rungs in one run, a nonsense selector as the negative control, and the class's own selectors
@@ -480,7 +480,7 @@ of earlier releases as the positive controls:
     18.0 28  6.1.3  0  reaction
     18.0  4  6.1.3  0  initWithIdentifier:...groupName:messageType:serviceName:                 <- control
     18.0  3  6.1.3  0  initWithIdentifier:...groupName:messageType:serviceName:attachmentFiles:   <- control
-    18.0  0  6.1.3  0  charonNoSuchSelector18Probe:                                                <- control
+    18.0  0  6.1.3  0  revenantNoSuchSelector18Probe:                                                <- control
 
 The selectors are the whole lines of the strings pass, which is why the `strings` pass exists at
 all: a selector sits inside a binary blob in `__objc_methname`, and a raw `grep -x` over the cache
@@ -500,22 +500,22 @@ over each of the three iPhoneOS 16.4 SDKs on this machine answers three lines - 
 generator, which reads that SDK's AST, had nothing to emit, and the four rows came out of it as
 `not_declared`. The contract is therefore read from **iPhoneOS 26.2's own `INMessage.h`** - lines
 139 to 178 for the two initialisers, 206 to 210 for the two properties, word for word - and
-`CharonIntents262.h` is where the port writes what its SDK does not have. Both types are already
+`RevenantIntents262.h` is where the port writes what its SDK does not have. Both types are already
 carried: `INSticker` and `INMessageReaction` are two of the four classes of the 18.0 group and
 `IN18_0.m` defines both.
 
 **Where the bodies are, and the one place this shape differs from the tree's.** A member does not
 have to arrive in its own object's release: `IN10_0_1.m` already carries `INMessage.serviceName`
 (13.2), `INMessage.groupName` (11.0) and `INMessage.audioMessageFile` (16.0), and
-`INIntent.donationMetadata` (15.0) was put beside its class in `CharonIntents100.m`. **By that
+`INIntent.donationMetadata` (15.0) was put beside its class in `RevenantIntents100.m`. **By that
 shape these four belong in `IN10_0_1.m`,** with an ivar and a synthesised accessor each, and
-`charon_intents_copy`'s own ivar walk would then carry them with no further work.
+`revenant_intents_copy`'s own ivar walk would then carry them with no further work.
 
 They are not there, and the reason is coordination and not architecture: this slice holds **one**
 object, the one for 18.0, and `IN10_0_1.m` is the 10.0 group's generated object, which another
 slice's rows also land in - putting these four there means changing `gen-intents.py` to emit
 members of a class the port SDK does not declare, and rewriting a generated file in flight. So
-`CharonIntents180.m` is a category on `INMessage` instead, the arrangement
+`RevenantIntents180.m` is a category on `INMessage` instead, the arrangement
 `Photos/PHPickerConfiguration15.m` already uses for `PHPickerConfiguration`'s own iOS 15
 properties. **What that costs, exactly:** the two values are held beside the object rather than in
 it, because a category cannot add an ivar to a class another object implements, and three of the
@@ -527,11 +527,11 @@ later is a clean move that removes all three, and nothing in this file depends o
 walk the ivar list, which cannot see what a category holds beside the object. Left alone they
 would carry the whole message except these values: a silent wrong answer rather than a crash.
 The category therefore carries those three selectors, each calling the package's own helper from
-`CharonCoding.h` (`charon_intents_copy`, `charon_intents_encode`, `charon_intents_decode`,
-`charon_intents_super_init`) and adding this file's three values, so none of them repeats the ivar
+`RevenantCoding.h` (`revenant_intents_copy`, `revenant_intents_encode`, `revenant_intents_decode`,
+`revenant_intents_super_init`) and adding this file's three values, so none of them repeats the ivar
 walk and the copy stays true as the class grows. Clang's note that a category implements a method
 its primary class also implements is that arrangement and is silenced for the reason
-`PHPickerConfiguration15.m` gives. The archive keys are `CharonCoding.h`'s own spelling (the class
+`PHPickerConfiguration15.m` gives. The archive keys are `RevenantCoding.h`'s own spelling (the class
 that owns the value, then the value's own name), and none of the three collides with an ivar key:
 `INMessage`'s ivars are `audioMessageFile`, `content`, `conversationIdentifier`, `dateSent`,
 `groupName`, `identifier`, `messageType`, `recipients`, `sender` and `serviceName`.
@@ -547,7 +547,7 @@ accessor, because an accessor the SDK does not declare is not a backport. The va
 handed is kept rather than dropped, so the object is whole.
 
 **What is not verified here.** The four selectors answer on the host's own Intents and are in the
-18.0 cache, and `CharonIntents180.m` compiles clean for `armv7-apple-ios6.0`, `arm64-apple-ios12.0`
+18.0 cache, and `RevenantIntents180.m` compiles clean for `armv7-apple-ios6.0`, `arm64-apple-ios12.0`
 and `arm64e-apple-ios12.0` against the port's SDK. It has **not** been run: `INMessage` is a port
 class that needs the whole `libIntentsBackports` linked, and this framework is device-unverified as
 a whole (see above), so these four are device-unverified with it.
@@ -557,7 +557,7 @@ a whole (see above), so these four are device-unverified with it.
 **The braille tables are written from the standard, not copied from an implementation.**
 liblouis is the implementation everyone uses and it is **LGPL**: read it, do not copy it, and
 **this package never had a copy of it** — there is no liblouis in the tree, in the store or in
-anything this work read. What is in `CharonBraille.m` is written out here:
+anything this work read. What is in `RevenantBraille.m` is written out here:
 
 * the twenty-six letter cells, as the dot numbers the grade-1 alphabet gives each letter, and
   every cell the **Unicode braille pattern** those dots are (`U+2800 +` the dot bitmask, dot 1 the
@@ -610,7 +610,7 @@ emitted body is built around:
     $ sh tests/backports/host/intents/run-rows.sh
     $ build/init-rows tests/backports/host/intents/init-classes.txt
 
-    control: INCharonNoSuchClassForThisHarness reads absent, as it must
+    control: INRevenantNoSuchClassForThisHarness reads absent, as it must
     control: NSObject, whose -init the SDK does not mark unavailable, has IMP non-NULL and answers
              an object through it
     control: INAirline declares 3 of its own, 3 of the 7 class_copyPropertyList answers
@@ -650,7 +650,7 @@ What the harness does **not** settle, and what is owed: it compares the port's `
 system's through `tests/backports/host/prefix_selectors.py`, the tool `mpsmatrix/run.sh` uses to
 rename the port's classes so its implementations are reached under names of their own. That rename
 list is generated from the port's own object symbols, and the port's Intents sources additionally
-need `CharonIntents262.h` renamed with them, because that header re-declares the classes the port's
+need `RevenantIntents262.h` renamed with them, because that header re-declares the classes the port's
 own SDK lacks and the host's has, and without the rename the host build fails with *duplicate
 interface definition*. Until that run exists, what is proven for the port's own side is the compile,
 the presence of each `-init` per `nm`, and the registry's own text.
@@ -675,7 +675,7 @@ marker forbids *naming* the selector at compile time, and that is the only thing
 Five rows were `owed`, each with the reason *"build -[X init]"* and the effect *"respondsToSelector:
 answers NO"*: `-[INInteraction init]`, `-[INIntentResolutionResult init]`, `-[INPaymentMethod init]`,
 `-[INRideCompletionStatus init]` and `-[INSpeakableString init]`. The effect was wrong. None of the five
-classes defines `-init` in `Intents/CharonIntents100.m`, and each inherits NSObject's, so
+classes defines `-init` in `Intents/RevenantIntents100.m`, and each inherits NSObject's, so
 `respondsToSelector:init` is YES: the probe asks `instancesRespondToSelector:init` of each class, and on both sides it answers YES.
 
 Whether an inherited `-init` is the right answer is the host's to say. The SDK header marks
@@ -686,7 +686,7 @@ both sides from one probe source, `owed.m`:
     sh tests/backports/host/intents-init-owed/run.sh
 
 The host build links the system's Intents for Catalyst, the target the port is built for. The port build
-compiles `CharonIntents100.m` with `CharonCoding.m` and `CharonIntentsStore.m`, under renamed class
+compiles `RevenantIntents100.m` with `RevenantCoding.m` and `RevenantIntentsStore.m`, under renamed class
 symbols, as tests/backports/host/inimage-bridge does. The probe is built without ARC, so it owns what it
 allocates. Both outputs are diffed. The plant is a port whose `INSpeakableString` answers nil for `-init`,
 and its diff must be non-empty. Measured, the same on both sides, for all five:
@@ -740,9 +740,9 @@ them and a header is not the answer. Their host answers are the golden file of
 Not measured: the order of the name in another locale (the machine is `en_US`, and the formatter's order is
 read here as given-first), and a non-nil image.
 
-The port's half is built the same way. `CharonIntents262.h` declares nothing under `CHARON_HOST_BUILD`, the
+The port's half is built the same way. `RevenantIntents262.h` declares nothing under `REVENANT_HOST_BUILD`, the
 convention the host harnesses define, so `Intents/IN10_0_1.m` compiles against the Catalyst headers, and
-`tests/backports/host/intents-ride-driver/run.sh` links the port's objects under renamed `CharonHost` classes and
+`tests/backports/host/intents-ride-driver/run.sh` links the port's objects under renamed `RevenantHost` classes and
 diffs their answers against the host's. The two initialisers are implemented in `IN10_0_1.m` and their rows are
 `implemented`. The plant (a port that answers `""` for a nil `displayName`) differs from the host, so the diff can fail.
 
@@ -760,7 +760,7 @@ the macOS and Catalyst runtimes agree on every line:
   `UIKit/UIImage+Symbols.m`, `facts/UIKit/UIImageSymbols.md`) and answers nil for every other name. The INImage
   carries the drawn image as PNG, as `imageNamed:` does, with its name and size.
   The host differs, and the difference is kept as measured: the system's own `+[INImage systemImageNamed:]`
-  answers an image for **any** non-empty name, including names no symbol has (`charon.no-such-symbol` and
+  answers an image for **any** non-empty name, including names no symbol has (`revenant.no-such-symbol` and
   `zz.not.a.symbol` were both answered on Catalyst, while UIImage answered nil). The port does not answer those,
   because a nil for them is the answer the UIKit table gives, and the ruling was one table for both classes.
   `tests/backports/host/intents-symbol` compares the port's INImage with the host's UIImage name by name, over 551
@@ -776,7 +776,7 @@ the macOS and Catalyst runtimes agree on every line:
 `-[INDateComponentsRange initWithEKRecurrenceRule:]` and `-[INDateComponentsRange EKRecurrenceRule]` are declared
 from iOS 11.0 in `INDateComponentsRange.h`, which forward declares `EKRecurrenceRule`. The port links EventKit into
 `IntentsBackports` (`modules/apple/backports.lua`), and implements the two as a category of the class in
-`Intents/CharonIntents100.m`. The host's answers are measured by `tests/backports/host/intents-ek`: a golden of 241
+`Intents/RevenantIntents100.m`. The host's answers are measured by `tests/backports/host/intents-ek`: a golden of 241
 lines (`expected.txt`), which macOS and Catalyst both give, and which the port matches line for line on Catalyst. The
 host is the oracle, by ruling: where it raises, the port raises; where it loses a field, the port loses it too.
 
@@ -809,7 +809,7 @@ the same way, so the golden also holds the frequencies, intervals, and which dat
 
 `+[INIntentResolutionResult unsupportedWithReason:]` and `+[INIntentResolutionResult confirmationRequiredWithItemToConfirm:forReason:]`
 are declared from iOS 13.0 in the macOS SDK's `INIntentResolutionResult+Custom.h`. The port implements both in
-`Intents/CharonIntents100.m`, through the one builder every resolution result uses. The host's answers are measured by
+`Intents/RevenantIntents100.m`, through the one builder every resolution result uses. The host's answers are measured by
 `tests/backports/host/intents-resolution-reason`: a golden of 72 lines (`expected.txt`), which macOS and Catalyst both
 give, and which the port matches line for line on Catalyst. A planted port whose `+unsupportedWithReason:` drops the
 reason is red.
@@ -828,7 +828,7 @@ The host's result class answers, by name, five readers that no header declares: 
   `disambiguationItems` the two; one string gives code 3, `itemToConfirm` that string, and `disambiguationItems` nil.
   The host turns a one-item disambiguation into a confirmation of that item, and the port's reader does the same.
 
-**A bug the measurement found, fixed in the same commit.** `+charon_adopted:`, which every generated resolution factory
+**A bug the measurement found, fixed in the same commit.** `+revenant_adopted:`, which every generated resolution factory
 builds through, passed the class object as the receiver of the superclass's `-init`. The helper answers its receiver, so
 the result's ivars were written into the class object itself, and `+[INIntentResolutionResult needsValue]` crashed
 (`objc_release` on a bad address). The receiver is now an instance, `[self alloc]`. The probe covers `+needsValue`,
@@ -878,8 +878,8 @@ three handler members - were asked again, member by member, and this is the whol
 run. `sh tests/backports/host/intents/run-rows.sh`, host `macOS 27.0 build 26A428, arm64`, one
 process per section:
 
-    intents12 classes INShortcut=1 INVoiceShortcut=1 INVoiceShortcutCenter=1 INRelevantShortcutStore=1 INUpcomingMediaManager=1 INObject=1 INCharonNoSuchClassForThisHarness=0
-    intents12 +[INCharonNoSuchClassForThisHarness sharedCenter]          ABSENT class=INCharonNoSuchClassForThisHarness
+    intents12 classes INShortcut=1 INVoiceShortcut=1 INVoiceShortcutCenter=1 INRelevantShortcutStore=1 INUpcomingMediaManager=1 INObject=1 INRevenantNoSuchClassForThisHarness=0
+    intents12 +[INRevenantNoSuchClassForThisHarness sharedCenter]          ABSENT class=INRevenantNoSuchClassForThisHarness
     intents12 +[NSObject new]                                            IMP non-NULL returned NSObject
     intents12 +[INShortcut new]                                          IMP non-NULL returned INShortcut
     intents12 +[INVoiceShortcut new]                                     IMP non-NULL returned INVoiceShortcut
@@ -938,13 +938,13 @@ version of this page had it wrong:
 > classes so its implementations are reached under names of their own"
 
 `prefix_selectors.py` renames **selectors** and not class names (its own comment: "gives one to the
-selectors the port's Charon categories carry"; `IN12_0.m` carries none, so for this file it renames
+selectors the port's Revenant categories carry"; `IN12_0.m` carries none, so for this file it renames
 nothing at all — measured, 0 occurrences of the prefix in its output). The class renaming is `-D`,
 and a `-D` moves the SDK's own declaration of a class along with the port's, because it applies to
 every occurrence in the translation unit. So the host build of `IN12_0.m` answers
 
-    CharonIntents262.h:39: error: duplicate interface definition for class
-        'CharonHostINMessageLinkMetadata'
+    RevenantIntents262.h:39: error: duplicate interface definition for class
+        'RevenantHostINMessageLinkMetadata'
     MacOSX.sdk/…/Intents.framework/Headers/INMessageLinkMetadata.h:14:12: note: previous definition is here
 
 — the port's own header renamed onto the SDK's own header, which is the same name twice. Every one
@@ -1109,7 +1109,7 @@ two things for all six.
 classes itself and why a caller that reaches one of these methods gets the class and not a release's
 own answer:
 
-    $ CHARON_ROOT=$PWD xmake l tools/corpus/cache-census.lua IN 6.1.3 4.3 11.0 12.0
+    $ REVENANT_ROOT=$PWD xmake l tools/corpus/cache-census.lua IN 6.1.3 4.3 11.0 12.0
 
     6.1.3   images 524,  classes 11378,  classes IN* 0,  protocols IN* 0
     4.3     images 354,  classes 7187,   classes IN* 0,  protocols IN* 0
@@ -1171,7 +1171,7 @@ answer that way: it answers the names UIKit draws (see "+[INImage systemImageNam
   rename that does not exist yet.** An earlier version of this bullet said it "needs
   `tests/backports/host/prefix_selectors.py`, which renames the port's classes"; it does not — it
   renames selectors, and the class renaming is `-D`, which moves the SDK's own declaration of a class
-  along with the port's. `CharonIntents262.h` re-declares the classes the port's own SDK lacks and
+  along with the port's. `RevenantIntents262.h` re-declares the classes the port's own SDK lacks and
   the host's has, so a `-D` renames the port's copy and the SDK's copy onto one name and the build
   answers *duplicate interface definition* — measured, with the exact text, in the 12.0 section
   above. Every class of this framework is declared by the macOS SDK, so what the comparison needs is

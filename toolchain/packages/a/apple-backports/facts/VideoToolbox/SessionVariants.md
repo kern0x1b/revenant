@@ -68,7 +68,7 @@ passed per call.
 `VTCompressionOutputCallback`" / "...a `VTDecompressionOutputCallbackRecord`" - so the caller creates the
 session with a NULL callback and passes a block per call. The callback is fixed at
 `VTCompressionSessionCreate` / `VTDecompressionSessionCreate` time. Measured over the release's own symbol
-table, `xmake l tools/corpus/dump-cache.lua $HOME/.charon/dyld/6.1.3/dyld_shared_cache_armv7`, 2026-10-03:
+table, `xmake l tools/corpus/dump-cache.lua $HOME/.revenant/dyld/6.1.3/dyld_shared_cache_armv7`, 2026-10-03:
 
 ```
 _VTCompressionSessionEncodeFrame                     1

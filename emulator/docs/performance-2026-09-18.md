@@ -62,7 +62,7 @@ Two things measured on the way there:
 
 - Share the translated shared cache between processes (1 above): translate UIKit once per machine
   instead of once per process.
-- Snapshot and restore a booted machine. Shade has none (`grep snapshot` finds only perf snapshots),
+- Snapshot and restore a booted machine. The emulator has none (`grep snapshot` finds only perf snapshots),
   so every run pays the whole boot. With one, a test restores in seconds and throws the memory away.
 - Run many tests per boot, and do not boot SpringBoard at all for daemon, library and tweak tests.
 

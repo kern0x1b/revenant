@@ -10,8 +10,8 @@ rows say.
 
 `packages/a/apple-backports/facts/UIKit/cache-hover16.tsv` holds the table. The commands a reader re-runs:
 
-    CHARON_ROOT=<worktree> xmake l tools/corpus/objc-inventory.lua ~/.charon/dyld/6.1.3/dyld_shared_cache_armv7
-    python3 -c "import json,os;print(len(json.load(open(os.path.expanduser('~/.charon/dyld/4.3/classes_armv7.json')))['classes']))"
+    REVENANT_ROOT=<worktree> xmake l tools/corpus/objc-inventory.lua ~/.revenant/dyld/6.1.3/dyld_shared_cache_armv7
+    python3 -c "import json,os;print(len(json.load(open(os.path.expanduser('~/.revenant/dyld/4.3/classes_armv7.json')))['classes']))"
 
 Both rungs are certified in the run that produced the table, because a zero is only a fact about a release when the reader
 is known to work: the 6.1.3 run read 11378 classes and 1171 protocols, 705 of the classes named `UI*`, and answered four

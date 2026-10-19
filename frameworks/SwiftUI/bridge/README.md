@@ -46,8 +46,8 @@
 
 ## Воспроизведение нашей реализацией
 
-`eidolon/Sources/SwiftUI` собран под `arm64-apple-ios14.0` против настоящего SDK
-(`-D REV_SYSTEM_COMBINE` — вместо Styx берётся системный Combine, `-D REV_NO_FIELD_REFLECTION` —
+`SwiftUI/Sources/SwiftUI` собран под `arm64-apple-ios14.0` против настоящего SDK
+(`-D REV_SYSTEM_COMBINE` — вместо Combine берётся системный Combine, `-D REV_NO_FIELD_REFLECTION` —
 на месте `_forEachField`, которого нет в prebuilt stdlib, заглушка; в порте этот SPI есть, потому что
 рантайм собирается из исходников).
 

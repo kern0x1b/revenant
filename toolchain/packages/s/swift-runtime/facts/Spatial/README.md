@@ -10,7 +10,7 @@ scalar.
 
 `swiftc -target armv7-apple-ios6.1.3 -emit-module -emit-object` over the generated sources, with
 the recipe's own flags, against the armv7 standard library built in
-`charon/.agent-work/swift-study/full-ios/rd` (Swift, SwiftOnoneSupport and the supplemental
+`toolchain/.agent-work/swift-study/full-ios/rd` (Swift, SwiftOnoneSupport and the supplemental
 libraries for `armv7-apple-ios`, plus `layouts-armv7.yaml`) and the compiler's own `clang`,
 `apinotes`, `module.modulemap` and the study's `shims`: EXIT 0, `Spatial.swiftmodule` 1262020
 bytes and `Spatial.o` 1121024 bytes written. The recipe's install path itself is not run here: no

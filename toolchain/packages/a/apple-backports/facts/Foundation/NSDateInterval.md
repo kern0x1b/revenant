@@ -49,11 +49,11 @@ is because the text is observable:
 - encoding: `Encoder does not allow keyed coding!`
 - decoding: `NSDateInterval cannot be decoded by non-keyed archivers`
 
-## What Charon does not carry
+## What the toolchain does not carry
 
 Foundation makes `NSDateInterval` a class cluster: `+allocWithZone:` hands back
 a private `_NSConcreteDateInterval` when the class asked is exactly
-`NSDateInterval`. Charon implements the class directly, so `-class` answers
+`NSDateInterval`. The toolchain implements the class directly, so `-class` answers
 `NSDateInterval` where Foundation answers `_NSConcreteDateInterval`. Everything
 reachable through the declared API is the same; only the private class name a
 program has no business reading differs.

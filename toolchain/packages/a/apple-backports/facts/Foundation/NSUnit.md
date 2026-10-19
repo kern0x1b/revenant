@@ -33,5 +33,5 @@ The two texts differ between the directions and are reproduced exactly:
 - encoding: `NSUnit encoder does not allow non-keyed coding!`
 - decoding: `NSUnit cannot be decoded by non-keyed archivers`
 
-The ivar `_symbol` is declared `@private` by the SDK header, so Charon does not
+The ivar `_symbol` is declared `@private` by the SDK header, so the toolchain does not
 declare it again.

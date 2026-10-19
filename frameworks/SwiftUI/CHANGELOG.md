@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ### Added
 
-- A Charon port in `eidolon/` (`xmake.lua`, `control`, `Info.plist`): the demo application, the snapshot bundle and
+- A toolchain port in `SwiftUI/` (`xmake.lua`, `control`, `Info.plist`): the demo application, the snapshot bundle and
   the engine tests as Debian packages, so `xmake emulate` installs them into an emulated iOS 6 image, SpringBoard
   launches the application (`xmake emulate launch`, which reaches `application:didFinishLaunchingWithOptions:`) and
   the tests run as the guest's first process (`xmake emulate run`). The snapshot bundle is the same program built as a
@@ -34,7 +34,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   `allowsTightening`, `autocorrectionDisabled`, `imageScale`, `pixelLength`, `isPresented`, `undoManager`,
   `isScrollEnabled`, `defaultMinListRowHeight` (the list honours it), `headerProminence`, `dynamicTypeSize`, and the
   accessibility settings iOS 6 has (VoiceOver, invert colours) or cannot have (read as off).
-- Combine is now Styx, the fork of OpenCombine that Charon packages as `charon@styx`; the module is named `Combine`.
+- Combine is now Combine, the fork of OpenCombine that toolchain packages as `revenant@combine`; the module is named `Combine`.
 - `Path` is a `Shape`, so `Path { … }.stroke(…)` works; it is a real value type now (a changed copy no longer changes
   the original), takes Apple's `transform:` parameters and has `currentPoint` and `contains`.
 - `Color` is `Hashable` and can be made from a `UIColor` or `CGColor`; `import SwiftUI` brings UIKit, as on iOS.

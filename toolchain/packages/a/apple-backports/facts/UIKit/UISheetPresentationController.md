@@ -61,13 +61,13 @@ Sources:
   `band_plan`), and the files that carry the sheet and the presentation machinery export nothing the release has before
   15.0 or nothing at all, so they are in the bands of 11 to 14 too, where devices without a home button run.
   From 8.0 on `UIPresentationController` is the release's class and `UIPresentationController.m`, which carries the
-  methods the port's engine sends a presentation controller (`-charon_setContainerView:` and the rest), is left out, so
+  methods the port's engine sends a presentation controller (`-revenant_setContainerView:` and the rest), is left out, so
   `UIViewController+TransitionCoordinator.m` does not run its engine there for styles 4 to 6 or for the sheet: it calls
   the release's own present and dismiss. A custom, over-full-screen or over-current-context presentation goes to the
   release with its style and transitioning delegate untouched, and the release makes the application's presentation
   controller and runs its animators. The sheet goes through the same public custom presentation: for the release's
   present call the style is Custom and the transitioning delegate gives the sheet; the animators and the interactive
-  controllers are those of the caller's delegate, and the sheet's `charon_transitionAnimator` where it gives none, as the
+  controllers are those of the caller's delegate, and the sheet's `revenant_transitionAnimator` where it gives none, as the
   engine below 8.0 asks. The style is put back after the call, and the caller's delegate once the sheet is dismissed, or at
   the controller's next presentation when a dismissal the port did not see took it away (its presenter's); until then
   `transitioningDelegate` answers the port's object. The sheet is asked for only when the presentation is one, a page,
@@ -77,9 +77,9 @@ Sources:
   that presents the custom styles as one from 8.0 on does; the host's own sheet class stands in for the port's). The sheet
   lays itself out through the public hooks and `self.containerView`. Not measured on a device: no fleet device or emulator
   runs 8.0 or later; the handover is measured against the host's UIKit only. Two parts have no public
-  counterpart there: touches passing through the container at an undimmed detent (`charon_containerIgnoresDirectTouches`),
+  counterpart there: touches passing through the container at an undimmed detent (`revenant_containerIgnoresDirectTouches`),
   and `presentationController` answering the sheet, which below 8.0 only the port's category makes one object. Before
-  e5522579 the path sent `-charon_setContainerView:` to the release's class and the application died with an unrecognized
+  e5522579 the path sent `-revenant_setContainerView:` to the release's class and the application died with an unrecognized
   selector (the 8.0 to 10.3 bands of canon `0.8.10+8cfbbe9d` carry the path and not the class); e5522579 stopped the crash
   but still ran the engine for an animated custom style with a delegate's animator and gave the release full screen.
   On 7.0 and 7.1 the release carries custom transitions with a transitioning delegate too, and the port's engine still
@@ -87,8 +87,8 @@ Sources:
 - Lifetime (host, `sheet.lifetime`): a controller owns the sheet it was asked for and the sheet does not own it back, so the
   two are freed together, and a sheet kept alone answers nil for `presentedViewController` once its controller is gone; a
   presentation controller the caller made holds both of its controllers. Below 8.0 the port's class does the same: it holds
-  its presented controller until `charon_set_presentation_controller` gives it to that controller
-  (`-charon_ownedByPresentedViewController`), and weakly after, which the popover and the document menu share. From 8.0 on the
+  its presented controller until `revenant_set_presentation_controller` gives it to that controller
+  (`-revenant_ownedByPresentedViewController`), and weakly after, which the popover and the document menu share. From 8.0 on the
   sheet is a subclass of the release's class, whose `initWithPresentedViewController:` holds the controller as the host's
   holds a caller-made one, so a controller asked for its sheet and the sheet hold each other and neither is freed, from the
   moment it is asked until the port drops its own reference at the end of the dismissal: the sheet's
@@ -118,7 +118,7 @@ Sources:
   `largestUndimmedDetentIdentifier` names one; over a parent that stacks, the dimming is confined to the parent's card at
   0.6 of the fraction, plus 0.2 of a grandchild's. Colour: black at 0.2 (0.48 dark; `_alertControllerDimmingViewColor`).
   At or below the largest undimmed detent the dimming view takes no touch and touches reach the presenter
-  (`UITransitionView`'s ignoreDirectTouchEvents; the port's container answers `charon_containerIgnoresDirectTouches`).
+  (`UITransitionView`'s ignoreDirectTouchEvents; the port's container answers `revenant_containerIgnoresDirectTouches`).
 - Keyboard (`-[_UISheetLayoutInfo _activeDetents]` 0x1895ea0e0, `-_handleKeyboardNotification:aboutToHide:`
   0x18938274c): the sheet hears the keyboard's will-show, will-hide and will-change-frame notifications (UIKit's private
   ones; the release posts the public ones with the same frame, duration and curve; a frame change counts only while the
@@ -196,7 +196,7 @@ Sources:
   0x189035fc8 makes the untransformed frame less the hosted one: zero for a sheet not hosting another, and the port has
   no hosting sheet). A real touch was not checked: `revtouch` delivered no touch to the phone-sized application in that
   session, the control tap included.
-- In landscape the container is not rotated, a limitation of the port's presentation (`charon_presentation_run`)
+- In landscape the container is not rotated, a limitation of the port's presentation (`revenant_presentation_run`)
   already.
 - The "magic" shadow is drawn from a reading of what lies under the sheet, not composited by the render server. UIKit
   lays it under a sheet whose parent does not stack with it (presented from a full-screen or a custom presentation, or
@@ -209,9 +209,9 @@ Sources:
   with the lower-intensity matrix (`-_updateShadowVisualStyling` 0x189229340). `tests/backports/host/sheetshadow/run.sh`
   measured on the host that this filter takes its colour from what lies behind the layer: the pixel is
   d + α·a(d)·(clamp(M·d) - d), with M the matrix, a(d) its alpha row and α the image's alpha times the view's. The
-  release has no such filter and no backdrop layer, so the port reads the window under the sheet (`CharonBackdrop`,
+  release has no such filter and no backdrop layer, so the port reads the window under the sheet (`RevenantBackdrop`,
   the blur's reader: the sheet view and everything above it hidden, at the screen scale) and draws that formula into a
-  layer (`CharonSheetShadow.c`). The image's alpha is generated, not shipped: two blurred rounded quadrants fitted to
+  layer (`RevenantSheetShadow.c`). The image's alpha is generated, not shipped: two blurred rounded quadrants fitted to
   the host's image, held to it pixel by pixel by the host test (worst 3/255 at 2x and at 1x against the 2x image's
   2 x 2 means). The host test also holds the port's matrix and cap insets to the host's shadow view and the port's
   pixel to the filter's over four colours; `tests/backports/device/sheet-cases.m` holds one pixel 20 points above a
@@ -221,7 +221,7 @@ Sources:
   has the probe): the read alone took 21 to 33 ms, against 16.7 ms a frame at 60, so a refresh every frame is out of reach.
   The shading of the read took 261 ms for the 620 x 740 region of a 320 x 440 card, 402 ms for 768 x 920 (540 x 620) and 432 ms
   for 768 x 992 (768 x 700) in doubles with a `lround` per channel per pixel, on the main thread (3.8, 2.5 and 2.3 frames a second
-  while it ran). In floats and off the main thread (`org.charon.sheet.shadow`) it takes 108, 162 and 174 ms a reading, 8.1, 5.5 and
+  while it ran). In floats and off the main thread (`org.revenant.sheet.shadow`) it takes 108, 162 and 174 ms a reading, 8.1, 5.5 and
   5.2 readings a second, and the display link keeps 60.0, 54.8 and 55.5 frames a second while the shadow is followed; what is
   left on the main thread is the read (p95 25.5 to 37.6 ms, once per refresh). Not measured on the iPhone 4S (the screen stayed
   locked to `wake`); its 640 x 960 screen reads four times the pixels of the same region on the iPad 2's generation of chip.

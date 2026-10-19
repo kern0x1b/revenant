@@ -59,7 +59,7 @@ The catalogue is collected at run time rather than written out a second time in 
 `UIKit/UTTypeCatalogueIndex.m` holds the index, `UIKit/UTType.m` and the four
 `UIKit/UTTypeCatalogue<BAND>.m` files each hand their own constants to it in their own constructors,
 and the index is a file of its own because it exports no API symbol (both of its functions begin
-`charon_`, which `modules/apple/backports.lua`'s `internal_symbol()` reads as one of Charon's own
+`revenant_`, which `modules/apple/backports.lua`'s `internal_symbol()` reads as one of Revenant's own
 helpers), so no band drops it and leaves the callers without it.
 
 The receiver is not among its own supertypes: `UTTypeConformsTo` answers YES for a type against itself,

@@ -1,7 +1,7 @@
 # WidgetKit value types, measured
 
 What `files/WidgetKit/Values.swift` carries, what it was checked against, and where each value comes
-from. Measured on 2026-10-17 from the `v-impl-appintents` worktree of charon.
+from. Measured on 2026-10-17 from the `v-impl-appintents` worktree of the toolchain.
 
 ## What is carried
 
@@ -103,7 +103,7 @@ the interpolation prints the case name. The probe now prints 26 lines, identical
 
 ## armv7
 
-Toolchain: charon@swift 6.4.0. SDK: iPhoneOS16.4 from the `iphoneos-sdk` 16.4 package. Runtime
+Toolchain: revenant@swift 6.4.0. SDK: iPhoneOS16.4 from the `iphoneos-sdk` 16.4 package. Runtime
 resource: the same run-folder farm as the AuthenticationServices error group, over the installed
 swift-runtime 6.4.0 variant named in the CKError facts.
 

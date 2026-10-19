@@ -32,11 +32,11 @@ object is placed in is a fact about the held caches, and the two are not the sam
 
 | file | what it holds | why |
 | --- | --- | --- |
-| `MPSNNReduce16.m` | `MPSNNReduceUnary`: the walk, the ivars, the `charon_nnReduceWithDevice:` seam, the weight accessors | the base is exported from 16.0 |
+| `MPSNNReduce16.m` | `MPSNNReduceUnary`: the walk, the ivars, the `revenant_nnReduceWithDevice:` seam, the weight accessors | the base is exported from 16.0 |
 | `MPSNNReduce12.m` | the twelve concrete classes, and `MPSNNReduceFeatureChannelsSum`'s `weight` accessors | the twelve are exported from 12.0 |
 
-The seam both files share is declared once, in `CharonMPSReduce.h`, beside the
-`MPSImageReduceUnary` one: a `static` in either file would be a second copy, and a `charon_`
+The seam both files share is declared once, in `RevenantMPSReduce.h`, beside the
+`MPSImageReduceUnary` one: a `static` in either file would be a second copy, and a `revenant_`
 selector reaching the class the SDK declares is the one thing the two can share. All three of the
 differential's mutation sites (`column-start`, `feature-step`, `weight-default`) are in the base, so
 `tests/backports/host/mpsnnreduce/mutation.sh` names `MPSNNReduce16.m`; `anchor_check` there is what
@@ -45,7 +45,7 @@ finds that a site moved rather than that a mutation is wrong.
 ## What decided that this is work and not a missing capability
 
 The release's own cache, read with `tools/corpus/objc-inventory.lua` over
-`$HOME/.charon/dyld/16.0/dyld_shared_cache_arm64e`: **none of the thirteen declares an encode of its
+`$HOME/.revenant/dyld/16.0/dyld_shared_cache_arm64e`: **none of the thirteen declares an encode of its
 own.** `MPSNNReduceRowSum`'s entire instance list is
 
     -destinationImageDescriptorForSourceImages:sourceStates:paddingMethod:sourceOffset:
@@ -67,7 +67,7 @@ The base does not carry the encode, and the twelve concrete classes each impleme
 ## The walk, and what is new in it
 
 `MPSImageReduceUnary16.m` already reduces a **row or a column** of an `MPSImage` over
-`CharonMPSImageReadRegion` / `CharonMPSImageLoad` / `CharonMPSImageWriteRegion`, and its 108 cases
+`RevenantMPSImageReadRegion` / `RevenantMPSImageLoad` / `RevenantMPSImageWriteRegion`, and its 108 cases
 compare with 0 mismatches. This object adds the **third axis** `MPSNNReduce` names and `MPSImageReduce`
 does not — the feature channel — and reuses the same helpers. One loop does all three axes because
 they differ by a stride, not by a loop.
@@ -118,7 +118,7 @@ That second clause is **not** defended by the mutation campaign, and the omissio
 is declared on one class and each kernel is its own object with its own copy of the base's storage, so
 no caller can set a weight and then ask a minimum. A campaign site for it would pass for a reason that
 has nothing to do with the mutation. The scope is held by the object's own comment and by
-`CharonNNReduceReference.h`, where a reader can check it.
+`RevenantNNReduceReference.h`, where a reader can check it.
 
 ## What the measurement is
 
@@ -127,7 +127,7 @@ directory and runs twelve cases plus two refusals over a 3×4×4 float32 source.
 as **classes**, not strings, so the generated rename header reaches the port's own — a string literal
 would reach the release's, which is what the first version of the `mpsimage` reduce case did.
 
-The reference is `CharonNNReduceReference.h`: the header's twelve sentences as arithmetic in plain C,
+The reference is `RevenantNNReduceReference.h`: the header's twelve sentences as arithmetic in plain C,
 taking the source values and the operation as arguments and never naming the port's class, so a case
 that agrees is two implementations of one sentence rather than one compared with itself. It is a NEW
 file and not an addition to `mps-reference.h`, because `MPSNNReduce` is in MPSNeuralNetwork.framework

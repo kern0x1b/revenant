@@ -41,10 +41,10 @@ no setter here at all. So these six are the program's values, and that is why th
 not `inert` — `inert` would promise the symbol loads and nothing applies it, and something does apply
 them: the map template's own guidance card, which reads the road name, the estimates and the lane plates.
 
-The command, verbatim, from this repository's root with `CHARON_ROOT` at the tree:
+The command, verbatim, from this repository's root with `REVENANT_ROOT` at the tree:
 
 ```
-CHARON_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua $HOME/.charon/dyld/18.0/dyld_shared_cache_arm64e
+REVENANT_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua $HOME/.revenant/dyld/18.0/dyld_shared_cache_arm64e
 ```
 
 Two runs, 168686 lines at 16.0 and 221703 at 18.0, both through `coordination/heavy.sh` because a whole
@@ -119,10 +119,10 @@ says no, the framework says yes, and the port follows the framework.
 release, and a category cannot add an ivar.** `CPNavigationSession`'s implementation is
 `CarPlayNavigationSession12.m`. That is why the port already splits: `CarPlayNavigationSession154.m` is a
 category on the same class that keeps nothing of its own and reaches the storage through a
-Charon-prefixed accessor the 12.0 object declares.
+Revenant-prefixed accessor the 12.0 object declares.
 
 So the storage for the six lives with the class's own ivars in `CarPlayNavigationSession12.m` behind
-`charon_` accessors, and `CarPlayNavigationSession174.m` carries only the six 17.4 selectors. Same rule,
+`revenant_` accessors, and `CarPlayNavigationSession174.m` carries only the six 17.4 selectors. Same rule,
 same tree, already proved twice — `CarPlayMapTemplate12.m` and `CarPlayGridButton26.m` on the sibling
 series `band-carplay12-1` are the other two instances of it.
 
@@ -130,16 +130,16 @@ The 12.0 object's storage accessors, each answering one header sentence:
 
 | accessor | the header it answers |
 | --- | --- |
-| `charon_addManeuvers:` | `:83-86` chronological order, "as soon as they are available" |
-| `charon_addLaneGuidances:` | `:90-91` the same, for lane guidance |
-| `charon_setCurrentLaneGuidance:` | `:78` "Must be set to nil if there is no current lane guidance" |
-| `charon_setCurrentRoadNameVariants:` | `:96-97` `copy`, "From most to least verbose" |
-| `charon_setManeuverState:` | `:101-102` the state, by how close the maneuver is |
-| `charon_resumeWithRouteInformation:` | `:54-57` resume on the updated route information |
+| `revenant_addManeuvers:` | `:83-86` chronological order, "as soon as they are available" |
+| `revenant_addLaneGuidances:` | `:90-91` the same, for lane guidance |
+| `revenant_setCurrentLaneGuidance:` | `:78` "Must be set to nil if there is no current lane guidance" |
+| `revenant_setCurrentRoadNameVariants:` | `:96-97` `copy`, "From most to least verbose" |
+| `revenant_setManeuverState:` | `:101-102` the state, by how close the maneuver is |
+| `revenant_resumeWithRouteInformation:` | `:54-57` resume on the updated route information |
 
 `CPLane` is the same problem one release further on: `CPLane.h` is two releases in one header (17.4 at
 `:22-48`, 18.0 at `:26-27`, `:43` and `:53`), so it is `CarPlayLane174.m` for the 17.4 half and
-`CarPlayLane18.m` for the 18.0 half, sharing the storage through `CharonCarPlayLane.h`. What the 18.0 half
+`CarPlayLane18.m` for the 18.0 half, sharing the storage through `RevenantCarPlayLane.h`. What the 18.0 half
 IS is in the header's own deprecation text — `CPLane.h:33` "Use -[CPLane initWithAngles:] to create a
 CPLane with CPLaneStatusNotGood, use -[CPLane initAngles:highlightedAngle:isPreferred:] to create a
 CPLane with status CPLaneStatusGood or CPLaneStatusPreferred" — so the 18.0 API replaces the 17.4 way of
@@ -169,7 +169,7 @@ The proof that each object holds one release, from the IMPs rather than from the
 ```
 CarPlayNavigationSession12.o   trip upcomingManeuvers pauseTripForReason:description:
                                updateTravelEstimates:forManeuver: finishTrip cancelTrip
-                               + the eleven charon_ accessors, and NO 17.4 selector
+                               + the eleven revenant_ accessors, and NO 17.4 selector
 CarPlayNavigationSession174.o  addManeuvers: addLaneGuidances: setCurrentLaneGuidance:
                                setCurrentRoadNameVariants: setManeuverState:
                                resumeTripWithUpdatedRouteInformation:

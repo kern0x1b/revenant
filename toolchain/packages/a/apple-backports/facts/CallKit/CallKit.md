@@ -16,7 +16,7 @@ Nothing. `callservicesd` arrived with CallKit, and iOS 6 runs no daemon that hol
 transaction from one. There is also no way to write one that another application would find: the port installs libraries into processes, not services into
 the system.
 
-So the broker is per process. `CharonCallBroker` is the one place in an application that knows which calls exist, and the provider, the call controller and
+So the broker is per process. `RevenantCallBroker` is the one place in an application that knows which calls exist, and the provider, the call controller and
 the call observer of that application meet there. An application sees its own calls and no others, which is what a single application using CallKit for its
 own VoIP calls - the case the ports have - sees anyway. Two applications do not see each other's calls, and that is the one place the port cannot follow the
 release. The cellular calls of the release are the one thing that does cross the boundary, and they come in through `CTCallCenter`.
@@ -122,7 +122,7 @@ own push daemon, ties every device token to a nonzero `UIRemoteNotificationType`
 against real hardware in `facts/PushKit/PushKit.md` - so a `PKPushRegistry` set up the way PushKit is meant to be used, with no prior
 `-registerUserNotificationSettings:` call, never receives a token at all. And even with a token, `apsd` on this release never wakes a suspended or
 not-running application for any push, VoIP included. Both are Apple's own service on this device, not something the release "didn't have yet" - which
-is why cellular incoming calls are still fully reported, through `CharonCallTelephony.m`'s `CTCallCenter` observation instead of a push.
+is why cellular incoming calls are still fully reported, through `RevenantCallTelephony.m`'s `CTCallCenter` observation instead of a push.
 
 What the release does with a cellular call beyond the four states is out of reach: `CTCallCenter` gives no direction for a connected call, no hold state and
 no handle, so a cellular call of the port has `onHold` NO and an update of nothing. CoreTelephony of iOS 6 does export `CTCallDial`, `CTCallAnswer`,
@@ -144,12 +144,12 @@ the iOS 10 header has no property for - and there is nothing to be gained from f
 The screen an incoming call is shown on belongs to SpringBoard, which no library loaded into an application can draw in, so what the library carries is one
 side of a bridge and the screen itself is a tweak's business. The two sides speak in Darwin notifications and a file, because that is what crosses the
 boundary on this release: a notification reaches every process whatever its sandbox and carries nothing, and a file carries the call but only where both
-sides may reach it - `/var/mobile/Library/Caches/org.charon.callkit`, made by whichever side runs first and writable by everyone, since an application and
+sides may reach it - `/var/mobile/Library/Caches/org.revenant.callkit`, made by whichever side runs first and writable by everyone, since an application and
 SpringBoard are not the same user and share no group.
 
 A provider reporting an incoming call writes the UUID, the caller's name, the handle and its type, whether there is video, the application's bundle
-identifier and the configured ringtone, and posts `org.charon.callkit.incoming`. What the person does on the screen comes back as
-`org.charon.callkit.answered` or `org.charon.callkit.declined` with the UUID in a file beside it, and the library turns it into an ordinary
+identifier and the configured ringtone, and posts `org.revenant.callkit.incoming`. What the person does on the screen comes back as
+`org.revenant.callkit.answered` or `org.revenant.callkit.declined` with the UUID in a file beside it, and the library turns it into an ordinary
 `CXAnswerCallAction` or `CXEndCallAction` run through the provider - so the delegate is called exactly as it is when the application answers from its own
 interface, and there is one path through the state machine instead of two. The screen is taken down when the call is answered, since from there on it is
 the application's own interface, and when the call ends.
@@ -158,13 +158,13 @@ Without that tweak none of this is heard: the library writes a file nobody reads
 work exactly as they do with no screen. Nothing on this path can refuse, raise or fail a call. The behaviour does not degrade when the tweak is missing -
 it simply does not happen, the way a device without the hardware a feature needs answers "unavailable" rather than pretending.
 
-The tweak, `org.charon.callkit-screen` (`packages/a/apple-callkit-screen`), carries the other side: a MobileSubstrate dylib filtered to
-`com.apple.springboard`, built by Charon's own tweak rule (`@addon/charon/tweak`) the way any port builds one, proven for real by
+The tweak, `org.revenant.callkit-screen` (`packages/a/apple-callkit-screen`), carries the other side: a MobileSubstrate dylib filtered to
+`com.apple.springboard`, built by Revenant's own tweak rule (`@addon/revenant/tweak`) the way any port builds one, proven for real by
 `tests/addon/tweak_test.lua` (the rule itself, against a device test already held to a running iPhone 4S) and `tests/addon/callkit_screen_test.lua`
-(this package, built and installed - `Library/MobileSubstrate/DynamicLibraries/charon-callkit-screen.dylib` and its filter plist land where the rule
-promises). It listens for `org.charon.callkit.incoming`, reads the payload, raises a window above SpringBoard's own with the caller's name and handle and
+(this package, built and installed - `Library/MobileSubstrate/DynamicLibraries/revenant-callkit-screen.dylib` and its filter plist land where the rule
+promises). It listens for `org.revenant.callkit.incoming`, reads the payload, raises a window above SpringBoard's own with the caller's name and handle and
 an answer and a decline button, and on a tap writes `answered` or `declined` and posts back, exactly the protocol the library already speaks; it takes the
-window down on `org.charon.callkit.ended` too, for a call the application ended for a reason of its own.
+window down on `org.revenant.callkit.ended` too, for a call the application ended for a reason of its own.
 
 What that proves and what it does not: the dylib links, is signed and packaged, and the build gate holds it to the same Mach-O checks every other binary in
 this tree answers to. It does **not** prove that a window drawn this way actually appears above SpringBoard's own interface, or that
@@ -174,8 +174,8 @@ incoming call from a command-line process and waits for a tap on the screen - lo
 turn into `performAnswerCallAction:` or `performEndCallAction:` on its own delegate. Until it has run on hardware, the screen is not declared working under
 any description weaker than that.
 
-Measured on hardware 2026-09-22 (iPhone 4S, 6.1.3): `dpkg -i` of `org.charon.callkit-screen` installs cleanly (`dpkg-query` confirms
-`install ok installed`, the dylib and filter plist land where the rule promises). Posting `org.charon.callkit.incoming` with the payload the library
+Measured on hardware 2026-09-22 (iPhone 4S, 6.1.3): `dpkg -i` of `org.revenant.callkit-screen` installs cleanly (`dpkg-query` confirms
+`install ok installed`, the dylib and filter plist land where the rule promises). Posting `org.revenant.callkit.incoming` with the payload the library
 writes reaches the folder and the notification is posted without error - but **no window appeared over SpringBoard**. This is not a crash: SpringBoard's
 PID was the same before and after the install and after the poke, and its crash log carries nothing from this run - silence, not a fault. The likely
 cause is architectural, not a bug in this package: `/Library/MobileSubstrate/MobileSubstrate.dylib` here resolves to
@@ -184,20 +184,20 @@ process's own launch, not retroactively into one already running - SpringBoard w
 respring picks a freshly-installed filter up.
 
 Measured again 2026-09-23, same iPhone 4S, with the owner's sign-off to respring: the tweak's constructor now writes its own pid to
-`/var/mobile/Library/Caches/org.charon.callkit/loaded` and posts `org.charon.callkit.screen-loaded`, so "did SpringBoard load this dylib" is a direct
+`/var/mobile/Library/Caches/org.revenant.callkit/loaded` and posts `org.revenant.callkit.screen-loaded`, so "did SpringBoard load this dylib" is a direct
 read instead of a guess from the window - there is still no `vmmap`/`otool` on this device to ask any other way. `launchctl stop
 com.apple.SpringBoard` (and, on a retry, `killall -9 SpringBoard`) changed the PID `launchctl list` reports (3565 -> 11711 across one respring, then
 11711 -> 12529 across a second one taken purely to pair a fresh before/after inside a single measurement), and each time the marker file's pid matched
-the new SpringBoard PID exactly. **The window appears.** Posting `org.charon.callkit.incoming` right after immediately raised the dimmed overlay with
+the new SpringBoard PID exactly. **The window appears.** Posting `org.revenant.callkit.incoming` right after immediately raised the dimmed overlay with
 the caller labels and the two round buttons, confirmed on a screenshot taken and deleted immediately after each check. A tap on Decline (80,390) and,
 on the next call, a tap on Answer (240,390), each written to `answered`/`declined` and dismissed the window as the tweak's `-respond:` promises.
 
-That much is the tweak's own file-and-notification protocol, driven by the `charon-callkit-poke` probe rather than a real `CXProvider` - the stronger
-proof is `tests/backports/device/callkit-screen.m` itself, built through the real toolchain (`@addon/charon/daemon`, `apple-backports` with
+That much is the tweak's own file-and-notification protocol, driven by the `revenant-callkit-poke` probe rather than a real `CXProvider` - the stronger
+proof is `tests/backports/device/callkit-screen.m` itself, built through the real toolchain (`@addon/revenant/daemon`, `apple-backports` with
 `callkit=true`) and run on the same device against the already-installed canon (`0.8.10+0f900eff` - the canon was not rebuilt or touched for this).
 It reports its own incoming call through a real `CXProvider`, waits on a tap at the coordinates it logs, and turns what arrives into
-`performAnswerCallAction:` or `performEndCallAction:` on its own delegate. Both cases ran: `charon-callkit-touch tap 80 390` turned into
-`performEndCallAction:`, and `charon-callkit-touch tap 240 390` on the next call turned into `performAnswerCallAction:` - `checks=7 failures=0`. The
+`performAnswerCallAction:` or `performEndCallAction:` on its own delegate. Both cases ran: `revenant-callkit-touch tap 80 390` turned into
+`performEndCallAction:`, and `revenant-callkit-touch tap 240 390` on the next call turned into `performAnswerCallAction:` - `checks=7 failures=0`. The
 screen is proven end to end: build, package, install, SpringBoard load, the window, and both directions of the tap round-trip through a real
 `CXAnswerCallAction`/`CXEndCallAction`. The one caveat that remains structural, not a gap in this measurement: MobileSubstrate here only picks up a
 freshly-installed or freshly-updated filtered dylib at SpringBoard's own next respring, never retroactively - anyone installing or updating this

@@ -1,7 +1,7 @@
 # AuthenticationServices error structs, measured
 
 What `files/AuthenticationServices/Errors.swift` carries, what it was checked against, and where it
-differs from the host. Measured on 2026-10-17 from the `v-impl-appintents` worktree of charon, with
+differs from the host. Measured on 2026-10-17 from the `v-impl-appintents` worktree of the toolchain, with
 the commands named below.
 
 ## What is carried
@@ -28,7 +28,7 @@ below confirms the host answers the same way: `CustomNSError`, `Hashable`, `Erro
 ## Domains and codes
 
 - Domains: `com.apple.AuthenticationServices.AuthorizationError` (`ASAuthorizationErrorDomain`,
-  charon@apple-backports `AuthenticationServices/ASConstants13_0.m`),
+  revenant@apple-backports `AuthenticationServices/ASConstants13_0.m`),
   `ASCredentialIdentityStoreErrorDomain` and `ASExtensionErrorDomain` (`ASConstants12_0.m`),
   `com.apple.AuthenticationServices.WebAuthenticationSession` (`ASWebAuthenticationSession.m`).
   The host reads the same four strings (below).
@@ -86,7 +86,7 @@ built and diffed against the host output. The diff reports both lines that print
 
 ## armv7
 
-Toolchain: charon@swift 6.4.0 (`swiftc` under its package folder, Apple Swift version 6.4). SDK:
+Toolchain: revenant@swift 6.4.0 (`swiftc` under its package folder, Apple Swift version 6.4). SDK:
 iPhoneOS16.4 from the `iphoneos-sdk` 16.4 package, folder `081db8db...`. Runtime resource: a run-folder
 symlink farm over the installed swift-runtime 6.4.0 `lib/swift` (variant `1b938f...`, the one whose
 `share/lift/vfs.yaml` the CKError facts name), with `iphoneos/layouts-armv7.yaml` copied from the

@@ -59,7 +59,7 @@ never needs the newer class. With it, `first-rung.lua` reads `CLRegion` at 4.0,
 `locationManager:didEnterRegion:` and `locationManager:didExitRegion:` at 4.0 -
 the two callbacks the trigger's sentence above needs.
 
-`$HOME/.charon/dyld/6.1.3/selectors_armv7.txt`, the selector set of the armv7
+`$HOME/.revenant/dyld/6.1.3/selectors_armv7.txt`, the selector set of the armv7
 cache of 6.1.3, carries each of them - `initCircularRegionWithCenter:radius:identifier:`,
 `containsCoordinate:`, `maximumRegionMonitoringDistance`, `authorizationStatus`,
 `locationServicesEnabled`, `locationServicesApproved`, `monitoredRegions`,
@@ -72,7 +72,7 @@ The class-scoped reading of the low band end, which is a dump of 7187 classes in
 the armv7 cache of iPhone OS 4.3:
 
 ```
-$ python3 -c "import json; c=json.load(open('$HOME/.charon/dyld/4.3/classes_armv7.json'))['classes']; \
+$ python3 -c "import json; c=json.load(open('$HOME/.revenant/dyld/4.3/classes_armv7.json'))['classes']; \
     [print(k, c[k]['instance'] if k in c else 'ABSENT') for k in \
      ('CLRegion','CLLocationManager','CLCircularRegion','CLBeaconRegion')]"
 CLRegion             center, clientRegion, containsCoordinate:, copyWithZone:, dealloc, description,
@@ -138,7 +138,7 @@ UNLocationNotificationTrigger10.o  _OBJC_CLASS_$_UNLocationNotificationTrigger  
 UNLocationNotificationTrigger10.o  _OBJC_METACLASS_$_UNLocationNotificationTrigger 10.0.1
 ```
 
-The helper classes in that object are named `Charon*`, which is what
+The helper classes in that object are named `Revenant*`, which is what
 `internal_symbol()` and `release-split`'s own exclusion list treat as internal, so
 the object's only API is the trigger - and that is the whole API of iOS 10.0 this
 slice owns.

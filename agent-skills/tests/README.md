@@ -21,21 +21,21 @@ tests/run.sh [--runtime claude] [--hours N] list timer …   # or: all
 
 For each scenario `run.sh`:
 
-1. makes a scratch directory under `$HOME/.cache/hades/psychopomp/`, outside any repository, and in it a fresh
+1. makes a scratch directory under `$HOME/.revenant/cache/agent-skills/`, outside any repository, and in it a fresh
    `HOME`;
-2. clones hades at `HEAD` (the tree must be committed) and installs the plugin into that `HOME`
+2. clones revenant at `HEAD` (the tree must be committed) and installs the plugin into that `HOME`
    with the runtime's own commands: for Claude Code `claude plugin marketplace add <clone>` and
-   `claude plugin install psychopomp@hades`;
+   `claude plugin install agent-skills@revenant`;
 3. copies the scenario's `answers.md` into an empty project directory and runs the agent there,
    headless, on `request.md`;
 4. runs `check.sh` and copies the evidence (transcript, check, project without build products,
-   `.deb`s) to `$HOME/.cache/hades/psychopomp/<run>/<id>/`.
+   `.deb`s) to `$HOME/.revenant/cache/agent-skills/<run>/<id>/`.
 
 Shared on purpose, not isolated: the xmake package store (`XMAKE_GLOBALDIR` is the real home, so
-nothing is rebuilt into a private store) and Charon's firmware, caches and emulator images
-(`CHARON_HOME`). A guard in front of `xmake` refuses `--force` and `xmake emulate clean`.
+nothing is rebuilt into a private store) and Revenant's firmware, caches and emulator images
+(`REVENANT_HOME`). A guard in front of `xmake` refuses `--force` and `xmake emulate clean`.
 
-`run.sh` refuses to start unless `PSYCHOPOMP_ISOLATION_APPROVED=1` is set (the isolation is
+`run.sh` refuses to start unless `REVENANT_AGENT_SKILLS_ISOLATION_APPROVED=1` is set (the isolation is
 approved; the variable keeps an accidental run from starting it).
 
 Login. On macOS the agent's login lives in the login keychain, and a fresh `HOME` is not logged in
@@ -60,7 +60,7 @@ lifetime minus 15 minutes, so the copy never has to refresh the login.
 - an app `.deb` for `iphoneos-arm` carrying the bundle under `/Applications`;
 - no login credentials in the copied evidence.
 
-Until Charon can launch an app through SpringBoard in the emulator, the emulator line proves that
+Until the toolchain can launch an app through SpringBoard in the emulator, the emulator line proves that
 the image booted with the app installed and the checked command passed, not that the app's screen
 worked. The check will be tightened when that lands.
 

@@ -1,18 +1,18 @@
 ---
 name: swift
-description: Write the app's Swift for old iOS with Charon — choosing with the user between the whole Swift runtime the program carries and Embedded Swift (what each gives, and that at the 0.8.10 pin xmake deb refuses a carried runtime), availability (#available, the SDK's marks against what the release really has, the release's classes file), UIKit from Swift, @objc and NSObject for Objective-C, the backports config and apple-compat from Swift, GCD and classes of service (DispatchQueue.global(qos:), barriers, work items) below iOS 8, and what to tell the user when the package is refused. Use at the code step when PROJECT.md says Swift, when a Swift build warns about weak imports or selectors, when xmake deb refuses the Swift runtime's libraries, or when the user asks whether their app can be written in Swift for an old release.
+description: Write the app's Swift for old iOS with the toolchain — choosing with the user between the whole Swift runtime the program carries and Embedded Swift (what each gives, and that at the 0.8.10 pin xmake deb refuses a carried runtime), availability (#available, the SDK's marks against what the release really has, the release's classes file), UIKit from Swift, @objc and NSObject for Objective-C, the backports config and apple-compat from Swift, GCD and classes of service (DispatchQueue.global(qos:), barriers, work items) below iOS 8, and what to tell the user when the package is refused. Use at the code step when PROJECT.md says Swift, when a Swift build warns about weak imports or selectors, when xmake deb refuses the Swift runtime's libraries, or when the user asks whether their app can be written in Swift for an old release.
 ---
 
 # Swift for old iOS
 
 You write the app's Swift yourself, from the decisions in `PROJECT.md`, against the releases it
-names. Charon compiles it with its own `swiftc` (Swift 6.4) and the iOS 16.4 SDK, and the program
+names. The toolchain compiles it with its own `swiftc` (Swift 6.4) and the iOS 16.4 SDK, and the program
 brings the Swift runtime with it, because no old iOS ships one. How `xmake.lua` is wired for that
 (the rule, the packages, carried or shared, the bridging header, the module map) is the skill
 `xmake-swift`; do not repeat it here. The Objective-C side of a mixed app is the skill `objc`,
 reading the build is the skill `build`, packaging is the skill `package`.
 
-Everything below holds at the pin `v0.8.10` / `charon-repo-0.8.10`. What was measured there says
+Everything below holds at the pin `v0.8.10` / `revenant-repo-0.8.10`. What was measured there says
 so; the rest is read from the addon, the recipes or the README at the pin.
 
 Read `PROJECT.md` first: the language, `apple_minimum`, the releases to check, the kind of target,
@@ -23,19 +23,19 @@ the backports.
 Ask before you write any Swift, tell the user what each choice costs, and record the answer in
 `PROJECT.md`. From the README (`v0.8.10:README.md:489-537`):
 
-| | Whole runtime (`charon@swift-runtime` + `charon@libcxx`) | Embedded Swift (`charon@swift-embedded`) |
+| | Whole runtime (`revenant@swift-runtime` + `revenant@libcxx`) | Embedded Swift (`revenant@swift-embedded`) |
 | --- | --- | --- |
 | Language | all of Swift 6.4: classes, generics, `Codable`, reflection, `async`/`await`, regular expressions, Observation | classes, structures, protocols, generics, closures, `any`, `throws`, arrays, dictionaries, strings; no `Mirror`, no `Codable`, no `async` |
 | Objective-C and UIKit | yes: the overlays of ObjectiveC, Dispatch, CoreFoundation, CoreGraphics, Foundation (from swift-5.4.3), QuartzCore, UIKit, CoreData (from swift-5.2.5) | none: no Objective-C interoperation; C calls Swift through `@_cdecl` functions |
 | What the program carries | the runtime's `libswift*.dylib` and `libc++` (an app: in `<Name>.app/Frameworks/`) | nothing: the result loads only libSystem |
-| Checked at the pin | built for armv7 at 6.0 (measured, `build ok`); no release named in the README where it was run. Run only with the package check waived on a scratch stand (`charon.waive.weak-imports`, §7), which an app must not do: a Combine daemon on an emulated iPhone 4S, iOS 6.1.3 (`pass on iPhone4,1 6.1.3`) | armv7 and armv7s at 6.0, arm64 at 7.0, against the devices' libraries (`swift_test`); older releases not checked. Measured: a daemon whose C `main` calls a `@_cdecl` function built for armv7 at 6.0 and ran on an emulated iPhone 4S, iOS 6.1.3 (`pass on iPhone4,1 6.1.3`) |
+| Checked at the pin | built for armv7 at 6.0 (measured, `build ok`); no release named in the README where it was run. Run only with the package check waived on a scratch stand (`revenant.waive.weak-imports`, §7), which an app must not do: a Combine daemon on an emulated iPhone 4S, iOS 6.1.3 (`pass on iPhone4,1 6.1.3`) | armv7 and armv7s at 6.0, arm64 at 7.0, against the devices' libraries (`swift_test`); older releases not checked. Measured: a daemon whose C `main` calls a `@_cdecl` function built for armv7 at 6.0 and ran on an emulated iPhone 4S, iOS 6.1.3 (`pass on iPhone4,1 6.1.3`) |
 | `xmake deb` at the pin | **refused** (§7, measured) | passes (measured: `deb build/<package>_<version>_iphoneos-arm.deb`) |
 
 An app with a Swift interface needs the whole runtime, and at this pin its package is refused.
 Say so before the user decides. The honest choices are:
 
 1. the whole runtime, knowing that `xmake deb` refuses it at this pin (§7): it builds and the code
-   can be written now, but it does not reach a device as a package until Charon passes it;
+   can be written now, but it does not reach a device as a package until the toolchain passes it;
 2. the interface in Objective-C (skill `objc`) and the logic in Embedded Swift, which the
    Objective-C calls through `@_cdecl` functions (C calling Embedded Swift was built and run at the pin; an Objective-C app with it was not);
 3. the whole app in Objective-C (skill `objc`).
@@ -50,7 +50,7 @@ the refusal under `## Limits`.
 
 Three different things decide whether a line may run on `apple_minimum`:
 
-- **The language and its standard library** are the program's own. Charon's compiler takes
+- **The language and its standard library** are the program's own. Revenant's compiler takes
   `-bundled-swift-runtime`, so every feature of Swift 6.4 is available at any deployment target,
   and the runtime's availability macros are rewritten to `*` (`README.md:502-506,536-537`). Do not
   put `#available` around `async`, a regular expression or `Observation`: the compiler asks for
@@ -85,7 +85,7 @@ its refusals, next to the runtime's own libraries (§7). The Objective-C `@avail
 release on iOS 6.1.3 in the emulator (skill `objc` §4), and so did Swift's, measured in Embedded
 Swift on an emulated iPhone 4S, iOS 6.1.3: `#available(iOS 7.0, *)` answered false. Under the whole
 runtime its program does not pass `xmake deb` (§7). Run only with the package check waived on a
-scratch stand (`charon.waive.weak-imports`, §7), which an app must not do, on the same emulated
+scratch stand (`revenant.waive.weak-imports`, §7), which an app must not do, on the same emulated
 6.1.3, `#available(iOS 7.0, *)` answered false and `#available(iOS 6.1, *)` true.
 
 Never pass `-Xfrontend -disable-availability-checking` through `swift.flags` to get a newer API
@@ -114,10 +114,10 @@ is the entry point: skill `xmake-swift` §2). `@main` and `@UIApplicationMain` w
 the pin; use the measured form.
 
 - The interface follows the skill `objc` §5 in every point: the release's own controls, built in
-  code (Charon's app rule compiles no nib or storyboard), frames and `autoresizingMask`, Auto
+  code (Revenant's app rule compiles no nib or storyboard), frames and `autoresizingMask`, Auto
   Layout only from 6.0, both rotation methods below 6.0.
 - UIKit's overlay is swift-5.2.5's (`README.md:569-573`). Its Swift conveniences keep the SDK's
-  marks, and Charon adds marks where that overlay reached a later release (`charon-repo-0.8.10:
+  marks, and the toolchain adds marks where that overlay reached a later release (`revenant-repo-0.8.10:
   packages/s/swift-runtime/patches/uikit/`). Treat an overlay member like any UIKit API (§2).
 
 How to know it worked: the build as in §2 ends with `build ok`, and `ls build/iphoneos/armv7/
@@ -144,7 +144,7 @@ How to know it worked: the build (`-v`, §2) compiles the `.m` file that include
 
 ## 5. Backports and apple-compat from Swift
 
-**Backports.** Swift reaches what `charon@apple-backports` implements only through the runtime's
+**Backports.** Swift reaches what `revenant@apple-backports` implements only through the runtime's
 `backports` config (`README.md:575-596`). With it, `modules/apple/lift.lua` lowers, in copies of
 the SDK's headers, the release of every API the backports implement to the program's release,
 and the rule hands those headers to your Swift (`v0.8.10:rules/swift/xmake.lua:69-92`). What it
@@ -152,12 +152,12 @@ does not lower: below an entry's own minimum, and anything the registry calls ab
 ignored; those keep their `#available`. Which API to take and its status is the skill `backports`.
 
 The requires, from the rule and the recipe at the pin (`rules/swift/xmake.lua:75,88`,
-`charon-repo-0.8.10:packages/s/swift-runtime/xmake.lua:81-105`):
+`revenant-repo-0.8.10:packages/s/swift-runtime/xmake.lua:81-105`):
 
-- `add_requires("charon@swift-runtime", {alias = "swift-runtime", configs = {backports = true}})`;
+- `add_requires("revenant@swift-runtime", {alias = "swift-runtime", configs = {backports = true}})`;
   an application may add `backports_uikit = true`, which links UIKit's overlay against
   libUIKitBackports (`backports_uikit` without `backports` is refused);
-- `add_requires("charon@apple-backports", {alias = "apple-backports", configs = {coredata = true}})`,
+- `add_requires("revenant@apple-backports", {alias = "apple-backports", configs = {coredata = true}})`,
   with `uikit = true` when the runtime has `backports_uikit` (and whatever the skill `backports`
   asks for the API you call), and `add_packages("apple-backports")` in the target.
 
@@ -172,7 +172,7 @@ How to know it worked (by the README, not yet measured): a call to an API the ba
 compiles without `#available` at `apple_minimum`; one they do not implement is still refused by the
 compiler until you guard it.
 
-**apple-compat.** The runtime already takes from `charon@apple-compat` what it calls and the
+**apple-compat.** The runtime already takes from `revenant@apple-compat` what it calls and the
 release lacks (`clock_gettime`, `clock_getres`, `dispatch_get_global_queue`, `memset_s`,
 `objc_allocWithZone`, the `dispatch_block_*` family, `os_unfair_lock_*`, …; `README.md:526-529,
 605-617`). Swift that reaches those calls through the runtime and its overlays (`DispatchQueue`,
@@ -190,8 +190,8 @@ A class of service is iOS 8; before it, `dispatch_get_global_queue` answers a cl
 (below):
 
 - `DispatchQueue.global(qos:)` and the `DispatchQoS` constants are made available below iOS 8 by
-  Charon's patch to the Dispatch overlay, and the global queue of a class is the queue of the
-  priority it stands for (`charon-repo-0.8.10:packages/s/swift-runtime/patches/overlays/
+  Revenant's patch to the Dispatch overlay, and the global queue of a class is the queue of the
+  priority it stands for (`revenant-repo-0.8.10:packages/s/swift-runtime/patches/overlays/
   the-overlay-of-dispatch-asks-a-release-before-8-for-the-queues-it-has.patch`). Use it; do not
   hand a raw `QOS_CLASS_…` to a C call.
 - `queue.async(qos:flags:…)` with a class, with flags other than `.barrier` alone, or with a group,
@@ -205,13 +205,13 @@ A class of service is iOS 8; before it, `dispatch_get_global_queue` answers a cl
   accepted and change nothing, as a release before iOS 8 has no classes of service. `.barrier` is
   not honoured either: the item runs as an ordinary block (`README.md:619-625`, which gives the
   reason that the release's `dispatch_async` cannot read a block's flags). That part is a limit of
-  apple-compat at `v0.8.10`, not of the release, which has `dispatch_barrier_async`; Charon is the
+  apple-compat at `v0.8.10`, not of the release, which has `dispatch_barrier_async`; the toolchain is the
   one to lift it. Until it does, for exclusive access use a serial queue, or
   `async(flags: .barrier)` alone.
 - `DispatchQueue.main.sync` from the main thread deadlocks on every release (the SDK's `queue.h`).
 
 How to know it worked: only a run shows it, and at the pin a Swift program that carries the runtime
-runs only with the package check waived on a scratch stand (`charon.waive.weak-imports`, §7),
+runs only with the package check waived on a scratch stand (`revenant.waive.weak-imports`, §7),
 which an app must not do. There, on an emulated iPhone 4S, iOS 6.1.3,
 `DispatchQueue.global(qos: .userInitiated).label` answered `com.apple.root.high-priority`. The
 `async(qos:flags:)` and `DispatchWorkItem` items above were not run.
@@ -224,12 +224,12 @@ and `xmake deb -y -v > .logs/deb.log 2>&1` stops with
 `error: these imports are not exported by the device's iOS:` and one line per library of the
 runtime (`Frameworks/libswiftCore.dylib  weakly imports 9 symbols …`, `libswiftDispatch` 11,
 `libswiftFoundation` 52, …), then the program's own line if its code uses `#available` (§2) or links
-a static library with a weak import of its own: with Styx (skill `combine`) that line names
+a static library with a weak import of its own: with Combine (skill `combine`) that line names
 `_CFRunLoopTimerSetTolerance`. The import
 check holds every binary the bundle carries to the app's rule, and exempts only the libraries of a
 package the program depends on (skill `xmake-swift` §4). A daemon carries the same libraries in
-`/usr/lib/charon/<Package>/` and is refused the same way (measured:
-`usr/lib/charon/<Package>/libswiftCore.dylib  weakly imports 9 symbols …`); a tweak was not run.
+`/usr/lib/revenant/<Package>/` and is refused the same way (measured:
+`usr/lib/revenant/<Package>/libswiftCore.dylib  weakly imports 9 symbols …`); a tweak was not run.
 
 What follows:
 
@@ -237,14 +237,14 @@ What follows:
   `error: these imports are not exported by the device's iOS:` (measured on the Combine daemon), so
   the program is not installed into the emulator either. It was run only with the check waived on a
   scratch stand, to measure the lines in §2, §6 and the skill `combine`; that is not a path for an app.
-- Do not write `charon.waive.weak-imports` to get it through: it states that every use is guarded,
+- Do not write `revenant.waive.weak-imports` to get it through: it states that every use is guarded,
   which you have not read in the runtime, and it hides your own later weak imports (skill `objc` §4).
 - The shared runtime was not built at the pin; whether its program passes is not known (skill
   `xmake-swift` §4). Do not offer it as the fix.
 
-Tell the user, in these terms: "The Swift runtime Charon builds for iOS <release> is refused by its
+Tell the user, in these terms: "The Swift runtime the toolchain builds for iOS <release> is refused by its
 own package check at this version: its libraries weakly import symbols iOS <release> lacks.
-The app builds, but it cannot be packaged, installed or run until Charon passes it. We can keep
+The app builds, but it cannot be packaged, installed or run until the toolchain passes it. We can keep
 Swift and wait, move the interface to Objective-C with the logic in Embedded Swift, or write it all
 in Objective-C." Record the answer and the refusal under `## Limits` in `PROJECT.md`.
 

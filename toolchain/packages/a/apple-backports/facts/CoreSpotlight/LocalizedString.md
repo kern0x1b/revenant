@@ -91,7 +91,7 @@ An earlier draft had a third step, the same call with `en_US` appended. It was m
 it is not in the port.
 
 The matcher answers nothing when it has no localization, and then it returns its first element. So each call puts a probe
-(`charon.no-match`, which is not a language) first in the keys: an answer equal to the probe means the matcher answered
+(`revenant.no-match`, which is not a language) first in the keys: an answer equal to the probe means the matcher answered
 nothing. The probe is not a key, so it cannot win.
 
 The matcher is the release's own call, `NSBundle`'s. The claim that on the device the release's own matcher decides the first

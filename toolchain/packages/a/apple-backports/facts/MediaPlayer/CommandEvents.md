@@ -7,7 +7,7 @@ arrived in iOS 7.1 / iOS 8.0", and what they answer instead.
 ## What the release has, measured
 
 Read with the deleted mach32 reader from the armv7 shared cache of 6.1.3
-(`~/.charon/dyld/6.1.3/dyld_shared_cache_armv7`, the MediaPlayer image at `0x31fe3000`), the same read
+(`~/.revenant/dyld/6.1.3/dyld_shared_cache_armv7`, the MediaPlayer image at `0x31fe3000`), the same read
 whose controls are the deleted mach32 test:
 
 - **236 classes** in `__objc_classlist` and **41** in `__objc_catlist`.
@@ -19,7 +19,7 @@ whose controls are the deleted mach32 test:
   is absent from every own instance list and every own class list.
 - `-aSelectorNoFrameworkHas` is absent, so the reader answers NO to a name that is not there.
 
-The whole-cache selector universe of the same release (`~/.charon/dyld/6.1.3/selectors_armv7.txt`,
+The whole-cache selector universe of the same release (`~/.revenant/dyld/6.1.3/selectors_armv7.txt`,
 113981 lines) is a list of **distinct names**, not a count per class: `dealloc` is on one line, not 433,
 and `valueForProperty:` is on one line, not 26. Read that way it says something this family needs said and
 nothing more: `isNegative`, `repeatType` and `shuffleType` are each on **one** line, so those three names
@@ -52,7 +52,7 @@ question the reviewer's finding turns on, and it is settled by the headers, not 
 | what does `MPRemoteCommand` publish? | `enabled`, `addTarget:action:`, `removeTarget:action:`, `removeTarget:`, `addTargetWithHandler:` | `MPRemoteCommand.h`, both SDKs, byte-identical |
 | so who invokes a handler? | **only the system** | an application sets a handler and has no way to call it |
 | where does `deliverEvent:` live? | `MPRemoteCommandCenter`, **private**, declared by no header | hence on no line of the 6.1.3 universe either - the 236 classes hold no `MPRemoteCommand` to declare it; controls `prepareToPlay` 1, `aSelectorNoFrameworkHas` 0 |
-| what does the port use instead? | its own `-charon_dispatch:` | `MPRemoteCommandCenter71.m:133` |
+| what does the port use instead? | its own `-revenant_dispatch:` | `MPRemoteCommandCenter71.m:133` |
 | who calls it? | **one place**, the subtype switch | `MPRemoteCommandCenter71.m:250-275` |
 | what does that switch map? | ten cases: Play, Pause, Stop, TogglePlayPause, NextTrack, PreviousTrack, BeginSeekingForward, EndSeekingForward, BeginSeekingBackward, EndSeekingBackward | read from the switch |
 | could any iOS send more? | **no** - `UIEvent.h` in SDK **26.2 and 16.4** declares exactly those ten, `100` through `109`, with no repeat-mode, shuffle-mode, rating, playback-rate or feedback case at any availability | both SDK headers, read |
@@ -63,10 +63,10 @@ does not exist. That is why these three are carried as addressable objects and n
 same answer `MPChangePlaybackPositionCommandEvent` has carried since it landed.
 
 **And the line that produced the false claim is still in the tree, because it is true.**
-`MPRemoteCommandCenter71.m:33` says `charon_command()` "creates them lazily by class regardless of which
-object file defines them, since they all share the same `MPRemoteCommand.initCharon` this file defines".
+`MPRemoteCommandCenter71.m:33` says `revenant_command()` "creates them lazily by class regardless of which
+object file defines them, since they all share the same `MPRemoteCommand.initRevenant` this file defines".
 "They" is the **command** objects - `MPRemoteCommand` and its subclasses - which is exactly what
-`charon_command()` allocates. Read as covering the *events*, it looks like the wiring that does not exist,
+`revenant_command()` allocates. Read as covering the *events*, it looks like the wiring that does not exist,
 and that is the misreading this page and two of its rows made. Nothing here changes that line; the next
 reader now has the sentence above it.
 

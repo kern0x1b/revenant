@@ -22,7 +22,7 @@ reading the symbols:
 
 ```
 xcrun clang -target armv7-apple-ios6.0 -isysroot $HOME/Git/tools/sdks/iPhoneOS16.5.sdk \
-    -fobjc-arc -w -Wno-deprecated-declarations -I packages/c/charon-coding/files \
+    -fobjc-arc -w -Wno-deprecated-declarations -I packages/r/revenant-coding/files \
     -c packages/a/apple-backports/Intents/IN11_0.m -o "$OBJ"
 xcrun nm "$OBJ"
 ```
@@ -144,15 +144,15 @@ error it produces.
 ```
 xcrun clang -fobjc-arc -target arm64-apple-macos13.0 \
     -isysroot "$(xcrun --show-sdk-path --sdk macosx)" -fsyntax-only -w \
-    -I packages/c/charon-coding/files packages/a/apple-backports/Intents/IN11_0.m
+    -I packages/r/revenant-coding/files packages/a/apple-backports/Intents/IN11_0.m
 ```
 
 ```
-packages/a/apple-backports/Intents/CharonIntents262.h:39:1: error: duplicate interface definition for class 'INMessageLinkMetadata'
-packages/a/apple-backports/Intents/CharonIntents262.h:47:71: error: property has a previous declaration
+packages/a/apple-backports/Intents/RevenantIntents262.h:39:1: error: duplicate interface definition for class 'INMessageLinkMetadata'
+packages/a/apple-backports/Intents/RevenantIntents262.h:47:71: error: property has a previous declaration
 ```
 
-`CharonIntents262.h` re-declares the classes the port's own SDK lacks, and `INMessageLinkMetadata` is
+`RevenantIntents262.h` re-declares the classes the port's own SDK lacks, and `INMessageLinkMetadata` is
 one the macOS framework has. This is the error the removed intents rename script
 exists to answer, and its head comment described the same command.
 
@@ -162,12 +162,12 @@ The removed intents rename script rewrote the port's sources and not the SDK's. 
 renamed declaration:
 
 ```
-error: cannot find interface declaration for 'ccharonHost_INIntentResponse', superclass of 'ccharonHost_INUnsendMessagesIntentResponse'
-error: cannot find interface declaration for 'ccharonHost_INAddTasksIntent'; did you mean 'ccharonHost_INEditMessageIntent'?
+error: cannot find interface declaration for 'crevenantHost_INIntentResponse', superclass of 'crevenantHost_INUnsendMessagesIntentResponse'
+error: cannot find interface declaration for 'crevenantHost_INAddTasksIntent'; did you mean 'crevenantHost_INEditMessageIntent'?
 ```
 
 The rename list is read off `_OBJC_CLASS_$_` symbols and carries classes and protocols only; the
-identifiers that collide and are not classes are the four `NS_ENUM` typedefs `CharonIntents262.h`
+identifiers that collide and are not classes are the four `NS_ENUM` typedefs `RevenantIntents262.h`
 declares — `INEditMessageIntentResponseCode`, `INMessageReactionType`, `INStickerType`,
 `INUnsendMessagesIntentResponseCode` — and their enumerators, thirty-six names in all, and adding
 them is a change to a tool every Intents slice shares. Fixing this properly means giving the harness
@@ -179,7 +179,7 @@ is not this slice's.
 ```
 error: 'INAccountType' is unavailable: not available on macOS
 error: 'INTaskPriority' is unavailable: not available on macOS
-error: no known class method for selector 'charon_resolutionWithStatus:resolvedValue:valuesToDisambiguate:valueToConfirm:'
+error: no known class method for selector 'revenant_resolutionWithStatus:resolvedValue:valuesToDisambiguate:valueToConfirm:'
 ```
 
 Apple's macOS headers mark these `API_UNAVAILABLE(macos)`. An explicit `unavailable` is an error, not

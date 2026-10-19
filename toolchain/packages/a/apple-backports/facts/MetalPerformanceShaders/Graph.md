@@ -13,13 +13,13 @@
 | `MPSNNGraphNodes16.m` | 16.0 | `MPSNNStateNode` `MPSNNBinaryArithmeticNode` `MPSCNNPoolingNode` |
 
 There is also one category on `MPSImage`, which holds no API of its own, and one shared header,
-`CharonMPSNN.h`, which holds no API either.
+`RevenantMPSNN.h`, which holds no API either.
 
 ## Why three objects and not one, which is the whole of the second half of this work
 
 **The release a name arrived in is not the release the gate places it at, and the difference is whether a
 client can link against it.** All fourteen classes are in the 11.0 release's ObjC inventory — `objc.inventory`
-over `~/.charon/dyld/11.0/dyld_shared_cache_arm64`, 52768 classes, answers PRESENT for every one, each with
+over `~/.revenant/dyld/11.0/dyld_shared_cache_arm64`, 52768 classes, answers PRESENT for every one, each with
 its true superclass. What four of them are *not*, at 11.0, is in any image's **export trie**:
 
 | class | 11.0 inventory | 11.0 trie | 12.0 trie | 16.0 trie | placed at |
@@ -42,7 +42,7 @@ registry is consulted **only as a last resort**, and only for a row whose status
 rows saying `introduced 11.0` never got a say, and `misplaced()` refused the single object.
 
 **`first-rung.lua` answers a different question and is right about the classes.** It reads
-`~/.charon/cache-index/<release>.names.gz`, which `tools/cache-index/build.lua` writes from `names.lua`'s reading of every rung: its string sections, its whole symbol
+`~/.revenant/cache-index/<release>.names.gz`, which `tools/cache-index/build.lua` writes from `names.lua`'s reading of every rung: its string sections, its whole symbol
 table and its export trie, a superset of `strings -a <cache> | grep -xF NAME`. So it finds
 a class that is *in* the cache and *not exported from* it, and answers 11.0 for all fourteen. That is a
 correct answer to "when did the class arrive" and not the answer `misplaced()` needs, which is "from which
@@ -59,7 +59,7 @@ seven of the other thirteen and lands a release later; `MPSNNBinaryArithmeticNod
 land two later and are the bases of six more. That reads backwards and is Apple's own export history. It is
 harmless here because the hierarchy is **not built by name at runtime**: a subclass names its superclass as
 a link-time symbol, and a band that keeps the 11.0 object keeps the 12.0 and 16.0 objects too — the same way
-main's other MPS objects already reference `CharonMPS` classes across files. `ld -r` over all 77 objects
+main's other MPS objects already reference `RevenantMPS` classes across files. `ld -r` over all 77 objects
 leaves no MPS class undefined, which is the mechanical form of that statement.
 
 **What the split cost and what it did not.** The rows' `introduced` stays **11.0** for all fourteen, because
@@ -115,7 +115,7 @@ Three things had to be got right for that, and each one is a bug the last attemp
    `MPSImageFeatureChannelFormatFloat16`, so the release's result image is R16Float and read as float32 the
    correct answer is `2.69038e+08 6.88875e+10 0 0`. `graph-cases.m` sets the format to Float32 on both
    sides — the port's destination is allocated from the *source* image's own channel format
-   (`[MPSImage charon_mps_descriptor]`), so it is float32 either way — and prints the format each side
+   (`[MPSImage revenant_mps_descriptor]`), so it is float32 either way — and prints the format each side
    produced.
 
 The MPS **image kernels** on this host are a separate question and they answer differently:
@@ -186,7 +186,7 @@ measurements:
 
 - **The four `MPSNNFilterNode` gradient methods and `-gradientClass` read `12.0`,** not the `11.0` their
   class's interface is annotated with. `MPSNNGraphNodes.h:404-428` and `:2158` carry no macro of their
-  own, and `grep -cxF` over `~/.charon/dyld/11.0/selectors_arm64.txt` — every selector the whole 11.0
+  own, and `grep -cxF` over `~/.revenant/dyld/11.0/selectors_arm64.txt` — every selector the whole 11.0
   cache carries — answers **0** for all five. They cannot have arrived in 11.0, and what they return is
   `MPSNNGradientFilterNode`, which `first-rung.lua` places at 12.0.
 - **`+[MPSNNDefaultPadding paddingForTensorflowAveragePooling]` reads `11.0`,** not the `11.3`
@@ -236,11 +236,11 @@ implemented now and the conformance is round-tripped under the port's own key `p
 ## What the cases measure, and the two answers the release and the port do not share
 
 `run.sh` compiles `graph-cases.m` twice — once linked against the host's `MetalPerformanceShaders`, once
-marked `-DCHARON_PORT_BUILD` with every class of the package renamed through `rename.h` and its own
+marked `-DREVENANT_PORT_BUILD` with every class of the package renamed through `rename.h` and its own
 selectors prefixed by `../prefix_selectors.py` — and compares the two transcripts. The rename is not
 optional: the host's framework defines every class this object defines. The `class` lines in both
 transcripts are the receipt, the system build printing `MPSNNAdditionNode` and the port build
-`CharonMPSNNAdditionNode`.
+`RevenantMPSNNAdditionNode`.
 
 ```
 ok    add
@@ -329,10 +329,10 @@ destination as allocated; the measurement refutes that, and the comment and the 
 
 ## Four defects the differential found, and where each is fixed
 
-1. **The walk searched the list it was building.** `charon_mps_visit:seen:` asked "which filter produced
+1. **The walk searched the list it was building.** `revenant_mps_visit:seen:` asked "which filter produced
    this node?" by scanning the list the walk is *appending to*. The producer of the node being visited is
    by definition not in it yet, so every node read as a graph input and the graph reported no filters. The
-   pairing now lives in `CharonMPSNNProducers()`, registered where a result node is made — which is the
+   pairing now lives in `RevenantMPSNNProducers()`, registered where a result node is made — which is the
    release's arrangement too, since a caller wires the filters *before* the graph exists.
 2. **`primaryScale` and `secondaryScale` defaulted to zero.** `MPSImageMath.h:31-32`: "The default value
    for primaryScale and secondaryScale is 1.0f." An Objective-C `float` ivar is zero and `:34-37` applies
@@ -342,13 +342,13 @@ destination as allocated; the measurement refutes that, and the comment and the 
    thing a node does not have at build time, since the caller builds the nodes before the graph that runs
    them.
 4. **The padding policy was handed the node instead of the node's images.**
-   `-charon_mps_destinationDescriptorForSource:` passed `@[ (MPSImage *)self ]`, so the policy asked its
-   first argument for its shape and sent `-charon_mps_descriptor` to an `MPSNNFilterNode`. Nothing caught
-   it, because every earlier case left that branch untaken. Measured: `-[CharonMPSCNNPoolingAverageNode
-   charon_mps_descriptor]: unrecognized selector sent to instance`.
+   `-revenant_mps_destinationDescriptorForSource:` passed `@[ (MPSImage *)self ]`, so the policy asked its
+   first argument for its shape and sent `-revenant_mps_descriptor` to an `MPSNNFilterNode`. Nothing caught
+   it, because every earlier case left that branch untaken. Measured: `-[RevenantMPSCNNPoolingAverageNode
+   revenant_mps_descriptor]: unrecognized selector sent to instance`.
 
 Two more were found by reading rather than by running, and are named at their fixes: the concatenation
-joined **in place** into a buffer sized for the source (`CharonMPSImageConcatRows` takes the two sides
+joined **in place** into a buffer sized for the source (`RevenantMPSImageConcatRows` takes the two sides
 separately — a one-channel source into a four-channel destination walked off the end of the read buffer,
 measured as a SIGSEGV), and the three size policies were read as the bits rather than the bits **minus
 one** (`MPSNeuralNetworkTypes.h:339-341` declares `ValidOnly 0, Same 1<<4, Full 2<<4` and `:397-401` wants

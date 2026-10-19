@@ -29,8 +29,8 @@ Each prints one line per check and exits with the number of failures.
     $CC -fobjc-arc -framework Foundation -framework CoreGraphics -framework CoreImage \
         -framework OpenGLES -o coreimage coreimage.m
     $CC -fobjc-arc -framework Foundation -framework OpenGLES -o gles2 gles2.m
-    $CC -dynamiclib -DIMAGE_VALUE=1 -install_name /usr/local/lib/charon-remap-1.dylib -o charon-remap-1.dylib remap_image.c
-    $CC -dynamiclib -DIMAGE_VALUE=2 -install_name /usr/local/lib/charon-remap-2.dylib -o charon-remap-2.dylib remap_image.c
+    $CC -dynamiclib -DIMAGE_VALUE=1 -install_name /usr/local/lib/revenant-remap-1.dylib -o revenant-remap-1.dylib remap_image.c
+    $CC -dynamiclib -DIMAGE_VALUE=2 -install_name /usr/local/lib/revenant-remap-2.dylib -o revenant-remap-2.dylib remap_image.c
 
 Sign the results (ldid -S), put them in the rootfs of the device to boot, and
 run them there as the test program of a boot; the install paths `remap.c` opens

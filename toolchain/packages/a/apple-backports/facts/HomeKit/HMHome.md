@@ -3,7 +3,7 @@
 iOS 8.0's HomeKit is an object graph: a home holds rooms, zones, users, service groups, accessories,
 triggers and action sets; an accessory holds services; a service holds characteristics; an action set
 holds actions. The port implements that graph, and the graph is a real store rather than a cache of
-what the process happens to be holding — `CharonHomeKitStore.m`, one property list per table under the
+what the process happens to be holding — `RevenantHomeKitStore.m`, one property list per table under the
 application's own Application Support directory, written atomically when a table changes. A name
 changed through `-updateName:completionHandler:` is on disk before the handler is called; a home
 added through `-addHomeWithName:completionHandler:` is there for the next launch.
@@ -67,10 +67,10 @@ behaviour, because each would change what an application believes about its own 
 
 Every model object holds its own identifier in an ivar and its own fields in the store's record under
 that identifier, and the two cannot disagree because the identifier is what the record is keyed by.
-The port's own way back in is a C function per class (`CharonHomeKitRoom`, `CharonHomeKitHome` and the
+The port's own way back in is a C function per class (`RevenantHomeKitRoom`, `RevenantHomeKitHome` and the
 rest) defined in the file that defines the class, and a class extension carrying the identity and the
 edge back to the owner. Neither is a row of the surface: `modules/apple/backports.lua` filters a
-symbol whose name starts with `Charon` out of what an object is weighed for, and a class extension is
+symbol whose name starts with `revenant` out of what an object is weighed for, and a class extension is
 part of the class's own implementation.
 
 One cycle in the graph is real and the store breaks it: `HMAccessory.home` and `HMHome.accessories`,
@@ -93,7 +93,7 @@ on one. A device run with a real accessory is what would confirm them, and it ha
 
 **HomeKit's `uniqueIdentifier` family is an `NSUUID`, not a string.** `HMRoom.h:37`, `HMZone.h:41` and
 `HMUser.h:31` all say `@property (readonly, copy) NSUUID *uniqueIdentifier`. Every graph edge is keyed by
-a string, so the accessors convert at the edge -- `CharonHomeKitUUIDString` to write one, `CharonHomeKitUUID`
+a string, so the accessors convert at the edge -- `RevenantHomeKitUUIDString` to write one, `RevenantHomeKitUUID`
 to read one back -- and the value an application reads is the UUID Apple's own type says it is. This
 was found by the compiler, not by reading the header first, and it is the kind of thing a port that
 writes from the memory of an API gets wrong.

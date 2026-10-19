@@ -120,7 +120,7 @@ display scale 0 looked up on their own.
 
 The current environment is the running device's: its display scale and idiom, and light style. The Catalyst host's
 values (scale 2, pad, light) are the ones measured here, read from the lookups that name nothing; the port answers
-the same on the host. The 6.1.3 emulator (iPhone4,1, Shade) reads phone at scale 2: a probe that registers a phone
+the same on the host. The 6.1.3 emulator (iPhone4,1, the emulator) reads phone at scale 2: a probe that registers a phone
 variant of 10 px and a pad variant of 20 px at scale 2 gets the 10 px one from a nil lookup, and the named lookups
 get their own (10 px and 20 px). That is the one device measurement; no hardware is measured here. An application
 that names every trait in its lookups does not depend on them.

@@ -4,7 +4,7 @@ Corpus: `DEMAND-AVFoundation-8.tsv`, 4 rows, CRASH-ON-USE, each called by 1 app 
 `xmake l tools/cache-index/first-rung.lua setExposureTargetBias:completionHandler: setSessionWithNoConnection: maxExposureTargetBias minExposureTargetBias`
 answers 8.0 for all four.
 
-`objc.inventory` (`modules/apple/objc.lua`) over `~/.charon/dyld/6.1.3/dyld_shared_cache_armv7`,
+`objc.inventory` (`modules/apple/objc.lua`) over `~/.revenant/dyld/6.1.3/dyld_shared_cache_armv7`,
 `AVCaptureDevice`, selectors matching `exposure`/`bias`/`iso`:
 
     -setManualExposureSupportEnabled:  -exposureGain          -setExposureGain:
@@ -14,7 +14,7 @@ answers 8.0 for all four.
     -isExposureModeSupported:          -exposurePointOfInterest
     -setAutoExposureBias:              -autoExposureBias      -isOpen
 
-None of these is a public SDK name; the same query over `~/.charon/dyld/8.0/dyld_shared_cache_armv7`
+None of these is a public SDK name; the same query over `~/.revenant/dyld/8.0/dyld_shared_cache_armv7`
 answers `-maxExposureTargetBias`, `-exposureTargetBias`, `-minExposureTargetBias`,
 `-setExposureTargetBias:completionHandler:` - the public quartet 8.0 adds over what 6.1.3 already had
 privately. Filtered for `bias` alone on 6.1.3, only `-setAutoExposureBias:`/`-autoExposureBias` answer:

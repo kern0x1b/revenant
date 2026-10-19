@@ -28,21 +28,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   together; a draw that outruns that fails with GL_INVALID_OPERATION and draws nothing.
 
 ### Changed
-- Shade builds with xmake as a member of hades (`xmake build shade`, `xmake test` at the top of hades):
+- The emulator builds with xmake as a member of revenant (`xmake build emulator`, `xmake test` at the top of revenant):
   one xmake target per former CMake library, the same include roots, tests and options
-  (`--shade_vulkan`, `--shade_sdl`, `--shade_ffmpeg`, `--shade_lto`,
-  `--shade_dynarmic_test_emit_failure`, the guest probe's `--shade_guest_rootfs` and
-  `--shade_armv6_ld`). The CMake files are gone. Every library is an xmake package: Dynarmic and Boost
-  from hades' `third_party` repository, OpenSSL and libplist from charon's, the rest from xmake's. The
+  (`--emulator_vulkan`, `--emulator_sdl`, `--emulator_ffmpeg`, `--emulator_lto`,
+  `--emulator_dynarmic_test_emit_failure`, the guest probe's `--emulator_guest_rootfs` and
+  `--emulator_armv6_ld`). The CMake files are gone. Every library is an xmake package: Dynarmic and Boost
+  from revenant's `third_party` repository, OpenSSL and libplist from Revenant's, the rest from xmake's. The
   vendored Vulkan Memory Allocator is the `vulkan-memory-allocator` 3.4.0 package now (the same header).
   The IR artifact key takes the Dynarmic package's identity (its commit and patch checksums,
   `DYNARMIC_BUILD_FINGERPRINT`), so artifacts saved before this are made again once.
 - The JIT core is Dynarmic again, under its own name: upstream (MC-XiaoXiao/dynarmic) at a
   pinned commit with our patches (the arm64 backend for A32 guests, the A32 test swap callbacks,
-  the fault-injection hooks named for the core), kept in hades' `third_party/dynarmic`; Boost is
+  the fault-injection hooks named for the core), kept in revenant's `third_party/dynarmic`; Boost is
   the 1.81.0 release pinned in `third_party/boost`. The Umbra and ext-boost submodules are gone.
   IR artifacts saved before this are made again, since the core's revision is in their key.
-- The project is named Shade, and its JIT core Umbra: the namespace, build files,
+- The project and its JIT core, Umbra, take names of their own: the namespace, build files,
   binary, file names and preference keys.
 - The core is a separate submodule, `external/umbra`, and the Boost headers come
   from an independent repository.
@@ -50,8 +50,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   before this is made again.
 
 ### Fixed
-- A boot finds its Vulkan driver without `VK_ICD_FILENAMES`: the build takes charon's `swiftshader`
-  package and puts `libvk_swiftshader.dylib` beside the program, and Shade hands it to the Vulkan
+- A boot finds its Vulkan driver without `VK_ICD_FILENAMES`: the build takes Revenant's `swiftshader`
+  package and puts `libvk_swiftshader.dylib` beside the program, and the emulator hands it to the Vulkan
   loader by path (`VK_LUNARG_direct_driver_loading`), next to the system's drivers. When no Vulkan
   driver is usable the boot draws with the reference renderer and logs one
   `[gles-renderer] Vulkan unavailable (...)` line, where it used to stop at once.

@@ -2,7 +2,7 @@
 
 Source: two LOAD-FAIL C symbols (corpus rows 24 and 151, `undecided-for-verdict.tsv`), imported
 strong by `provenance` and `utm`. Measured directly against `dyld_shared_cache_armv7` for iOS
-6.1.3 (`$HOME/.charon/dyld/6.1.3/dyld_shared_cache_armv7`), reading `CoreFoundation`'s own
+6.1.3 (`$HOME/.revenant/dyld/6.1.3/dyld_shared_cache_armv7`), reading `CoreFoundation`'s own
 `LC_SYMTAB` and disassembling three of its functions (armv7 Thumb, capstone) - nothing here is
 inferred from a header or from the modern SDK's behaviour.
 
@@ -60,7 +60,7 @@ So the backport registers a real CF class - `_CFRuntimeRegisterClass` and
 `_CFRuntimeCreateInstance`, both exported by this same release (`0x310d2d40` and `0x310a2640`,
 confirmed the same way) and the ordinary, documented mechanism every CF type uses, not private API
 this backport invented. `_CFRuntimeRegisterClass`'s own preamble was disassembled to check the
-`CharonCFRuntimeClass` struct's field layout before trusting it: it reads a flag out of
+`RevenantCFRuntimeClass` struct's field layout before trusting it: it reads a flag out of
 `version`'s low byte and, only if that flag is set, reads a function pointer at struct offset
 `0x28` - exactly where the `refcount` field lands in the eleven 4-byte-field layout used here
 (`version, className, init, copy, finalize, equal, hash, copyFormattingDesc, copyDebugDesc,

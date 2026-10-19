@@ -105,7 +105,7 @@ come from the port's own Accelerate, and what the port carries there is narrower
 
 - `vImageRotate90_ARGB16U` and `vImageRotate90_ARGB16S` at 7.0 (`vImageGeometry7.m`), and the three
   half-precision shapes at 15.0 (`vImageGeometry15.m`);
-- the mapping and the loop are `Accelerate/CharonGeometry.h`'s `charon_turn` and `charon_turn_run`, a byte
+- the mapping and the loop are `Accelerate/RevenantGeometry.h`'s `revenant_turn` and `revenant_turn_run`, a byte
   mover parameterised by bytes per sample, measured over eight destination shapes both ways, which is the
   shape a 32-bit packed format needs;
 - **no `vImageRotate90_ARGB8888`, no `vImageRotate180_*` and no `vImageHorizontalReflect_*` or
@@ -169,7 +169,7 @@ Two routes to the layout, neither of which has produced it yet:
 
 The four rows - `VTPixelRotationSessionCreate`, `...GetTypeID`, `...Invalidate`, `...RotateImage` - are
 implementable: the session object, its type ID, its invalidation and the rotation loop over the release's
-vImage (and over `CharonGeometry.h`'s own byte mover where the release has no entry point) are all native.
+vImage (and over `RevenantGeometry.h`'s own byte mover where the release has no entry point) are all native.
 What the port does with them is settled:
 
 - the port registers its own session type with the release's `VTSessionRegisterCallbacksForTypeID` at the
@@ -177,7 +177,7 @@ What the port does with them is settled:
   release;
 - one shared helper serves the rotation session, `VTMotionEstimation`, `VTFrameSilo` and the pixel transfer
   session - not four;
-- the flips and every 4.3 operation go through `charon_turn`/`charon_turn_run`, the port's own byte mover,
+- the flips and every 4.3 operation go through `revenant_turn`/`revenant_turn_run`, the port's own byte mover,
   and the release's vImage only where it exists at that band;
 - the port answers what the header and the measured codes say for what it carries: `kVTParameterErr` for a
   geometry the header forbids and for a cross-format destination, and **kVTPixelRotationNotSupportedErr
@@ -191,7 +191,7 @@ thing missing, and it is measured, not guessed (see above).
 
 - `tests/backports/host/videotoolbox-pixelrotation/` - the oracle, its four plants and the refusal section.
 - `coordination/corpus/caches/6.0.tsv`, the 6.1.3 armv7 symbol dump, and `tools/corpus/dump-cache.lua` over
-  `~/.charon/dyld/4.3/dyld_shared_cache_armv7` (read-only) - `_VTSessionSetProperty` and
+  `~/.revenant/dyld/4.3/dyld_shared_cache_armv7` (read-only) - `_VTSessionSetProperty` and
   `_VTSessionCopyProperty` in all three, the four `_vImage*_ARGB8888` entry points in 6.1.3 and no
   `vImage` symbol in 4.3.
 - `modules/apple/backports.lua` `band()` - what happens to a port object that defines a symbol the release

@@ -52,8 +52,8 @@ The five classes of the 8.0 payment request, measured the same way, with the con
 the reader in the same run:
 
 ```
-$ CHARON_ROOT=<worktree> xmake l tools/corpus/objc-inventory.lua \
-      $HOME/.charon/dyld/6.1.3/dyld_shared_cache_armv7 > inv-6.1.3.tsv
+$ REVENANT_ROOT=<worktree> xmake l tools/corpus/objc-inventory.lua \
+      $HOME/.revenant/dyld/6.1.3/dyld_shared_cache_armv7 > inv-6.1.3.tsv
 12549 rows: 11378 class and 1171 protocol
 
 $ awk -F'\t' '$1=="class" && $2 ~ /^PK/ {print $2}' inv-6.1.3.tsv | wc -l
@@ -82,11 +82,11 @@ That is why `PKPass.paymentPass` is `absent` on a measured ground rather than on
 **One of the neighbouring rows needs a word of care, and it is not this slice's row.** `-logoImage` is
 *not* among those 90 either, and neither is `-dictionaryRepresentation` — yet the selector
 `dictionaryRepresentation` **is** in the release, in a run of its own: it is one exact line in
-`$HOME/.charon/dyld/6.1.3/selectors_armv7.txt`, and **224** classes carry it in the inventory
+`$HOME/.revenant/dyld/6.1.3/selectors_armv7.txt`, and **224** classes carry it in the inventory
 (`MKMapItem`, `GEOPlace`, `GEORoute` and the rest). It is absent from `PKPass`'s *method list* because Apple's
 PassKit adds it in a **category** on `PKPass`, and `apple.objc.inventory` reads a cache's class method
 lists without merging a category compiled into one image onto a class defined in another — the same
-blind spot `tools/release-split.lua` names in its own header. So `PKPass14.m`'s `CharonReleaseJSON`
+blind spot `tools/release-split.lua` names in its own header. So `PKPass14.m`'s `RevenantReleaseJSON`
 category declaring it is right, and a row that read "PKPass has 90 methods, therefore
 `dictionaryRepresentation` is not among them" would be wrong. The distinction matters only for
 category methods, which is why the check above was run one selector at a time instead of by count.
@@ -227,7 +227,7 @@ release-split: every folder of .agent-work/runs/pk-ios8-a/objects is clean
 
 macOS carries both classes, so **Apple's own objects are the oracle** — the one thing this port has
 been unable to do for the wallet. The run compiles the port's own object under renamed classes
-(`charonHost_PKPaymentRequest`, `charonHost_PKPaymentSummaryItem`, so the driver reaches the port and
+(`revenantHost_PKPaymentRequest`, `revenantHost_PKPaymentSummaryItem`, so the driver reaches the port and
 never Apple's) beside Apple's two, and compares member by member. Sources and transcripts:
 `.agent-work/runs/pk-ios8-a/` (`differential.m`, `port-decls.h`, `real.body`, `mutant.body`,
 `libport8.dylib`).
@@ -252,7 +252,7 @@ $ diff real.body mutant.body
 ```
 
 The two classes' `PKAddressField` spelling is why `port-decls.h` exists as a scratch header: the
-tracked stand-in (`CharonPassKitStandin.h`) declares `PKMerchantCapability` and the two controllers
+tracked stand-in (`RevenantPassKitStandin.h`) declares `PKMerchantCapability` and the two controllers
 but not `PKAddressField`, and that stand-in is a file shared with the other PassKit bands, so this
 run keeps its own header rather than editing theirs. Wiring the two classes into `tests/backports/host/passkit/run.sh`
 is the follow-up, and it needs `PKAddressField` in the stand-in first.
@@ -327,7 +327,7 @@ says the hardware refused, the exact opposite of "nothing has been asked". Both 
 holds them to **−1**.
 
 `PKLibraryCapability` has one case, `PKPassLibraryCapabilityBackgroundAddPasses`. Both enumerations
-are declared in `CharonPassKit.h` **only when the build's SDK lacks them** (`#if !defined(__IPHONE_26_0)`),
+are declared in `RevenantPassKit.h` **only when the build's SDK lacks them** (`#if !defined(__IPHONE_26_0)`),
 because a second typedef of the same enum is a hard error and an SDK that has them must keep its own.
 The 16.4 SDK this package is built against does not have them; the 26.2 SDK does.
 
@@ -369,7 +369,7 @@ pair, which are real.
 ## The probe
 
 `tests/backports/host/passkit/run.sh` compiles the objects onto **renamed** classes
-(`charonHost_PKPassLibrary` and the rest, in `port-classes.m`) so the runner reaches the port through
+(`revenantHost_PKPassLibrary` and the rest, in `port-classes.m`) so the runner reaches the port through
 the runtime and never the host's PassKit. **43 check lines over 33 member cases, 0 failures**, and
 **two** mutants, because one kind of mutation going red is not evidence that another would:
 
@@ -389,8 +389,8 @@ is the oracle for the error domain alone. Build and transcripts: `.agent-work/ru
 
 ```
 categories whose class neither iOS 6.1.3 nor the package exports ...
-  PKPaymentAuthorizationController(CharonSecureElement: ...) and
-  PKPaymentAuthorizationViewController(CharonSecureElement: ...)
+  PKPaymentAuthorizationController(RevenantSecureElement: ...) and
+  PKPaymentAuthorizationViewController(RevenantSecureElement: ...)
 ```
 
 A category on a class nobody carries is dead code: the loader has nothing to attach it to. Both
@@ -420,9 +420,9 @@ class, so together they are one class in two objects.
 armv7 cache of 6.1.3), so a payment sheet over a pass that cannot exist is a sheet with nothing in it.
 The delegate callbacks are the same: they would report a presentation that cannot happen.
 
-**The stand-in**, following `CHARON_MEDIAPLAYER_STANDIN` / `MPMediaItemStandin.h` in MediaPlayer: a
+**The stand-in**, following `REVENANT_MEDIAPLAYER_STANDIN` / `MPMediaItemStandin.h` in MediaPlayer: a
 host that already has Apple's `PKPaymentAuthorizationController` gives a second `@implementation` of
-the name as a duplicate symbol, and the probe would then measure Apple's class. `CharonPassKitStandin.h`
+the name as a duplicate symbol, and the probe would then measure Apple's class. `RevenantPassKitStandin.h`
 declares both classes as the SDK declares them and carries `PKMerchantCapability`, which the release's
 own headers do not declare and which the members are spelled with.
 
@@ -462,16 +462,16 @@ a type the port has not got. That, and not the hardware, is what makes these fiv
 ### The measurement, at both band ends, with the control
 
 ```
-$ CHARON_ROOT=<worktree> xmake l tools/corpus/cache-census.lua PKPayment
-6.1.3     ~/.charon/dyld/6.1.3/dyld_shared_cache_armv7
+$ REVENANT_ROOT=<worktree> xmake l tools/corpus/cache-census.lua PKPayment
+6.1.3     ~/.revenant/dyld/6.1.3/dyld_shared_cache_armv7
          images 524, of which naming PKPayment 0
          classes 11378, of which PKPayment* 0
          protocols 1171, of which PKPayment* 0
-4.3       ~/.charon/dyld/4.3/dyld_shared_cache_armv7
+4.3       ~/.revenant/dyld/4.3/dyld_shared_cache_armv7
          images 354, of which naming PKPayment 0
          classes 7187, of which PKPayment* 0
          protocols 564, of which PKPayment* 0
-11.0      ~/.charon/dyld/11.0/dyld_shared_cache_arm64
+11.0      ~/.revenant/dyld/11.0/dyld_shared_cache_arm64
          images 1258, of which naming PKPayment 0
          classes 52768, of which PKPayment* 267 (PKPayment PKPaymentActivationResponse ...)
 control: 307 name(s) beginning PKPayment found in this run, so a zero on another rung is the release's and not the reader's
@@ -495,8 +495,8 @@ enumeration is: it has no symbol at all, so it is the SDK's declaration and not 
 ### What Apple's own 11.0 has, measured class by class
 
 ```
-$ CHARON_ROOT=<worktree> xmake l tools/corpus/objc-inventory.lua \
-    ~/.charon/dyld/11.0/dyld_shared_cache_arm64
+$ REVENANT_ROOT=<worktree> xmake l tools/corpus/objc-inventory.lua \
+    ~/.revenant/dyld/11.0/dyld_shared_cache_arm64
 ```
 
 | class | superclass | image | Apple's own instance selectors |
@@ -646,7 +646,7 @@ Element. The other two hold the issuer's own `NSString`/`NSData` and need no har
 ### The measurement, with its command, its output and its control
 
 ```
-$ xmake l tools/corpus/objc-inventory.lua ~/.charon/dyld/6.1.3/dyld_shared_cache_armv7
+$ xmake l tools/corpus/objc-inventory.lua ~/.revenant/dyld/6.1.3/dyld_shared_cache_armv7
    (run through coordination/heavy.sh; output kept at .agent-work/runs/pk9/inv-6.1.3.tsv)
 $ awk -F'\t' '$1=="class" && $2 ~ /^PK/' .agent-work/runs/pk9/inv-6.1.3.tsv | wc -l
 66
@@ -671,7 +671,7 @@ The 11378 is the control: one run of a working reader, and the 66 is its PassKit
 The 4.3 end carries no PassKit at all, and that zero is the release's and not the reader's:
 
 ```
-$ python3 -c "import json; d=json.load(open('~/.charon/dyld/4.3/classes_armv7.json'))['classes']; \
+$ python3 -c "import json; d=json.load(open('~/.revenant/dyld/4.3/classes_armv7.json'))['classes']; \
     n=sorted(d); print([x for x in n if x.startswith('UI')].__len__(), [x for x in n if x.startswith('PK')])"
 597 ['PKJob', 'PKPaper', 'PKPrintSettings', 'PKPrinter', 'PKPrinterBrowser']
 ```

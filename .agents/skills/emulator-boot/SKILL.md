@@ -1,52 +1,52 @@
 ---
-name: shade-boot
-description: Build this Shade checkout and boot a firmware root filesystem with it to check that a change works — the xmake build, `shade profile --list`, a headless boot at `--time-scale 10`, and reading the log for fatal CPU faults, frames and started processes; attach gdb or drive the guest over `--control-stdin`. Use after changing Shade, or when asked to build, boot or debug it.
+name: emulator-boot
+description: Build this emulator checkout and boot a firmware root filesystem with it to check that a change works — the xmake build, `emulator profile --list`, a headless boot at `--time-scale 10`, and reading the log for fatal CPU faults, frames and started processes; attach gdb or drive the guest over `--control-stdin`. Use after changing the emulator, or when asked to build, boot or debug it.
 ---
 
-# Build Shade and boot a root filesystem
+# Build the emulator and boot a root filesystem
 
 ## 1. Build
 
-From the top of hades:
+From the top of revenant:
 
 ```sh
 xmake f -y
-xmake build shade
+xmake build emulator
 xmake test
 ```
 
-The program is `build/macosx/arm64/release/shade` (`build/shade` below stands for it). Options, given to
-`xmake f`: `--shade_vulkan`, `--shade_sdl`, `--shade_ffmpeg`, `--shade_lto`,
-`--shade_dynarmic_test_emit_failure`. `build/shade --help` lists the verbs.
+The program is `build/macosx/arm64/release/emulator` (`build/emulator` below stands for it). Options, given to
+`xmake f`: `--emulator_vulkan`, `--emulator_sdl`, `--emulator_ffmpeg`, `--emulator_lto`,
+`--emulator_dynarmic_test_emit_failure`. `build/emulator --help` lists the verbs.
 
 ## 2. Pick a device and a root filesystem
 
 ```sh
-build/shade profile --list                      # the device profiles, e.g. iPhone4,1
-build/shade profile --device iPhone4,1          # one profile's details
+build/emulator profile --list                      # the device profiles, e.g. iPhone4,1
+build/emulator profile --device iPhone4,1          # one profile's details
 ```
 
-A root filesystem comes from charon's `xmake firmware --device=ID rootfs RELEASE` (unpacked under
-`$HOME/.charon/firmware/rootfs/<device>/`). Boot a clone, never the shared tree:
+A root filesystem comes from Revenant's `xmake firmware --device=ID rootfs RELEASE` (unpacked under
+`$HOME/.revenant/firmware/rootfs/<device>/`). Boot a clone, never the shared tree:
 
 ```sh
 run=.agent-work/runs/<name>; mkdir -p $run
-cp -c -R "$HOME/.charon/firmware/rootfs/<device>/<release_build>" $run/rootfs
+cp -c -R "$HOME/.revenant/firmware/rootfs/<device>/<release_build>" $run/rootfs
 ```
 
 ## 3. Boot headless
 
 ```sh
-perl -e 'alarm 300; exec @ARGV' build/shade boot --rootfs $run/rootfs --device iPhone4,1 \
+perl -e 'alarm 300; exec @ARGV' build/emulator boot --rootfs $run/rootfs --device iPhone4,1 \
     --display headless --gles-backend software --time-scale 10 > $run/boot.log 2>&1
 ```
 
 A boot runs until it is stopped: the `alarm` bounds it (`--ticks N` bounds it in CPU ticks).
-A build with `--shade_vulkan` (the default) draws through Vulkan, and `--gles-backend software` then means a
-Vulkan CPU driver. The build provides one: it takes charon's `swiftshader` package and puts
-`libvk_swiftshader.dylib` beside the program, and Shade hands that file to the Vulkan loader itself
+A build with `--emulator_vulkan` (the default) draws through Vulkan, and `--gles-backend software` then means a
+Vulkan CPU driver. The build provides one: it takes Revenant's `swiftshader` package and puts
+`libvk_swiftshader.dylib` beside the program, and the emulator hands that file to the Vulkan loader itself
 (`VK_LUNARG_direct_driver_loading`), next to whatever drivers the system has. No environment variable is
-needed; the log names the renderer in `[gles-renderer] selected Shade GLES 1.1 Vulkan (SwiftShader Device ...)`.
+needed; the log names the renderer in `[gles-renderer] selected Revenant GLES 1.1 Vulkan (SwiftShader Device ...)`.
 When no Vulkan driver is usable, the boot goes on with the reference renderer and says why in one line:
 `[gles-renderer] Vulkan unavailable (<reason>): drawing with the reference renderer`.
 `--verbose` adds every trace line; without it only the lifecycle lines below are printed.
@@ -71,7 +71,7 @@ and `SpringBoard` among the spawned programs.
 
 ## Traps
 
-- `xmake emulate` (charon) does not use this checkout: it builds and runs its own pinned copy through the `charon@shade` package.
+- `xmake emulate` (revenant) does not use this checkout: it builds and runs its own pinned copy through the `revenant@emulator` package.
 - Without `--time-scale 10` the guest's watchdogs expire: iOS 6.1.3 loses SpringBoard every 100 s to a mediaserverd timeout.
-- The emulator writes `.shade-device-state` beside the root filesystem it boots: boot a clone in the run directory, not the shared rootfs.
-- The `[cpu] fatal`, `[display] frame=` and `[process] spawn-setexec` lines are what charon reads: do not reword them without changing its reader.
+- The emulator writes `.emulator-device-state` beside the root filesystem it boots: boot a clone in the run directory, not the shared rootfs.
+- The `[cpu] fatal`, `[display] frame=` and `[process] spawn-setexec` lines are what the toolchain reads: do not reword them without changing its reader.

@@ -7,7 +7,7 @@
 
 Source: the headers of `MetalPerformanceShadersGraph` in the SDK of iOS 16.4, which is the SDK this
 package compiles against, for every signature; the 26.2 headers under
-`charon/.agent-work/sdk-26.2/` for what 16.4 does not declare. The behaviour is measured against the
+`toolchain/.agent-work/sdk-26.2/` for what 16.4 does not declare. The behaviour is measured against the
 system's own MPSGraph by `tests/backports/host/mpsgraph/run.sh`.
 
 ## The model, and why it is a walk rather than a compiler
@@ -27,8 +27,8 @@ That is not a shortcut around the graph, it is the same graph with the storage t
 
 Over the host memory behind an `MTLBuffer`, on the CPU, exactly as the matrix kernels in
 `../MetalPerformanceShaders` do (`facts/MetalPerformanceShaders/Matrix.md`). The data type of the
-operands decides the arithmetic, as it does there, through the same `CharonMPSStore` and `CharonMPSLoad`:
-`CharonMPSGraph.h` **includes** `CharonMPS.h` rather than restating it, so an `MPSDataType` means one
+operands decides the arithmetic, as it does there, through the same `RevenantMPSStore` and `RevenantMPSLoad`:
+`RevenantMPSGraph.h` **includes** `RevenantMPS.h` rather than restating it, so an `MPSDataType` means one
 thing in both families rather than two.
 
 A result tensor's storage is a buffer of its own, made when the operation runs, so a run never writes
@@ -39,7 +39,7 @@ into a buffer the caller fed it.
 The iPhoneOS 16.4 SDK predates four names of the 26.2 surface:
 
 * **`MPSGraphObject`** arrived in iOS 17, and every class of that surface descends from it there,
-  while 16.4 has them descending from `NSObject`. It is declared in `CharonMPSGraph.h` and implemented
+  while 16.4 has them descending from `NSObject`. It is declared in `RevenantMPSGraph.h` and implemented
   here, so a graph's objects have the root the 26.2 headers give them.
 * `MPSGraphFFTDescriptor`, `MPSGraphImToColOpDescriptor` and
   `MPSGraphExecutableSerializationDescriptor` are in the 26.2 surface and not in the 16.4 headers.
@@ -52,7 +52,7 @@ duplicate, and where the host's own classes are what a comparison must be agains
 ## The measuring, and where it stands
 
 `tests/backports/host/mpsgraph/` compiles the same cases twice - once against the system's own
-MPSGraph, once against these classes with the MPSGraph names mapped to `Charon` names and their
+MPSGraph, once against these classes with the MPSGraph names mapped to `revenant` names and their
 selectors prefixed - and compares the bytes of a buffer the case owns.
 
 **Both execution routes work on this host**, measured directly:
@@ -93,9 +93,9 @@ harness rather than in the library:
   for it, and a reciprocal of `-0.0` is `-inf` where the reciprocal branch had only `+inf`. The measured
   columns `reciprocal` and `divide` carry both zeroes, `ff800000` and `7f800000`, which is what the case
   file feeds now. IEEE division answers every one of them, so the four cases are the arithmetic itself.
-* **A denormal, and a NaN of its own.** `CharonMPSGraphAsZero` and `CharonMPSGraphOwnNaN` are what a result
-  leaves the release's arithmetic as, and they are in `CharonMPSGraphApply` rather than in the store,
-  because `CharonMPSStore` is shared with the matrix and image families and because two kinds keep both: the
+* **A denormal, and a NaN of its own.** `RevenantMPSGraphAsZero` and `RevenantMPSGraphOwnNaN` are what a result
+  leaves the release's arithmetic as, and they are in `RevenantMPSGraphApply` rather than in the store,
+  because `RevenantMPSStore` is shared with the matrix and image families and because two kinds keep both: the
   measured table below has `abs` and `identity` returning `0x00000001` and `0x7f800001` unchanged.
 
 **Where it stands, measured on macOS 27.0 build 26A428 (M4 Pro, Metal 4):
@@ -151,7 +151,7 @@ compares the two families side by side: `tests/backports/host/mpsgraph/run.sh` r
 their cells, recorded` and `checks=24 failures=0 recorded=7`. Every float32 case is byte-identical and
 170 of the 192 half cells are.
 
-What the release's half path answers where a float32 does not, and what `CharonMPSGraphApply` now
+What the release's half path answers where a float32 does not, and what `RevenantMPSGraphApply` now
 answers the same way:
 
 | | the release | measured on |
@@ -169,9 +169,9 @@ answers the same way:
 | a denormal | kept | `identity(0x0001)` is `0001` and `abs(0x8001)` is `0001`, where float32 answers `00000000` |
 
 **A halfway half rounds away from zero here, and now does in the port's MPSGraph path.**
-`CharonMPSFloatToHalfRounded` in `../MetalPerformanceShaders/CharonMPS.h` takes the rounding as an
-argument, `CharonMPSStoreRounded` passes it on to the narrowing, and the interpreter's two stores ask
-for it; `CharonMPSFloatToHalf` and `CharonMPSStore` are the same functions with the even rounding and
+`RevenantMPSFloatToHalfRounded` in `../MetalPerformanceShaders/RevenantMPS.h` takes the rounding as an
+argument, `RevenantMPSStoreRounded` passes it on to the narrowing, and the interpreter's two stores ask
+for it; `RevenantMPSFloatToHalf` and `RevenantMPSStore` are the same functions with the even rounding and
 every other family keeps calling those, so the matrix and image kernels do not move. Measured: an
 addition of `2^-10` to 3.0 is exactly halfway between two halves and the release answers `4201`, and
 a square root of `3c01` - `sqrt(1 + 2^-14 * 2)` - is exactly halfway and the release answers `3c01`,
@@ -256,9 +256,9 @@ MPSGraph over a rank-3 float32 operand: `isNaN`, `isFinite`, `isInfinite`, `equa
 is `MPSDataTypeAlternateEncodingBit | 8` (MPSCoreTypes.h:260) and **one byte** an element
 (`MPSSizeofMPSDataType(MPSDataTypeBool)` is 1, measured), while `logicalAND`, `logicalOR`, `logicalNAND`,
 `logicalNOR`, `logicalXOR`, `logicalXNOR`, `not` and `signbit` answer the operand's own type. The port
-therefore has two builders - `charon_mps_arithmetic:operands:name:` and
-`charon_mps_predicate:operands:name:` - and `CharonMPSLoad` and `CharonMPSStoreRounded` in
-`../MetalPerformanceShaders/CharonMPS.h` carry the one-byte type.
+therefore has two builders - `revenant_mps_arithmetic:operands:name:` and
+`revenant_mps_predicate:operands:name:` - and `RevenantMPSLoad` and `RevenantMPSStoreRounded` in
+`../MetalPerformanceShaders/RevenantMPS.h` carry the one-byte type.
 
 **A minimum and a maximum are `fmin` and `fmax`, not an operator.** Measured: a minimum of `+inf` and a
 NaN is `0x7f800000`, of `-inf` and a NaN is `0xff800000` and of a NaN and `0x00000001` is `0x00000001`,
@@ -410,7 +410,7 @@ last place, so no figure anywhere near four can hide it.
 ### What a NaN, an infinity and a zero are in half, per operation
 
 The release's half kernels do not agree with each other about a NaN, and each of them answers it its own
-way. Measured over the case file's thirty-two classes, `CharonMPSGraphHalfNaNOf` in the interpreter is the
+way. Measured over the case file's thirty-two classes, `RevenantMPSGraphHalfNaNOf` in the interpreter is the
 table, one entry per kind, and this is what it says:
 
 | a kind's answer in half for a NaN operand | the kinds | measured |
@@ -489,7 +489,7 @@ of the same shape.
 
 Addition, subtraction, multiplication, division, and the unary operations negation, square,
 reciprocal, square root, reverse square root, exponential, logarithm, absolute and sign. Each is a kind
-in `CharonMPSGraphOperationKind` and a case in the interpreter, so a family lands by adding a kind and a
+in `RevenantMPSGraphOperationKind` and a case in the interpreter, so a family lands by adding a kind and a
 function rather than by touching every other operation.
 
 Not written: matmul, convolution, pooling, normalization, activation, shape operations,
@@ -499,7 +499,7 @@ each wants the differential to run a graph end to end first.
 ## The reduction family of 14.0
 
 A reduction is the first family here whose result is not the operand's shape, so it is walked by a
-function of its own (`CharonMPSGraphReduce` in `MPSGraphInterpreter14.m`) over the OPERAND rather than by
+function of its own (`RevenantMPSGraphReduce` in `MPSGraphInterpreter14.m`) over the OPERAND rather than by
 the element-at-a-time loop the arithmetic family uses, and `graph-cases.m` asks it through a case helper
 of its own (`reduction_case`) that gives the compile a feed of the operand's shape and a destination of the
 result's.
@@ -679,7 +679,7 @@ Sixteen rows of the tensor-shape headers, in four objects: 14.0's `transposeTens
 
 **One walk for all sixteen.** A gather is one question - for each axis of the result, which axis of the
 operand feeds it, how many of the operand's axes it covers, and whether that one is reversed - so
-`CharonMPSGraphGatherPlan` derives that from the operation's parameters and `CharonMPSGraphGather` walks it.
+`RevenantMPSGraphGatherPlan` derives that from the operation's parameters and `RevenantMPSGraphGather` walks it.
 Which transformation it is (`@"gather"`), which of its parameter the caller wrote down (`@"gatherAxis"`,
 `@"gatherDrop"`, `"gatherAdd"`, `@"gatherAxes"`, `@"gatherPermutation"`) or which of the operation's inputs
 carries it instead (`@"gatherOperand"`), and every release's factory fills those in and names only its own
@@ -688,7 +688,7 @@ methods.
 **The result's shape is derived at build time as well as at run time, because that is where the release
 derives it.** The release infers an operation's result type when the graph is built - which is why an axis it
 cannot use aborts there rather than at the run - so a caller can read `shape` off the tensor it was handed
-before anything runs, and the port answers it there through `-[MPSGraph charon_mps_gatherShapeOfTensor:
+before anything runs, and the port answers it there through `-[MPSGraph revenant_mps_gatherShapeOfTensor:
 parameters:named:]`: the same plan the interpreter walks, asked with the operand's shape and no fed parameter.
 A parameter the caller fed, or an operand whose own shape is not known yet (a gather of a fed gather), gives
 nil there, and the interpreter puts the shape on when it runs the operation - which is what lets a shape the
@@ -815,7 +815,7 @@ both answer, measured.
 
 The paragraph above is about what the release does to the PROCESS. This one is about what its own tensor says,
 which is a question the harness can ask and the port could not answer before, because every fed form went
-through `charon_mps_operation:` and took the FIRST INPUT's shape - a shape nobody asked for.
+through `revenant_mps_operation:` and took the FIRST INPUT's shape - a shape nobody asked for.
 
 Measured on this host's own MPSGraph over **thirty-seven configurations**, one case per process under a
 timeout: `.agent-work/probe/fedshape.m`, driven by `fedshape.sh`, every stage flushed before the next is
@@ -838,10 +838,10 @@ parameter names. Everything else follows from that:
 | `broadcastTensor:toShapeTensor:` | the operand's own shape where the release carries one and a vector of `-1` where it does not - see below |
 | the slice's gradient, both fed forms | **nil**, before the run and after it (`refusals.m`'s `slice-gradient-fed-shape` and `slice-gradient-fed`) |
 
-**The port now carries the same vector**, in `CharonMPSGraphFedGatherResultShape` in `MPSGraph14.m`, asked from
-`-[MPSGraph charon_mps_gather:tensor:fedParameter:parameters:name:]`, and the walk puts the real shape on when
+**The port now carries the same vector**, in `RevenantMPSGraphFedGatherResultShape` in `MPSGraph14.m`, asked from
+`-[MPSGraph revenant_mps_gather:tensor:fedParameter:parameters:name:]`, and the walk puts the real shape on when
 the graph runs - the only moment a fed value is there to read it from. The slice's gradient carries no shape
-at all, because what `charon_mps_operation:` left on it was the shape of the INCOMING GRADIENT, which is the
+at all, because what `revenant_mps_operation:` left on it was the shape of the INCOMING GRADIENT, which is the
 shape of the region and not of the result.
 
 The fed parameter of a rank the release will not read is refused by its own compiler with its own rule, and
@@ -1105,7 +1105,7 @@ Sixteen rows in one object (`MPSGraphCumulativeOps160.m`): `cumulativeSum`, `cum
 `exclusive:` and `reverse:` flags, and an axis fed at run time with and without them.
 
 **The walk is the reduction family's fold along an axis**, and it shares the fold table and the step with
-it: `CharonMPSGraphFoldStep` is one function both walks call, so the seeds, the NaN rule and the four steps
+it: `RevenantMPSGraphFoldStep` is one function both walks call, so the seeds, the NaN rule and the four steps
 are measured once. What the scan adds is a direction, an axis and a flag, all three read out of the
 operation's parameters (`@scanCombination`, `@scanAxis`/`@scanAxisTensor`, `@scanExclusive`, `@scanReverse`),
 so the 16.0 object names its sixteen methods and nothing of any other release.
@@ -1148,7 +1148,7 @@ A sum's seed is the zero of the type and a product's its one, in every type meas
 the sixteen classes, whose first row is (1, -1, -0.0, +0.0), a *reverse* cumulative maximum answers a NEGATIVE
 zero at positions 1 and 2 where a strict comparison keeps the zero it already held, and an exclusive reverse
 maximum answers a negative zero at positions 0 and 1 where a strict comparison would take the positive one it
-was handed. So `CharonMPSGraphFoldStep` takes both rules as arguments: the two reductions pass
+was handed. So `RevenantMPSGraphFoldStep` takes both rules as arguments: the two reductions pass
 "propagate a NaN, break a tie towards the held answer" and a scan passes "skip a NaN, break a tie towards the
 new value", and the reduction family's own cases (a row of (0, -0, 0, -0) answers 0, the first of the equal
 elements) are what pin its half of that.
@@ -1805,7 +1805,7 @@ already had, in this order:
    coordinates into the order the flag names;
 3. the reshape that collapses that group back into the single axis the result has.
 
-So the seam is `-charon_mps_blockShuffle:spatial:batch:block:toBatch:shuffle:name:` and what is worth writing
+So the seam is `-revenant_mps_blockShuffle:spatial:batch:block:toBatch:shuffle:name:` and what is worth writing
 down is the **order the axes are held in** and **the rules the release refuses the family by**.
 
 Measured on this host's own MPSGraph (macOS 27.0 build 26A428, M4 Pro, Metal 4) and compared cell for cell in a
@@ -1977,9 +1977,9 @@ turn and in both directions** (`.agent-work/probe/fedlists.m`, one case per proc
   `(1, 19, 2, 20, 3, 21, 37, ...)` - **exit 0** in all six.
 
 So this is the 2D form's fed pair with the **lists** the general form hands over, and the plan takes them as it
-takes the 2D form's two. `charon_mps_fedBlockShuffle:` now builds one operation of the family with the operand
+takes the 2D form's two. `revenant_mps_fedBlockShuffle:` now builds one operation of the family with the operand
 and the three tensors, and the interpreter reads the three lists when the graph runs and asks
-`CharonMPSGraphBlockShufflePlan` - through `charon_mps_runBlockShuffleChain:into:from:operation:values:`, which
+`RevenantMPSGraphBlockShufflePlan` - through `revenant_mps_runBlockShuffleChain:into:from:operation:values:`, which
 is the 2D pair's own three walks (a reshape into the split shape, the permutation transpose and the merge back)
 factored out so that both ask it rather than one of them repeating it. What the release refuses over a fed list
 is a **floating point** one, at the graph's own building, and that is where the port refuses it.
@@ -2016,7 +2016,7 @@ the `8x2x2` (`refusals.m`'s `block-s2b-batch-outside`, `block-b2s-batch-outside`
   inside that range is one this family counts from the end.
 
 Both of those were wrong in the port's own refusal, and are fixed in
-`CharonMPSGraphBlockShufflePlan`: it printed the counted axis (`-1` where the release prints `-4`) and its prose
+`RevenantMPSGraphBlockShufflePlan`: it printed the counted axis (`-1` where the release prints `-4`) and its prose
 said "axis 0 to rank-1 is all it has" where the release's rule is `-rank <= axis < rank`. The port still refuses
 **where the graph is built**, which is this library's moment and the only one it has, and now says the release's
 sentence with the release's range.
@@ -2045,9 +2045,9 @@ enough. Must be 8 bytes`, exit 134), which is a probe's artefact and not the pai
 operand's RANK coordinates for every element of the operand that is not a zero, in the operand's own row-major
 order, in `MPSDataTypeInt32`; and its LENGTH is the count of those elements, which is data, so nothing in the
 graph knows it when the graph is built. That is what makes it a walk of its own
-(`CharonMPSGraphNonZeroCount` and `CharonMPSGraphNonZero` in `MPSGraphInterpreter14.m`), a shape the walk puts
+(`RevenantMPSGraphNonZeroCount` and `RevenantMPSGraphNonZero` in `MPSGraphInterpreter14.m`), a shape the walk puts
 on the output tensor when the operation runs, and a copy-out that has to know the destination's own shape
-(`CharonMPSGraphWriteInto` in `CharonMPSGraph.h`, which both run paths end at).
+(`RevenantMPSGraphWriteInto` in `RevenantMPSGraph.h`, which both run paths end at).
 
 Measured on this host's own MPSGraph (macOS 27.0 build 26A428, M4 Pro, Metal 4) with the probe
 `.agent-work/probe/nonzero.m`, one case per process, and every case of the differential
@@ -2073,10 +2073,10 @@ the zero an unreached row is given:
 | `0x80000000`, a NEGATIVE zero | **a zero** | **a zero** |
 | `0x00000000`, a positive zero | a zero | a zero |
 
-So a float32 denormal is a zero because `CharonMPSGraphAsZero` reads one as a zero of the same sign (the rule
+So a float32 denormal is a zero because `RevenantMPSGraphAsZero` reads one as a zero of the same sign (the rule
 this library already measured for the arithmetic family), a half denormal is not because the half path keeps
 one, and a negative zero is a zero in both because `-0.0 == 0.0` is true and that is the test. The walk is
-therefore `CharonMPSGraphAsZero(CharonMPSLoad(...), type) != 0.0` - the load every other walk here reads with,
+therefore `RevenantMPSGraphAsZero(RevenantMPSLoad(...), type) != 0.0` - the load every other walk here reads with,
 and no rule of its own.
 
 **The caller's destination does NOT decide the count, and this family writes the WHOLE destination.** Four
@@ -2134,58 +2134,58 @@ surface this library's own files use to share their own state, and each is a reg
 method of its object's own class rather than of a category - which is the one shape `carried_api` does not read,
 so it is named here in the facts and not only in the registry.
 
-* `-[MPSGraph charon_mps_addOperationOfKind]` - MPSGraph14.m
-* `-[MPSState charon_mps_appendBuffer]` - MPSState11.m
-* `-[MPSState charon_mps_appendResource]` - MPSState11.m
-* `-[MPSState charon_mps_appendTexture]` - MPSState11.m
-* `-[MPSGraph charon_mps_arithmetic]` - MPSGraph14.m
-* `-[MPSMatrixRandom charon_mps_batchOver]` - MPSMatrixRandom13.m
-* `-[MPSMatrixRandom charon_mps_configureWithDataType]` - MPSMatrixRandom13.m, MPSMatrixRandomMTGP3213.m, MPSMatrixRandomPhilox13.m
-* `-[MPSMatrixCopy charon_mps_destinationAtIndex]` - MPSMatrixCopy11.m, MPSMatrixCopyDescriptor11.m
-* `-[MPSCNNConvolutionDescriptor charon_mps_fold]` - MPSCNNConvolutionDescriptor10.m
-* `-[MPSCNNBatchNormalization charon_mps_foldFromDataSource]` - MPSCNNBatchNormalization12.m
-* `-[MPSCNNConvolutionWeightsAndBiasesState charon_mps_listOfBufferSizes]` - MPSCNNConvolutionWeightsAndBiasesState11.m
-* `-[MPSGraph charon_mps_nanPropagatingExtreme:secondaryTensor:lesser:name:]` - MPSGraphReductionOps150.m, the one method 15.0's two NaN-propagating extremes share
-* `-[MPSMatrixCopyDescriptor charon_mps_offsetsAtIndex]` - MPSMatrixCopy11.m, MPSMatrixCopyDescriptor11.m
-* `-[MPSGraph charon_mps_operation]` - MPSGraph14.m
-* `-[MPSGraph charon_mps_predicate]` - MPSGraph14.m
-* `-[MPSGraph charon_mps_reduction:axes:tensor:parameters:name:]` - MPSGraph14.m, the seam every release's reduction factory goes through
-* `-[MPSGraph charon_mps_reductionOf:tensor:combination:kind:propagatesNaN:name:]` - MPSGraph14.m
-* `-[MPSGraph charon_mps_runOperation]` - MPSGraph14.m, MPSGraphInterpreter14.m
-* `-[MPSMatrixLogSoftMax charon_mps_setLogarithmic]` - MPSMatrixLogSoftMax12.m, MPSMatrixSoftMax12.m
-* `-[MPSCNNPooling charon_mps_setMaximum]` - MPSCNNPooling10.m
-* `-[MPSCNNConvolutionDescriptor charon_mps_setNeuronParameterC]` - MPSCNNConvolutionDescriptor10.m
-* `-[MPSGraph charon_mps_setOutputTensors]` - MPSGraph14.m, MPSGraphOperation14.m
-* `-[MPSGraph charon_mps_setParameters]` - MPSGraph14.m, MPSGraphOperation14.m
-* `-[MPSCNNKernel charon_mps_setWindowWidth]` - MPSCNNKernel10.m, MPSCNNPooling10.m
-* `-[MPSMatrixCopy charon_mps_sourceAtIndex]` - MPSMatrixCopy11.m, MPSMatrixCopyDescriptor11.m
-* `-[MPSState charon_mps_temporaryWithBlock]` - MPSState11.m
-* `-[MPSMatrixCopyDescriptor charon_mps_withCount]` - MPSMatrixCopyDescriptor11.m
-* `-[MPSTemporaryMatrix charon_mps_withReadCount]` - MPSTemporaryMatrix11.m, MPSTemporaryVector12.m
-* `-[MPSMatrixRandom charon_mps_wordAtIndex]` - MPSMatrixRandom13.m
-* `-[MPSCNNPooling charon_mps_zeroPadSizeX]` - MPSCNNPooling10.m
-* `-[MPSCNNPooling charon_mps_zeroPadSizeY]` - MPSCNNPooling10.m
-* `-[MPSGraph charon_mps_constantShapeOfTensor:]` - MPSGraph14.m, the shape a constant tensor holds and nil for
+* `-[MPSGraph revenant_mps_addOperationOfKind]` - MPSGraph14.m
+* `-[MPSState revenant_mps_appendBuffer]` - MPSState11.m
+* `-[MPSState revenant_mps_appendResource]` - MPSState11.m
+* `-[MPSState revenant_mps_appendTexture]` - MPSState11.m
+* `-[MPSGraph revenant_mps_arithmetic]` - MPSGraph14.m
+* `-[MPSMatrixRandom revenant_mps_batchOver]` - MPSMatrixRandom13.m
+* `-[MPSMatrixRandom revenant_mps_configureWithDataType]` - MPSMatrixRandom13.m, MPSMatrixRandomMTGP3213.m, MPSMatrixRandomPhilox13.m
+* `-[MPSMatrixCopy revenant_mps_destinationAtIndex]` - MPSMatrixCopy11.m, MPSMatrixCopyDescriptor11.m
+* `-[MPSCNNConvolutionDescriptor revenant_mps_fold]` - MPSCNNConvolutionDescriptor10.m
+* `-[MPSCNNBatchNormalization revenant_mps_foldFromDataSource]` - MPSCNNBatchNormalization12.m
+* `-[MPSCNNConvolutionWeightsAndBiasesState revenant_mps_listOfBufferSizes]` - MPSCNNConvolutionWeightsAndBiasesState11.m
+* `-[MPSGraph revenant_mps_nanPropagatingExtreme:secondaryTensor:lesser:name:]` - MPSGraphReductionOps150.m, the one method 15.0's two NaN-propagating extremes share
+* `-[MPSMatrixCopyDescriptor revenant_mps_offsetsAtIndex]` - MPSMatrixCopy11.m, MPSMatrixCopyDescriptor11.m
+* `-[MPSGraph revenant_mps_operation]` - MPSGraph14.m
+* `-[MPSGraph revenant_mps_predicate]` - MPSGraph14.m
+* `-[MPSGraph revenant_mps_reduction:axes:tensor:parameters:name:]` - MPSGraph14.m, the seam every release's reduction factory goes through
+* `-[MPSGraph revenant_mps_reductionOf:tensor:combination:kind:propagatesNaN:name:]` - MPSGraph14.m
+* `-[MPSGraph revenant_mps_runOperation]` - MPSGraph14.m, MPSGraphInterpreter14.m
+* `-[MPSMatrixLogSoftMax revenant_mps_setLogarithmic]` - MPSMatrixLogSoftMax12.m, MPSMatrixSoftMax12.m
+* `-[MPSCNNPooling revenant_mps_setMaximum]` - MPSCNNPooling10.m
+* `-[MPSCNNConvolutionDescriptor revenant_mps_setNeuronParameterC]` - MPSCNNConvolutionDescriptor10.m
+* `-[MPSGraph revenant_mps_setOutputTensors]` - MPSGraph14.m, MPSGraphOperation14.m
+* `-[MPSGraph revenant_mps_setParameters]` - MPSGraph14.m, MPSGraphOperation14.m
+* `-[MPSCNNKernel revenant_mps_setWindowWidth]` - MPSCNNKernel10.m, MPSCNNPooling10.m
+* `-[MPSMatrixCopy revenant_mps_sourceAtIndex]` - MPSMatrixCopy11.m, MPSMatrixCopyDescriptor11.m
+* `-[MPSState revenant_mps_temporaryWithBlock]` - MPSState11.m
+* `-[MPSMatrixCopyDescriptor revenant_mps_withCount]` - MPSMatrixCopyDescriptor11.m
+* `-[MPSTemporaryMatrix revenant_mps_withReadCount]` - MPSTemporaryMatrix11.m, MPSTemporaryVector12.m
+* `-[MPSMatrixRandom revenant_mps_wordAtIndex]` - MPSMatrixRandom13.m
+* `-[MPSCNNPooling revenant_mps_zeroPadSizeX]` - MPSCNNPooling10.m
+* `-[MPSCNNPooling revenant_mps_zeroPadSizeY]` - MPSCNNPooling10.m
+* `-[MPSGraph revenant_mps_constantShapeOfTensor:]` - MPSGraph14.m, the shape a constant tensor holds and nil for
   any other, which is how a slice's gradient is given the shape of its forward input before the graph runs
-* `-[MPSGraph charon_mps_gatherShapeOfTensor:parameters:named:]` - MPSGraphInterpreter14.m,
+* `-[MPSGraph revenant_mps_gatherShapeOfTensor:parameters:named:]` - MPSGraphInterpreter14.m,
   the gather walk's own plan asked when the graph is built, so that the output tensor
   carries its result's shape before anything runs
-* `-[MPSGraph charon_mps_slice:inputs:parameters:name:]` - MPSGraph14.m, the one seam the slice family's eleven
+* `-[MPSGraph revenant_mps_slice:inputs:parameters:name:]` - MPSGraph14.m, the one seam the slice family's eleven
   methods and the pad's and the tile's four go through: a gather in one direction, a scatter in the others
-* `-[MPSGraph charon_mps_split:axis:sizes:numSplits:name:]` - MPSGraph14.m, the one seam in this library that
+* `-[MPSGraph revenant_mps_split:axis:sizes:numSplits:name:]` - MPSGraph14.m, the one seam in this library that
   answers with SEVERAL tensors: one output tensor per region, each with its own shape
-* `-[MPSGraph charon_mps_splitSizes:numSplits:axis:ofShape:named:]` - MPSGraphInterpreter14.m, the sizes a split
+* `-[MPSGraph revenant_mps_splitSizes:numSplits:axis:ofShape:named:]` - MPSGraphInterpreter14.m, the sizes a split
   cuts by, and the three refusals about them, asked both when the graph is built and when it runs
-* `-[MPSGraph charon_mps_coordinates:fedAxis:shape:fedShape:name:]` - MPSGraph14.m, the walk with no operand: the
+* `-[MPSGraph revenant_mps_coordinates:fedAxis:shape:fedShape:name:]` - MPSGraph14.m, the walk with no operand: the
   shape and the axis, written down or held in a constant
 
 **Which half of this list is current, and which is not.** The graph's names are read out of the graph's own
 compiled objects with `nm` and are current for this tree: `relcheck` compiled twenty of them - the slice family's
 three objects of 17.4, 18.0 and 18.2 among them - and held every one to a single release. The matrix and CNN entries are a snapshot of an earlier pass and are short of the tree:
-measured against the sources, `MPSPredicate16.m` carries `charon_mps_permitsExecution`, `MPSImagePyramid16.m`
-carries three (`charon_mps_filter`, `charon_mps_filterWidth`, `charon_mps_filterHeight`) and `MPSNDArray13.m`
-carries four (`charon_mps_wholeShapeOf:`, `charon_mps_makeBuffer`, `charon_mps_elementCount`,
-`charon_mps_bufferStrides:`), and none of those eight is named above. Nothing in the graph family rests on the
+measured against the sources, `MPSPredicate16.m` carries `revenant_mps_permitsExecution`, `MPSImagePyramid16.m`
+carries three (`revenant_mps_filter`, `revenant_mps_filterWidth`, `revenant_mps_filterHeight`) and `MPSNDArray13.m`
+carries four (`revenant_mps_wholeShapeOf:`, `revenant_mps_makeBuffer`, `revenant_mps_elementCount`,
+`revenant_mps_bufferStrides:`), and none of those eight is named above. Nothing in the graph family rests on the
 gap in the rest of the list, because the registry check reads the built libraries and not this page - but the
 page is wrong about the tree there until the whole library's objects are read again, which is what the closing
 sentence describes.

@@ -13,9 +13,9 @@ tool and a step of the conversion, not of the device.
 
     xmake l tools/assets-extract/assets-extract.lua [--scales 1,2,3] [--keep-appearance] Assets.car OUTPUT-FOLDER
 
-The first call builds `assets-extract` into `$CHARON_ASSETS_EXTRACT_CACHE` (default the `assets-extract` run folder of
-`modules/workspace.lua`, `$HOME/.cache/hades/<task>/assets-extract`). `tests/addon/assets_extract_test.lua` checks it, and
-extracts the catalogue `CHARON_TEST_ASSET_CATALOGUE` names when it is set. The tool
+The first call builds `assets-extract` into `$REVENANT_ASSETS_EXTRACT_CACHE` (default the `assets-extract` run folder of
+`modules/workspace.lua`, `$HOME/.revenant/cache/<task>/assets-extract`). `tests/addon/assets_extract_test.lua` checks it, and
+extracts the catalogue `REVENANT_TEST_ASSET_CATALOGUE` names when it is set. The tool
 prints one line of counts and exits 0; it exits 64 for a bad command line, 65 when the file is not a compiled catalogue and 69
 on a machine with no CoreUI. Call it on the resource stage, with the catalogue of the application and the folder the bundle
 is being made in, and copy the output beside the application's other resources.

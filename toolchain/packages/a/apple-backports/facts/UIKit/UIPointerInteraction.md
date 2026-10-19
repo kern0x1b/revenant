@@ -57,13 +57,13 @@ nothing can enter or leave a region and no object is ever handed to an applicati
 ### The commands, from the root of the repository
 
 ```
-CHARON_ROOT=$PWD xmake l tools/corpus/cache-census.lua UIPointerInteraction 6.1.3 4.3 16.0
-CHARON_ROOT=$PWD xmake l tools/corpus/cache-census.lua UIHoverGesture        6.1.3 4.3 16.0
+REVENANT_ROOT=$PWD xmake l tools/corpus/cache-census.lua UIPointerInteraction 6.1.3 4.3 16.0
+REVENANT_ROOT=$PWD xmake l tools/corpus/cache-census.lua UIHoverGesture        6.1.3 4.3 16.0
 for r in 6.1.3 4.3; do
   for s in pointerInteraction:regionForRequest:defaultRegion: pointerInteraction:styleForRegion: \
            pointerInteraction:willEnterRegion:animator: pointerInteraction:willExitRegion:animator: \
            gestureRecognizer:shouldRecognizeSimultaneouslyWithGestureRecognizer: zzNonexistentSelectorForControl:
-  do printf '%s %-62s %s\n' "$r" "$s" "$(strings -a ~/.charon/dyld/$r/dyld_shared_cache_armv7 | grep -cxF "$s")"; done
+  do printf '%s %-62s %s\n' "$r" "$s" "$(strings -a ~/.revenant/dyld/$r/dyld_shared_cache_armv7 | grep -cxF "$s")"; done
 done
 printf '%s\n' UIPointerInteraction UIPointerInteractionDelegate UIPointerInteractionAnimating \
   addAnimations: addCompletion: zzNonexistentNameForControl | xmake l tools/cache-index/first-rung.lua
@@ -72,15 +72,15 @@ printf '%s\n' UIPointerInteraction UIPointerInteractionDelegate UIPointerInterac
 ### The output
 
 ```
-6.1.3     ~/.charon/dyld/6.1.3/dyld_shared_cache_armv7
+6.1.3     ~/.revenant/dyld/6.1.3/dyld_shared_cache_armv7
          images 524, of which naming UIPointerInteraction 0
          classes 11378, of which UIPointerInteraction* 0
          protocols 1171, of which UIPointerInteraction* 0
-4.3       ~/.charon/dyld/4.3/dyld_shared_cache_armv7
+4.3       ~/.revenant/dyld/4.3/dyld_shared_cache_armv7
          images 354, of which naming UIPointerInteraction 0
          classes 7187, of which UIPointerInteraction* 0
          protocols 564, of which UIPointerInteraction* 0
-16.0      ~/.charon/dyld/16.0/dyld_shared_cache_arm64e
+16.0      ~/.revenant/dyld/16.0/dyld_shared_cache_arm64e
          images 2664, of which naming UIPointerInteraction 0
          classes 143137, of which UIPointerInteraction* 2 (UIPointerInteraction UIPointerInteractionAnimator)
          protocols 25549, of which UIPointerInteraction* 2 (UIPointerInteractionAnimating UIPointerInteractionDelegate)

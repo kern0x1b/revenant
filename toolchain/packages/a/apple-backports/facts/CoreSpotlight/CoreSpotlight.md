@@ -75,7 +75,7 @@ attempt's `183410688 + (8192 - 187111415) = -3692535`.
 
 ## What the port does
 
-`CSSearchableIndex` keeps its own journal: a `CharonSpotlightStore` per index name, a property-list
+`CSSearchableIndex` keeps its own journal: a `RevenantSpotlightStore` per index name, a property-list
 of archived `CSSearchableItem`s and the batch client state, under Application Support at
 `space.kern0x1b.corespotlight/<name>.plist`. `indexSearchableItems:completionHandler:` and the three
 delete methods write or remove entries and call their handler with a `nil` error — a real journal, not
@@ -84,7 +84,7 @@ a `documented-absent` refusal — and `endIndexBatchWithClientState:completionHa
 header describes, including refusing batching on `defaultSearchableIndex`. `isIndexingAvailable`
 answers `YES`: the index genuinely indexes.
 
-Every mutation also calls `CharonSpotlightBridge`, which `dlopen`s `Spotlight.framework`,
+Every mutation also calls `RevenantSpotlightBridge`, which `dlopen`s `Spotlight.framework`,
 resolves `SPSpotlightManager` and `+sharedManager` with `NSClassFromString`/`objc_msgSend`, registers
 the index's category (the application's own bundle identifier) with
 `-startRecordUpdatesForApplication:andCategory:`, and on each write pushes the changed identifiers
@@ -107,10 +107,10 @@ fixed eleven-bundle list above, none of which reads a third-party category, and
 
 **The twelfth entry named above is built and installed; the query path is not proven yet, and
 exactly how far it gets is now measured on an iPad 2 (6.1.3), not guessed.**
-`packages/a/apple-backports/CoreSpotlight/SearchBundle/CharonSearchDatastore.m` is
-`org.charon.corespotlight.searchBundle`'s principal class, built by `write_searchbundle` in
+`packages/a/apple-backports/CoreSpotlight/SearchBundle/RevenantSearchDatastore.m` is
+`org.revenant.corespotlight.searchBundle`'s principal class, built by `write_searchbundle` in
 `modules/apple/backports.lua` whenever `corespotlight` is among the staged libraries, for
-`/System/Library/SearchBundles/org.charon.corespotlight.searchBundle/`. **It is not packaged:**
+`/System/Library/SearchBundles/org.revenant.corespotlight.searchBundle/`. **It is not packaged:**
 `write_deb` builds it outside the stage and prints `withheld:` with the reason, because sending
 `-appendResults:` hangs `searchd` (below). It goes back into the package only once that hang is
 fixed and the query path is measured green on a device. The protocol it
@@ -128,12 +128,12 @@ answering `nil` - corrected before it ever shipped a crash) and
 pushes matches through `-[resultsPipe addResults:]`, the way `NotesDatastore` itself does.
 
 This forced a real correction to `CSSearchableIndex` itself:
-`CharonSpotlightStoreDirectory` wrote under `NSApplicationSupportDirectory`, sandboxed to the
+`RevenantSpotlightStoreDirectory` wrote under `NSApplicationSupportDirectory`, sandboxed to the
 indexing application's own container - a location no search bundle, running in whatever process
 hosts system search, could ever read. It now writes under
-`/var/mobile/Library/Caches/org.charon.corespotlight/<bundle identifier>/`, world-readable
-(`0777`), the same shared-cache bridge pattern `org.charon.callkit` already uses to cross the same
-kind of process boundary. `CharonSearchDatastore.m` resolves `CSSearchableItem` - this port's own
+`/var/mobile/Library/Caches/org.revenant.corespotlight/<bundle identifier>/`, world-readable
+(`0777`), the same shared-cache bridge pattern `org.revenant.callkit` already uses to cross the same
+kind of process boundary. `RevenantSearchDatastore.m` resolves `CSSearchableItem` - this port's own
 class, not Apple's, so no compile-time link is possible - by `dlopen`ing the installed
 `libCoreSpotlightBackports.dylib` symlink before unarchiving, and every value that crosses that
 boundary is typed `id` and read with `valueForKey:`, never a static `CSSearchableItem *`, since
@@ -243,7 +243,7 @@ conforming to `<SPSearchDatastore>`, `searchd` calls `-searchDomains` and
 `-performQuery:withResultsPipe:` for real, `-performQuery:withResultsPipe:` correctly reads the
 query's `searchString`, correctly finds the one synthetic item written for this test, and correctly
 builds a real `SPContentResult` carrying that exact title - confirmed by the object's own
-`-description` in the log: `<SPContentResult: 0x1d59c080> { title = CharonProbeXyzzyPlugh19640523; }`.
+`-description` in the log: `<SPContentResult: 0x1d59c080> { title = RevenantProbeXyzzyPlugh19640523; }`.
 `resultsPipe respondsToSelector:@selector(appendResults:)` answers `YES`.
 
 **Sending `-appendResults:` to it hangs `searchd`, and the differentiating experiment names which
@@ -265,8 +265,8 @@ that field belongs to the unrelated `SPSearchResultSection`, so "unset domain" w
 candidate; `_extid`/`_content` were the only two fields actually worth filling.
 
 Filled both (`-setExtid:` with the item's own identifier, `-setContent:` with its title, confirmed
-in the log immediately before the hang: `extid=org.charon.corespotlight.probe.item1
-content=CharonProbeXyzzyPlugh19640523`) and repeated the call on a clean `searchd`
+in the log immediately before the hang: `extid=org.revenant.corespotlight.probe.item1
+content=RevenantProbeXyzzyPlugh19640523`) and repeated the call on a clean `searchd`
 (confirmed not-yet-running before the run, per the coordinator's instruction not to chain
 experiments without a health check between them). **The hang still happens, identically** - same
 missing `appendResults: sent` line, same `U` state, same unresponsiveness until `kill -9`. This
@@ -313,8 +313,8 @@ for what closing that gap actually requires. `CSIndexErrorDomain` = `"CSIndexErr
 the same way.
 
 A write that fails is answered, and nothing of it is kept. The index is a plist per index name
-under `CHARON_SPOTLIGHT_SHARED_ROOT` (`CoreSpotlight/CharonSpotlightStore.h`), written by
-`-[CharonSpotlightStore save]` in `CSSearchableIndex.m`. When the directory cannot be made, the
+under `REVENANT_SPOTLIGHT_SHARED_ROOT` (`CoreSpotlight/RevenantSpotlightStore.h`), written by
+`-[RevenantSpotlightStore save]` in `CSSearchableIndex.m`. When the directory cannot be made, the
 store cannot be serialized, or the file cannot be written, the five mutating calls
 (`indexSearchableItems:`, the three deletes, `endIndexBatchWithClientState:`) hand their completion
 handler an error in `CSIndexErrorDomain`:

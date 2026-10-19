@@ -9,12 +9,12 @@ all. But a class **named** `CPListItem` is, and it is not CarPlay's: its own ele
 `accessoryType` and no `handler`.
 
 So Apple's CarPlay `CPListItem` is iOS 12 and absent, and its *name* is taken, which is the case
-`charon_alias.h` exists for. (Note what this is and is not: the release has no `CPWindow`,
+`revenant_alias.h` exists for. (Note what this is and is not: the release has no `CPWindow`,
 `CPTemplate` or any other CarPlay class, but it does have this one *name*, and a name the release
 exports cannot be replaced by a second class of the same name.) `CarPlay/CPListItem.m` carries the name as an **alias**: it defines
-`CharonCPListItem`, exports the release's name to it, and records the pair in
-`__DATA,__charon_alias` for the library's loader. A subclass an application writes of `CPListItem`
-inherits the release's class and is laid out after it; sent to `CharonCPListItem` itself, the class
+`RevenantCPListItem`, exports the release's name to it, and records the pair in
+`__DATA,__revenant_alias` for the library's loader. A subclass an application writes of `CPListItem`
+inherits the release's class and is laid out after it; sent to `RevenantCPListItem` itself, the class
 introspection answers as the release's class does, so `[CPListItem class]`, what `[CPListItem alloc]`
 makes and what the release hands out are one class. This is exactly how the port already handles a
 name the release carries and Apple did not add -- `UIKit`'s `NSTextList` and `NSTextTab`, whose rows
@@ -158,7 +158,7 @@ A 25th class the corpus does **not** ask about, and the reason the registry name
 the corpus has 74: `CPListItem`. The corpus does not list it as missing, because the release carries
 that *name* -- a class of another framework's, measured in facts' own words below -- so the port has to
 say what happens to the name rather than the corpus having to ask. The answer is `ignored`: the name
-is an **alias** through `charon_alias.h`, the loader makes `CharonCPListItem` a subclass of the
+is an **alias** through `revenant_alias.h`, the loader makes `RevenantCPListItem` a subclass of the
 release's own class and gives that class what the alias has and lacks, and the row says so.
 
 The 44 with **no registry entry at all** are the rest of the corpus. They are not `absent` -- they
@@ -220,7 +220,7 @@ entry. Measured, not read off a header:
 - **The SDK the package compiles against does not have the class at all**, so this is not a declaration
   of Apple's that was copied: `grep` finds the name nowhere in the iPhoneOS16.4 SDK, whose
   `CarPlay.framework/Headers/CPGridButton.h` is 57 lines and stops at the 12.0 members (its last
-  initialiser at `:30`). `CharonCarPlay260.h` therefore carries Apple's own declaration from
+  initialiser at `:30`). `RevenantCarPlay260.h` therefore carries Apple's own declaration from
   CPGridButton.h:15-34 -- declarations only, no method body and no Apple byte -- and every behaviour in
   it is `CarPlayGrid260.m`'s.
 
@@ -235,7 +235,7 @@ own name is now `tabTitle`, which the header does declare.
 
 **The buttons are NSObjects, and the templates draw them.** That is the SDK's own shape -- `CPButton`,
 `CPBarButton`, `CPGridButton`, `CPMapButton` and `CPTextButton` are all `NSObject` subclasses in the
-16.4 headers, and none of them is a view. So each carries a `charon_drawInRect:` (and `alpha:` where it
+16.4 headers, and none of them is a view. So each carries a `revenant_drawInRect:` (and `alpha:` where it
 is drawn in a bar), and each template asks its buttons to draw themselves: the list and grid and map
 templates put the bar buttons in a bar the template owns, the grid template asks each grid button to
 draw into the collection view cell it is in, and the map template asks each map button to draw over
@@ -304,7 +304,7 @@ of why this is not a cut-and-paste:
 | 15.0 | `-[CPListSection initWithItems:header:headerSubtitle:headerImage:headerButton:sectionIndexTitle:]` | the section's own storage |
 | 26.0 | `-[CPListTemplate initWithTitle:sections:assistantCellConfiguration:headerGridButtons:]` | the list's own storage |
 
-A category cannot reach an ivar, so the split needs five `Charon`-prefixed accessors on the classes in
+A category cannot reach an ivar, so the split needs five `revenant`-prefixed accessors on the classes in
 `CarPlayTemplatesView12.m` (`_stack`, `_sections`, `_gridButtons`, `_grid`, `_title`, plus whatever the
 three initialisers need) and then three new objects named for 14.0, 15.0 and 26.0 — which is what
 `CarPlayNavigationSession12.m` and `CarPlayNavigationSession154.m` do for the session, one release each,
@@ -330,24 +330,24 @@ and they follow the shapes read here.
 **The home screen is the carplay port's, not this library's.** The coordinator's decision: the car's
 home screen is the Core Graphics one `carplayd` already draws -- it needs no window server and it
 already reaches the car -- so it stays the renderer, and what `libCarPlayBackports` had and it lacked
-moves into it **as C and Core Graphics**, in `charon_car_apps.{h,m}` and `charon_layout.{h,m}` in
+moves into it **as C and Core Graphics**, in `revenant_car_apps.{h,m}` and `revenant_layout.{h,m}` in
 `~/Git/projects/ios/carplay`, delivered to that band as patches **0001 and 0002** from
 `carplay/.agent-work/worktrees/home-c-library` (branch `band/home-c-library`).
 
 | what | where it is now |
 | --- | --- |
-| the real app icons out of the app bundles -- `CFBundleIcons`/`CFBundlePrimaryIcon`, the older `CFBundleIconFiles`, the singular `CFBundleIconFile`, `@2x` first -- decoded with ImageIO | `charon_car_app_icon`, carplay |
-| `UIPrerenderedIcon`, so the gloss is drawn only where the release has not | its out-parameter, and `charon_car_draw_gloss`, carplay |
-| the name plate for an app that ships no icon, never a picture invented for one | `charon_car_draw_name_plate`, carplay |
-| the six dock plates, each saying whether the release answered | `charon_car_draw_dock_plate`, carplay |
-| the exclusion state, in the release's own `NSUserDefaults` | `charon_car_status_{read,load,save,flip_exclusion}`, carplay |
-| the layout, a pure function of the head unit's size and scale | `charon_car_layout`, carplay |
+| the real app icons out of the app bundles -- `CFBundleIcons`/`CFBundlePrimaryIcon`, the older `CFBundleIconFiles`, the singular `CFBundleIconFile`, `@2x` first -- decoded with ImageIO | `revenant_car_app_icon`, carplay |
+| `UIPrerenderedIcon`, so the gloss is drawn only where the release has not | its out-parameter, and `revenant_car_draw_gloss`, carplay |
+| the name plate for an app that ships no icon, never a picture invented for one | `revenant_car_draw_name_plate`, carplay |
+| the six dock plates, each saying whether the release answered | `revenant_car_draw_dock_plate`, carplay |
+| the exclusion state, in the release's own `NSUserDefaults` | `revenant_car_status_{read,load,save,flip_exclusion}`, carplay |
+| the layout, a pure function of the head unit's size and scale | `revenant_car_layout`, carplay |
 | **the restyled `CPListTemplate`, `CPMapTemplate`, `CPGridTemplate` and the rest** | **here**, because those are what an app with a CarPlay scene shows |
 
-`CharonCarPlayHomeTemplate`, `CharonCarPlayHomeView`, `CharonCarPlayDock` and
-`CharonCarPlayHomeSettingsTemplate` are **out of this library**: Apple has no such template, and a
+`RevenantCarPlayHomeTemplate`, `RevenantCarPlayHomeView`, `RevenantCarPlayDock` and
+`RevenantCarPlayHomeSettingsTemplate` are **out of this library**: Apple has no such template, and a
 class the SDK does not declare is not something `libCarPlayBackports` should carry (COORDINATION §9 --
-and the gate agrees: `internal_symbol()` filters every `Charon*` name out of what a library exports,
+and the gate agrees: `internal_symbol()` filters every `Revenant*` name out of what a library exports,
 so a home screen in here would never have been API anything could reach). What this library now has
 of the home screen is the **templates in the release's own chrome**: `UIBarStyleBlack` bars, the
 release's grouped cells, its Helvetica, and a plate the skin draws where a collection view cell has no
@@ -391,7 +391,7 @@ judgement:
 **What the dock's button therefore does.** It does not guess and it does not claim. It asks the
 release whether the assistant is available, through the release's own `AFPreferences`/`AFSettingsConnection`
 where the release answers at all, and:
-- where something answers that Siri is available, the button is drawn live and `charon_siri` asks the
+- where something answers that Siri is available, the button is drawn live and `revenant_siri` asks the
   daemon to bring Siri up over the SpringBoard path above;
 - where the release does not answer, the plate is drawn **dimmed and disabled** and says *Siri is not
   available on this device*, which is a statement about what was measured on this device and not a
@@ -451,7 +451,7 @@ its own `src/`, `xmake.lua` and `packaging/` for `backboardd`, `SpringBoardServi
 design's own section 3 describes the daemon's Mach service as the **app-facing** one it declares,
 with `backboardd` as the precedent for that and not as something the port calls. Carrying the message
 would mean a new IPC surface plus a hook inside SpringBoard, the one thing only SpringBoard can do.
-The plate in the carplay port's `charon_apps.m` says the same, where the plate is drawn, and the two
+The plate in the carplay port's `revenant_apps.m` says the same, where the plate is drawn, and the two
 agree.
 
 
@@ -483,7 +483,7 @@ and `CarPlaySessionConfiguration12.m` / `CarPlaySessionConfiguration13.m`.
 
 Two traps in that reader, both hit while writing it, because both make a real definition look missing:
 
-- A category's IMP prints as `-[CPNavigationSession(CharonRouteInformation174) addManeuvers:]`, not as
+- A category's IMP prints as `-[CPNavigationSession(RevenantRouteInformation174) addManeuvers:]`, not as
   `-[CPNavigationSession addManeuvers:]`. A matcher that expects the bare spelling reports all four of
   the session's category methods as having no definition.
 - The 17.4 properties of the session are `@dynamic` in the 12.0 object, so that object has their IVARS

@@ -5,12 +5,12 @@ themselves are the product.
 
 ## What this is
 
-Psychopomp is a set of Agent Skills that guides a coding agent through building a modern app for
+agent-skills is a set of Agent Skills that guides a coding agent through building a modern app for
 old iOS (5, 6, 7, 9 and later) and old devices, from an empty directory to a `.deb`: the interview,
 installation, the project and its `xmake.lua`, the code (Objective-C or Swift, SwiftUI and Combine
 included), the build, a check in the emulator on the chosen release and device, packaging, and a
-Cydia repository. It stands on the stack of [Charon] (the xmake addon, toolchain, backports and
-Swift runtime), [Styx] (Combine), [Eidolon] (SwiftUI) and [Shade] (the emulator).
+Cydia repository. It stands on the stack of [toolchain] (the xmake addon, toolchain, backports and
+Swift runtime), [Combine] (Combine), [SwiftUI] (SwiftUI) and [emulator] (the emulator).
 
 `README.md` is for the people who install the plugin; this file is for the people who change it.
 
@@ -46,7 +46,7 @@ Swift runtime), [Styx] (Combine), [Eidolon] (SwiftUI) and [Shade] (the emulator)
   on reading files, running commands and asking the user. Runtime-specific manifests stay in their
   own files.
 - **Anchored to the stack as it is.** Every command, option and path in a skill is checked against
-  the current Charon, Styx, Eidolon and Shade before it is written; an intention is not described
+  the current toolchain, Combine, SwiftUI and the emulator before it is written; an intention is not described
   as a feature.
 - **Derived text keeps its origin.** A skill built on third-party material says so in its own file
   and in `THIRD-PARTY.md`, with the source, commit and license.
@@ -59,7 +59,7 @@ Swift runtime), [Styx] (Combine), [Eidolon] (SwiftUI) and [Shade] (the emulator)
 
 This section is not yet filled.
 
-[Charon]: https://github.com/kern0x1b/charon
-[Styx]: https://github.com/kern0x1b/styx
-[Eidolon]: https://github.com/kern0x1b/eidolon
-[Shade]: https://github.com/kern0x1b/shade
+[toolchain]: https://github.com/kern0x1b/revenant/tree/main/toolchain
+[Combine]: https://github.com/kern0x1b/revenant/tree/main/frameworks/Combine
+[SwiftUI]: https://github.com/kern0x1b/revenant/tree/main/frameworks/SwiftUI
+[emulator]: https://github.com/kern0x1b/revenant/tree/main/emulator

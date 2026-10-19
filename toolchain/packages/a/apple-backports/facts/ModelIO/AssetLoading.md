@@ -6,7 +6,7 @@ properties) and the three classes of `registry/ModelIO/ios9.json`.
 ## The wall this runs into
 
 iOS 6 carries no ModelIO at all. The 6.1.3 armv7 dyld cache holds no `MDLAsset`, no `MDLMesh`, no
-`MDLTexture` and no `MDLVertexDescriptor`: `~/.charon/dyld/6.1.3/selectors_armv7.txt`, the release's
+`MDLTexture` and no `MDLVertexDescriptor`: `~/.revenant/dyld/6.1.3/selectors_armv7.txt`, the release's
 whole selector table, has no `vertexAttributeDataForAttributeNamed:`, no `faceVertexIndices`, and no
 selector of any of the classes below. The framework arrived in iOS 9. So there is nothing on the
 release to answer with, and the work is building it.
@@ -109,11 +109,11 @@ zone is the release's own from 9.0 up and the port's only below 9.0. That is wha
 So a band of 9.0 to 10.3.4 that linked a class implementation of this name would hold **two** classes
 of one name in every process, and the runtime keeps the one it registered first - the release's - so
 a lookup answered one of the two and the program holding the port's symbol held the other. The name
-is therefore an alias through `charon_alias.h` (`MDLMeshBuffer11.m`), which is what
+is therefore an alias through `revenant_alias.h` (`MDLMeshBuffer11.m`), which is what
 `modules/apple/backports.lua`'s own `check_categories` asks for when it reads this reading ("the
 release carries MDLMeshBufferZoneDefault in ModelIO without exporting it: alias it through
-charon_alias.h"), and what `NSTextList` and `NSTextTab` already are for the same one - UIFoundation
-carries `NSTextList` from 6.0 and exports it from 9.0. The two members are a category on Charon's own
+revenant_alias.h"), and what `NSTextList` and `NSTextTab` already are for the same one - UIFoundation
+carries `NSTextList` from 6.0 and exports it from 9.0. The two members are a category on Revenant's own
 name, and the two values they hold are an associated object, because a category cannot add an
 instance variable and neither can the class behind an alias: `attach.c` lays the proxy out from the
 release's class and takes that write back when the two instance sizes differ.
@@ -132,10 +132,10 @@ What each band answers, and which of the three is measured where:
   capacity the allocator was asked to make.
 
 Two things about the alias that are written down rather than left to be discovered, and
-`charon_alias.h` says the first in its own comment: an application that asks the runtime for the name
+`revenant_alias.h` says the first in its own comment: an application that asks the runtime for the name
 with `NSClassFromString` gets nil on a release that has no class of the name, where the port's own
-class answered before - the name belongs to a class of Charon's own there. And the proxy adopts
-`MDLMeshBufferZone` from a `+load` (`class_addProtocol`), because `CHARON_ALIAS` declares the proxy
+class answered before - the name belongs to a class of Revenant's own there. And the proxy adopts
+`MDLMeshBufferZone` from a `+load` (`class_addProtocol`), because `REVENANT_ALIAS` declares the proxy
 with a superclass and nothing else, and a category's protocol list belongs to the category: measured
 with `otool -o` over a class with a category declaring `<P>`, `baseProtocols 0x0` on the class and
 `count 1` on the category. Without that, `[zone conformsToProtocol:@protocol(MDLMeshBufferZone)]`
@@ -151,10 +151,10 @@ three different answers from one constructor:
 
 - **Below 9.0** `objc_getClass("MDLMeshBufferZoneDefault")` answers nil, so the constructor skips
   this alias entirely: the proxy is not re-parented, nothing is adopted into anything, and its own
-  `-capacity`, `-allocator` and `charon_setCapacity:allocator:` are what answer.
+  `-capacity`, `-allocator` and `revenant_setCapacity:allocator:` are what answer.
 - **On 9.0 to 10.3.4** the release's class is found, so the proxy is re-parented under it, and the
   proxy's own copies of `-capacity` and `-allocator` are replaced by the release's implementations -
-  `charon_adopt_methods` does that wherever the release's class already has the selector, so that a
+  `revenant_adopt_methods` does that wherever the release's class already has the selector, so that a
   subclass of the proxy gets the release's answer. The proxy's own **class** methods are not: that
   call passes NSObject's own class as the "already has it" reference, so every one of the alias's
   class methods keeps the alias's answer, and `+alloc` keeps handing out

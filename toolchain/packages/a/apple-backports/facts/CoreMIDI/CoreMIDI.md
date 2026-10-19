@@ -12,7 +12,7 @@ MIDI 1.0 bytes only.
 
 - `MIDIClientCreateWithBlock` is the release's `MIDIClientCreate` with the block carried in its reference constant. The
   block is copied once and kept for as long as the client lives. The release does not tell this library when the client ends,
-  so the copy is released when the object is found gone: the rows of CharonMIDIPorts.m are swept whenever the library makes
+  so the copy is released when the object is found gone: the rows of RevenantMIDIPorts.m are swept whenever the library makes
   another object, and a client that answers paramErr to a UniqueID read is gone (below). A NULL
   block is accepted and returns noErr, as macOS does (measured, oracle/nullargs.m: `0`). A protocol that is neither 1.0 nor
   2.0 answers `paramErr` here; macOS does not answer it, it terminates the process (measured, the same probe).
@@ -60,11 +60,11 @@ Both string constants are the values macOS CoreMIDI gives them, read from the ho
   bring the release of a block forward to the moment of the dispose, which needs a client of the library's own and a running
   main run loop; neither is needed for the sweep.
 - The owned row also carries the stamp the library wrote on its object when it took it, so a reference the release gives to a
-  new object after a dispose is not taken for the old one (CharonMIDIPorts.m, charon_object_check; "Which identity" below). The
+  new object after a dispose is not taken for the old one (RevenantMIDIPorts.m, revenant_object_check; "Which identity" below). The
   UniqueID is not part of a row: it is the creator's to set (MIDIServices.h, kMIDIPropertyUniqueID), and an application that sets
   it on its own destination has the same live object.
 - The library learns of a dispose by reads it makes itself: on each in-process delivery, right before its block is called
-  (charon_drain), and on each creation's sweep (charon_sweep, a window of rows). The release gives it no call for a dispose, and the
+  (revenant_drain), and on each creation's sweep (revenant_sweep, a window of rows). The release gives it no call for a dispose, and the
   notification above goes to a client's notify proc, not to the library.
 
 ## What is not built here
@@ -73,7 +73,7 @@ What the registry (registry/CoreMIDI/*.json) says is not an implemented API, cou
 eight files (`xmake l` over the files, `json.loadfile`): 41 are `implemented`, 8 are `inert` and 2 are `owed`.
 
 - `owed` (not exported under their names): `MIDIBluetoothDriverActivateAllConnections` and `MIDIBluetoothDriverDisconnect`
-  (iOS 16). The bodies are built (MIDIBluetooth16.m, `charon_bluetooth_*`) and the central has never run on a device; see
+  (iOS 16). The bodies are built (MIDIBluetooth16.m, `revenant_bluetooth_*`) and the central has never run on a device; see
   Bluetooth.md.
 - `inert` (the type exists, and does nothing that a MIDI-CI transport would do, because the port has none; each logs once
   when an action is asked for): `MIDICISession` (iOS 12), `MIDICIDiscoveredNode`, `MIDICIDiscoveryManager`, `MIDICIResponder` and
@@ -86,7 +86,7 @@ eight files (`xmake l` over the files, `json.loadfile`): 41 are `implemented`, 8
 
 Measured with `tests/backports/emulate/coremidi` (`xmake l run.lua`: `xmake emulate -d iPhone4,1 -r 6.1.3`, time scale 10):
 
-- A daemon (`/usr/libexec/charoncoremidi`, started by launchd, no bundle) is refused: the release's own `MIDISourceCreate`
+- A daemon (`/usr/libexec/revenantcoremidi`, started by launchd, no bundle) is refused: the release's own `MIDISourceCreate`
   returns -10844 (kMIDINotPermitted), and so do this library's protocol endpoints. The round trip was FAIL (7 failures) as a
   daemon. The command-line tool that made that run is retired (the commit "Retire the CoreMIDI round-trip command-line tool"),
   so no command-line form of the round trip is kept. The guest's MIDIServer runs (it is spawned by launchd at boot).
@@ -117,7 +117,7 @@ facts/CoreMIDI/EventList.md. The host differential that holds the library to mac
 A row must tell its object from a reference the release gave to a new object, without taking an object whose creator changed
 its UniqueID for a new one (the first rule did: it freed the port and block of a live destination whose application had set
 its UniqueID, while the release still held them). Chosen: the library writes a private integer under its own key
-(`charon.owner`, CHARON_OWNER_KEY) when it takes an object, and a row is the same object while the key reads back the value.
+(`revenant.owner`, REVENANT_OWNER_KEY) when it takes an object, and a row is the same object while the key reads back the value.
 
 Measured with the same program (oracle/stamp.h) on macOS 27.0.1 (oracle/stamp-macos.txt) and on the emulated 6.1.3 (run folder
 of the band, app-stamp.out):
@@ -128,14 +128,14 @@ of the band, app-stamp.out):
 - Round 9 (host only, macOS 27.0.1; probe-owner.out in the run folder v-midifix9/l5/out): a destination the release made and the library
   did not stamp answers -10835 for the owner key (value 0); a destination the library made answers noErr with its stamp; after the
   dispose both answer -50 for the owner key, and the release destination answers -50 for the UniqueID too. A reused reference was not
-  produced on the host, so the library's branch for a new object without the stamp (charon_object_check, kMIDIUnknownProperty on a
+  produced on the host, so the library's branch for a new object without the stamp (revenant_object_check, kMIDIUnknownProperty on a
   stamped row) is by reading.
 - Churn: 300 destinations, 300 sources, 300 input ports and 100 clients made and disposed, with a few kept alive across it: no
   reference was seen again and every reference was above the one before (macOS and 6.1.3 alike). A reuse was never observed;
   the stamp is for the case that cannot be excluded, and its failure mode (an in-process delivery into the block of a destination
   that is another object now) is a delivery into the application's freed context.
 - Cost: one write per owned object. The release announces the write to the clients of the process as one property change
-  (macOS: object type 3 and 2 for a destination and a source, -1 for ports and clients, property name `charon.owner`).
+  (macOS: object type 3 and 2 for a destination and a source, -1 for ports and clients, property name `revenant.owner`).
 
 Alternatives, and why each lost:
 
@@ -172,17 +172,17 @@ Alternatives, and why each lost:
 
 - A send to a destination the library made (its row is found by a binary search of the owned table) queues the list: one allocation
   (the delivery, with the list in it), appended to one FIFO under its own lock. A drain runs on the serial queue
-  charon.in-process-delivery, one at a time, and takes the deliveries in the order they were queued.
+  revenant.in-process-delivery, one at a time, and takes the deliveries in the order they were queued.
 - A drain pass delivers at most 16 deliveries and runs at most 1 ms (the delivery that crosses 1 ms is the last of the pass); the next
   pass is scheduled while deliveries remain. Each delivery checks its object once, right before its block is called
-  (charon_object_check, one property read of CHARON_OWNER_KEY at CharonMIDIPorts.m:321, about 18 us per call on the host: 18037 ns live
+  (revenant_object_check, one property read of REVENANT_OWNER_KEY at RevenantMIDIPorts.m:321, about 18 us per call on the host: 18037 ns live
   and 18041 ns disposed in the same-slot run of Round 8; the five candidate reads of that run were 17.4 to 18.2 us); no check is carried over from the delivery before it
   (Round 8: before, consecutive deliveries to one row shared a check per pass). The check is the only property read of a delivery.
   The gap between a delivery's check and its call is not bounded by the code (see "Window of the check" below).
 - What a delivery does with the check: a live object gets its block called; a disposed object (paramErr) gets nothing, as the release
   delivers nothing to a disposed destination; a reference the release gave to another object (the stamp answers another value or
   none) takes the release's route instead: a 2.0 list is converted to MIDI 1.0 and sent with MIDISend through the port the sender
-  gave; a UMP request's words take the release's sysex route (CharonMIDIUMPReleaseSend), as a UMP send to any other destination does.
+  gave; a UMP request's words take the release's sysex route (RevenantMIDIUMPReleaseSend), as a UMP send to any other destination does.
 - A UMP sysex sent to a release destination (Round 9): the words are converted in stack storage and the bytes are copied once into the
   block that holds the send's request and its data, which the release's completion frees. That is one allocation per release (the
   previous library made two: the conversion's 64-byte buffer, kept as the data, and the send struct). The release's sysex send is
@@ -205,7 +205,7 @@ Alternatives, and why each lost:
   one row (81), 99 ns at 64 (81), 585 ns at 1024 (77), a ratio of 7.56 at 1024; after (the final tree), 125 ns at one row (55), 88 ns
   at 64 (86), 155 ns at 1024 (91). The ratio is noisy between runs (1.02 to 2.29 in the final run; an earlier run of the tree before
   its last edit gave 1.52, 1.46 and 1.79), so the absolute cost is the figure: it does not grow with the rows as before.
-  Round 9 (M2, host only): a 2.0 send to a 1.0 row of this library no longer retains and releases the row's port (charon_destination_port
+  Round 9 (M2, host only): a 2.0 send to a 1.0 row of this library no longer retains and releases the row's port (revenant_destination_port
   with its twoOnly flag; the lock order is in the crutches register). Five interleaved rounds per row count (run folder v-midifix9/m2,
   analysis.txt): the library's send 103 ns before and 118 ns after at one row, 147 and 115 at 64, 134 and 118 at 1024, against Apple's
   MIDISendEventList to a 1.0 release destination at 59 to 103 ns. The ratio medians before and after: 1.83 and 1.73, 1.35 and 1.12,
@@ -242,8 +242,8 @@ this.
   outlive the call, so it is one heap allocation (the port reference and the list), and the queue's own continuation, which
   libdispatch keeps, is not counted. The copy of the block a port or destination keeps is the framework's and is made once when
   the object is made.
-- CharonMIDIUp32From7 is written in 32-bit arithmetic: `0x80000000 + d * 34087042 + (2d + 63) / 126` with `d = x - 64`, which is
-  the 64-bit rule because 2^32 = 126 * 34087042 + 4. armv7 -O2 of CharonCoreMIDI.c at iOS 6.0 against the 16.4 SDK had `___udivdi3`
+- RevenantMIDIUp32From7 is written in 32-bit arithmetic: `0x80000000 + d * 34087042 + (2d + 63) / 126` with `d = x - 64`, which is
+  the 64-bit rule because 2^32 = 126 * 34087042 + 4. armv7 -O2 of RevenantCoreMIDI.c at iOS 6.0 against the 16.4 SDK had `___udivdi3`
   among its undefined symbols (a libgcc call, with no hardware 64-bit divide on the A5) and has not now (core-undefined-before.txt
   and core-undefined-after.txt). No object of the library calls a 64-bit divide or modulo (scanned: every CoreMIDI source,
   nm -u, no `divdi`, `moddi`, `udivmod`). differential.m checks the new rule against the 64-bit rule at all 128 inputs, and the
@@ -254,7 +254,7 @@ this.
   activates the central (and the two driver functions are not exported, so none does) loads no CoreBluetooth image for this
   library. The release's own libraries may have loaded it already; this library no longer causes it.
 - The sweep of the owned table is incremental. A creation reads a window of 8 rows of the owned table and 8 routes
-  (charon_sweep, CharonMIDIPorts.m), from where the last creation stopped, with no lock held during the reads. So a creation
+  (revenant_sweep, RevenantMIDIPorts.m), from where the last creation stopped, with no lock held during the reads. So a creation
   makes at most 16 property reads however many objects the process holds, where it made one for every row and every state;
   a table of N rows is walked in N / 8 creations. The cost of that is a delay: a stale row's block is kept for up to N / 8
   creations, and not released at the next one. It is a bounded delay in memory and never an answer: a send checks its own
@@ -274,10 +274,10 @@ the probe says whether the dispose came back within 1.5 s while the procedure wa
 | destination (MIDIEndpointDispose, list sent with MIDISend) | not within 1.5 s; returned after the procedure did | the same |
 | input port (MIDIPortDispose, list from MIDIReceived on a connected source) | the same | the same |
 
-What the library's lifetime rule does with that. A row is freed by the sweep only after the stamp read (charon_object_check) says
+What the library's lifetime rule does with that. A row is freed by the sweep only after the stamp read (revenant_object_check) says
 the object is gone or answers another stamp, and the read says so only once the dispose has come back, which (measured above)
 is after any read procedure that was running has returned. And the release gives no list to a disposed destination (a send to it delivers 0 calls, above). So the sweep's free of a row
-does not overlap a read procedure of that object; the reference the read holds (charon_port_retain) is for the paths the dispose does
+does not overlap a read procedure of that object; the reference the read holds (revenant_port_retain) is for the paths the dispose does
 not order: a queued in-process delivery, and a send that found the row before the sweep removed it.
 
 A queued in-process delivery is checked right before its block is called (Round 6; per delivery since Round 8, "Deliveries to a
@@ -306,11 +306,11 @@ object's own block, more than one object at a time, and the A5 CPU of the iPhone
 
 ## What the owner stamp costs a client (measured 2026-10-10)
 
-The stamp (`charon.owner`, CharonMIDIPorts.m, charon_own) is a property written on each object the library owns. The release posts
+The stamp (`revenant.owner`, RevenantMIDIPorts.m, revenant_own) is a property written on each object the library owns. The release posts
 kMIDIMsgPropertyChanged for a property written on an object to every client with a notify proc. Measured by oracle/stamp.h, which makes
 a destination, a source, an input port, an output port and a client in one process and writes the stamp on each: one notification
 for each stamped object, five in all, with the object type (3 destination, 2 source, -1 input port, output port and client) and the
-property name 'charon.owner' (macOS 27.0.1, oracle/stamp-macos.txt: 7 notifications, those five and the two the probe's own UniqueID
+property name 'revenant.owner' (macOS 27.0.1, oracle/stamp-macos.txt: 7 notifications, those five and the two the probe's own UniqueID
 writes make; the emulated 6.1.3, app-r8b.out: 9, the same seven and two more that the application's own earlier steps cause
 through the library: a 'protocol' write and a stamp, both before the probe's objects). So a client with a notify proc, on either release, sees one extra
 property-changed notification with the library's own key name for each object the library takes a row for. It is the price of an

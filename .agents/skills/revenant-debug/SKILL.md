@@ -9,11 +9,11 @@ description: Diagnose and recover the Safari substitution on device — Safari f
 
 The loader did not re-exec Safari, or the engine did not load. Check in order:
 
-1. `charon device run 12 "cat /tmp/rev-safari-tweak.log"` — is there a
+1. `revenant device run 12 "cat /tmp/rev-safari-tweak.log"` — is there a
    `re-exec …MobileSafari` line? No line → the loader bailed (Safari disabled in
    `InjectedApps`, or the loader failed to load).
 2. Confirm the two dylibs are the right files and sizes:
-   `charon device run 12 "ls -la /Library/MobileSubstrate/DynamicLibraries/RevSafari.dylib /usr/lib/rev-safari-compat.dylib"`.
+   `revenant device run 12 "ls -la /Library/MobileSubstrate/DynamicLibraries/RevSafari.dylib /usr/lib/rev-safari-compat.dylib"`.
    A common mistake is deploying the compat dylib over `RevSafari.dylib` — the
    loader is small; the compat dylib is much larger (bundles WASM).
 3. Compare the on-device dylib's linkage to the local build: pull it back and run
@@ -40,13 +40,13 @@ Settings → RevWebKit → Diagnostics → **Log page console** (`ConsoleLog` in
 `space.kern0x1b.rev` domain) makes the compat dylib turn on WebKit's
 `LogsPageMessagesToSystemConsoleEnabled` when Safari starts — no engine rebuild.
 Relaunch Safari, load the page, then read
-`charon device run 12 "cat /tmp/rev-safari-stderr.log"`: console messages and
+`revenant device run 12 "cat /tmp/rev-safari-stderr.log"`: console messages and
 uncaught errors appear with their file and line.
 
 The row sits below what a remote session can scroll to. To flip it remotely:
-`charon device fetch /var/mobile/Library/Preferences/space.kern0x1b.rev.plist <local>`,
-set `ConsoleLog` with Python's `plistlib`, `charon device copy` it back, then
-`charon device run 12 "killall cfprefsd MobileSafari"`. Turn it off afterwards:
+`revenant device fetch /var/mobile/Library/Preferences/space.kern0x1b.rev.plist <local>`,
+set `ConsoleLog` with Python's `plistlib`, `revenant device copy` it back, then
+`revenant device run 12 "killall cfprefsd MobileSafari"`. Turn it off afterwards:
 a chatty page writes a lot.
 
 ## A symptom after a change of the port's own
@@ -82,15 +82,15 @@ read a connection-reset — the tunnel/USB mechanics there apply here unchanged.
 Nothing on the device keeps a copy of the loader or the compat dylib. The ways
 back:
 
-- **Anything the .deb installed:** reinstall an earlier .deb (`charon package`
+- **Anything the .deb installed:** reinstall an earlier .deb (`revenant package`
   leaves each version it builds in `build/<variant>/`):
-  `charon device copy build/system/space.kern0x1b.rev_<version>_iphoneos-arm.deb /tmp/rev.deb`,
-  then `charon device run 300 "dpkg -i /tmp/rev.deb && rm -f /tmp/rev.deb"`.
-- **The engine after `charon deploy`:** it left the replaced binaries in
+  `revenant device copy build/system/space.kern0x1b.rev_<version>_iphoneos-arm.deb /tmp/rev.deb`,
+  then `revenant device run 300 "dpkg -i /tmp/rev.deb && rm -f /tmp/rev.deb"`.
+- **The engine after `revenant deploy`:** it left the replaced binaries in
   `/usr/lib/rev-fw.bak/<Framework>`; copy each back and restart Safari:
 
 ```sh
-charon device run 30 'cd /usr/lib/rev-fw.bak && for fw in *; do cp -f "$fw" "/usr/lib/rev-fw/$fw.framework/$fw"; done; killall MobileSafari'
+revenant device run 30 'cd /usr/lib/rev-fw.bak && for fw in *; do cp -f "$fw" "/usr/lib/rev-fw/$fw.framework/$fw"; done; killall MobileSafari'
 ```
 
 If a bad **broad** injection makes the UI misbehave, reinstalling a good

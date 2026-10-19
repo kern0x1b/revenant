@@ -95,7 +95,7 @@ The smallest link that aborts, reduced by ddmin from the 123-object `libMatterBa
 
 ```
 clang -target armv7-apple-ios -miphoneos-version-min=6.1.3 -isysroot <iPhoneOS16.4.sdk> -mlinker-version=956.6 \
-  -fuse-ld=<ld> -dynamiclib -install_name /usr/lib/charon/org.charon.apple-backports/libMatterBackports.dylib \
+  -fuse-ld=<ld> -dynamiclib -install_name /usr/lib/revenant/org.revenant.apple-backports/libMatterBackports.dylib \
   -o out.dylib libCHIP.a src/app/clusters/descriptor/DescriptorCluster.cpp.o \
   -L<libcxx>/lib -lc++ libapple-compat.a -framework Foundation -framework CoreBluetooth
 ```

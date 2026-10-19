@@ -7,7 +7,7 @@ and no media anywhere in the slice.
 
 ## Open source checked
 
-The coordinator's scout table (`charon/.agent-work/runs/oss-scout/oss-candidates.tsv`, **21 data rows** —
+The coordinator's scout table (`toolchain/.agent-work/runs/oss-scout/oss-candidates.tsv`, **21 data rows** —
 22 lines with the header) was read. Its candidates are the Swift runtime libraries -
 swift-corelibs-foundation, swift-corelibs-libdispatch, swift-crypto, swift-collections,
 swift-numerics and the rest - plus three Apple-OSS frameworks held on a separate list with their own
@@ -36,7 +36,7 @@ its printed text.
 
 The same table is then read out of two builds and the two diffed, which is what
 `tests/backports/host/avf-notifications/run.sh` does: once linked against Apple's framework alone, and
-once with the port's four objects in the same binary, every name renamed to `charon_host_<name>`, so
+once with the port's four objects in the same binary, every name renamed to `revenant_host_<name>`, so
 the port's definition and Apple's sit side by side. The port's table is byte-identical to the host's.
 
 **The objects are split by measurement, not by the corpus's `introduced`.** Searching the exports of

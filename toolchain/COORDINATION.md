@@ -41,7 +41,7 @@ work. A backport is the act of building what is missing.
 
 Bands produce patches. **Only the coordinator merges and pushes.**
 
-1. A band works in **its own worktree** (`git -C $HOME/Git/projects/ios/charon worktree add <path> -b <branch> origin/main`).
+1. A band works in **its own worktree** (`git -C $HOME/Git/projects/ios/revenant worktree add <path> -b <branch> origin/main`).
    The shared checkout belongs to the coordinator; a band editing it corrupts the coordinator's gate.
 2. The band runs the full package gate itself, then sends `git format-patch` output with: the base
    commit, what is inside, which checks ran, and honest caveats.
@@ -85,7 +85,7 @@ Each is an independent session with its own worktree. Domains do not overlap.
 | Backports · frameworks | AVFoundation, AVKit before 11, CoreMedia, VideoToolbox, CoreSpotlight, MediaPlayer, Security, Metal, CoreImage, ImageIO, CoreVideo, QuartzCore, CoreTelephony, Accelerate, GameController, Intents, FileProvider |
 | Backports · fixes by review of main | JavaScriptCore: JSContext, JSValue, JSVirtualMachine, JSManagedValue and JSExport over the release's own C API (`facts/JavaScriptCore/JSContext.md`) |
 | Backports · SceneKit/PassKit/Speech/ReplayKit | those four frameworks, including a real `SCNView` renderer for Telegram |
-| charon: app launch in the emulator | `xmake emulate launch`, the guest tools it needs, and the `charon@eidolon` package |
+| The toolchain: app launch in the emulator | `xmake emulate launch`, the guest tools it needs, and the `revenant@swiftui-uikit` package |
 | Telegram from source | the official Telegram built from its own source with this toolchain; no stubs, no recompiler |
 
 Photos, CallKit and Contacts are closed; their facts files describe what was carried. A closed
@@ -151,7 +151,7 @@ Every one of these was paid for once. None of them is theoretical.
 - Hard-linking a clone of the xmake store carries the `*.lock` files with it and the flocks stay
   shared: run `find "$XMAKE_GLOBALDIR" -name '*.lock' -delete` after cloning.
 - Never point `add_repositories` at the shared checkout — xmake may `checkout`/`reset --hard` in it.
-- `add_addons("charon latest")` fetches the newest **tag** from GitHub; a hand-placed `latest`
+- `add_addons("revenant latest")` fetches the newest **tag** from GitHub; a hand-placed `latest`
   directory is never picked up. The real lever is `add_repositories` on the main tree.
 - Before building the canon, diff `toolchains`, `includes` and `rules` against the addon tag; if
   they moved, the canon will be built with a foreign toolchain while the recipe looks correct.
@@ -182,7 +182,7 @@ Honesty is a hard requirement, not a style.
 ## 7. Restarting from nothing
 
 1. Read this file and `AGENTS.md`.
-2. `git -C $HOME/Git/projects/ios/charon fetch origin && git log --oneline -5` — see where main is.
+2. `git -C $HOME/Git/projects/ios/revenant fetch origin && git log --oneline -5` — see where main is.
 3. Create the coordinator's own merge worktree; never merge in the shared checkout.
 4. The gate scripts are in `$HOME/Git/projects/ios/coordination/`; gate the merge worktree by passing it
    as argument three (skill `backports-gate`).
@@ -193,7 +193,7 @@ Honesty is a hard requirement, not a style.
 
 ## 8. Where state lives
 
-- Code and registry: `$HOME/Git/projects/ios/charon`, branch `main`.
+- Code and registry: `$HOME/Git/projects/ios/revenant`, branch `main`.
 - The canon package and its checksum: the shared canon directory under the system temp path,
   rebuilt from current main by the iOS 11–12 band; one file only, older ones removed.
 - Demand engine artefacts (ranked demand, decisions, verifier): its own worktree scratchpad plus

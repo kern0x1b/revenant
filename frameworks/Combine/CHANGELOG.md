@@ -24,10 +24,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 ### Changed
 - Folded the separate Dispatch and Foundation modules into the core and renamed
   the whole to `Combine`; dropped the `.ocombine` disambiguation machinery.
-- Styx is no longer a copy of OpenCombine's sources. The `charon@styx` recipe
+- Combine is no longer a copy of OpenCombine's sources. The `revenant@combine` recipe
   fetches OpenCombine at its pinned commit and applies a patch series that
   carries only content edits; it installs the patched tree laid out as the one
-  module, and the hades targets compile that tree. Upstream's tests run as the
+  module, and the revenant targets compile that tree. Upstream's tests run as the
   `CombineTests` target, found by a Lua discovery; the SwiftPM manifest, the
   Makefile, the gyb script and the LLDB script are gone.
 

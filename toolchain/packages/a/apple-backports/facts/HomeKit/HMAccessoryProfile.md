@@ -101,7 +101,7 @@ The ten rows above are decided by the code, not by the header, and the code is i
 `apple.objc.method_imps` (added for this, commit b9089f454, held by the coordinator until the commit that
 uses it lands) reads, in one pass over the arm64e cache of iOS 16.0, every method the ten classes define
 themselves with the address and 512 bytes at it: 1060 methods over the ten classes, written to
-`charon/.agent-work/worktrees/v-health/.agent-work/runs/cachewalk/hk-init-imp.out`. The addresses are the
+`toolchain/.agent-work/worktrees/v-health/.agent-work/runs/cachewalk/hk-init-imp.out`. The addresses are the
 cache's own UNSLID addresses, so a page-relative `adrp` inside a body resolves the same way whatever the
 slide. A pass costs minutes - 157s measured on the cache of iOS 18.0, 525s on 16.0 - which is why the
 reader takes the whole set of names at once.

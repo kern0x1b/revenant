@@ -1,10 +1,8 @@
-# Katabasis
+# The recompiler
 
 **Static binary recompiler that takes a compiled 64-bit (arm64) iOS application and turns it into a 32-bit (armv7) binary that runs on iOS 6 — without source, without rewriting the app.**
 
-The name is κατάβασις, "the descent" — lowering a living, modern binary down into a long-dead operating system.
-
-Katabasis lifts each arm64 function to LLVM IR (via [Rellume](https://github.com/aengelke/rellume)), rewrites the Objective-C metadata and data segments for the 32-bit runtime, re-emits the code as armv7, and links it against a small support runtime plus generated ABI bridges. The result is an ordinary armv7 Mach-O that a real iOS 6 device (or an emulator) loads and runs as a normal app.
+The recompiler lifts each arm64 function to LLVM IR (via [Rellume](https://github.com/aengelke/rellume)), rewrites the Objective-C metadata and data segments for the 32-bit runtime, re-emits the code as armv7, and links it against a small support runtime plus generated ABI bridges. The result is an ordinary armv7 Mach-O that a real iOS 6 device (or an emulator) loads and runs as a normal app.
 
 This is a research prototype, not a product. It is complete enough to take a real 64-bit App Store application to a live, interactive screen on iOS 6.
 
@@ -30,9 +28,9 @@ The guest keeps its arm64 memory image (rebased below 4 GiB); code runs natively
 
 ## Building
 
-Katabasis is part of the hades xmake project; run everything from the hades root. It needs an LLVM 23 with its headers and libraries
-(`/opt/homebrew/opt/llvm` by default, `--katabasis_llvm=<prefix>` for another). Rellume, farmdec and BlocksRuntime are packages of
-`third_party/packages/`; the iOS SDK (for header-driven bridge generation), `ld64` and `ldid` are charon's packages. Build `xlate` and
+The recompiler is part of the revenant xmake project; run everything from the revenant root. It needs an LLVM 23 with its headers and libraries
+(`/opt/homebrew/opt/llvm` by default, `--recompiler_llvm=<prefix>` for another). Rellume, farmdec and BlocksRuntime are packages of
+`third_party/packages/`; the iOS SDK (for header-driven bridge generation), `ld64` and `ldid` are Revenant's packages. Build `xlate` and
 `xlgen`:
 
 ```sh
@@ -43,17 +41,17 @@ Katabasis is part of the hades xmake project; run everything from the hades root
 Then translate an arm64 executable:
 
 ```sh
-./xmakew l katabasis/scripts/translate.lua path/to/app-arm64 includes.h out/
+./xmakew l recompiler/scripts/translate.lua path/to/app-arm64 includes.h out/
 ```
 
 where `includes.h` imports the frameworks the app uses. The output `out/<name>` is an armv7 iOS 6 executable; drop it into the app bundle in place of the original.
-A whole `.ipa` is translated with `./xmakew l katabasis/scripts/ipa.lua App.ipa includes.h out/App.ipa`.
+A whole `.ipa` is translated with `./xmakew l recompiler/scripts/ipa.lua App.ipa includes.h out/App.ipa`.
 
-The corpus runs with `./xmakew test 'katabasis_corpus/*'`; `docs/corpus.md` says what each check proves and how to run the parts that need a device.
+The corpus runs with `./xmakew test 'recompiler_corpus/*'`; `docs/corpus.md` says what each check proves and how to run the parts that need a device.
 
 ### Guest libraries, and what a bind names
 
-Further arguments are guest images lifted with the executable (`./xmakew l katabasis/scripts/translate.lua app-arm64 includes.h out/ libA.dylib libB.dylib`;
+Further arguments are guest images lifted with the executable (`./xmakew l recompiler/scripts/translate.lua app-arm64 includes.h out/ libA.dylib libB.dylib`;
 `XL_FRAMEWORKS_DIR` finds a bundle's embedded frameworks). A bind takes an image by the install name it spells, exactly: an app that binds the
 host's `NSString` next to an embedded image that defines its own keeps the host's. Two images with one install name are an error.
 
@@ -62,12 +60,12 @@ A guest image that stands for a *system* library under another name is said to d
 image's own install name, is refused). Without it the bind is the host's, and xlate prints the `--replaces` line to use when an image's file name
 matches.
 
-The Swift demo needs this. It binds `/usr/lib/libc++.1.dylib`, and the guest libc++ it runs on (built by `charon@libcxx`, with libswiftCore and
-libc++abi from `charon@swift-runtime` built with `library_evolution=true`) is `@rpath/libc++.1.dylib`, the recipe's name for it. Translate it with
+The Swift demo needs this. It binds `/usr/lib/libc++.1.dylib`, and the guest libc++ it runs on (built by `revenant@libcxx`, with libswiftCore and
+libc++abi from `revenant@swift-runtime` built with `library_evolution=true`) is `@rpath/libc++.1.dylib`, the recipe's name for it. Translate it with
 
 ```sh
 XL_REPLACES=/usr/lib/libc++.1.dylib=<libs>/libc++.1.dylib \
-  ./xmakew l katabasis/scripts/translate.lua katabasis/swift/demo-arm64 katabasis/targets/swiftdemo-includes.h out/ <libs>/libswiftCore.dylib <libs>/libc++.1.dylib <libs>/libc++abi.1.dylib
+  ./xmakew l recompiler/scripts/translate.lua recompiler/swift/demo-arm64 recompiler/targets/swiftdemo-includes.h out/ <libs>/libswiftCore.dylib <libs>/libc++.1.dylib <libs>/libc++abi.1.dylib
 ```
 
 or the operators, guards and exception classes it takes from libc++ (307 names re-exported from libc++abi among them) come from the host's C++ runtime
@@ -97,7 +95,7 @@ object, so what Swift reads from it stays true. `runtime/swift_classes.m`.
 - What a shadow cannot do: give the host an *instance* the guest allocated. Its isa word is the guest class, so the bridge looks the shadow up when a
   guest message reaches it and answers `-retain`, `-release` and `-autorelease` with the guest's own methods; a host method of a shadow's ancestry
   (`-[NSObject isEqual:]`) sent to such an instance, or host code that meets one (`CFRetain` from an array), still faults in libobjc. A shadow carries no
-  protocols, properties or ivars yet; a class that has any says so in the shadow log (`touch /private/var/charon/xl-shadow-log` on the device, read
+  protocols, properties or ivars yet; a class that has any says so in the shadow log (`touch /private/var/revenant/xl-shadow-log` on the device, read
   `xlate-shadow.log`). A method a shadow adds is a block IMP that carries `self`, the selector and four more words to the guest method.
 
 `corpus/classpair` builds the cases as a program for macOS, where objc4 is the real thing, and the translation must print on the iPad 2 what objc4 printed.

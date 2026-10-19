@@ -1,20 +1,20 @@
 ---
 name: xmake-tests
-description: Reference for testing an old-iOS app built with Charon, and what xmake test (xmake 3.1.1) can and cannot do for it — xmake test runs each case on the Mac, so it cannot run the app or anything built by Charon's rules; it can run host tests of the app's platform-independent logic in a target built for macOS in the same project. Covers the host-test target, add_tests and its options (whole-output patterns, trim_output, plain, groups, should_fail, runenvs, run_timeout), reading the report, and where the on-target tests live instead (probes run in the emulator or on the device). Use when adding tests, deciding where a test runs, or reading an xmake test failure.
+description: Reference for testing an old-iOS app built with the toolchain, and what xmake test (xmake 3.1.1) can and cannot do for it — xmake test runs each case on the Mac, so it cannot run the app or anything built by Revenant's rules; it can run host tests of the app's platform-independent logic in a target built for macOS in the same project. Covers the host-test target, add_tests and its options (whole-output patterns, trim_output, plain, groups, should_fail, runenvs, run_timeout), reading the report, and where the on-target tests live instead (probes run in the emulator or on the device). Use when adding tests, deciding where a test runs, or reading an xmake test failure.
 ---
 
-Derived from the `xmake-tests` skill of xmake-io/xmake-skills at `ef67caa` (Apache-2.0), rewritten and modified for Charon.
+Derived from the `xmake-tests` skill of xmake-io/xmake-skills at `ef67caa` (Apache-2.0), rewritten and modified for the toolchain.
 
 # Tests for an app for old iOS
 
 `xmake test` builds every target that declares a test case (a `set_default(false)` target too) and
-then **runs each case's program on the Mac**. An app or program built by Charon's rules is for the
+then **runs each case's program on the Mac**. An app or program built by Revenant's rules is for the
 device; the Mac cannot run it. So there are two kinds of test, run by two commands:
 
 | What is tested | Built as | Run by | Result |
 | --- | --- | --- | --- |
 | logic that needs no iOS framework (parsing, arithmetic, model code in C, C++ or Foundation-only Objective-C) | a target for macOS in the same project | `xmake test` | the report: `N% tests passed, M test(s) failed out of K, …` |
-| the code on the release it ships for, against that release's own libraries | a probe with Charon's `daemon` rule | `xmake emulate run`, or `xmake device run` on a real device | the verdict: `pass`, `fail(exit N)`, `crash(…)`, `timeout` |
+| the code on the release it ships for, against that release's own libraries | a probe with Revenant's `daemon` rule | `xmake emulate run`, or `xmake device run` on a real device | the verdict: `pass`, `fail(exit N)`, `crash(…)`, `timeout` |
 
 A host test that passes proves the logic on macOS only: macOS's Foundation and the Mac's compiler
 are not the release's libraries. Read `PROJECT.md` first: the releases to check decide where the
@@ -29,7 +29,7 @@ target of the project in three lines:
 - `set_plat("macosx")` and `set_arch("arm64")` (the Mac's own architecture, `uname -m`) — it is
   built for the Mac, with the Mac's own toolchain, into `build/macosx/arm64/<mode>/`;
 - `set_default(false)` — a bare `xmake` does not build it; `xmake test` does;
-- no Charon rule and no `add_packages`: the packages of this project are built for the device.
+- no toolchain rule and no `add_packages`: the packages of this project are built for the device.
 
 Then its `add_files` (the test's `main` and the shared sources), `add_includedirs`, and
 `add_tests("default")`. Objective-C tests add `add_mflags("-fobjc-arc")` and
@@ -71,16 +71,16 @@ printed only with `-v` or `-D`.
 
 ## 3. Tests on the target release
 
-The on-target test is a probe: a small program with Charon's `daemon` rule, its own control file,
+The on-target test is a probe: a small program with Revenant's `daemon` rule, its own control file,
 `-fobjc-arc` on compile and link, `ok`/`FAIL` lines with `printf` and `fflush`, and a negative
 control — the skill `checks` says how to write it. It runs in the emulator with
 `xmake emulate -y -d <device> -r <release> run /usr/libexec/<probe>` (skill `emulate`: the
 device, the release, the cost of a run, what a verdict proves) and on the device with
 `xmake device run` (skill `device`). The verdict line is the result; record it as those skills say.
 
-Do not declare `add_tests` on the app or on a probe: `xmake test` builds it (Charon's checks run)
+Do not declare `add_tests` on the app or on a probe: `xmake test` builds it (Revenant's checks run)
 and then tries to start a device binary on the Mac, and the case fails (a daemon probe at the pin:
-`errors: run <probe>/default failed, exit code: 255`). Charon 0.8.10 has no
+`errors: run <probe>/default failed, exit code: 255`). revenant 0.8.10 has no
 command that runs on-target programs as `xmake test` cases.
 
 ## 4. Keep the emulator out of xmake test
@@ -97,8 +97,8 @@ user that on-target tests run as separate emulator or device commands, not as on
   the release (§3). Reason: `xmake test` runs the file on the Mac, which cannot run a device binary.
 - A host test that passes, reported as "works on iOS 6" → report it as a host result; the
   on-target verdict is the evidence for the release.
-- The host-test target given a Charon rule or the project's packages, or the app's target given
-  `set_plat("macosx")` → keep them apart. Reason: Charon's rules and packages build for the
+- The host-test target given a toolchain rule or the project's packages, or the app's target given
+  `set_plat("macosx")` → keep them apart. Reason: Revenant's rules and packages build for the
   device; the app is never built for macOS.
 - `pass_outputs = "OK"` expecting a substring match → a whole-output pattern with `trim_output`,
   or the exit status. Reason: xmake matches `^pattern$` against the entire standard output.

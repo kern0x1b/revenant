@@ -2,7 +2,7 @@
 
 **The first held rung of a name, answered from an index instead of from 15 caches.**
 
-`strings -a ~/.charon/dyld/<release>/dyld_shared_cache_<arch> | grep -xF NAME`, once per name, over
+`strings -a ~/.revenant/dyld/<release>/dyld_shared_cache_<arch> | grep -xF NAME`, once per name, over
 every rung, per slice, per author, was how the workspace found when a class, selector, symbol or ivar
 first appeared. It reads the whole cache per name. Measured on this machine, that is **6 ms per MB**:
 0.42 s at 80 MB, 1.38 s at 233 MB, 3.07 s at 494 MB, 6.04 s at 1002 MB — and the ladder the port holds
@@ -36,8 +36,8 @@ at the 10-minute mark with two of the three unfinished.
 
 ## What it is
 
-    $HOME/.charon/cache-index/<release>.names.gz    one name per line, sorted, deduplicated
-    $HOME/.charon/cache-index/first-rung.tsv.gz     every name -> the first held rung carrying it
+    $HOME/.revenant/cache-index/<release>.names.gz    one name per line, sorted, deduplicated
+    $HOME/.revenant/cache-index/first-rung.tsv.gz     every name -> the first held rung carrying it
 
 `first-rung.lua` reads the merged file once and binary searches it, so a lookup costs a few
 milliseconds regardless of how many rungs there are. `--rungs NAME` answers from the per-release

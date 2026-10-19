@@ -43,7 +43,7 @@ its own. Class-scoped, with `python3` over the prepared per-release census:
 ```
 python3 -c 'import json,os
 for r in ("4.3","4.3.5","6.0","7.0"):
-    c=json.load(open(os.path.expanduser("~/.charon/dyld/"+r+"/classes_armv7.json")))["classes"]
+    c=json.load(open(os.path.expanduser("~/.revenant/dyld/"+r+"/classes_armv7.json")))["classes"]
     own=[n for n,e in c.items()
          if "languageIdentifier" in (e.get("instance") or {}) or "regionCode" in (e.get("instance") or {})]
     print(r, len(c), own)'
@@ -77,7 +77,7 @@ also read directly, through `modules/apple/objc.lua`'s own `inventory` — the r
 a re-implementation:
 
 ```
-xmake l .agent-work/probe/inv.lua ~/.charon/dyld/6.1.3/dyld_shared_cache_armv7 NSLocale NSFilePresenter
+xmake l .agent-work/probe/inv.lua ~/.revenant/dyld/6.1.3/dyld_shared_cache_armv7 NSLocale NSFilePresenter
   control: 11378 classes, 188523 instance selectors, 15334 class selectors read in this run
   class NSLocale PRESENT  superclass=NSObject  image=/System/Library/Frameworks/CoreFoundation.framework/CoreFoundation
     inst -localeIdentifier, -objectForKey:, -identifier, -displayNameForKey:value:,

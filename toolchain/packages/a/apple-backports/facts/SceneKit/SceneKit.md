@@ -34,7 +34,7 @@ space-separated ASCII float list in the authoring space, alpha last), `NSRGB` or
 shape it is a bare plist `data` value.
 
 **Retracted:** this section used to say `NSComponents` is a dictionary holding `NSRGB`/
-`NSWhite` strings, and `CharonSCNArchivedColor` read it that way. It is raw bytes, and
+`NSWhite` strings, and `RevenantSCNArchivedColor` read it that way. It is raw bytes, and
 `NSRGB`/`NSWhite` are sibling keys. The old reading could never have produced a color from
 these files: no guest probe printed a color before 2026-09-23, so the error went unseen, and
 every light/particle color sat at its class default.
@@ -49,14 +49,14 @@ What real SceneKit exposes (macOS oracle,
 `NSColor` in its authoring space, unconverted. `NSComponents` and `NSRGB` differ
 (`star2` ambient: 0.4845 vs 0.4090), so reading `NSRGB` as if it were sRGB would be wrong.
 
-Implementation: `CharonSCNArchivedColor` (mapped for `NSColor`) converts to sRGB, the only
+Implementation: `RevenantSCNArchivedColor` (mapped for `NSColor`) converts to sRGB, the only
 meaning a spaceless `UIColor` on this platform has. It uses the profile's own `rXYZ`/`gXYZ`/
 `bXYZ` matrix and `rTRC`/`gTRC`/`bTRC` (or `kTRC`) curves to reach PCS XYZ, then goes through
 the inverse of the sRGB profile's D50 colorants and the IEC sRGB encoding, clamped to [0,1].
 A calibrated white without a profile is Generic Gray, gamma 1.8: measured, `coin`'s
 `NSWhite 0.3652207168` -> oracle sRGB 0.4406431317. Device RGB/white is taken as sRGB.
 Calibrated RGB without a profile (Generic RGB) appears in no measured file and is refused,
-so `nil`, as is a LUT-based profile. `CharonSCNArchivedColorSpace` (mapped for `NSColorSpace`)
+so `nil`, as is a LUT-based profile. `RevenantSCNArchivedColorSpace` (mapped for `NSColorSpace`)
 carries only `NSICC`. `decodeColor:` maps both class names on whichever `NSKeyedUnarchiver`
 holds the color: the caller's for the graph shape, a fresh inner one for the nested shape.
 A colour that is not read (a refused space, a profile that does not convert, a catalog or
@@ -100,11 +100,11 @@ directory prefix. An early draft of this port resolved the reference into an
 is exactly what a renderer would eventually need to actually load the file) —
 that draft shipped once already (`particleImage`, with `gift`/`diamond`) before
 being caught by this same direct-Swift-check technique and corrected in both
-places together. `CharonSCNCoding.decodeFileReferenceName:forKey:` now returns
+places together. `RevenantSCNCoding.decodeFileReferenceName:forKey:` now returns
 the bare `NSString` for both properties; nothing between here and the archive
 resolves it against the scene's source.
 
-The scene-source stack (`+[CharonSCNCoding pushSourceURL:]`/`popSourceURL`/
+The scene-source stack (`+[RevenantSCNCoding pushSourceURL:]`/`popSourceURL`/
 `currentSourceURL`, pushed by `+[SCNScene sceneWithURL:options:error:]` around
 the decode) is left in place, unused by any decoder now — real, harmless,
 already-wired infrastructure for whenever a renderer actually needs to load
@@ -151,7 +151,7 @@ comments.
 
 A key that holds a list (`particleSystem`, `particleSystems`, `childNodes`, `materials`, each
 geometry-source semantic, `elements`) may hold a single object instead, and a decode that allows
-both `NSArray` and the class lets either through. `+[CharonSCNCoding decodeArrayOfClass:coder:forKey:]`
+both `NSArray` and the class lets either through. `+[RevenantSCNCoding decodeArrayOfClass:coder:forKey:]`
 is the one place that reads such a key: a single object becomes a one-element list, and an element
 of another class is left out with a log line naming the key. Before it, a single particle system
 reached `.count` and died on an unrecognized selector (`tests/backports/device/scenekit-decode.m`).
@@ -322,7 +322,7 @@ apart in truth. Measured on this port: `SCNLightTypeIES` and
 `SCNLightTypeProbe` were both declared `introduced: "10.0"` in one object
 file; `check_releases` and `band()` both accepted it and
 `libSceneKitBackports.dylib` linked and installed with no complaint.
-`tools/release-split.lua`, walking the real `~/.charon/dyld/*` cache ladder
+`tools/release-split.lua`, walking the real `~/.revenant/dyld/*` cache ladder
 symbol by symbol instead of by band boundary, found `SCNLightTypeProbe`
 already exporting at 9.0 — the registry entry was wrong by a full release,
 underneath a green gate. Run it before a band build, not instead of one: see
@@ -362,7 +362,7 @@ radialGravityField]`, which returns a plain `SCNPhysicsField *`-typed
 pointer to a private concrete subclass — the same pattern the archive
 depends on by naming the class directly (`$classname: "SCNPhysicsRadialGravityField"`,
 confirmed by `plutil`/`plistlib` on `gift.scn`, `diamond.scn`, `star2.scn`,
-`coin.scn`). Our port declares this class itself, in `CharonSCN.h`, since
+`coin.scn`). Our port declares this class itself, in `RevenantSCN.h`, since
 there is no Apple header to import it from. The same will likely be true
 for `SCNPhysicsVortexField` (needed only by `swirl.scn`, outside the current
 four-file scope) and any other field subclass reached later.
@@ -373,7 +373,7 @@ four-file scope) and any other field subclass reached later.
 `SCNMaterial`, `SCNMaterialProperty`, `SCNParticleSystem`,
 `SCNParticlePropertyController`, `SCNPhysicsField`,
 `SCNPhysicsRadialGravityField`, the `NSValue(SceneKitAdditions)` category,
-and the shared `CharonSCNCoding` helper — the complete class set `gift.scn`
+and the shared `RevenantSCNCoding` helper — the complete class set `gift.scn`
 and `diamond.scn` need per the per-file class survey (`gift`/`diamond` share
 an identical `$classname` set; neither uses `SCNGeometrySource`/
 `SCNGeometryElement`, which are `star2`/`coin`-only).
@@ -409,7 +409,7 @@ moving on, none described as a finding without a fix:
    same file. A blanket switch to `decodeIntegerForKey:` (item 4's first fix)
    broke `hidden` immediately — a second, separate guest-caught failure from
    generalizing off one measured sample instead of re-checking. Fixed with a
-   `CharonSCNCoding.decodeBool:forKey:default:` that tries `decodeBoolForKey:`
+   `RevenantSCNCoding.decodeBool:forKey:default:` that tries `decodeBoolForKey:`
    first and falls back to `decodeIntegerForKey:` on exception, rather than
    assuming either encoding.
    Probing by exception stays, since `NSKeyedUnarchiver` answers no question
@@ -477,7 +477,7 @@ Divergence recorded in the table above.
 
 **A second, independent finding from the same probe — and this one turned out to affect
 already-merged code too, fixed the same turn.** The fix's first draft reused
-`CharonSCNCoding.decodePathContents:`, which resolves a file reference to an `NSURL`
+`RevenantSCNCoding.decodePathContents:`, which resolves a file reference to an `NSURL`
 relative to the scene's source (the same helper `particleImage` already used, merged with
 `gift`/`diamond`). A direct Swift test against real SceneKit
 (`material.diffuse.contents`, printed via `String(describing:)`) showed the real property
@@ -487,7 +487,7 @@ constructing one directly), which is not what real SceneKit returns. The same ch
 against `gift.scn`'s `particleImage` (four particle systems, all resolving `"particles.png"`)
 confirmed real SceneKit returns `__NSCFString`/`"particles.png"` there too — not the
 `NSURL` this port had been building. Both call sites now share one helper,
-`CharonSCNCoding.decodeFileReferenceName:forKey:`, which returns the bare archived
+`RevenantSCNCoding.decodeFileReferenceName:forKey:`, which returns the bare archived
 `NSString` and does not touch the scene-source stack at all. Re-ran all three probes
 (`gift`/`diamond`/`star2`) on the armv7 guest after the fix: all three still `pass`,
 `failures=0`, and `image=`/`diffuseContents=` now print the bare filename
@@ -577,7 +577,7 @@ guessed:
   the same `NS.bytes` object came back whole (1026 bytes). Mechanism not identified. Debug
   interception of the unarchiver hides this failure, so do not trust an instrumented run for it.
 
-Fix: `CharonSCNArchivedData`, an `NSMutableData` subclass mapped for `NSMutableData` on the
+Fix: `RevenantSCNArchivedData`, an `NSMutableData` subclass mapped for `NSMutableData` on the
 unarchiver `decodeColor:` is handed, reads `NS.bytes` or `NS.data` itself.
 
 ## Class defaults, from macOS SceneKit's new objects
@@ -605,7 +605,7 @@ they are SceneKit's now:
 - `SCNMaterial`: every slot had nil contents. SceneKit's are white for diffuse, normal, transparent, multiply and
   ambient occlusion; black for specular, reflective, emission, displacement, self-illumination and metalness; and
   sRGB 0.484529 for ambient and roughness, which is 0.2 in linear light (sRGB-encoding 0.2 gives 0.48453), so it is
-  made as `+[CharonSCNCoding colorWithLinearWhite:0.2]`.
+  made as `+[RevenantSCNCoding colorWithLinearWhite:0.2]`.
 - `SCNNode`: `rotation` (0, 0, 0, 0) (was (0, 0, 1, 0)).
 
 ## Demand row that is not SceneKit's: `SCNSceneRenderer.audioEngine`

@@ -70,12 +70,12 @@ says `introduced: "15"` and every other 15.0 row says `"15.0"`.
 
 ## The three seams, and where they live
 
-`CharonMLCOptimizerState` is the port's own object and holds the seventeen numbers, so a factory in one
-release's object and a property in another's read the same values; its name begins with `Charon`, so
+`RevenantMLCOptimizerState` is the port's own object and holds the seventeen numbers, so a factory in one
+release's object and a property in another's read the same values; its name begins with `revenant`, so
 `internal_symbol()` in `modules/apple/backports.lua` keeps it out of the exports and the band splitter
 never weighs it. Three methods of `MLCOptimizer` are the seams between it and the optimizers -
-`charon_mlc_state`, `charon_mlc_takeStateFrom:` and `charon_mlc_optimizerOfClass:copying:` - and each is a
-registered row, as the graph library's own thirteen are. They are declared in `CharonMLCompute.h` because
+`revenant_mlc_state`, `revenant_mlc_takeStateFrom:` and `revenant_mlc_optimizerOfClass:copying:` - and each is a
+registered row, as the graph library's own thirteen are. They are declared in `RevenantMLCompute.h` because
 three objects of the library read them.
 ## What the host differential found that the probe did not ask
 
@@ -97,17 +97,17 @@ Four things came out of it that the probe had not asked for, and each is now in 
   compares the host with itself. The case reaches the base class as `class_getSuperclass` of an optimizer a
   factory made, which is the port's own base class on the port's side.
 * **The same is true of the device data class**, and there is nothing whose superclass reaches it, so that
-  one name is written through a two-level stringifying macro: `#define X CharonX` does not reach inside a
-  string literal, and `@(CHARON_STRINGIFY(MLCTensorOptimizerDeviceData))` goes through the macro first,
+  one name is written through a two-level stringifying macro: `#define X RevenantX` does not reach inside a
+  string literal, and `@(REVENANT_STRINGIFY(MLCTensorOptimizerDeviceData))` goes through the macro first,
   so each side asks for the class it actually has.
 * **A copy carries all seventeen numbers**, and the port's first answer did not: it wrote `-copy` and
   `-copy` is NSObject's, reaching `-copyWithZone:` through the copy protocol's dispatch, and the port's own
   header for the optimizer's storage is exactly the kind of place a category answers `-copy`. The seventeen
   are now written out one by one from the original's state into the new one's, which is the only shape that
-  is certainly right, and `-[MLCOptimizer charon_mlc_setState:]` is the registered seam that carries them
+  is certainly right, and `-[MLCOptimizer revenant_mlc_setState:]` is the registered seam that carries them
   across.
 
-**The red control.** `-DCHARON_MLC_PLANT=1` is compiled into `CharonMLCOptimizerState`'s initialiser in
+**The red control.** `-DREVENANT_MLC_PLANT=1` is compiled into `RevenantMLCOptimizerState`'s initialiser in
 `MLCOptimizers14.m` and into nothing else, so a build of the library carries no plant. It puts every default
 of the family one step off - the clip bounds to 0, the clip type to `ByNorm`, both norms to 0, the momentum
 to 1, nesterov to YES, beta1, beta2 and epsilon to 0, AMSGrad to YES and the step to 2 - and run.sh builds

@@ -1,6 +1,6 @@
 # Contributing
 
-hades is an openly AI-built project (developed with Claude). Contributions are welcome; the working guide of each
+revenant is an openly AI-built project (developed with Claude). Contributions are welcome; the working guide of each
 member (architecture, gotchas, how to build and test) is its `AGENTS.md`, and [AGENTS.md](AGENTS.md) at the top says
 how the members fit together.
 

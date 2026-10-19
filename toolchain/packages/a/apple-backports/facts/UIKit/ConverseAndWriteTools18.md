@@ -9,7 +9,7 @@
 //   strongly against UIWritingToolsCoordinator names _OBJC_CLASS_$_UIWritingToolsCoordinator and dyld has
 //   to find it before main runs.  No release this port targets carries any of the eleven, so the port is
 //   the only thing here that can make the name exist, and for a name whose only requirement is that dyld
-//   resolve it an empty class is the complete honest answer.  This is the same answer CharonUIKit26.h's
+//   resolve it an empty class is the complete honest answer.  This is the same answer RevenantUIKit26.h's
 //   twenty-one give, and the same reason.
 //
 //   FORTY-THREE NAMES NOTHING CAN CARRY.  A @protocol has no implementation: a category cannot be on
@@ -32,7 +32,7 @@
 //
 //    Command, from the checkout root, one line per release:
 //
-//      CHARON_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua ~/.charon/dyld/<release>/dyld_shared_cache_<arch>
+//      REVENANT_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua ~/.revenant/dyld/<release>/dyld_shared_cache_<arch>
 //
 //    It prints one TSV line per class and per protocol, so the answer is a grep over the owner name.
 //    The four releases are both ends of every band this port stages: 6.1.3 is the deployment target,
@@ -139,10 +139,10 @@
 //      ls ~/.xmake/packages/i/iphoneos-sdk/16.4/*/iPhoneOS16.4.sdk/System/Library/Frameworks/UIKit.framework/Headers | wc -l
 //
 //    351 headers, and @interface UIGlassEffect, @interface UIWritingToolsCoordinator and
-//    @interface UIConversationEntry are in none of them - the same measurement CharonUIKit26.h rests on.
+//    @interface UIConversationEntry are in none of them - the same measurement RevenantUIKit26.h rests on.
 //
 //    AvailabilityVersions.h in that same SDK defines __IPHONE_16_4 as its highest macro and no
-//    __IPHONE_17_* or __IPHONE_18_*, which is why CharonUIKit18.h guards on those macros rather than on
+//    __IPHONE_17_* or __IPHONE_18_*, which is why RevenantUIKit18.h guards on those macros rather than on
 //    __has_include of a header name this tree cannot measure:
 //
 //      grep -o '__IPHONE_1[0-9]_[0-9]' AvailabilityVersions.h | sort -u | tail -5

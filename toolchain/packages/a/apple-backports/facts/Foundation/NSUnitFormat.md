@@ -1,12 +1,12 @@
 # The three measurement formatters of iOS 8.0
 
 `NSLengthFormatter`, `NSMassFormatter` and `NSEnergyFormatter`, one machine with three sets of
-numbers: what they share is in `Foundation/CharonUnitFormat.{h,m}`, a `Charon`-prefixed helper, and
+numbers: what they share is in `Foundation/RevenantUnitFormat.{h,m}`, a `revenant`-prefixed helper, and
 each class is in a file of its own.
 
 Source: the 26.2 headers for the classes; the host's own Foundation for every rule, held against the
 port by `tests/backports/host/unitformat`, which runs the two in one process over the same inputs and
-compares two answers for one input; the armv7 caches under `$HOME/.charon/dyld/<release>/` for
+compares two answers for one input; the armv7 caches under `$HOME/.revenant/dyld/<release>/` for
 whether the release could have answered anything itself.
 
 **device-unverified.** The wording of every answer, every threshold and every name is measured on

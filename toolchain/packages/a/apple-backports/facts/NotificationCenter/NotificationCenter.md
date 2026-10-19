@@ -37,7 +37,7 @@ of any kind, which is a different thing.
 `NCWidgetDisplayMode` has two cases, compact and expanded. The contract NotificationCenter documents (NCWidgetTypes.h
 and NCWidgetProviding.h of the iOS SDK) is that a widget no Today host presents is in compact mode, that compact is the
 fixed height, and that an expanded size is granted only by a host. Three members speak of the mode, and the port carries
-all three as a category of `NSExtensionContext` in `NotificationCenter/CharonNSExtensionContext+NotificationCenter.m`:
+all three as a category of `NSExtensionContext` in `NotificationCenter/RevenantNSExtensionContext+NotificationCenter.m`:
 
 * `-widgetActiveDisplayMode` and `NSExtensionContext.widgetLargestAvailableDisplayMode` answer compact (0). A context no
   host presents is compact, and no host grants a larger mode, so the largest a context may use is compact.
@@ -48,7 +48,7 @@ all three as a category of `NSExtensionContext` in `NotificationCenter/CharonNSE
 NotificationCenter headers (NCWidgetController.h, NCWidgetListViewController.h, NCWidgetProviding.h, NotificationCenter.h)
 declare none of the three members or the mode, and the device SDK is not installed here. On Catalyst a fresh
 `NSExtensionContext` answers none of the three selectors (`tests/backports/host/nsextension-context`, golden: absent),
-so the host cannot be the oracle for them. The values are the documented ones, named under Charon's own names so they
+so the host cannot be the oracle for them. The values are the documented ones, named under Revenant's own names so they
 collide with nothing Apple declares. The screen width is measured: Catalyst's main screen is 960 points wide in the probe,
 and the port's answer is that same `UIScreen` value, which the harness checks line for line.
 

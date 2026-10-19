@@ -6,10 +6,10 @@ is declared and never sent, and the section below says why and what was measured
 
 ## The class of that name, which iOS 8.0-8.4.1 carry and no release exports before 9.0
 
-The class this port carries is an ALIAS of a class of Charon's own, and the reason is measured, not
+The class this port carries is an ALIAS of a class of Revenant's own, and the reason is measured, not
 guessed. Every held armv7 rung, read with `objc.inventory` for the class list and `dyld.load` for the
 export trie (`.agent-work/measure/stream-export.lua` in the worktree that wrote this, run against
-`$HOME/.charon/dyld`):
+`$HOME/.revenant/dyld`):
 
 | release | `NSURLSessionStreamTask` in `__objc_classlist` | image | `_OBJC_CLASS_$_NSURLSessionStreamTask` exported |
 | --- | --- | --- | --- |
@@ -30,36 +30,36 @@ So the two answers differ on exactly the ten 8.x rungs, and that is the whole of
   routes is measured to be unavailable on every release, and a class implementation in
   `Foundation/NSURLSessionStreamTask9.m` would put a second class of that name into every process on
   every band from 8.0 on.
-* **So the name is an alias** (`charon_alias.h`), which is what this tree already does for a name a
+* **So the name is an alias** (`revenant_alias.h`), which is what this tree already does for a name a
   release carries and does not export: CarPlay's `CPListItem` (`CarPlay/CPListItem.m`), UIKit's
   `NSTextList` and `NSTextTab`. What is new here is that the release carries the class in *some* of
   the releases a band is built for and in none of the others, which the three existing aliases never
   had to answer for -- measured above, they are carried on 6.1.3, 7.1.2, 8.0, 8.4.1 and 9.0 alike.
 
-What the library's loader (`attach.c`) then does, per release, is what `charon_alias.h` says and this
+What the library's loader (`attach.c`) then does, per release, is what `revenant_alias.h` says and this
 page measured on the bands:
 
 | band | what the proxy is | what an application gets |
 | --- | --- | --- |
 | 9.0 and later | the band drops the object and re-exports the release's own class and metaclass (`band()`), so the port's members are not in the process at all | the release's own task, which is `__NSCFURLLocalStreamTask`'s public face |
-| 8.0 - 8.4.1 | `charon_reparent` makes `CharonNSURLSessionStreamTask` a subclass of CFNetwork's class (no instance variable of its own, so the two instance sizes are equal and the re-parent is kept) and `charon_adopt_methods` gives that class all ten methods the proxy carries | an instance of **CFNetwork's own class**, which answers the seven methods, `-captureStreams`, the factories' construction method and the delegate sends |
-| 6.0 - 7.1.2 | there is no class of that name, so the loader has nothing to re-parent onto and nothing to adopt into: the proxy **is** the class | an instance of `CharonNSURLSessionStreamTask`, which answers the same seven methods over the same `NSStream` pair |
+| 8.0 - 8.4.1 | `revenant_reparent` makes `RevenantNSURLSessionStreamTask` a subclass of CFNetwork's class (no instance variable of its own, so the two instance sizes are equal and the re-parent is kept) and `revenant_adopt_methods` gives that class all ten methods the proxy carries | an instance of **CFNetwork's own class**, which answers the seven methods, `-captureStreams`, the factories' construction method and the delegate sends |
+| 6.0 - 7.1.2 | there is no class of that name, so the loader has nothing to re-parent onto and nothing to adopt into: the proxy **is** the class | an instance of `RevenantNSURLSessionStreamTask`, which answers the same seven methods over the same `NSStream` pair |
 
 Two things about the 6.x/7.x row are worth writing down rather than leaving to be found:
 
 * **`NSClassFromString(@"NSURLSessionStreamTask")` answers nil there.** The class is a class of
-  Charon's own, and the release's own name belongs to no class on such a release -- giving it that
+  Revenant's own, and the release's own name belongs to no class on such a release -- giving it that
   name would mean a second class of it, which is the collision this shape exists to avoid. Everything
   reached through the name a port links (`[NSURLSessionStreamTask class]`, `+alloc`, the factory in
   `NSURLSession+StreamTask9.m`) answers as the proxy, and `-isKindOfClass:` through the linked
   reference is true; a lookup by string is the one thing that no longer finds it.
 * **`-init` is the release's own there**, not the port's: the loader does not add a method the
   release's class already answers somewhere in its chain, and `NSObject` answers `-init`. That is
-  why the task's state is made when it is first asked for (`-charon_state`) and not in `-init`.
+  why the task's state is made when it is first asked for (`-revenant_state`) and not in `-init`.
 
 ## What `-resume` reaches on 8.0 - 8.4.1, and the one step nobody has run
 
-The port's `-resume` is `[self charon_open]; [super resume];`, and on an 8.x band `[super resume]` is
+The port's `-resume` is `[self revenant_open]; [super resume];`, and on an 8.x band `[super resume]` is
 CFNetwork's own `-[NSURLSessionTask resume]` -- the 8.4 band's `libFoundationBackports.dylib` defines
 `NSURLSessionStreamTask` and `NSURLSessionStreamTaskState` and *references* `NSURLSessionTask` "(from
 CFNetwork)", so the port's own task class is not in that chain. What that `resume` then drives is not
@@ -90,13 +90,13 @@ either way:
 * The metadata names the vocabulary and says which class holds it. It cannot say which selectors
   `-[NSURLSessionTask resume]` sends, because that is in its code and not in its method list.
 * The one level that would answer it is the emulator or hardware, and **this machine has no image of a
-  release from 8.0 on**: `~/.charon/firmware/rootfs/iPhone4,1` holds 6.0 and 6.1.3 and
-  `~/.charon/emulator/golden.noindex` four golden images (iPhone2,1 4.0 and 4.3.2, iPhone3,1 4.3.2 and
-  7.1.2), while `shade profile --list` does offer iPhone4,1 and `shade abi` knows Darwin 14.0.0. So the
+  release from 8.0 on**: `~/.revenant/firmware/rootfs/iPhone4,1` holds 6.0 and 6.1.3 and
+  `~/.revenant/emulator/golden.noindex` four golden images (iPhone2,1 4.0 and 4.3.2, iPhone3,1 4.3.2 and
+  7.1.2), while `emulator profile --list` does offer iPhone4,1 and `emulator abi` knows Darwin 14.0.0. So the
   probe is possible and it costs what the skill says: the 8.4.1 iPhone4,1 firmware (1.55 GB) fetched and
   extracted, then one boot past first-boot migration to make the golden image. Nothing was booted and
   nothing was run.
-* An 8.x armv7s band cannot be asked either: the newest firmware Shade has a profile for is iPhone4,1
+* An 8.x armv7s band cannot be asked either: the newest firmware the emulator has a profile for is iPhone4,1
   at 9.3.6, so 10.3.4 - the top of the armv7s ladder - is not emulable on this machine at all.
 
 One earlier reading of these caches said no class in 8.0 or 8.4.1 carries `-_onqueue_resume` at all,
@@ -107,7 +107,7 @@ iterates the map.
 **What was NOT fetched, and why the probe never got as far as an image.** Nothing was downloaded and no
 image was booted. The probe this section needs was written first and it does not link: with
 `apple-backports` at `apple_minimum=8.4.1`, resolved through the same addon and the same
-`@addon/charon/apple-ios` toolchain `coordination/build-gate.lua` uses (`xmake show -t` prints
+`@addon/revenant/apple-ios` toolchain `coordination/build-gate.lua` uses (`xmake show -t` prints
 `-fuse-ld=/Users/<user>/.xmake/packages/l/ld64/956.6/<hash>/bin/ld`), the placement of the band library
 into a guest target stops with
 
@@ -115,10 +115,10 @@ into a guest target stops with
     stamped LC_ENCRYPTION_INFO on a 32-bit ARM library, which iOS 6 refuses to load; link it with ld64
 
 and the band library in the store's own staged tree carries that load command, as does the
-`libFoundationBackports.dylib` the sanctioned 8.4.1 gate build wrote, while **charon's own ld64 does not
+`libFoundationBackports.dylib` the sanctioned 8.4.1 gate build wrote, while **Revenant's own ld64 does not
 stamp it** - the same trivial armv7 dylib linked both ways on 2026-10-04:
 
-    probe/t-charon.dylib   LC_ENCRYPTION=0     (clang -fuse-ld=<charon ld64>)
+    probe/t-revenant.dylib   LC_ENCRYPTION=0     (clang -fuse-ld=<revenant ld64>)
     probe/t-host.dylib     LC_ENCRYPTION=1     (the host's linker)
 
 `macho.verify`'s `encrypted()` reads that load command on a dylib or a bundle only, which is why the
@@ -132,7 +132,7 @@ The seven methods are not a CATEGORY on the release's name here, and that is a m
 a category on `NSURLSessionStreamTask` implements the methods the SDK's own interface declares there,
 and clang's `-Wobjc-protocol-method-implementation` says so once per method, which the wave's rules
 have no pragma to silence. `CarPlay/CPListItem.m` and `UIKit/NSTextTab.m` each carry that pragma for
-the same warning; this file writes the members as a category on Charon's own name instead, which
+the same warning; this file writes the members as a category on Revenant's own name instead, which
 ld64 merges into the proxy, and the proxy's method list is what the loader adopts.
 
 ## The connection is the release's own, not ours
@@ -167,7 +167,7 @@ the value cast to an int (what this file did)  -> 444811776, getsockname: Bad fi
 the four bytes read as an int                  -> 6,            getsockname: 127.0.0.1:62140
 ```
 
-So `charon_native_descriptor()` reads the bytes of the `CFData`, and a value that is not a `CFData` or
+So `revenant_native_descriptor()` reads the bytes of the `CFData`, and a value that is not a `CFData` or
 is shorter than a descriptor is refused by name rather than read as bytes that are not there. That was
 the whole of `localAddress`, `localPort`, `remoteAddress` and `remotePort` answering nil, and it was
 not a property of the host: the property is a `CFData` here and on iOS alike, so the four rows are the
@@ -204,7 +204,7 @@ why nothing in this file depends on it: the state is made on first use (see the 
 taken off a connection once it is on -- which is the header's own reason for deprecating it.
 
 **The negotiated TLS values are asked of the stream only when this task started a TLS session.**
-`charon_negotiated_tls()` reads `kCFStreamPropertySSLContext`, which IS the stream's `SSLContext`, and
+`revenant_negotiated_tls()` reads `kCFStreamPropertySSLContext`, which IS the stream's `SSLContext`, and
 then asks the release's own `SSLGetNegotiatedProtocolVersion` / `SSLGetNegotiatedCipher` (both looked up
 by name, as the table above says, because this library links neither framework). Asking a stream that
 never negotiated does not answer nil: measured on the host, 2026-10-04, `CFReadStreamCopyProperty(stream,
@@ -224,21 +224,21 @@ are different claims, so they are measured separately.
 **What the release carries.** From the repository root, with no xmake project and no gate:
 
 ```
-CHARON_ROOT="$PWD" xmake l tools/corpus/cache-census.lua NSURLSessionStream 6.1.3 4.3 11.0
+REVENANT_ROOT="$PWD" xmake l tools/corpus/cache-census.lua NSURLSessionStream 6.1.3 4.3 11.0
 ```
 
 Its output, in full:
 
 ```
-6.1.3     $HOME/.charon/dyld/6.1.3/dyld_shared_cache_armv7
+6.1.3     $HOME/.revenant/dyld/6.1.3/dyld_shared_cache_armv7
          images 524, of which naming NSURLSessionStream 0
          classes 11378, of which NSURLSessionStream* 0
          protocols 1171, of which NSURLSessionStream* 0
-4.3       $HOME/.charon/dyld/4.3/dyld_shared_cache_armv7
+4.3       $HOME/.revenant/dyld/4.3/dyld_shared_cache_armv7
          images 354, of which naming NSURLSessionStream 0
          classes 7187, of which NSURLSessionStream* 0
          protocols 564, of which NSURLSessionStream* 0
-11.0      $HOME/.charon/dyld/11.0/dyld_shared_cache_arm64
+11.0      $HOME/.revenant/dyld/11.0/dyld_shared_cache_arm64
          images 1258, of which naming NSURLSessionStream 0
          classes 52768, of which NSURLSessionStream* 2 (NSURLSessionStreamTask NSURLSessionStreamTaskTester)
          protocols 8954, of which NSURLSessionStream* 1 (NSURLSessionStreamDelegate)
@@ -285,7 +285,7 @@ _SCNetworkReachabilitySetCallback	3.0
 ```
 
 SystemConfiguration's reachability is in 6.1.3, and this same library already reads it -- `NSURLSession.m`
-watches a task's host while that task waits for connectivity (`charon_task_when_connected`). What those
+watches a task's host while that task waits for connectivity (`revenant_task_when_connected`). What those
 flags answer is whether the host is reachable and over which kind of interface. The header's message
 says the *system* has determined that a better route to the host exists, and gives "a wi-fi interface
 becoming available" as its example; a change in the flags is this port's own inference from a
@@ -318,7 +318,7 @@ and calls the delegate. Carrying the stream task inside the session's own implem
 
 because that object held the task's own class -- which a release exports from **9.0** -- and the state
 class beside it, which **no release exports at all**. The state class is now in an object of its own
-(`CharonStreamTaskState.m`, declared in `CharonStreamTaskState.h`), so each object holds one release
+(`RevenantStreamTaskState.m`, declared in `RevenantStreamTaskState.h`), so each object holds one release
 group, and the same command over the same objects now names no file.
 
 Run over the object this file's own changes produced, compiled with the tree's clang for
@@ -331,19 +331,19 @@ NSURLSessionStreamTask9.o	_OBJC_CLASS_$_NSURLSessionStreamTask	9.0
 NSURLSessionStreamTask9.o	_OBJC_METACLASS_$_NSURLSessionStreamTask	9.0
 ```
 
-The object's four defined Objective-C symbols are the release's name and the class of Charon's own at
+The object's four defined Objective-C symbols are the release's name and the class of Revenant's own at
 one address each, which is what an alias is:
 
 ```
 nm -gU NSURLSessionStreamTask9.m.o | grep OBJC_CLASS
-000035b4 S _OBJC_CLASS_$_CharonNSURLSessionStreamTask
+000035b4 S _OBJC_CLASS_$_RevenantNSURLSessionStreamTask
 000035b4 S _OBJC_CLASS_$_NSURLSessionStreamTask
-000035a0 S _OBJC_METACLASS_$_CharonNSURLSessionStreamTask
+000035a0 S _OBJC_METACLASS_$_RevenantNSURLSessionStreamTask
 000035a0 S _OBJC_METACLASS_$_NSURLSessionStreamTask
 ```
 
 `release-split` and the band machinery read the two symbols under the release's name (the ones under
-Charon's are filtered out as internal, `internal_symbol()`), so what the object carries is 9.0's API
+Revenant's are filtered out as internal, `internal_symbol()`), so what the object carries is 9.0's API
 and nothing else, and one `.m` for release 9 it is. What the tool cannot see, and what a reader has to
 check by hand here, is the methods: an Objective-C method implementation is not an exported symbol, so
 the four callbacks, the seven task methods and the two factories are all invisible to it, and this

@@ -1,8 +1,8 @@
 # Combine for the port's armv7 releases
 
-One Swift module, built for armv7 by `packages/s/styx/xmake.lua` against the
-`charon@swift-runtime` a port carries. A port takes it with
-`add_requires("charon@styx", {alias = "combine"})` and `add_packages("combine")`
+One Swift module, built for armv7 by `packages/c/combine/xmake.lua` against the
+`revenant@swift-runtime` a port carries. A port takes it with
+`add_requires("revenant@combine", {alias = "combine"})` and `add_packages("combine")`
 beside the runtime and libcxx, and writes `import Combine`.
 
 ## Where the module comes from
@@ -29,7 +29,7 @@ out as the one module under `src/` of the install: `Sources/OpenCombine` as `src
 header of its gyb templates as `src/utils`. It then compiles `src/Combine` into `libCombine.a`
 and its module, and the C++ helper into `libCombineHelpers.a`. With `sources = true` it
 installs the tree alone and compiles nothing, for a project that builds the module itself:
-hades does, in `frameworks/styx`.
+revenant does, in `frameworks/Combine`.
 
 ## The patches
 
@@ -43,7 +43,7 @@ hades does, in `frameworks/styx`.
 | `0006` | `Publishers.CombineLatest`, `CombineLatest3`, `CombineLatest4`, the `combineLatest` operators, their equality |
 | `0007` | `Publishers.TimeGroupingStrategy`, `Publishers.CollectByTime`, `collect(_:options:)` |
 | `0008` | the `==`, `hash(into:)` and `hashValue` Apple's interface declares in the open, and `Publishers.MapError`'s labelled initializer |
-| `0009` | `MapKeyPath`'s gyb helpers defined in its template, so charon's gyb expands it |
+| `0009` | `MapKeyPath`'s gyb helpers defined in its template, so Revenant's gyb expands it |
 
 ## What is measured
 

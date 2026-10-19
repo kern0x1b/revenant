@@ -42,12 +42,12 @@ about touches, never about an event" - was true but unmeasured. This is the meas
 ### The commands, from the root of the repository
 
 ```
-CHARON_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua ~/.charon/dyld/6.1.3/dyld_shared_cache_armv7 > inv-6.1.3.tsv
+REVENANT_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua ~/.revenant/dyld/6.1.3/dyld_shared_cache_armv7 > inv-6.1.3.tsv
 awk -F'\t' '$1=="protocol" && $2=="UIGestureRecognizerDelegate"' inv-6.1.3.tsv
 for r in 6.1.3 4.3; do
   for s in gestureRecognizer:shouldReceiveEvent: shouldReceiveEvent: \
            gestureRecognizer:shouldRecognizeSimultaneouslyWithGestureRecognizer: zzNonexistentSelectorForControl:
-  do printf '%s %-62s %s\n' "$r" "$s" "$(strings -a ~/.charon/dyld/$r/dyld_shared_cache_armv7 | grep -cxF "$s")"; done
+  do printf '%s %-62s %s\n' "$r" "$s" "$(strings -a ~/.revenant/dyld/$r/dyld_shared_cache_armv7 | grep -cxF "$s")"; done
 done
 ```
 

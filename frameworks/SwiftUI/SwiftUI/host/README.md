@@ -12,7 +12,7 @@ maxDrawableCount=3 rbColorMode=nil
 ```
 
 Those are the seven defaults of `_RendererConfiguration.RasterizationOptions` in
-`eidolon/Sources/SwiftUI/Rasterizations.swift`. The SDK interface declares the seven properties and a
+`SwiftUI/Sources/SwiftUI/Rasterizations.swift`. The SDK interface declares the seven properties and a
 bare `init()` and gives no value for any of them, so the framework itself is the only source there is,
 and the type is underscored — which in Swift is public, so the host can name it.
 

@@ -21,7 +21,7 @@ whole difficulty in them, because a port cannot add an ivar to a class it does n
 ## Every number here is the same two reads
 
 Read with the deleted mach32 reader from the armv7 shared cache of 6.1.3
-(`~/.charon/dyld/6.1.3/dyld_shared_cache_armv7`, MediaPlayer image at `0x31fe3000`); the reader's own
+(`~/.revenant/dyld/6.1.3/dyld_shared_cache_armv7`, MediaPlayer image at `0x31fe3000`); the reader's own
 controls are the deleted mach32 test - class count, `valueForProperty:` found in `MPMediaEntity`'s
 **own** list, a nonsense selector absent - 0 failures.
 
@@ -29,7 +29,7 @@ controls are the deleted mach32 test - class count, `valueForProperty:` found in
   category's own class pointer. **None extends any of these four classes.** That is what makes each of
   these a safe category and what would be unsafe otherwise: a category that landed on one of them would
   be answering the same selector the release answers.
-- The whole-cache selector list `~/.charon/dyld/6.1.3/selectors_armv7.txt` is **113981 distinct names**,
+- The whole-cache selector list `~/.revenant/dyld/6.1.3/selectors_armv7.txt` is **113981 distinct names**,
   not per-class counts. It reads **0** for `showsItemsWithProtectedAssets`, `requestAuthorization:` and
   `prepareToPlayWithCompletionHandler:` - absence from the whole release - and **1** each for
   `playbackState` and `authorizationStatus`, because other frameworks declare those names. Where it reads

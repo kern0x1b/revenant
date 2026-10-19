@@ -1,17 +1,17 @@
 ---
 name: xmake-basics
-description: Reference for how an old-iOS app project drives xmake 3.1.1 with the Charon addon — where xmake keeps the configuration, the build and the packages, which Charon rule gives a target its kind and why a device target without one is wrong, set_default and add_deps, build modes (mode.debug, mode.release) and the strip policy Charon's checks need, what xmake f keeps and forgets between runs (-c, a failed configure, options given again), options before a positional argument, what xmake run cannot do, the commands the addon adds, and the environment variables that matter (XMAKE_COLORTERM, CHARON_HOME, and why XMAKE_GLOBALDIR stays unset). Use when writing or reading an xmake.lua, when a configure or build does something unexpected with platform, architecture or mode, or before running an xmake command whose effect you do not know.
+description: Reference for how an old-iOS app project drives xmake 3.1.1 with the revenant addon — where xmake keeps the configuration, the build and the packages, which the toolchain rule gives a target its kind and why a device target without one is wrong, set_default and add_deps, build modes (mode.debug, mode.release) and the strip policy Revenant's checks need, what xmake f keeps and forgets between runs (-c, a failed configure, options given again), options before a positional argument, what xmake run cannot do, the commands the addon adds, and the environment variables that matter (XMAKE_COLORTERM, REVENANT_HOME, and why XMAKE_GLOBALDIR stays unset). Use when writing or reading an xmake.lua, when a configure or build does something unexpected with platform, architecture or mode, or before running an xmake command whose effect you do not know.
 ---
 
-Derived from the `xmake-basics`, `xmake-targets`, `xmake-commands` and `xmake-env-vars` skills of xmake-io/xmake-skills at `ef67caa` (Apache-2.0), rewritten and modified for Charon.
+Derived from the `xmake-basics`, `xmake-targets`, `xmake-commands` and `xmake-env-vars` skills of xmake-io/xmake-skills at `ef67caa` (Apache-2.0), rewritten and modified for the toolchain.
 
 # xmake for an old-iOS app
 
 xmake reads `xmake.lua` in the project directory, keeps the project's configuration under
 `.xmake/macosx/arm64/` (the host's platform and architecture, not the target's), builds into
 `build/<plat>/<arch>/<mode>/`, and installs packages into a store shared by every project on the
-machine (`~/.xmake/packages`). Charon is an xmake addon, installed under
-`~/.xmake/addons/charon/<version>/`: it brings the `apple-ios` toolchain, the rules that make a
+machine (`~/.xmake/packages`). The toolchain is an xmake addon, installed under
+`~/.xmake/addons/revenant/<version>/`: it brings the `apple-ios` toolchain, the rules that make a
 target an app, daemon, tweak or library, the checks every binary is held to, and commands such as
 `xmake deb` and `xmake emulate`. Read `PROJECT.md` first.
 
@@ -21,14 +21,14 @@ target's lines are the skill `project`'s (step 3); the build loop and its checks
 
 ## 1. Targets
 
-- A target's kind comes from its Charon rule: `app` and `daemon` make an executable, `library` and
+- A target's kind comes from its toolchain rule: `app` and `daemon` make an executable, `library` and
   `tweak` a shared library. Do not also call `set_kind`. The rule binds the `apple-ios` toolchain
-  and runs Charon's checks after the link.
-- **Every target that runs on the device carries a Charon rule.** A plain `set_kind("binary")`
-  target has no Charon toolchain: on `iphoneos` xmake gives it its own Xcode toolchain, which on a
+  and runs Revenant's checks after the link.
+- **Every target that runs on the device carries a toolchain rule.** A plain `set_kind("binary")`
+  target has no toolchain: on `iphoneos` xmake gives it its own Xcode toolchain, which on a
   Mac with only the Command Line Tools finds no iPhoneOS SDK (`checking for Xcode SDK ... no` in
   the configure log). Building it runs the Command Line Tools' `clang` with an empty `-isysroot`
-  and stops at `fatal error: 'stdio.h' file not found`; none of Charon's checks would run on it.
+  and stops at `fatal error: 'stdio.h' file not found`; none of Revenant's checks would run on it.
 - `set_default(false)` keeps a target (a probe, a test program) out of a bare `xmake`; name it to
   build it: `xmake build -y -v <target>`.
 - `add_deps("<target>")` builds another target of the project first and links it.
@@ -41,7 +41,7 @@ target's lines are the skill `project`'s (step 3); the build loop and its checks
 ## 2. Modes
 
 Without mode rules, `xmake f -m debug` changes only the output folder: xmake adds no `-O` and no
-`-g` to the project's own files. The packages are optimised anyway (`-O3`, from Charon's toolchain
+`-g` to the project's own files. The packages are optimised anyway (`-O3`, from Revenant's toolchain
 for packages). To compile the app's code with optimisation, add the two rules and the policy:
 
 ```
@@ -53,12 +53,12 @@ set_policy("build.release.strip", false)
   (not for a shared-library target), and adds `-DNDEBUG` to C and C++ files only, not to `.m` or
   `.mm`. `-m debug` compiles with `-O0 -g`.
 - The policy belongs with `mode.release`: that rule otherwise links with `-Wl,-x -Wl,-dead_strip`,
-  which removes the local symbols. Charon's link check needs those names to check each code
+  which removes the local symbols. Revenant's link check needs those names to check each code
   pointer's mode, and refuses the binary when none of its code pointers is named any more:
   `… is not what the platform runs: none of its N rebased code pointers names a function in its
   symbol table, so no pointer's mode could be checked; it arrived stripped, and the check has to
-  see it before strip`. Charon strips each binary itself after that check, when it assembles the
-  bundle (`charon.strip`, default `-x`).
+  see it before strip`. The toolchain strips each binary itself after that check, when it assembles the
+  bundle (`revenant.strip`, default `-x`).
 - The mode is part of every path: a debug build is `build/iphoneos/<arch>/debug/<Name>.app`.
 
 How to know it worked: `xmake -r -y -v > .logs/build.log 2>&1`; the compile lines of the app's
@@ -102,7 +102,7 @@ armv7 binary; it stops with `error: execv(<file> ) failed(<n>), unknown reason`.
 the emulator (skill `emulate`) or on the device (skill `device`); test logic on the Mac as the
 skill `xmake-tests` says.
 
-Commands the Charon addon adds, and the skill for each:
+Commands the revenant addon adds, and the skill for each:
 
 | Command | Skill |
 | --- | --- |
@@ -119,13 +119,13 @@ Commands the Charon addon adds, and the skill for each:
 `xmake show -l envs` lists the `XMAKE_*` variables xmake documents, with their current values.
 
 - `XMAKE_COLORTERM=nocolor` — plain text in logs you will read or `grep`.
-- `CHARON_HOME` — where Charon keeps the release libraries, firmware, root filesystems, emulator
-  images and device state (default `~/.charon`). Set it only to move that data to another disk,
+- `REVENANT_HOME` — where the toolchain keeps the release libraries, firmware, root filesystems, emulator
+  images and device state (default `~/.revenant`). Set it only to move that data to another disk,
   and then the same way for every command.
 - `XMAKE_PROFILE=stuck` — traces what a hanging command runs (skill `xmake-troubleshooting`).
 - `XMAKE_GLOBALDIR`, `XMAKE_PKG_INSTALLDIR`, `XMAKE_PKG_CACHEDIR` — **leave unset.** They move the
   package store (`XMAKE_GLOBALDIR` the addons as well). A store of its own starts empty and builds
-  Charon's compiler from source again (an hour or more, more for Swift); the shared store already
+  Revenant's compiler from source again (an hour or more, more for Swift); the shared store already
   has what the project needs.
 - `XMAKE_RCFILES` — not needed; what the project needs belongs in its `xmake.lua`, where the next
   reader sees it.
@@ -133,9 +133,9 @@ Commands the Charon addon adds, and the skill for each:
 ## Traps
 
 - A device binary as a plain `set_kind("binary")` target → the `daemon` (or `app`) rule. Reason:
-  without a Charon rule it is built by xmake's Xcode toolchain, without Charon's SDK and checks.
+  without a toolchain rule it is built by xmake's Xcode toolchain, without Revenant's SDK and checks.
 - `mode.release` without `set_policy("build.release.strip", false)` → add the policy. Reason: the
-  release link strips the names Charon's check reads.
+  release link strips the names Revenant's check reads.
 - `xmake f -m debug -y` (or `-c -y`) after choosing an architecture on an earlier line → give
   `-p` and `-a` again. Reason: options given anew replace the earlier set; the rest fall back to
   the project defaults.

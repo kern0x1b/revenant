@@ -25,7 +25,7 @@ SecureTransport. The same measurement is what made the stream task itself possib
 ## The work, in the order that can be verified cheapest first
 
 1. **The socket half, four rows, no certificate needed.** In `NSURLSessionStreamTask9.m`, once
-   `-[NSURLSessionStreamTask charon_open]` has opened the pair, read
+   `-[NSURLSessionStreamTask revenant_open]` has opened the pair, read
    `kCFStreamPropertySocketNativeHandle` off the *input* stream (`CFReadStreamCopyProperty` /
    `kCFStreamGetProperty`) and call `getsockname` and `getpeername` on the descriptor. Four rows
    become answerable and the test is cheap: a plain TCP listener the test opens, one stream task to it,
@@ -82,7 +82,7 @@ rests on; the per-release answers come from the per-rung index files it reads, a
 run over any subset is:
 
     $ python3 -c 'import gzip,os,sys                       # first-rung.lua _names_of(), inlined
-    p=os.path.expanduser("~/.charon/cache-index/"+sys.argv[1]+".names.gz")
+    p=os.path.expanduser("~/.revenant/cache-index/"+sys.argv[1]+".names.gz")
     with gzip.open(p,"rb") as h:
         h.readline(); body={l.rstrip(b"\n") for l in h if l.strip()}
     for n in sys.argv[2:]:

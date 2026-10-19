@@ -43,26 +43,26 @@ compares `.domain` against Apple's string byte for byte.
 ## Why this file's `GetTypeID` is not the pattern the tree already uses
 
 The tree already has a mechanism for a CF type the 16.4 SDK lacks, and it is used by
-`AVFoundation/CMTaggedBufferGroup17.m` and `Graphics/CVMetalTexture80.m`: a `Charon`-prefixed NSObject class
-plus `(CFTypeID)objc_getClass("Charon...")` for the type ID. That is one mechanism and it is the right one
+`AVFoundation/CMTaggedBufferGroup17.m` and `Graphics/CVMetalTexture80.m`: a `revenant`-prefixed NSObject class
+plus `(CFTypeID)objc_getClass("Revenant...")` for the type ID. That is one mechanism and it is the right one
 for a type that HAS objects - the class pointer is unique, stable and cannot collide with a numeric slot.
 
 This file does not use it, and the difference is deliberate rather than a second mechanism invented by
 accident: **this type has no objects.** `VTHDRPerFrameMetadataGenerationSessionCreate` returns
 `kVTVideoEncoderNotAvailableNowErr` on every path, so no instance of this type can ever exist and there is
-no class whose `isa` could answer for it. A `CharonVTFrameProcessorSession` class with no instances would be
+no class whose `isa` could answer for it. A `RevenantVTFrameProcessorSession` class with no instances would be
 dead code, and a dead class is worse than a UUID: it would need a registry row (a seam the port owns still
 needs one, per AGENTS.md) for a class nothing instantiates.
 
 So `CFUUIDGetTypeID()` is used, which is the mechanism CoreFoundation itself uses for a type it registers at
 run time, and it cannot collide with a slot any other type holds. If a session ever becomes creatable on a
-release that has the hardware, that is the moment this changes - and it should change to the `Charon` class
+release that has the hardware, that is the moment this changes - and it should change to the `revenant` class
 pattern, which is the one to reuse.
 
 ## The codes are an NS_ERROR_ENUM, so there is no symbol for a case
 
 `VTFrameProcessorErrors.h:26` gives fourteen codes with Apple's own values, -19730 through -19743.
-They are transcribed into `CharonVideoToolbox.h` as `VTFrameProcessorError`, because a caller compares
+They are transcribed into `RevenantVideoToolbox.h` as `VTFrameProcessorError`, because a caller compares
 a code against those NAMES - `VTFrameProcessorSessionNotStarted` is a call site, not a number - and
 there is nothing else that would give an application compiling against this port the same names.
 

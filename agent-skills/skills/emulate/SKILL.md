@@ -1,12 +1,12 @@
 ---
 name: emulate
-description: Check the app on an emulated old iPhone, iPod touch or iPad with Charon's `xmake emulate` (the Shade emulator) — add the emulator to the project, install the app's .deb and its dependencies into the image of the chosen device and iOS release, run a program in it and read the verdict (pass, fail, crash, timeout, boot-blocked), its output, log and last frame. Says which devices and releases boot, what a verdict proves, and what cannot be checked yet (an app launched through SpringBoard). Use after a green build, for the "check in the emulator" step, or when asked to run the app in the emulator, on iOS 3 to 6, on an iPhone 3GS, 4, 4S.
+description: Check the app on an emulated old iPhone, iPod touch or iPad with Revenant's `xmake emulate` (the emulator) — add the emulator to the project, install the app's .deb and its dependencies into the image of the chosen device and iOS release, run a program in it and read the verdict (pass, fail, crash, timeout, boot-blocked), its output, log and last frame. Says which devices and releases boot, what a verdict proves, and what cannot be checked yet (an app launched through SpringBoard). Use after a green build, for the "check in the emulator" step, or when asked to run the app in the emulator, on iOS 3 to 6, on an iPhone 3GS, 4, 4S.
 ---
 
 # Check in the emulator
 
 `xmake emulate` boots the chosen firmware's own userland (launchd, SpringBoard, the system
-daemons) in Shade, Charon's emulator, on the user's Mac, installs the project's packages into that
+daemons) in the emulator, Revenant's emulator, on the user's Mac, installs the project's packages into that
 image and runs one program in it under a deadline. The outcome is a **verdict** with evidence on
 disk. Read `PROJECT.md` first: `## Target` names the devices and the releases to check. Each pair
 checked here gets a line in `## Progress`.
@@ -17,15 +17,15 @@ launch an app the way a user's tap does; what it can prove about an app is narro
 ## 1. What the emulator covers
 
 - **Host:** macOS on Apple silicon only; anything else is refused before it starts.
-- **Devices** (Shade profiles): `iPhone1,1`, `iPhone1,2`, `iPhone2,1` (3GS), `iPhone3,1` (4),
+- **Devices** (the emulator profiles): `iPhone1,1`, `iPhone1,2`, `iPhone2,1` (3GS), `iPhone3,1` (4),
   `iPhone4,1` (4S), `iPod1,1`, `iPod2,1`, `iPod4,1`, `iPad1,1`, `iPad2,1`. No armv7s or arm64
   device: nothing from the iPhone 5 on. A device without a profile is refused, never replaced.
-- **Releases** (Shade's Darwin kernels, chosen by firmware build): most releases from iPhone OS 1
+- **Releases** (the emulator's Darwin kernels, chosen by firmware build): most releases from iPhone OS 1
   to iOS 7, with gaps among the point releases (3.1.x, 4.1 and 4.3.1 to 4.3.5 among them), and
   none from 8.0 on — iOS 8 and 9 cannot be emulated. A release without a kernel is refused with the
   list of kernels the emulator has.
-- **What boots:** Shade's README says it boots firmware from iPhone OS 3.0 through iOS 6.1.3 in
-  Charon's acceptance runs; iOS 7 is declared and has never been booted. Not every device and
+- **What boots:** the emulator's README says it boots firmware from iPhone OS 3.0 through iOS 6.1.3 in
+  Revenant's acceptance runs; iOS 7 is declared and has never been booted. Not every device and
   release pair inside that range has been booted: until one has on this machine, tell the user the
   check may not be possible. A pair that does not boot fails at its first `install` (§3), before
   any run.
@@ -39,20 +39,20 @@ launch an app the way a user's tap does; what it can prove about an app is narro
 
 ## 2. Add the emulator to the project
 
-1. After the `includes("@addon/charon/apple-ios")` line of `xmake.lua`, add
-   `includes("@addon/charon/emulate")`. It requires `charon@shade` (the emulator, built from
-   source with CMake on first use), `charon@swiftshader` (its CPU graphics
-   driver) and `charon@emulator-guest` (the runner that starts your program in the guest).
+1. After the `includes("@addon/revenant/apple-ios")` line of `xmake.lua`, add
+   `includes("@addon/revenant/emulate")`. It requires `revenant@emulator` (the emulator, built from
+   source with CMake on first use), `revenant@swiftshader` (its CPU graphics
+   driver) and `revenant@emulator-guest` (the runner that starts your program in the guest).
 2. Configure again so they are installed: `xmake f -p iphoneos -a armv7 -y > .logs/config.log 2>&1`.
 
-Check: `xmake where shade` prints an install folder; `.logs/config.log` has no `error:`.
+Check: `xmake where emulator` prints an install folder; `.logs/config.log` has no `error:`.
 
 **Disk and time, first use of a device and release:** the root filesystem is downloaded from
-Apple's servers and unpacked into `~/.charon/firmware/rootfs/<device>/<version>_<build>/` (about
+Apple's servers and unpacked into `~/.revenant/firmware/rootfs/<device>/<version>_<build>/` (about
 1.2 GB for an iOS 6 iPhone; skill `firmware`), then booted once past its first-boot data migration
-into a **golden image** under `~/.charon/emulator/golden.noindex/` (about 1.5 GB, about 5 host
+into a **golden image** under `~/.revenant/emulator/golden.noindex/` (about 1.5 GB, about 5 host
 minutes for iOS 6). Every later install and run is an APFS clone of it: seconds and almost no
-space. A golden image is keyed by device, build and the emulator package: a new Charon pin that
+space. A golden image is keyed by device, build and the emulator package: a new the toolchain pin that
 brings a new emulator builds a new golden image and removes the old one.
 
 ## 3. Install the app's packages into the image
@@ -67,7 +67,7 @@ xmake emulate -y -d iPhone4,1 -r 6.1.3 install > .logs/emulate-install-iPhone4,1
 `install` runs `xmake deb` first (the whole packaging of skill `package`: build, stage, sign,
 imports refused rather than warned), then clones the golden image and unpacks the data of **every
 .deb that step wrote** — the app's and, for an app that uses the backports, the
-`org.charon.apple-backports` package — and runs each package's `preinst` and `postinst` against
+`org.revenant.apple-backports` package — and runs each package's `preinst` and `postinst` against
 the image the way dpkg does (`DPKG_ROOT`). The backports' `postinst` links the libraries built for
 the image's own release and refuses a release outside its bands. What `xmake deb` refuses is not
 installed: at this pin a Swift program that carries its runtime stops `xmake emulate install` with
@@ -89,7 +89,7 @@ sockets.
 xmake emulate -y -d iPhone4,1 -r 6.1.3 [-s 60] run /absolute/path/in/the/guest [ARGS...] > .logs/emulate-run.log 2>&1
 ```
 
-A fresh clone of the installed image boots; launchd starts `charon-runner` (from
+A fresh clone of the installed image boots; launchd starts `revenant-runner` (from
 `/etc/launchd.conf` up to iOS 6.x, from a LaunchDaemon from iOS 7), which starts
 the command **as root** with a deadline of `-s` seconds (default 60). Up to iOS 6.x it starts
 early in the boot: when it runs, the guest holds only launchd, launchctl, the runner and the
@@ -111,7 +111,7 @@ with `error: <verdict> on <device> <version> (<build>) in …; the emulator log 
 | `boot-blocked(<where>…)` | the command never ran, although the image booted at `install`: the emulator, a process in a crash loop, SpringBoard or the data migration stopped the boot; a guest crash report's reason and a request that never got its reply are named |
 
 `run` prints the command's own standard output and error before the verdict. The evidence stays in
-`~/.charon/emulator/images.noindex/<project>-<hash>/<device>_<build>/run/`: `verdict.json`
+`~/.revenant/emulator/images.noindex/<project>-<hash>/<device>_<build>/run/`: `verdict.json`
 (`state`, `guest_seconds`, `host_seconds`, `scale`), `results/test.stdout`, `results/test.stderr`,
 `results/reports/` (the guest's crash reports), `emulator.log` and `frame.png`. It is replaced by
 the next run of the same device and release: copy what you cite into the project's `.logs/`.
@@ -134,7 +134,7 @@ scale; `guest_seconds` is the program's own clock.
 
 ## 5. Checking an app
 
-**Current state (Charon 0.8.10 and main): the emulator cannot launch an app through SpringBoard.**
+**Current state (revenant 0.8.10 and main): the emulator cannot launch an app through SpringBoard.**
 `run` starts a program from launchd, not from a tap on the home screen. An app's executable
 started that way does not go through SpringBoard's launch, so `application:didFinishLaunching…`
 is never reached and the app never draws; `frame.png` shows SpringBoard, not the app. There is no
@@ -150,7 +150,7 @@ What can be checked today, and how to word it in `## Progress`:
   an emulator run for "every symbol the app calls exists".
 - **The app's logic runs on that release:** put the logic that does not need `UIApplication` (the
   model, parsing, persistence, the backported Foundation classes the app relies on) into a test
-  stand — a small `@addon/charon/daemon` target in the same project that exercises it, prints each
+  stand — a small `@addon/revenant/daemon` target in the same project that exercises it, prints each
   result and exits with the number of failures (skill `checks`). `run` that program: `pass` is real
   evidence on that device and release.
 
@@ -160,7 +160,7 @@ to the user in these words, and check those on a real device (skill `device`) wh
 one. Never write "the app runs in the emulator" in `## Progress`; write what was run and its
 verdict.
 
-This section changes when Charon gains an app launch for the emulator.
+This section changes when the toolchain gains an app launch for the emulator.
 
 ## 6. Record
 

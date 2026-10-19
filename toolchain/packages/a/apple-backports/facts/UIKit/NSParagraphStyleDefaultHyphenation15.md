@@ -31,7 +31,7 @@ halves now agree, in the same words, and both point at the same measurement.
 ## What the release actually carries, measured
 
 `6.1.3`'s own Objective-C metadata, read class-scoped with the tree's own reader
-(`xmake l tools/corpus/objc-inventory.lua ~/.charon/dyld/6.1.3/dyld_shared_cache_armv7`):
+(`xmake l tools/corpus/objc-inventory.lua ~/.revenant/dyld/6.1.3/dyld_shared_cache_armv7`):
 
 | class | hyphenation selectors on 6.1.3 |
 |---|---|
@@ -47,7 +47,7 @@ at 4.3 and 12.0 carries neither, which is what the rows' `source` records.
 
 The storage is an associated object keyed on the style, the same mechanism
 `NSLayoutManager+Text13.m` uses, and the same shape as that file's `HyphenationKey`. The helper is
-`charon_menus_say_once`, which is `static inline` in `CharonMenus.h` — so **this file exports no C
+`revenant_menus_say_once`, which is `static inline` in `RevenantMenus.h` — so **this file exports no C
 symbol of its own**, which matters: a file that exported one would be a file another release's
 band might also keep, and the call would be undefined symbols in the band that did not
 (`AGENTS.md`, "A C function shared between backport files").

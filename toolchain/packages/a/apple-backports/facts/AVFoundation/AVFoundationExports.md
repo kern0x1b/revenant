@@ -42,10 +42,10 @@ iPhoneOS 16.4 SDK), and both are measured present at the band floor:
 | `AVCompositionTrack` | `_OBJC_CLASS_$_AVCompositionTrack` and its metaclass | 6 | `AVAssetTrack` (52 of its own) |
 | `AVMutableCompositionTrack` | `_OBJC_CLASS_$_AVMutableCompositionTrack` and its metaclass | 19 | `AVCompositionTrack` (6 of its own) |
 
-The class symbols were read out of `~/.charon/dyld/6.1.3/dyld_shared_cache_armv7` with
+The class symbols were read out of `~/.revenant/dyld/6.1.3/dyld_shared_cache_armv7` with
 `tools/cache-extract.lua` (dyld.lua's `extract()`) and that image's own symbol table; the method counts
 and the superclasses are from the armv7 class table of 6.0,
-`~/.charon/dyld/6.0/classes_armv7.json`, where the same image carries `AVMovieTrack` and `AVMutableMovieTrack`
+`~/.revenant/dyld/6.0/classes_armv7.json`, where the same image carries `AVMovieTrack` and `AVMutableMovieTrack`
 and `AVMovie` is ABSENT - which is what the absent rows in `absent_AVFoundation.json` record for the 13.0
 classes.
 

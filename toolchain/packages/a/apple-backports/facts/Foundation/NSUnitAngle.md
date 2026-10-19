@@ -26,7 +26,7 @@ A unit that ICU has no measure unit for carries none, and is built with
 
 ## Differences from iOS 10
 
-Charon takes the corrected numbers: a measurement asked for in stones is asked
+The toolchain takes the corrected numbers: a measurement asked for in stones is asked
 for in stones, not in the defect Apple itself withdrew.
 
 - `radians`: iOS 10 uses coefficient 57.2958, constant 0. The corrected value is used.

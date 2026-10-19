@@ -51,7 +51,7 @@ header of iOS 16.4, so the value was read from a release that does carry it:
 
 ```
 $ printf 'kCVPixelBufferOpenGLESTextureCacheCompatibilityKey\tp\tp\ts\n' > .agent-work/runs/cv9-symbols.tsv
-$ CHARON_ROOT=$PWD xmake l tools/corpus/cache-value.lua ~/.charon/dyld/9.0/dyld_shared_cache_armv7 .agent-work/runs/cv9-symbols.tsv
+$ REVENANT_ROOT=$PWD xmake l tools/corpus/cache-value.lua ~/.revenant/dyld/9.0/dyld_shared_cache_armv7 .agent-work/runs/cv9-symbols.tsv
 ```
 
 The reader answers with the symbol's install, its address and the string its pointer names, which is

@@ -1,7 +1,7 @@
 # CSSearchQuery: the query the port answers from its own index
 
 `CSSearchQuery` searches the default index. The port's search reads the store its `CSSearchableIndex` writes
-(`CharonSpotlightDefaultItems`, the store named `__defaultIndex`), in `CoreSpotlight/CSSearchQuery.m`.
+(`RevenantSpotlightDefaultItems`, the store named `__defaultIndex`), in `CoreSpotlight/CSSearchQuery.m`.
 
 The answers are the host's, measured with `tests/backports/host/corespotlight-query`: one program, built once against the
 host's framework and once against the port's sources, whose output must be the same line for line. The run has 25 lines and
@@ -11,9 +11,9 @@ comparison does tell a wrong answer apart.
 
 ## The grammar, as measured
 
-- `attribute == "value"` and `attribute != "value"` compare the whole string, case-sensitively: `title == "charon alpha q"`
-  does not match `Charon Alpha Q`.
-- `*` in the quoted value matches any run of characters: prefix (`Charon*Q`), substring (`*Alpha*`), suffix (`*Q`), and `*`
+- `attribute == "value"` and `attribute != "value"` compare the whole string, case-sensitively: `title == "revenant alpha q"`
+  does not match `Revenant Alpha Q`.
+- `*` in the quoted value matches any run of characters: prefix (`Revenant*Q`), substring (`*Alpha*`), suffix (`*Q`), and `*`
   alone. `?` is an ordinary character: `Gamm? Q` matches nothing.
 - `&&` binds tighter than `||`: `a || b && c` answers `a` together with `b && c`. Parentheses group: `(a || b) && c`.
 - An attribute the item does not have, or one the attribute set does not declare, matches nothing and is not an error
@@ -29,7 +29,7 @@ quoted value; unquoted values; a single `=`; attribute names other than the ones
 
 ## Where the class is carried
 
-The query reads the port's default store, `CharonSpotlightDefaultItems`, which `CSSearchableIndex.o` defines. Measured with
+The query reads the port's default store, `RevenantSpotlightDefaultItems`, which `CSSearchableIndex.o` defines. Measured with
 `tools/symbol-first-release.lua` on the armv7 ladder: the release's own `CSSearchableIndex` is first exported at 9.0, so from
 9.0 the port's index is left out and its store is not there; the release's own `CSSearchQuery` is first exported at 10.0.1,
 the first held rung that exports it. The release has no query over the index it keeps from 9.0 on, so in the 9.0 band and

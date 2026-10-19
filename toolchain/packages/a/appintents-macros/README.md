@@ -1,14 +1,14 @@
-# charon@appintents-macros
+# revenant@appintents-macros
 
-The macro plugins `charon@appintents` and `charon@tipkit` name: `AppIntentsMacros` and `TipKitMacros`,
+The macro plugins `revenant@appintents` and `revenant@tipkit` name: `AppIntentsMacros` and `TipKitMacros`,
 as host executables a device compile loads with `-load-plugin-executable`.
 
 The framework expands these with its own compiler plugin, which is on the framework's own releases and
 not on these, so a port that writes `@AppEntity(schema:)` has no expansion. This package is the port's
-own expansion of them, and it is what the 19 macro rows in `charon@appintents` and the three in
-`charon@tipkit` are waiting for.
+own expansion of them, and it is what the 19 macro rows in `revenant@appintents` and the three in
+`revenant@tipkit` are waiting for.
 
-**Built against `charon@swift-syntax`**, the Apache-2.0 upstream at the tag that matches the fleet's
+**Built against `revenant@swift-syntax`**, the Apache-2.0 upstream at the tag that matches the fleet's
 6.4 toolchain, and not against the toolchain's own copy: that copy exports every macro protocol
 (`AccessorMacro`, `PeerMacro`, `MemberAttributeMacro`, `MemberMacro`, `ExtensionMacro`,
 `FreestandingMacro`, `Macro`) and **no** `CompilerPlugin` — it sits behind `@_spi(PluginMessage)` in
@@ -33,8 +33,8 @@ header, and says which two of its own errors are its own.
 
 ## Building it, and the store rule that a run of it has to know
 
-`charon@swift-syntax` is a **host** package, and the rule that builds a plugin from it is
-`@addon/charon/macro`, not `rules/swift`: a plugin is compiled for the machine running the compiler
+`revenant@swift-syntax` is a **host** package, and the rule that builds a plugin from it is
+`@addon/revenant/macro`, not `rules/swift`: a plugin is compiled for the machine running the compiler
 and loaded with `-load-plugin-executable`, so it is neither a port target nor a device binary.
 
 **Use the shared `~/.xmake` store.** A run of mine set a private `XMAKE_GLOBALDIR` and the project
@@ -50,7 +50,7 @@ A gigabyte-class download and then a toolchain install: network-bound, which is 
 for 26 minutes at 0% CPU with no child processes, holding a slow slot. The repository's own trap
 says it: *a private store re-resolves the whole dependency chain from network, up to rebuilding LLVM
 from source — never do that either.* Nothing collides in the shared store anyway, because
-`charon@swift-syntax` installs under its own recipe digest (the recipe file's hash and the pinned
+`revenant@swift-syntax` installs under its own recipe digest (the recipe file's hash and the pinned
 commit, since its sources are upstream's and not in this tree).
 
 A gate that builds this should also **bound** its `xmake` calls and close stdin (`</dev/null`), so
@@ -58,9 +58,9 @@ neither a hang nor a prompt can hold a slot again, and it should be launched onl
 below its load cap — a queued job that waits in heavy.sh is a job holding a slot, which is the thing
 the cap exists to prevent.
 
-## Where `charon@swift-syntax`'s products land — measured, not derived
+## Where `revenant@swift-syntax`'s products land — measured, not derived
 
-`charon@swift-syntax` **installs**, and the run that first did so is what fixed the paths the recipe
+`revenant@swift-syntax` **installs**, and the run that first did so is what fixed the paths the recipe
 copies and the rule includes. With a target-scoped `swift build`, SwiftPM writes each module's
 `.swiftmodule` and its object **flat** in the scratch path's `release/`:
 

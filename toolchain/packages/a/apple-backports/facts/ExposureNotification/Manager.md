@@ -54,17 +54,17 @@ is; the queue is what a caller reads back.
 ## `ENErrorDomain`
 
 `ENCommon.h:64` declares `extern NSErrorDomain const ENErrorDomain;` and gives no value, so there is
-nothing in a header to read. It was measured out of a release that has it, with charon's own reader:
+nothing in a header to read. It was measured out of a release that has it, with Revenant's own reader:
 
 ```
 $ printf 'ENErrorDomain\t8\tp\ts\n' > symbols.txt
-$ CHARON_ROOT=$PWD xmake l tools/corpus/cache-value.lua ~/.charon/dyld/16.0/dyld_shared_cache_arm64e symbols.txt
+$ REVENANT_ROOT=$PWD xmake l tools/corpus/cache-value.lua ~/.revenant/dyld/16.0/dyld_shared_cache_arm64e symbols.txt
 #cache	arm64e	8
 ENErrorDomain	/System/Library/Frameworks/ExposureNotification.framework/ExposureNotification	0x20e5acab8	a888db1402000800	349931688	2251808753551528	1.1125413461344081e-308	0x214db88a8	ENErrorDomain	8	8
 ```
 
 The domain string is `ENErrorDomain`. ExposureNotification arrived in 12.5 and the 16.0 arm64e cache is
-the oldest one on this machine that has the framework (`~/.charon/dyld/` lists 12.0 and 16.0 but no
+the oldest one on this machine that has the framework (`~/.revenant/dyld/` lists 12.0 and 16.0 but no
 12.5-15.x), which is what makes that cache the measurement rather than a recollection.
 
 There is no `ExposureNotification.framework` in any SDK installed here

@@ -108,9 +108,9 @@ first. Three artifacts do this:
 
 | Artifact | On device | Built by | Role |
 | --- | --- | --- | --- |
-| **Loader** | `/Library/MobileSubstrate/DynamicLibraries/RevSafari.dylib` | the `RevSafari` device library in `charon.toml` | Reads the enabled-apps preference and re-execs an enabled app with the engine's `DYLD_*` set. Skips SpringBoard. |
-| **Engine** | `/usr/lib/rev-fw/{JavaScriptCore,WebCore,WebKit}.framework` | `charon build` from `charon.toml`, which also lays it out under the system's names | The WebKit build itself. |
-| **Compat / hooks** | `/usr/lib/rev-safari-compat.dylib` | the `rev-safari-compat` device library in `charon.toml` | The ABI symbols iOS 6 predates, plus the bookmarks start page, WebAssembly, and preference reads. Inserted by the loader. |
+| **Loader** | `/Library/MobileSubstrate/DynamicLibraries/RevSafari.dylib` | the `RevSafari` device library in `revenant.toml` | Reads the enabled-apps preference and re-execs an enabled app with the engine's `DYLD_*` set. Skips SpringBoard. |
+| **Engine** | `/usr/lib/rev-fw/{JavaScriptCore,WebCore,WebKit}.framework` | `revenant build` from `revenant.toml`, which also lays it out under the system's names | The WebKit build itself. |
+| **Compat / hooks** | `/usr/lib/rev-safari-compat.dylib` | the `rev-safari-compat` device library in `revenant.toml` | The ABI symbols iOS 6 predates, plus the bookmarks start page, WebAssembly, and preference reads. Inserted by the loader. |
 
 The loader and the compat dylib are two different files with two different jobs —
 overwriting one with the other drops Safari back to the system engine.
@@ -127,7 +127,7 @@ overwriting one with the other drops Safari back to the system engine.
 - The Command Line Tools. The **iOS 16.4 SDK** the `apple-ios` platform names
   arrives as the toolchain's `iphoneos-sdk` package, fetched from [theos/sdks](https://github.com/theos/sdks)
   and checked against its sha256. Xcode is not needed, and neither is Theos.
-- `conan`, and [Charon](https://github.com/kern0x1b/charon)
+- `conan`, and [toolchain](https://github.com/kern0x1b/revenant/tree/main/toolchain)
   installed with `conan config install`. Conan itself installs `cmake`, `ninja`,
   `ldid` and the `ld64` linker.
 
@@ -142,20 +142,20 @@ sequence, and why each piece exists, is in **[docs/building.md](docs/building.md
 
 | Step | Builds |
 | --- | --- |
-| `charon build` | the libraries iOS 6 predates, `libios6compat.a`, the engine and everything around it, laid out as the device filesystem in `build/system/stage` |
-| `charon package` | the `.deb` |
+| `revenant build` | the libraries iOS 6 predates, `libios6compat.a`, the engine and everything around it, laid out as the device filesystem in `build/system/stage` |
+| `revenant package` | the `.deb` |
 
-A change to a WebCore header means a full build, which `charon build` is: a
+A change to a WebCore header means a full build, which `revenant build` is: a
 partial build leaves the other frameworks compiled against the old class size,
 and the result loads and then misbehaves with no crash to read.
 
 ### The Safari substitution, as a package
 
-`charon build` lays out the engine as the system frameworks it replaces, and
+`revenant build` lays out the engine as the system frameworks it replaces, and
 builds everything that goes on the device around it from the device libraries
-`charon.toml` declares. `charon package` packs that tree into
+`revenant.toml` declares. `revenant package` packs that tree into
 `<package folder>/deb/space.kern0x1b.rev_<version>_iphoneos-arm.deb`.
-The version is `version` in `charon.toml` - change it there and build.
+The version is `version` in `revenant.toml` - change it there and build.
 
 One `.deb` carries all of it: the loader and its MobileSubstrate filter, the
 compatibility and hook dylib, the TLS library, the Settings bundle with its
@@ -166,7 +166,7 @@ is installed:
 dpkg -i space.kern0x1b.rev_*_iphoneos-arm.deb
 ```
 
-Two settings on the `rev-safari-compat` device library in `charon.toml` are not
+Two settings on the `rev-safari-compat` device library in `revenant.toml` are not
 optional: the compat dylib
 is built without `_FORTIFY_SOURCE` and without libc++, because the `__*_chk`
 symbols are linkage this release never had, and the engine carries its own C++
@@ -185,10 +185,10 @@ Then build and install the package, which carries the loader, the compatibility
 dylib, the TLS dylib and the Settings pane, and can be removed again:
 
 ```sh
-charon build
-charon package
-charon device copy "<package folder>/deb/space.kern0x1b.rev_<version>_iphoneos-arm.deb" /tmp/rev.deb
-charon device run 120 "dpkg -i /tmp/rev.deb"
+revenant build
+revenant package
+revenant device copy "<package folder>/deb/space.kern0x1b.rev_<version>_iphoneos-arm.deb" /tmp/rev.deb
+revenant device run 120 "dpkg -i /tmp/rev.deb"
 ```
 
 **Verify it took.** Open any page in Safari and check the user agent — a request

@@ -17,7 +17,7 @@ none; the row list came out of the file this band owns.
 | reader | the question | command |
 | --- | --- | --- |
 | the deleted class-scoped row reader | does **OWNER** carry the member, own table or through a superclass | `xmake l tools/corpus/objc-inventory.lua <cache>` then the tool |
-| `objc.lua`'s `known_selectors` file | is the **name** in the release's whole selector set at all | `~/.charon/dyld/6.1.3/selectors_armv7.txt`, 113 981 names |
+| `objc.lua`'s `known_selectors` file | is the **name** in the release's whole selector set at all | `~/.revenant/dyld/6.1.3/selectors_armv7.txt`, 113 981 names |
 | `tools/cache-index/first-rung.lua` | which **held release** first carries the name | `first-rung.lua NAME` |
 
 All three ran over these 64 rows. The class-scoped reader is the one the registry's own
@@ -106,11 +106,11 @@ Own selectors, each from its own release's class line. This is the substrate, an
 
 ## Reproducing
 
-    CHARON_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua ~/.charon/dyld/6.1.3/dyld_shared_cache_armv7 \
+    REVENANT_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua ~/.revenant/dyld/6.1.3/dyld_shared_cache_armv7 \
         > 6.1.3.armv7.inventory.tsv
-    CHARON_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua ~/.charon/dyld/8.0/dyld_shared_cache_armv7 \
+    REVENANT_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua ~/.revenant/dyld/8.0/dyld_shared_cache_armv7 \
         > 8.0.armv7.inventory.tsv
-    CHARON_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua ~/.charon/dyld/12.0/dyld_shared_cache_arm64 \
+    REVENANT_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua ~/.revenant/dyld/12.0/dyld_shared_cache_arm64 \
         > 12.0.arm64.inventory.tsv
     # the removed class-scoped row read, arguments: <rows.tsv> \
         6.1.3-armv7=6.1.3.armv7.inventory.tsv 8.0-armv7=8.0.armv7.inventory.tsv \

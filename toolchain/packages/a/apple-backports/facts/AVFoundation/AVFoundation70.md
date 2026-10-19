@@ -55,8 +55,8 @@ through `coordination/heavy.sh`:
 
 The `unparsed=1` is the queue file's trailing blank line, and the tool refused to certify the run rather
 than report totals that did not cover its input. All four of its controls answered correctly
-(`-[NSURLSessionTask cancel]` HAS, `-[NSURLSessionTask charonProbeNoSuchSelector]` LACKS,
-`NSAttributedString` HAS, `NSCharonProbeNoSuchClass` LACKS).
+(`-[NSURLSessionTask cancel]` HAS, `-[NSURLSessionTask revenantProbeNoSuchSelector]` LACKS,
+`NSAttributedString` HAS, `NSRevenantProbeNoSuchClass` LACKS).
 
 The eight `LACKS` are not eight absences, and reading them as such would be the third shape of the same
 trap:
@@ -135,8 +135,8 @@ itself and does not compute a second answer.
 
 The row's `minimum` is 6.0, so the object is carried from 6.0 up -- and it is compiled into both
 bands, `build/objects` and `build/objects-7.0`, each holding
-`-[AVCaptureDeviceFormat(CharonBinnedVideo) isVideoBinned]` and its
-`__OBJC_$_CATEGORY_AVCaptureDeviceFormat_$_CharonBinnedVideo` metadata. A category's methods are not
+`-[AVCaptureDeviceFormat(RevenantBinnedVideo) isVideoBinned]` and its
+`__OBJC_$_CATEGORY_AVCaptureDeviceFormat_$_RevenantBinnedVideo` metadata. A category's methods are not
 symbols and are never dropped from the rung up, so being carried at 7.0 is not in doubt. What is in
 doubt is whether a category method **replaces** the release's own, because 7.0 has
 `-isVideoBinned` and does **not** have `-isBinned`:
@@ -148,8 +148,8 @@ doubt is whether a category method **replaces** the release's own, because 7.0 h
 
 If the port's copy replaced the release's, every 7.0-and-later caller of `isVideoBinned` would reach
 `[self isBinned]` on a release that has no such method. It does not replace it, and the reason is in
-`packages/a/apple-backports/attach.c`: `charon_collect` adds a category's method only when
-`!charon_implements(cls, selector)`, and `charon_implements` walks the class and its superclasses.
+`packages/a/apple-backports/attach.c`: `revenant_collect` adds a category's method only when
+`!revenant_implements(cls, selector)`, and `revenant_implements` walks the class and its superclasses.
 So at 6.1.3, where nothing implements `isVideoBinned`, the port's method is installed and forwards
 to the release's `-isBinned`; at 7.0 and above, where the release implements `isVideoBinned`, the
 port's method is not installed at all and the release's own body runs, reading the `videoBinned` key
@@ -190,9 +190,9 @@ bodies were read through `apple.objc`'s slide-resolving reader instead.
 
 ## Reproducing
 
-    CHARON_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua ~/.charon/dyld/6.1.3/dyld_shared_cache_armv7 \
+    REVENANT_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua ~/.revenant/dyld/6.1.3/dyld_shared_cache_armv7 \
         > 6.1.3.armv7.inventory.tsv
-    CHARON_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua ~/.charon/dyld/7.0/dyld_shared_cache_armv7 \
+    REVENANT_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua ~/.revenant/dyld/7.0/dyld_shared_cache_armv7 \
         > 7.0.armv7.inventory.tsv
     # the removed class-scoped row read, arguments: --inventory 6.1.3 7.0 \
         -- $HOME/Git/projects/ios/coordination/corpus/queue/avfoundation-7_0.tsv
@@ -207,9 +207,9 @@ band against the FIRST and LAST release of its range, and the port's floor is 4.
 on the other, so both ends were read in one run, from the two `objc-inventory.lua` dumps those two
 caches produce:
 
-    CHARON_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua ~/.charon/dyld/4.3/dyld_shared_cache_armv7 \
+    REVENANT_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua ~/.revenant/dyld/4.3/dyld_shared_cache_armv7 \
         > 4.3.armv7.inventory.tsv
-    CHARON_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua ~/.charon/dyld/6.1.3/dyld_shared_cache_armv7 \
+    REVENANT_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua ~/.revenant/dyld/6.1.3/dyld_shared_cache_armv7 \
         > 6.1.3.armv7.inventory.tsv
     # the removed class-scoped row read, arguments: \
         $HOME/Git/projects/ios/coordination/corpus/queue/SLICE-AVFoundation-absent_AVFoundation-7.tsv \

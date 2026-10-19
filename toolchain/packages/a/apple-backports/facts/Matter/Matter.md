@@ -7,7 +7,7 @@ because a class has too many members for a hand transcription to be right and th
 
 ## The generated family against the real stack (v-matter9)
 
-The real stack is charon@matter's `libMatterBackports.dylib` (v1.6.1.0, armv7). Its Objective-C classes, read with
+The real stack is revenant@matter's `libMatterBackports.dylib` (v1.6.1.0, armv7). Its Objective-C classes, read with
 `modules/apple/objc.lua`'s `binary_inventory` (the reader `tools/matter-registry.lua` uses), are 1508. Of the 1208
 classes the committed generated objects define, the real stack defines **1188** and **20** it does not.
 
@@ -49,7 +49,7 @@ Two families, and both are read out of the headers rather than listed:
   `MTR_AVAILABLE(ios(17.4))` - so without it every one of the 143 is `cannot find interface declaration for`
   and the library does not link. It carries the one property its own header declares at `MTRCluster.h:66`,
   `device`, and nothing else. **79 of the 143 are absent from 16.4** and get the port's own `@interface` in
-  `CharonMatterTypes.h`, superclass and every member; the other 64 are declared by it and add nothing there.
+  `RevenantMatterTypes.h`, superclass and every member; the other 64 are declared by it and add nothing there.
   Their list is written to `generic-clusters-emitted.txt` beside `clusters-emitted.txt` and CHECKED against
   the headers on every run, so a stale file is named rather than carried.
 
@@ -135,7 +135,7 @@ tools/matter-generate.py            run exit 0; `clusters written: 281` (the 142
                                         MTRGenericCluster, and 143 of them, disjoint from the 142
                                         MTRBaseCluster* ones`; `generic-clusters-emitted.txt: 143 name(s)
                                         written, and they MATCH the committed list`;
-                                        `CharonMatterTypes.h: 2 shared class declaration(s), 158 cluster
+                                        `RevenantMatterTypes.h: 2 shared class declaration(s), 158 cluster
                                         interface(s), 610 plain data declaration(s); 3 object(s) written`
     the generator's two invariants, both ways
                                         `invariant: every member the header declares is in the generated
@@ -174,7 +174,7 @@ tools/matter-generate.py            run exit 0; `clusters written: 281` (the 142
                                         one release` - measured from the held caches' EXPORT TRIE, not from
                                         API_AVAILABLE
     nm -gU over those 1208 objects      1208 distinct _OBJC_CLASS_$_ symbols, one per object, and every one
-                                        is either Charon-prefixed or a class the registry carries as
+                                        is either Revenant-prefixed or a class the registry carries as
                                         `implemented`: 0 that are neither. The only other exported symbol is
                                         _OBJC_LABEL_PROTOCOL_$_NSCopying, from the NSCopying conformance the
                                         plain data classes carry, which internal_symbol() does not exempt -
@@ -186,7 +186,7 @@ tools/matter-generate.py            run exit 0; `clusters written: 281` (the 142
                                         measured their releases in 34.7s, linked 69 libraries in 3.9s,
                                         checked in 4.1s` - the same note as 6.1.3: the band links
                                         MatterClusterBackports without Matter, which the release has not
-    CharonMatterMTRGenericBaseCluster.m, armv7-apple-ios4.3
+    RevenantMatterMTRGenericBaseCluster.m, armv7-apple-ios4.3
                                         fails: MTRDeviceControllerStartupParams.h:240 `property with 'retain
                                         (or strong)' attribute must be of object type`. The smallest of the
                                         144 objects, which imports Matter.h and declares nothing of its own,
@@ -216,7 +216,7 @@ selector the file defines is in the contract - it named 700 on `MTRBaseClusterTe
 invented instance method injected into one emitted object is caught and named, so the reverse direction is
 not vacuous.
 
-**The 45 declarations that were not there.** Both of those directions read the OBJECT. `CharonMatterTypes.h`
+**The 45 declarations that were not there.** Both of those directions read the OBJECT. `RevenantMatterTypes.h`
 is a second artifact, built from the same `facts()` but read by a different function, and a shape one of them
 takes and the other does not is invisible to a check that looks at one of them. Reading the interface's
 commands over the parameterised shapes alone dropped the `<verb>WithCompletion:` form of every verb that has
@@ -244,8 +244,8 @@ compile. A check that cannot fail is worth nothing; that one could.
 **An annotation macro is the header's, not the method's.** `signature()` took off `MTR_AVAILABLE(` and
 nothing else, so a declaration SDK 16.4 spells with the OTHER name arrived with the macro still attached and
 the emitted signature carried it: 1,723 lines of `MTR_DEPRECATED(...)` in
-`CharonMatterMTRBaseClusterTestCluster.m` and 22 lines of `API_AVAILABLE(...)` in
-`CharonMatterMTRBaseClusterColorControl.m`, both of which compiled and neither of which is the framework's
+`RevenantMatterMTRBaseClusterTestCluster.m` and 22 lines of `API_AVAILABLE(...)` in
+`RevenantMatterMTRBaseClusterColorControl.m`, both of which compiled and neither of which is the framework's
 shape. The list is now every macro a declaration can END with - available, deprecated, unavailable, in both
 spellings - and the paren-counting strip takes off whichever it finds first, so a nested one is still
 consumed whole.
@@ -275,7 +275,7 @@ The initializer itself does the work that matters: it writes the device, the end
 given into the three ivars its class declares, boxing the `uint16_t` that the header's deprecated
 `initWithDevice:endpoint:queue:` hands it.
 
-**The differential does not build here, and the reason is the port's own types header.** `CharonMatterTypes.h`
+**The differential does not build here, and the reason is the port's own types header.** `RevenantMatterTypes.h`
 declares every cluster class SDK 16.4 lacks, because the library compiles against 16.4 and an object that
 implements a class no `@interface` declares is `cannot find interface declaration for`. This host's
 Matter.framework declares 141 of the 142 emitted clusters, and 78 of the port's declarations carry a name
@@ -345,16 +345,16 @@ three things:
   the library did not LINK: `Undefined symbols for architecture arm64:
   "_OBJC_CLASS_$_MTRUnitTestingClusterNestedStructList"`. The family now CLOSES over the classes its members
   name, so 924 classes and 1068 objects, and the oracle for 26.2's own defaults is the connectedhomeip tree
-  already on this machine at `charon/.agent-work/upstreams/chip/src/darwin/Framework/CHIP/zap-generated/`,
+  already on this machine at `toolchain/.agent-work/upstreams/chip/src/darwin/Framework/CHIP/zap-generated/`,
   whose generated `MTRCommandPayloadsObjc.h` is the 26.2-era shape (`groupID` at `MTR_AVAILABLE(ios(16.4))`,
   the same as 26.2).
 
 **`fabricID` and `ipk` are FIXED, and the rule came out of the framework's own source.** The port wrote an
 `-init` for all 924 plain data classes. It should write one only where the framework's source does:
 
-    charon/.agent-work/upstreams/chip/src/darwin/Framework/CHIP/MTRDeviceControllerStartupParams.h:30
+    toolchain/.agent-work/upstreams/chip/src/darwin/Framework/CHIP/MTRDeviceControllerStartupParams.h:30
         - (instancetype)init NS_UNAVAILABLE;
-    charon/.agent-work/upstreams/chip/src/darwin/Framework/CHIP/zap-generated/MTRCommandPayloadsObjc.mm
+    toolchain/.agent-work/upstreams/chip/src/darwin/Framework/CHIP/zap-generated/MTRCommandPayloadsObjc.mm
         @implementation MTRGroupsClusterAddGroupParams
         - (instancetype)init
         {
@@ -413,7 +413,7 @@ one silently, and the run exits 1 if it does.
 **THE "Foundation-runtime" FAMILY WAS A PORT DEFECT, and the ruling was right.** The zap-generated
 `-description` prints every octet string through BASE64, not through `%@` of the `NSData`:
 
-    charon/.agent-work/upstreams/chip/src/darwin/Framework/CHIP/zap-generated/MTRStructsObjc.mm:788
+    toolchain/.agent-work/upstreams/chip/src/darwin/Framework/CHIP/zap-generated/MTRStructsObjc.mm:788
         [NSString stringWithFormat:@"<%@: data:%@; fabricIndex:%@; >", NSStringFromClass([self class]),
         [_data base64EncodedStringWithOptions:0], _fabricIndex]
 
@@ -475,9 +475,9 @@ as one that declares it:
 so `[[MTRSubscribeParams alloc] init]` runs MTRSubscribeParams' OWN `-init` and then, through `[super init]`,
 `MTRReadParams`' - and the framework's source says which one that is:
 
-    charon/.agent-work/upstreams/chip/src/darwin/Framework/CHIP/MTRCluster.mm:184
+    toolchain/.agent-work/upstreams/chip/src/darwin/Framework/CHIP/MTRCluster.mm:184
         @implementation MTRSubscribeParams            <- no -init here, only initWithMinInterval:maxInterval:
-    charon/.agent-work/upstreams/chip/src/darwin/Framework/CHIP/MTRCluster.mm:287
+    toolchain/.agent-work/upstreams/chip/src/darwin/Framework/CHIP/MTRCluster.mm:287
         @implementation MTRSubscribeParams (Deprecated)
         - (instancetype)init
         {
@@ -569,7 +569,7 @@ deprecated spelling of which is not a list: it is each class's OWN annotation**,
       MTRTestClusterClusterTestEventEvent.arg4: MTRTestClusterClusterSimpleStruct -> MTRUnitTestingClusterSimpleStruct
 
 **What the regeneration changed, measured by `diff -rq` over the 1,068 objects: 5 files.** Four objects and
-one line of `CharonMatterTypes.h` five times over - the 5 `-init` stores above and the 5 declared types.
+one line of `RevenantMatterTypes.h` five times over - the 5 `-init` stores above and the 5 declared types.
 Nothing else in the tree moved, which is the check that matters here: 3,267 members and the derived rule
 they used to come from agree with the framework's own source everywhere else.
 
@@ -650,7 +650,7 @@ states. The `.unannotated` sidecar loses those 443 declarations and adds none.
 **`--base` makes the registry write ROWS, and that is the only way it may be written.** The tool writes its
 entries in the order the objects' FILE NAMES sort in, which is not the committed file's order: the 144 cluster
 rows are there first and the 924 plain data rows were appended under them, so writing the tool's own order
-replaced all 17,606 rows and changed nothing but their order - the failure `charon/AGENTS.md` records for three
+replaced all 17,606 rows and changed nothing but their order - the failure `toolchain/AGENTS.md` records for three
 different families on 2026-09-30. With `--base` every row the file holds keeps its place, a row the run adds
 is appended, a row the file holds that the run no longer produces is DROPPED and named, and every row that
 keeps its place is compared value for value and its change printed by name. So the run's list of moved rows
@@ -861,8 +861,8 @@ above are answered by the corpus, not by a gap. The rerun carries 17061 of the 2
   (`appleClearAliroReaderConfigWith...`, `readAttributeAppleAliro...`, `readAttributeAppleNumberOfAliro...`). The corpus
   marks all 48 `Apple...Aliro` rows `unavailable` (yes). The dylib defines none of them (`strings` finds
   `clearAliroReaderConfig` and `AppleAliro` nowhere): the unprefixed Aliro selectors are the ones it carries. The
-  `Charon/MTRBaseClusterDoorLock.mm` and `Charon/MTRClusterDoorLock.mm` forwards that were meant to add them are not in
-  the matter package's build (`packages/m/matter/xmake.lua` names no `Charon` directory), so they are not compiled.
+  `Revenant/MTRBaseClusterDoorLock.mm` and `Revenant/MTRClusterDoorLock.mm` forwards that were meant to add them are not in
+  the matter package's build (`packages/m/matter/xmake.lua` names no `revenant` directory), so they are not compiled.
 - The other 29 of the 48 were never in the committed registry and stay out (unavailable).
 
 The 1188 generated classes' rows against the new real registry (by kind and name; the 20 are not in this set):
@@ -948,12 +948,12 @@ The rest are declared nowhere in the headers.
 corpus marks unavailable are all Aliro methods of `MTRBaseClusterDoorLock` (33) and `MTRClusterDoorLock` (15): 36 spelled
 with `Apple` (for example `+[MTRBaseClusterDoorLock readAttributeAppleAliroBLEAdvertisingVersionWithClusterStateCache:endpoint:queue:completion:]`,
 `16.1`, `unavailable` yes, `container`) and 12 unprefixed. The corpus carries all 36 Apple-spelled rows as unavailable
-(`yes`). The dylib defines none of the Apple-spelled selectors. The `Charon/MTRBaseClusterDoorLock.mm` and
-`Charon/MTRClusterDoorLock.mm` forwards that would have added them are not in `packages/m/matter/xmake.lua`, so nothing
+(`yes`). The dylib defines none of the Apple-spelled selectors. The `Revenant/MTRBaseClusterDoorLock.mm` and
+`Revenant/MTRClusterDoorLock.mm` forwards that would have added them are not in `packages/m/matter/xmake.lua`, so nothing
 compiled them; both are deleted (coordinator's decision 6), and the Aliro rows leave with the generated classes. No
 app can call them: the SDK declares them unavailable.
 
-**The removal.** The 1185 generated classes' object files are removed (1185 tracked files). The 20 generated-only classes and the three base classes they subclass stay (23 `CharonMatter*.m`): MTRCluster, MTRGenericCluster and MTRGenericBaseCluster are the superclasses of the 20, and the release has no Matter framework, so the library is the only provider of them. The first removal dropped those three and the 6.1.3 gate failed to link the 20 (undefined `_OBJC_CLASS_$_MTRGenericBaseCluster` and `_OBJC_CLASS_$_MTRGenericCluster`).
+**The removal.** The 1185 generated classes' object files are removed (1185 tracked files). The 20 generated-only classes and the three base classes they subclass stay (23 `RevenantMatter*.m`): MTRCluster, MTRGenericCluster and MTRGenericBaseCluster are the superclasses of the 20, and the release has no Matter framework, so the library is the only provider of them. The first removal dropped those three and the 6.1.3 gate failed to link the 20 (undefined `_OBJC_CLASS_$_MTRGenericBaseCluster` and `_OBJC_CLASS_$_MTRGenericCluster`).
 `registry/Matter/ios16.json` goes from 21250 entries to 268 (the 20982 rows owned by
 the 1185 are dropped; the 268 owned by the 23 stay, the same bytes in the same order). `registry/Matter/ios16.json.unannotated`
 goes from 10334 lines to 264, by the same owner rule. The `matter` option's description no longer names 1208 objects.
@@ -965,7 +965,7 @@ Every row of the removed classes is either homed in `packages/m/matter/registry`
 - Coordinator, decision: the 3380 NSObject-rooted rows (`init`, `new`, `copyWithZone:`, `description`) were removed with
   their classes as c rows. They are the root's members, not Matter's. Say if they must stay as a registry row of their
   own, or be homed on `NSObject`; the proof does not decide that.
-- The guard `tests/addon/matter_objects_test.lua` (`failures`, pure Lua): fails when a committed `Matter/CharonMatter*.m`
+- The guard `tests/addon/matter_objects_test.lua` (`failures`, pure Lua): fails when a committed `Matter/RevenantMatter*.m`
   implements a class of `class-overlap.tsv` `yes`, or a class the real registry carries (the three base classes exempt), and pins the count at 23. The
   coordinator adds its suite name `matter_objects_test` to `coordination/run_light_tests.lua`.
 - `tools/matter-generate.py` still writes the 1185 classes. It is Python and was not run; a re-run would re-emit them, and
@@ -1014,11 +1014,11 @@ MTRGenericCluster, MTRGenericBaseCluster) are carried by the real stack, which i
 gone no generated class needs them. No exception to condition (1) is made.
 
 **Measured counts, before the removal (the v-matter12 tip this series builds on).** 1208 generator inputs; 0 emitted (column 5 of
-`emit-closure.tsv`); 23 committed `Matter/CharonMatter*.m` objects (the three base classes and the 20); 268 registry rows in
+`emit-closure.tsv`); 23 committed `Matter/RevenantMatter*.m` objects (the three base classes and the 20); 268 registry rows in
 `registry/Matter/ios16.json`, all owned by the 23 classes (every row's class name is one of them); 1 `.unannotated` sidecar.
 
 **Removed.**
-- The 23 objects, `Matter/CharonMatterTypes.h` and `Matter/CharonMatterQueueStorage.h` (the two headers only they included).
+- The 23 objects, `Matter/RevenantMatterTypes.h` and `Matter/RevenantMatterQueueStorage.h` (the two headers only they included).
 - `registry/Matter/ios16.json` and `registry/Matter/ios16.json.unannotated`. The folder is gone.
 - The library `MatterClusterBackports`: its entry in `modules/apple/backports.lua`, the `matter` config and its library
   line in `packages/a/apple-backports/xmake.lua`. Nothing else in the tree named it (grep over the tree).
@@ -1039,20 +1039,20 @@ gone no generated class needs them. No exception to condition (1) is made.
 The real stack's host-side harness stays: `tests/backports/host/matter/run.sh`, `members.m` (the host's own surface, read from a
 live process) and `pure.m` (one program held against the host framework), with `tools/matter-host-diff.lua` and
 `tools/matter-pure-diff.lua`, which compare them with the real stack's `libMatterBackports.dylib` (`packages/m/matter/facts/MatterFramework.md`).
-Those files test only charon@matter's surface and read nothing of the removed family.
+Those files test only revenant@matter's surface and read nothing of the removed family.
 
-**The matter option (ruling, coordinator).** Its removal is accepted. The real stack's route is charon@matter: its
+**The matter option (ruling, coordinator).** Its removal is accepted. The real stack's route is revenant@matter: its
 `libMatterBackports.dylib` is built and installed by `packages/m/matter`, which depends on apple-backports, so no
 apple-backports option can deliver it.
 
-**Guards.** `tests/addon/matter_closure_test.lua` has no pending list: it fails on any committed `Matter/CharonMatter*.m`.
+**Guards.** `tests/addon/matter_closure_test.lua` has no pending list: it fails on any committed `Matter/RevenantMatter*.m`.
 `tests/addon/matter_objects_test.lua` pins 0 and no longer excepts the base classes. Each fails on one added class object
 (a mutant defining MTRBaseClusterOnOff: four failures, then removed; see the report).
 
 **What an application gets for Matter now.**
 - From apple-backports: nothing. No file in this package defines or installs a Matter cluster class.
-- From charon@matter: the real stack's `libMatterBackports.dylib` (v1.6.1.0, armv7), installed under
-  `/usr/lib/charon/org.charon.apple-backports/libMatterBackports.dylib` (`packages/m/matter/xmake.lua:339`). That package
+- From revenant@matter: the real stack's `libMatterBackports.dylib` (v1.6.1.0, armv7), installed under
+  `/usr/lib/revenant/org.revenant.apple-backports/libMatterBackports.dylib` (`packages/m/matter/xmake.lua:339`). That package
   depends on apple-backports (`packages/m/matter/xmake.lua:28`), so apple-backports cannot deliver it: the dependency would be
   a cycle. The owner's acceptance "the matter option still delivers the real stack's libMatterBackports" cannot hold from this
   package; the option is removed instead.

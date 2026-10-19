@@ -24,17 +24,17 @@ selector*", and that is `carried_by_release()` at `backports.lua:1612-1631` read
 `apple.objc` inventory.
 
 ```
-CHARON_ROOT=$PWD xmake l tools/corpus/cache-census.lua UI 6.1.3 12.0
+REVENANT_ROOT=$PWD xmake l tools/corpus/cache-census.lua UI 6.1.3 12.0
 ```
 
 Output, abridged to its control line and the two headers (the full run is 2926 names):
 
 ```
-6.1.3     ~/.charon/dyld/6.1.3/dyld_shared_cache_armv7
+6.1.3     ~/.revenant/dyld/6.1.3/dyld_shared_cache_armv7
          images 524, of which naming UI 25
          classes 11378, of which UI* 705 (UIActionSheet UIAlertView ... UIBarButtonItem UIButton UICollectionViewCell ...)
          protocols 1171, of which UI* 91 (UIAccessibilityElement UIActionSheetDelegate ... UITableViewDelegate UITextViewDelegate ...)
-12.0      ~/.charon/dyld/12.0/dyld_shared_cache_arm64
+12.0      ~/.revenant/dyld/12.0/dyld_shared_cache_arm64
          images 1368, of which naming UI 138
          classes 63192, of which UI* 1741 (...)
          protocols 11426, of which UI* 389 (...)
@@ -54,8 +54,8 @@ selector trap does not apply. The 86 method and property rows need the class's o
 they were read from the two full inventories:
 
 ```
-CHARON_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua ~/.charon/dyld/6.1.3/dyld_shared_cache_armv7 > inv-6.1.3.tsv
-CHARON_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua ~/.charon/dyld/12.0/dyld_shared_cache_arm64 > inv-12.0.tsv
+REVENANT_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua ~/.revenant/dyld/6.1.3/dyld_shared_cache_armv7 > inv-6.1.3.tsv
+REVENANT_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua ~/.revenant/dyld/12.0/dyld_shared_cache_arm64 > inv-12.0.tsv
 ```
 
 One TSV line per class: `class <name> <superclass> <image> <instance selectors> <class selectors>
@@ -137,9 +137,9 @@ declaration as its whole `source`. Its owner class is not new in 16.0, so the cl
 is real: does `UIPrintFormatter` carry `requiresMainThread` at either band end?
 
 ```
-CHARON_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua ~/.charon/dyld/6.1.3/dyld_shared_cache_armv7 > inv-6.1.3.tsv
-CHARON_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua ~/.charon/dyld/12.0/dyld_shared_cache_arm64  > inv-12.0.tsv
-CHARON_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua ~/.charon/dyld/16.0/dyld_shared_cache_arm64e > inv-16.0.tsv
+REVENANT_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua ~/.revenant/dyld/6.1.3/dyld_shared_cache_armv7 > inv-6.1.3.tsv
+REVENANT_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua ~/.revenant/dyld/12.0/dyld_shared_cache_arm64  > inv-12.0.tsv
+REVENANT_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua ~/.revenant/dyld/16.0/dyld_shared_cache_arm64e > inv-16.0.tsv
 ```
 
 ```
@@ -189,18 +189,18 @@ The row asks for the marker protocol `UIPopoverPresentationControllerSourceItem`
 two things, and neither is written:
 
 ```
-grep -c UIPopoverPresentationControllerSourceItem packages/a/apple-backports/UIKit/CharonUIKitProtocols.h
+grep -c UIPopoverPresentationControllerSourceItem packages/a/apple-backports/UIKit/RevenantUIKitProtocols.h
 grep -rn "UIPopoverPresentationController.sourceItem" packages/a/apple-backports/registry/
 ```
 
 ```
-0                       the protocol is in no band of CharonUIKitProtocols.h
+0                       the protocol is in no band of RevenantUIKitProtocols.h
 (no match)              no registry row names UIPopoverPresentationController.sourceItem
 ```
 
 The first is why a category conformance would be dropped silently. A protocol row the port
 carries is emitted by the generated `UIKitProtocols<release>.m`, which names each protocol the
-registry lists for that band - and that file only names what `CharonUIKitProtocols.h` declares
+registry lists for that band - and that file only names what `RevenantUIKitProtocols.h` declares
 (`protocol_sources()` in `backports.lua:702` imports that header and writes `(void)@protocol(X)`
 per row). This protocol is not in it, so no protocol object is emitted and
 `attach.c:337` - which adds a category's protocols by resolving their names with
@@ -240,7 +240,7 @@ grep -n "addConstraint" packages/a/apple-backports/UIKit/UILayoutGuide.m
 `UILayoutGuide.m` implements `leadingAnchor` through `heightAnchor` and `centerXAnchor` through
 `centerYAnchor`, each anchored to the guide's own backing view, but the class carries no
 `addConstraint:` of its own - `UIView+SafeAreaGuide.m` reaches the backing view through its own
-`-[UILayoutGuide charon_view]` and adds the constraints to the *view*. Enforcing the ratio on the
+`-[UILayoutGuide revenant_view]` and adds the constraints to the *view*. Enforcing the ratio on the
 backing view would work and would not be the API a caller expects: the caller sets
 `aspectRatio` on the guide, and the constraint would have to live somewhere the port does not
 expose. Writing `-addConstraint:` on `UILayoutGuide` is the first step, and it is a change to the

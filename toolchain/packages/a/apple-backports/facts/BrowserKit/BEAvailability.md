@@ -32,7 +32,7 @@ nothing on this device that could be made eligible.
 
 Measured: the state of the release (the 6.1.3 armv7 cache has no BrowserKit and no such class) and
 the shape of the API (the header of `BrowserKit/BEAvailability.h` in the SDK 26.2, which the
-coordinator pointed this band at because the SDK the port builds against — `charon@iphoneos-sdk` 16.4
+coordinator pointed this band at because the SDK the port builds against — `revenant@iphoneos-sdk` 16.4
 — has no BrowserKit at all; the declaration is therefore written in the backport's own source).
 
 Not measured: Apple's own `BEAvailability`, and the eligibility of a device that *could* be

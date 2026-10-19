@@ -31,7 +31,7 @@ silence reports nothing - no exception, no error code, a green gate. The only re
 reading the graph's actual output and comparing samples, the way `tests/backports/device/avfaudio.m`
 already does for a bare buffer.
 
-`AVAudioSession` needs a live `mediaserverd`, which the Shade emulator does not run at all
+`AVAudioSession` needs a live `mediaserverd`, which the emulator does not run at all
 (measured: every `AVAudioSession` call there fails identically with `kAudioSessionNotInitialized`,
 `'!ini'`, both as a bare daemon and as a real `.app` bundle - see
 `facts/AVFoundation/AVAudioSessionCategoryModeOptions.md`). `kAudioUnitSubType_GenericOutput` does
@@ -54,7 +54,7 @@ needs a device and comes after this.
 
 `AVAudioEngine` owns one real `AUGraph`, created in `-init`: a `kAudioUnitType_Output` node
 (`kAudioUnitSubType_GenericOutput` in offline/test mode, `kAudioUnitSubType_RemoteIO` for a real
-application - the switch is `CharonAudioEngineTestSupport`'s only job, never set outside a
+application - the switch is `RevenantAudioEngineTestSupport`'s only job, never set outside a
 device-probe) and a `kAudioUnitType_Mixer`/`kAudioUnitSubType_MultiChannelMixer` node, connected
 mixer -> output before any application code runs - matching the real class's own default wiring.
 `attachNode:`/`detachNode:`/`connect:to:format:`/`disconnectNodeOutput:`/`prepare`/
@@ -63,8 +63,8 @@ mixer -> output before any application code runs - matching the real class's own
 
 `AVAudioPlayerNode` carries no `AudioUnit` of its own - there is no stock Apple component that
 takes arbitrary `AVAudioPCMBuffer`s as input the way `scheduleBuffer:` needs. It is a buffer
-queue (`CharonScheduledBuffer`), read frame-by-frame by a C render callback
-(`CharonPlayerRenderCallback`, `AVAudioPlayerNode.m`) that `-connect:to:format:` wires directly
+queue (`RevenantScheduledBuffer`), read frame-by-frame by a C render callback
+(`RevenantPlayerRenderCallback`, `AVAudioPlayerNode.m`) that `-connect:to:format:` wires directly
 onto the destination node's real input bus through `AUGraphSetNodeInputCallback` - the callback
 *is* the connection on that side, exactly the way a generator unit would be if this device shipped
 one for this job. A raw byte copy moves samples from the scheduled buffer into `ioData`, correct
@@ -106,11 +106,11 @@ just non-zero - first eight of both: `+0.0000 +0.0250 +0.0499 +0.0747 +0.0993 +0
 cache both times, to rule out any stale-binary artifact.
 
 A third symbol-visibility trap, found and fixed along the way, is recorded in
-`AVFoundation/CharonAVAudioEngine.h` itself rather than here: this project deliberately hides every
-symbol whose bare name starts with `charon_`/`Charon` from a dylib's exported table
+`AVFoundation/RevenantAVAudioEngine.h` itself rather than here: this project deliberately hides every
+symbol whose bare name starts with `revenant_`/`revenant` from a dylib's exported table
 (`modules/apple/backports.lua`'s `internal_symbol()`), and a brand-new such class needs to be
 reached by runtime lookup (`NSClassFromString`/`objc_msgSend`) from a separate test binary, not
-static linking - `CharonAudioEngineTestSupport`/`engine-probe.m` is the worked example.
+static linking - `RevenantAudioEngineTestSupport`/`engine-probe.m` is the worked example.
 
 ## What is built: `AVAudioUnit` / `AVAudioUnitEffect` / `AVAudioUnitEQ`
 
@@ -128,8 +128,8 @@ already wires.
 A caller is free to configure `AVAudioUnitEQ`'s bands (`filterType`/`frequency`/`bandwidth`/`gain`/
 `bypass`) and `globalGain` before the node is ever attached - matching real usage, and matching how
 a real `AVAudioUnitEQ` is normally built and configured before `-attachNode:`. Every one of those
-setters funnels through `-charon_setParameterID:bandIndex:value:`, which is a no-op until a real
-`AudioUnit` exists; `-attachNode:` calls the base class hook `-charon_applyPendingParameters` right
+setters funnels through `-revenant_setParameterID:bandIndex:value:`, which is a no-op until a real
+`AudioUnit` exists; `-attachNode:` calls the base class hook `-revenant_applyPendingParameters` right
 after creating that real unit, which sets `kAUNBandEQProperty_NumberOfBands` (must happen before the
 graph as a whole is initialized - it always does here, since `-prepare`/`AUGraphInitialize` only
 runs later) and replays every kept parameter through the real `kAUNBandEQParam_*` IDs
@@ -142,7 +142,7 @@ documented default (a fresh band does nothing until explicitly un-bypassed).
 
 **Measured, not assumed - `checks=9 failures=0`, `tests/backports/device/avaudiouniteq.m`**,
 run through `xmake emulate -d iPhone4,1 -r 6.1.3 run
-/usr/libexec/charon-avaudiouniteq-test` (`pass ... in 0.1 guest s / 6.2 host s`, the same Shade offline
+/usr/libexec/revenant-avaudiouniteq-test` (`pass ... in 0.1 guest s / 6.2 host s`, the same emulator offline
 `GenericOutput` path `AVAudioEngine`'s own proof uses - no `mediaserverd`, no device queue for this
 part): builds a `player -> AVAudioUnitEQ(2 bands) -> mainMixer -> (offline) output` graph, a 2 kHz
 test tone scheduled through it, pulled by hand through `AudioUnitRender`. Two runs, same tone, only
@@ -167,7 +167,7 @@ One implementation bug the build itself caught before any of this ran: an early 
 `active`/`isActive` property on `AVAudioUnitEQFilterParameters` that Apple's own real header
 (SDK 16.4, `AVAudioUnitEQ.h`) does not declare - only `filterType`/`frequency`/`bandwidth`/`gain`/
 `bypass` are real. Client-facing code compiles against the actual SDK framework headers, not this
-port's own private `CharonAVAudioUnit.h`, so the mistake surfaced immediately as a hard compile
+port's own private `RevenantAVAudioUnit.h`, so the mistake surfaced immediately as a hard compile
 error in `eq-probe.m` ("property 'active' not found") the first time real client code tried to use
 it - removed from the header, the implementation and the registry rather than worked around.
 

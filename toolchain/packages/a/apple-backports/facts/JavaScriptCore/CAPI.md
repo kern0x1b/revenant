@@ -37,7 +37,7 @@ goes looking for.
 
 ## The engine the release carries, and what it can be asked
 
-`~/.charon/dyld/6.1.3/dyld_shared_cache_armv7` carries `JavaScriptCore.framework` in
+`~/.revenant/dyld/6.1.3/dyld_shared_cache_armv7` carries `JavaScriptCore.framework` in
 `/System/Library/PrivateFrameworks` - the path Apple moved to `/System/Library/Frameworks` exactly at
 iOS 7.0, the one framework of this package's 21 whose path differs across the covered range, and the
 reason `modules/apple/backports.lua`'s `framework_install_path` exists. The image is the 2012 engine.
@@ -82,7 +82,7 @@ that is NULL, and no value to ask about.
 
 Carrying them is not a wrapper's work either. A typed array on the release would have to be a value the
 2012 engine knows how to make, index and hand to script, and nothing in this package makes engine values.
-The workspace does have a JavaScriptCore that has them: `revenant-webkit` builds WebKit 254 with its own
+The workspace does have a JavaScriptCore that has them: `frameworks/WebKit` builds WebKit 254 with its own
 JSC for armv7, where `_JSValueMakeSymbol` and `_JSObjectMakeDeferredPromise` are `T` (defined) symbols.
 But both of its `JavaScriptCore.framework` targets declare the *system* framework's install name
 (`otool -D` on `build/system/...` and `build/prefixed/...` both answer
@@ -109,7 +109,7 @@ for a symbol is a different value that claims to be the same one.
 something are built in `JavaScriptCore/JSCAPI9.m` (JSValueIsArray, JSValueIsDate), `JSCAPI16.m`
 (JSValueIsSymbol and the four `ForKey`) and `JSCAPI8.m` (JSGlobalContextCopyName), and the ninth, the
 one that returns a promise, is built in `JavaScriptCore/JSObjectMakeDeferredPromise16.m` over the
-machinery in `CharonJSPromise.m`. The four carried inert below are in `JSCAPI8.m` and `JSCAPI18.m`.
+machinery in `RevenantJSPromise.m`. The four carried inert below are in `JSCAPI8.m` and `JSCAPI18.m`.
 Each is asked directly by `tests/backports/host/jscontext/checks.m`, which is a differential: the same
 file runs first against the host's own JavaScriptCore, which is the oracle, then against the backport
 linked over the host's C API. **Both sides answer every check they run and finish with
@@ -117,7 +117,7 @@ linked over the host's C API. **Both sides answer every check they run and finis
 
 The number to quote is the run's, not the file's, and the two are not the same count: the run prints
 **177** `ok` lines per side (`grep -c '^ok '` on its log), the file carries **181** `check(` statements, of
-which **174** are call sites in a host build - the rest are `#ifdef CHARON_PORT` regions with no `#else`
+which **174** are call sites in a host build - the rest are `#ifdef REVENANT_PORT` regions with no `#else`
 and the device-only one - and at least one of those sites runs in a loop over three cases with a name built
 from the case, so executions are not statements either. "177 of 177" was a number this page carried without
 its derivation, and a reader could not reproduce it from the file it described; that is the whole of what is
@@ -153,8 +153,8 @@ own engine has not yet been asked.
 
 | row | what it answers | what it is built on |
 | --- | --- | --- |
-| `JSValueIsArray()` | whether a value is an array by class | `charon_js_is_array`, the helper `-isArray` already answers through |
-| `JSValueIsDate()` | whether a value is a Date by class | `charon_js_is_date`, likewise |
+| `JSValueIsArray()` | whether a value is an array by class | `revenant_js_is_array`, the helper `-isArray` already answers through |
+| `JSValueIsDate()` | whether a value is a Date by class | `revenant_js_is_date`, likewise |
 | `JSValueIsSymbol()` | false, for every value of an engine with no symbols | the measurement above |
 | `JSObjectGetPropertyForKey()` | reads the property a value key names | `JSValueToStringCopy` for the key, the release's own `JSObjectGetProperty` for the read |
 | `JSObjectSetPropertyForKey()` | writes it | the release's own `JSObjectSetProperty` |
@@ -248,15 +248,15 @@ none between 16.0 and 18.0: a name Apple published inside a gap is bounded from 
 that exports it. `tools/release-split.lua` prints the same note about its own ladder when it skips a
 major release. No `introduced` value changed, because none of them was wrong.
 
-`CharonJSPromise.m` is a fifth file and is in **every** band: `nm -gU` on it reports three symbols and
-`backports.lua`'s `internal_symbol()` filters all three (two `charon_js_` entry points and a block
+`RevenantJSPromise.m` is a fifth file and is in **every** band: `nm -gU` on it reports three symbols and
+`backports.lua`'s `internal_symbol()` filters all three (two `revenant_js_` entry points and a block
 descriptor), so `band()` sees no API of its own and keeps it wherever it is needed. That is what lets
 `JSObjectMakeDeferredPromise16.m` reach the promise at all: from iOS 7.0 to 15.x, `JSValue.m` is
 re-exported to the release's own `JSValue` and is not in the library, so the promise could not have
 stayed in it, and it could not have been a `static inline` in `JSInternal.h` either, because
 `PromiseClass` and `CaptureClass` hold their `JSClassRef` in a `dispatch_once` function-local and
 `PromiseState` answers by identity. One copy, in a file that exports nothing, is the shape
-`charon/AGENTS.md` names for exactly this.
+`toolchain/AGENTS.md` names for exactly this.
 
 Every one of the twenty-six rows is `minimum: 6.0`, and every object above is one release: no object
 is claimed from a band that already carries its exports. The four `ForKey` rows are four names of one

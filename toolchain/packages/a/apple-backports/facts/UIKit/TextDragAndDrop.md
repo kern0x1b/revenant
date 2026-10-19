@@ -8,7 +8,7 @@ is not offered, which is what a device of this era answers and what the sessions
 
 Of the 96 rows the ledger had as missing, **eleven were already routed by the port and only
 undescribed** — the questions a drag and a drop ask its *interaction* delegate, in
-`UIDragInteraction.m` and `CharonDropSequence11.m`. Those are registered where the routing is, and the
+`UIDragInteraction.m` and `RevenantDropSequence11.m`. Those are registered where the routing is, and the
 order a drop is asked in is asserted by `tests/backports/device/textdragdrop.m`. It has been **RUN on
 an emulated iPhone3,1 6.1.3, both halves, and both CRASHED in the guest with signal 5 before the
 first check** -- `verdict.json` reads `state: crash, signal: 5, reason: reached, guest_seconds: 0.366`
@@ -50,7 +50,7 @@ size:
 
     NSObject UIDragInteractionDelegate UIDropInteractionDelegate UITextDragRequest UITextDropRequest
 
-The two request protocols are there because `CharonTextDragRequest` and `CharonTextDropRequest`
+The two request protocols are there because `RevenantTextDragRequest` and `RevenantTextDropRequest`
 **adopt** them: those are the objects that answer a text drag's delegate and a text drop's delegate,
 and an adoption is what puts a protocol in the list. `UITextDraggable`, `UITextDroppable`,
 `UITextDragDelegate` and `UITextDropDelegate` are in the same file and are in **no** list, because the
@@ -114,7 +114,7 @@ Every header of this family is behind the SDK's own guard
 
 so a translation unit that includes only the umbrella header sees none of it, and a class written
 against a name the header does not declare compiles as a root class and the gate says so later. The
-check that matches the build passes `-DUSE_UIKIT_PUBLIC_HEADERS=1` and the runtime's port overlay (CHARON_SWIFT_PORT_HEADERS); that
+check that matches the build passes `-DUSE_UIKIT_PUBLIC_HEADERS=1` and the runtime's port overlay (REVENANT_SWIFT_PORT_HEADERS); that
 is what `/tmp/checkbuild.sh` now does for this family.
 
 
@@ -160,7 +160,7 @@ so the members are reached through the protocol the SDK declares them on.
 **The delegates are weak and zeroing, as both headers say.** `UITextDragging.h:35` and
 `UITextDropping.h:24` declare their delegate `weak`, and they are: the port associates a small box
 that holds the delegate weakly, so a delegate deallocated before its control reads back `nil`
-rather than leaving a slot that would be messaged. The box is a private `CharonWeakDelegateBox` with
+rather than leaving a slot that would be messaged. The box is a private `RevenantWeakDelegateBox` with
 a `__weak id target`, the association retains the box with `RETAIN_NONATOMIC`, the getter returns
 `box.target`, and the setter builds a fresh box so a replaced delegate leaves nothing pointing at the
 old one; `nil` clears the slot outright. Both delegates share it, and `UITextView` and `UITextField`
@@ -198,7 +198,7 @@ construct a label or a text control at all. Three isolation runs, each its own p
 `[UILabel class]` and `[UITextView class]` are both real classes here (`class_getInstanceSize` 144
 and 528), so this is not a missing class. Every run traps with **signal 5 at pc `0x310dc0d6`**, the
 same pc in all of them and in the harness's own runs, in
-`~/.charon/emulator/images.noindex/textdragdrop-f0a987fc/iPhone3,1_10B329/run/results/test.stdout`
+`~/.revenant/emulator/images.noindex/textdragdrop-f0a987fc/iPhone3,1_10B329/run/results/test.stdout`
 (08:04:49 for V1, 08:06:48 for V2, 08:08:27 for V3). It is not ordering, not the frame path and not
 the port's code: the text-drag family is never reached in any of these runs, and a `UIView`
 allocates in the same processes. A guest that can build a `UIView` but not a `UILabel` is a guest

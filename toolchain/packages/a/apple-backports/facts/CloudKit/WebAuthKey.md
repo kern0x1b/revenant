@@ -12,10 +12,10 @@ works for a client that has only a `.p8` in its bundle, so it is carried.
 
 iOS 6.1.3 cannot make this signature: `SecKeyCreateRandomKey` and `SecKeyCreateSignature` are iOS 8,
 and CommonCrypto signs nothing but a digest. So the curve arithmetic is taken rather than written:
-`charon@micro-ecc` is Kenneth MacKay's micro-ecc, BSD-2, pinned at `541b3a78026420a3e369c4c9281c396b5e531113`,
+`revenant@micro-ecc` is Kenneth MacKay's micro-ecc, BSD-2, pinned at `541b3a78026420a3e369c4c9281c396b5e531113`,
 built for the port's own architecture as a static archive with every symbol hidden, so no second copy
 of a curve implementation is ever API of a process that links `libCloudKitBackports.dylib`.
-`CharonCKWebAuth.c`, in that package, is the JOSE around micro-ecc and nothing else: SHA-256 of the
+`RevenantCKWebAuth.c`, in that package, is the JOSE around micro-ecc and nothing else: SHA-256 of the
 message, the DER a JOSE ES256 verifier reads, and the low-s half.
 
 ## What the differential proves
@@ -62,13 +62,13 @@ What is here is the signature, which is the part iOS 6 cannot do at all.
 
 `tests/backports/host/cloudkit/run.sh` now exists and its harness is in the tree, so the number is
 re-runnable by a reader rather than produced by a binary in a work area. The script builds the port's
-own `CharonCKWebAuth.c` against micro-ecc and calls it; it needs `charon@micro-ecc` installed, like
+own `RevenantCKWebAuth.c` against micro-ecc and calls it; it needs `revenant@micro-ecc` installed, like
 every other host test needs its package.
 
 **The group order and its half are corrected.** The hard-coded order read `0x25` in byte 30 where
 FIPS 186-4 D.1.2.3 reads `0xff`, and the half was shifted with the little-endian rule applied to a
 big-endian number, so the threshold was 0.9999999702 of *n* rather than half of it. Both are right
-now, and `CharonCKGroupOrder()` / `CharonCKGroupOrderHalf()` expose them so the test reads the same
+now, and `RevenantCKGroupOrder()` / `RevenantCKGroupOrderHalf()` expose them so the test reads the same
 values the signer uses rather than transcribing a third copy — a second transcription of the number
 this file got wrong is exactly how the mistake survived.
 

@@ -29,7 +29,7 @@ its lock: presenting the renderbuffer of a context the same code just made curre
 case, and a non-recursive lock would deadlock on it.
 
 The lock is kept boxed in an `NSValue` in an associated object: a `pthread_mutex_t` is not an object,
-and sending it `retain` would be the `NSMapTable` trap this repository already records (`charon`
+and sending it `retain` would be the `NSMapTable` trap this repository already records (`revenant`
 AGENTS.md, "`NSMapTable` and non-object keys/values"). The flag itself is an `NSNumber`, so it is
 associated retained. A mutex that could not be made - `pthread_mutex_init` or the recursive-type set
 failing, or the allocation itself - is not stored and not used: the context is then left the way the
@@ -40,7 +40,7 @@ release leaves it, unguarded, rather than guarded by a mutex nothing initialised
 The guards are installed the first time any context is marked, and never before: a port that no
 application has asked to share a context runs the release's own code with one extra
 associated-object read per call, which is what the `dispatch_once` in
-`-charon_installMultiThreadedGuards` buys. Installation is idempotent - it happens once per process,
+`-revenant_installMultiThreadedGuards` buys. Installation is idempotent - it happens once per process,
 so a second context marked does not wrap anything twice.
 
 The port says so once, in the log, the first time an application marks a context, so a process that

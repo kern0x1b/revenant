@@ -38,7 +38,7 @@ subclass of the release's own `MKOverlayView`, which is `MKOverlayView` at run t
   renderer are composited at, rather than a number nothing reads.
 
 The 16.4 header hides that superclass, so the objects that build a renderer reach the view half
-through the `CharonOverlayView` protocol in `CharonMapKit.h`, and the two initialisers go through
+through the `RevenantOverlayView` protocol in `RevenantMapKit.h`, and the two initialisers go through
 the release's own `-[MKOverlayView initWithOverlay:]` and `-initWithCoder:` because there is no
 other way to build one of this class as one of them.
 
@@ -55,7 +55,7 @@ release's own: `MKMapPointForCoordinate`, `MKCoordinateForMapPoint`,
 `MKMetersPerMapPointAtLatitude`, `MKMapPointsPerMeterAtLatitude`, `MKCoordinateRegionForMapRect`,
 `MKMapRectUnion`, `MKMapRectIntersection`, `MKMapSizeWorld` and `MKMapRectWorld` are all in the
 armv7 cache from 3.2 (measured) and are called directly. What MapKit.framework does not export on
-this release, and what `CharonMapKit` therefore has, is the map size of a zoom scale, the map rect
+this release, and what `RevenantMapKit` therefore has, is the map size of a zoom scale, the map rect
 of a coordinate region, and the bearing between two coordinates.
 
 ## The delegate bridge
@@ -63,7 +63,7 @@ of a coordinate region, and the bearing between two coordinates.
 This is the part that makes the renderers draw rather than merely exist. The release's map view
 asks its delegate for an `MKOverlayView` with `mapView:viewForOverlay:`; a program written since
 iOS 7 does not implement that, it implements `mapView:rendererForOverlay:`. So
-`-[MKMapView setDelegate:]` puts a `CharonMapKitDelegate` in front of the caller's own object,
+`-[MKMapView setDelegate:]` puts a `RevenantMapKitDelegate` in front of the caller's own object,
 that proxy answers the release's two questions out of the program's two, and every other message
 goes to the program untouched through `forwardingTargetForSelector:`. `-[MKMapView delegate]`
 gives the caller's own object back, so a program that compares its map view's delegate with itself
@@ -389,7 +389,7 @@ Apple**, and the provider is named here and in the source:
 > routing provider **OSRM**, the Open Source Routing Machine, at
 > `https://router.project-osrm.org` (`/route/v1/{driving,foot,bike}/...`, `overview=full`,
 > `geometries=polyline`, `steps=true`, `alternatives=true`), BSD-2-Clause.
-> The base URL is read from the `MKCHARON_OSRM_BASE` environment variable when a program sets one,
+> The base URL is read from the `MKREVENANT_OSRM_BASE` environment variable when a program sets one,
 > and defaults to the address above.
 
 The transport is the device's own: an `NSURLConnection` over HTTPS, which on iOS 6 is the release's
@@ -488,16 +488,16 @@ This release's map has none." **That reason was false, and it is measured false 
 the release's own nowhere, which is true and is not why it was absent:
 
 ```
-$ CHARON_ROOT=<worktree> xmake l tools/corpus/cache-census.lua MKLocalPointsOfInterest 6.1.3 4.3 16.0
-6.1.3     $HOME/.charon/dyld/6.1.3/dyld_shared_cache_armv7
+$ REVENANT_ROOT=<worktree> xmake l tools/corpus/cache-census.lua MKLocalPointsOfInterest 6.1.3 4.3 16.0
+6.1.3     $HOME/.revenant/dyld/6.1.3/dyld_shared_cache_armv7
           images 524, of which naming MKLocalPointsOfInterest 0
           classes 11378, of which MKLocalPointsOfInterest* 0
           protocols 1171, of which MKLocalPointsOfInterest* 0
-4.3       $HOME/.charon/dyld/4.3/dyld_shared_cache_armv7
+4.3       $HOME/.revenant/dyld/4.3/dyld_shared_cache_armv7
           images 354, of which naming MKLocalPointsOfInterest 0
           classes 7187, of which MKLocalPointsOfInterest* 0
           protocols 564, of which MKLocalPointsOfInterest* 0
-16.0      $HOME/.charon/dyld/16.0/dyld_shared_cache_arm64e
+16.0      $HOME/.revenant/dyld/16.0/dyld_shared_cache_arm64e
           images 2664, of which naming MKLocalPointsOfInterest 0
           classes 143137, of which MKLocalPointsOfInterest* 1 (MKLocalPointsOfInterestRequest)
           protocols 25549, of which MKLocalPointsOfInterest* 0
@@ -506,7 +506,7 @@ the release's and not the reader's
 ```
 
 and neither release has the class's entry points either — `grep -cxF` on each release's own selector
-table (`~/.charon/dyld/6.1.3/selectors_armv7.txt`, `~/.charon/dyld/4.3/selectors_armv7.txt`) answers
+table (`~/.revenant/dyld/6.1.3/selectors_armv7.txt`, `~/.revenant/dyld/4.3/selectors_armv7.txt`) answers
 **0 and 0** for `initWithCenterCoordinate:radius:`, for `initWithCoordinateRegion:` and for
 `pointOfInterestCategory`. `xmake l tools/cache-index/first-rung.lua MKLocalPointsOfInterestRequest`
 answers `16.0`, which is the ladder's hole (no 13.0, 14.0 or 15.0 is held) and not a measured first
@@ -554,6 +554,6 @@ object's, and its implementation in `MKLocalSearchRequest13.m` makes the release
 them — `-initWithCenterCoordinate:radius:` and `-initWithCoordinateRegion:` read each other through
 the **release's own projection** (`MKMapPointForCoordinate`, `MKMapPointsPerMeterAtLatitude` and
 `MKCoordinateRegionForMapRect`, all `3.2` on the ladder, with the region-to-map-rect direction being
-`+[CharonMapKit charon_mapRectForRegion:]`, the declared inverse of the release's own function) — and
+`+[RevenantMapKit revenant_mapRectForRegion:]`, the declared inverse of the release's own function) — and
 the release's own search is still asked with no query. The three initialisers and the filter setter say
 so once in the log, which is what `registry/README.md` asks of an inert entry.

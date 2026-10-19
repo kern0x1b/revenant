@@ -13,7 +13,7 @@ held to on iOS 6.
 `-startAnimation` runs the blocks through UIView's own animation and then, **if
 the animator is interruptible**, immediately pauses what it added and replaces the
 curve with a linear one, taking the timing into its own hands. That is not a
-choice Charon made to save work: it is what UIKit does, in `-startAnimation:`,
+choice the toolchain made to save work: it is what UIKit does, in `-startAnimation:`,
 the moment such an animator starts, and `interruptible` is what an animator is
 unless it is told otherwise. An animator that is not interruptible is left to
 Core Animation.
@@ -28,14 +28,14 @@ UIKit keeps a register of the animations **it** added, under a UUID, through
 `-modifyTrackedAnimations:removeOnCompletion:animationFactory:block:` rebuilds
 them when the fraction moves.
 
-Charon does the same by other means: the animation keys of every layer are taken
+The toolchain does the same by other means: the animation keys of every layer are taken
 before the blocks run, and only the keys that appear afterwards belong to this
 animator. It then holds a layer **and a key**, not a layer.
 
 This matters more than it looks. Stopping a layer stops everything on it, so an
 animator that froze every layer it found animating would freeze animations it
 never started, two animators at once would each stop the other, and clearing up
-would remove another animator's work. Charon stops the **animation's** own
+would remove another animator's work. The toolchain stops the **animation's** own
 `speed`, not the layer's, so anything else on the same layer keeps running.
 
 A running animation cannot be changed where it lies, so moving the fraction means

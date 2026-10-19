@@ -50,21 +50,21 @@ Everything else in `signpost.h` is a macro over these four, so carrying them car
 ## How another of this package's libraries reaches the store
 
 Not by a link. Measured on a built `libFoundationBackports.dylib`: it exports **six** `os_log*`
-symbols and **zero** `charon_`-prefixed C symbols and zero `Charon*` classes, and the registry lists
-**no** name beginning with `charon` — a library of this package exports only the names the registry
+symbols and **zero** `revenant_`-prefixed C symbols and zero `Revenant*` classes, and the registry lists
+**no** name beginning with `revenant` — a library of this package exports only the names the registry
 lists, and the registry lists only names an SDK header declares. So there is no name of ours that
 another of our libraries can link, in either direction, and a first attempt at two C functions across
 the boundary failed at link with exactly that:
 
 ```
 Undefined symbols for architecture armv7:
-  "_charon_signpost_intervals", referenced from: _CharonSignpostMetrics in MXMetricManager.o
+  "_revenant_signpost_intervals", referenced from: _RevenantSignpostMetrics in MXMetricManager.o
 ```
 
 MetricKit therefore looks the store up by its own name with `NSClassFromString` and messages it,
 once, behind a `respondsToSelector:`. That is the port's own idiom for a class in another image —
 `NSClassFromString` in `AVFoundation/AVCaptureDevice+Authorization.m`,
-`CoreSpotlight/CSSearchableIndex.m` and `CallKit/CharonCallAudio.m` — and it costs one string lookup
+`CoreSpotlight/CSSearchableIndex.m` and `CallKit/RevenantCallAudio.m` — and it costs one string lookup
 per process.
 
 ## The snapshot pointer

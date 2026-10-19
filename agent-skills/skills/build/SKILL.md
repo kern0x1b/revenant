@@ -1,6 +1,6 @@
 ---
 name: build
-description: Build the app with Charon and xmake and read what the build says — the build loop with -y and a log file, where the bundle lands, the import check against the lowest release's own dyld shared cache, and how to read each failure — an import the release does not export (weak and strong), unimplemented selectors, a missing shared cache, the minimum raised by the linker, `Bad system call: 12`, two xmake processes locking each other, the addon version in use versus the one pinned or a Charon checkout's working tree, and a prompt waiting for -y. Use after the code is written, after every change to sources, xmake.lua or Info.plist, and whenever a build fails, hangs or the app dies with a bad system call.
+description: Build the app with the toolchain and xmake and read what the build says — the build loop with -y and a log file, where the bundle lands, the import check against the lowest release's own dyld shared cache, and how to read each failure — an import the release does not export (weak and strong), unimplemented selectors, a missing shared cache, the minimum raised by the linker, `Bad system call: 12`, two xmake processes locking each other, the addon version in use versus the one pinned or a toolchain checkout's working tree, and a prompt waiting for -y. Use after the code is written, after every change to sources, xmake.lua or Info.plist, and whenever a build fails, hangs or the app dies with a bad system call.
 ---
 
 # Build, and read what the build says
@@ -23,7 +23,7 @@ xmake -y -v > .logs/build.log 2>&1; echo "exit $?"
 - Always `-y`, always `-v`, always a log file, and wait for it. Without `-v` xmake prints only the
   first warning and replaces the rest with `warning: add -v for getting more warnings ..`; a log
   holding that line has not been read, build again with `-v`. The first build after `install` is quick; a
-  build that adds a package (Swift runtime, Styx, backports) may build it from source first.
+  build that adds a package (Swift runtime, Combine, backports) may build it from source first.
 - `xmake -r -y -v` rebuilds the project's own files; `xmake f -c -y` re-resolves the
   configuration and packages after a change to `add_requires` or a package's configs (plain
   `xmake f` keeps the resolution it cached). Neither touches the shared store; nothing here needs
@@ -91,17 +91,17 @@ each of which is NULL there and must be called only behind a check for it: _OBJC
 The compiler weak-linked a newer API because its declaration carries availability. It is NULL on
 the device: every use must sit behind a check (`NSClassFromString`, `respondsToSelector:`, a
 function pointer test, `#available` in Swift, skill `swift` §2). `xmake deb` refuses the image
-unless the target says why every call is guarded: `set_values("charon.waive.weak-imports", "<the reason>")`. Write
+unless the target says why every call is guarded: `set_values("revenant.waive.weak-imports", "<the reason>")`. Write
 that waiver only when every use of every symbol it covers is behind such a check, the user agreed,
 and it is written under `## Limits` in `PROJECT.md` (skill `self-review`) — it records a guard the
 static check cannot see; it is never a way to turn a refusal green. It covers the whole target: a
 weak import added later is never refused, so read this warning's symbols on every build and ask the
 user again for a new one (skill `objc`). A C call of the system library may instead come from
-`charon@apple-compat` (skill `objc`). To see the packaging verdict without packaging, build as a
+`revenant@apple-compat` (skill `objc`). To see the packaging verdict without packaging, build as a
 release:
 
 ```
-CHARON_RELEASE=1 xmake -r -y -v > .logs/build-release.log 2>&1
+REVENANT_RELEASE=1 xmake -r -y -v > .logs/build-release.log 2>&1
 ```
 
 For symbols the compiler emits itself (ARC entry points, the block runtime, emulated TLS, wide
@@ -127,15 +127,15 @@ command it names (skill `firmware`) or build again with `-y`.
 ### The minimum was raised
 
 `<file> records iOS 7.0, and this target builds for 6.0; the linker raised it, which it does when a
-startup object such as crt1.3.1.o is missing` — something linked outside Charon's toolchain or SDK
+startup object such as crt1.3.1.o is missing` — something linked outside Revenant's toolchain or SDK
 package. Build every piece as a target of this project.
 
 ### `Bad system call: 12`
 
 A process on the device or in the emulator dies with `Bad system call: 12` (SIGSYS; an emulator
 verdict shows it as `crash(signal 12)`) before its own code runs. The binary was not built by
-Charon's toolchain: a helper, test probe or tool compiled with the Mac's `clang`/`cc`, or taken
-prebuilt from elsewhere. Rebuild it as a target in `xmake.lua` with Charon's rules (`app`, or
+Revenant's toolchain: a helper, test probe or tool compiled with the Mac's `clang`/`cc`, or taken
+prebuilt from elsewhere. Rebuild it as a target in `xmake.lua` with Revenant's rules (`app`, or
 `daemon` for a command-line probe), same toolchain as the app, `-fobjc-arc` on compile and link.
 By the symptom alone it cannot be told from a signing or sandbox rejection; check how the binary
 was built first.
@@ -161,23 +161,23 @@ installing the same package.
 ### The addon in use is not the one pinned
 
 The rules, the checks and `xmake deb` come from the addon installed at
-`~/.xmake/addons/charon/<version>/`, chosen by `xmake-addons.lock`; the packages come from the
-repository clone at `.xmake/macosx/arm64/repositories/charon`, at the `charon-repo-<X>` tag.
+`~/.xmake/addons/revenant/<version>/`, chosen by `xmake-addons.lock`; the packages come from the
+repository clone at `.xmake/macosx/arm64/repositories/revenant`, at the `revenant-repo-<X>` tag.
 
 ```
-xmake addon --list | sed -n 2p                        # in the project: -> charon v<X>
+xmake addon --list | sed -n 2p                        # in the project: -> revenant v<X>
 grep 'version = "v' xmake-addons.lock
-git -C .xmake/macosx/arm64/repositories/charon log --oneline -1
+git -C .xmake/macosx/arm64/repositories/revenant log --oneline -1
 ```
 
-- The lock names another version: the build is not using the pinned Charon. Stop and tell the
+- The lock names another version: the build is not using the pinned toolchain. Stop and tell the
   user; this is an xmake limit described in the skill `install` (its first trap), with no native
   fix yet. Do not edit the lock by hand.
-- The user edits a clone of Charon to try a fix: the build does not see it. A tag is fetched
-  from GitHub; even a local repository (`add_repositories("charon /path")` with
-  `add_addons("charon latest")`) is installed from its last commit, so uncommitted edits never
+- The user edits a clone of the toolchain to try a fix: the build does not see it. A tag is fetched
+  from GitHub; even a local repository (`add_repositories("revenant /path")` with
+  `add_addons("revenant latest")`) is installed from its last commit, so uncommitted edits never
   reach a build. Commit them in that clone first, and put the tag pin back before shipping.
-- Something documented for Charon's `main` is missing: the pinned tag predates it. Say so; do
+- Something documented for Revenant's `main` is missing: the pinned tag predates it. Say so; do
   not move the pin to `main` without the user.
 
 ### A prompt waiting for -y

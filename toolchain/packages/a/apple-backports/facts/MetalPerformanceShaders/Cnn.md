@@ -4,7 +4,7 @@
 `MPSCNNPooling`, `MPSCNNPoolingAverage`, `MPSCNNPoolingMax` and `MPSCNNBatchNormalization`.
 
 The reference is **ncnn** at `c6b351b56fbe32e0381ae00331e3df649b20d7b7` (BSD 3-Clause), read from
-`https://github.com/tencent/ncnn` — a fresh clone, not a package cache, which `charon/AGENTS.md` says is
+`https://github.com/tencent/ncnn` — a fresh clone, not a package cache, which `toolchain/AGENTS.md` says is
 patched. Three things were taken from it, and each is named where it is used.
 
 ## The convolution
@@ -84,7 +84,7 @@ the first three.
 ## What the host differential says
 
 `tests/backports/host/mpscnn/` compiles `cnn-cases.m` twice - once against the system's MPS, once
-against this port's classes with the MPS names mapped to `Charon` names and their selectors prefixed -
+against this port's classes with the MPS names mapped to `revenant` names and their selectors prefixed -
 and compares with a tolerance written down before the numbers were read: **1e-4 absolute or relative**
 for a single-precision result, because a convolution accumulates in a different order on a GPU than on
 a CPU, and **exact** for pooling, whose cases are named as such.

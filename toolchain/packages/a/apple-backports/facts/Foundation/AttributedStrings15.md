@@ -62,8 +62,8 @@ canonical whatever locale it is handed, and that is what it answers.
 
 All of these need the argument list read **once**, into the argument each conversion stands for, and every
 conversion then reading its own slot out of it: that is what makes one argument be substituted twice, and
-what lets a width be an argument rather than digits. `CharonScan` walks the format first and says which
-argument each conversion stands for, `CharonRead` takes them off the list with the type C promotes them
+what lets a width be an argument rather than digits. `RevenantScan` walks the format first and says which
+argument each conversion stands for, `RevenantRead` takes them off the list with the type C promotes them
 to, and the walk that substitutes reads the slots. The count the list is read by is the largest number
 any conversion asked for: a `n$` reads the argument it names and leaves the list at least there, and a
 conversion that names none takes the next one.
@@ -79,7 +79,7 @@ Two shapes of a negative `*` are the two families disagreeing with each other, a
 
 * **A negative width.** The canonical family takes the magnitude with the `-` flag (C's rule) and the
   localized family takes no width at all, for every width from -1 to -12. The port answers each of them
-  as measured, which is why `CharonApplyStars` reads the locale.
+  as measured, which is why `RevenantApplyStars` reads the locale.
 * **A negative precision.** The canonical family answers the default six, which is C's "no precision",
   and the localized family answers the value's own digits — the shortest decimal that reads back as the
   same double. That one is **not carried**: it is a search over the precisions rather than a rule, and
@@ -100,7 +100,7 @@ Two things about the va_list are the port's own and not the release's, and both 
 
 * A list cannot be handed to the release's formatter twice. The second call reads the floating-point
   register area as spent and answers `0.00` where the first answered `1234.50`, so each argument is taken
-  out of the list with the type C promotes it to and formatted on its own (`CharonApply`).
+  out of the list with the type C promotes it to and formatted on its own (`RevenantApply`).
 * A variadic member cannot be reached through a non-variadic `objc_msgSend` prototype: the call is a
   misread, and a member given `Bob 7` answers `Ann 3`. `tests/backports/host/attributed15/ported.h`
   declares the prefixed members the way the SDK declares them, with the variadics, and `run.sh` checks
@@ -151,11 +151,11 @@ reference failed at the 6.1.3 band link with
 
     Undefined symbols for architecture armv7:
       "_NSLinkAttributeName", referenced from:
-          -[CharonMarkdownParser parseInlines:from:to:intent:] in NSAttributedStringMarkdown15.o
+          -[RevenantMarkdownParser parseInlines:from:to:intent:] in NSAttributedStringMarkdown15.o
     ld: symbol(s) not found for architecture armv7
 
 The **device** does carry the name, and where it lives is measured from the armv7 dyld cache of 6.1.3
-itself (`~/.charon/dyld/6.1.3/dyld_shared_cache_armv7`, 574 images, every image's external defined
+itself (`~/.revenant/dyld/6.1.3/dyld_shared_cache_armv7`, 574 images, every image's external defined
 symbol table read — the same order `modules/apple/dyld.lua`'s `library_of()` reads them in, export trie
 first and symbol table otherwise, and no image of that cache carries an export trie):
 
@@ -180,9 +180,9 @@ other —
 (`facts/UIKit/NSAttributedStringText.md`). The 6.0 cache holds the same family in the same order in
 UIFoundation's `__TEXT,__cstring`, so the value has been `NSLink` for as long as the name has existed.
 
-`NSAttributedStringMarkdown15.m` therefore writes the link under `CharonMarkdownLinkKey`, a
+`NSAttributedStringMarkdown15.m` therefore writes the link under `RevenantMarkdownLinkKey`, a
 file-scope `static NSString * const` holding that string, and defines nothing with Apple's name on it.
-The shape is `NSBundleResourceRequest.m`'s `charon_manifest_tags_key` — an Apple string under a name of
+The shape is `NSBundleResourceRequest.m`'s `revenant_manifest_tags_key` — an Apple string under a name of
 our own — and the reason is the one `NSLanguageIdentifierAttributeName` already has in
 `NSAttributedStringKeys15.m`: for this key the name is not the value.
 
@@ -323,7 +323,7 @@ system's own doing the same.
 ### The routing is per SELECTOR, and that was measured before it was written
 
 The header states three things about this property beyond its accessors, at SDK 16.4
-`NSURLSession.h:296-304`, and `charon_task_delegate()` in `NSURLSession.m` was answering only the first
+`NSURLSession.h:296-304`, and `revenant_task_delegate()` in `NSURLSession.m` was answering only the first
 of them:
 
     Sets a task-specific delegate. Methods not implemented on this delegate will
@@ -360,7 +360,7 @@ Three answers, and each one is a different piece of code:
 
 - **Per selector.** A delegate implementing nothing left the session delegate hearing
   `URLSession:task:didCompleteWithError:` once; a delegate implementing exactly that selector heard it
-  once and the session delegate heard it **zero** times. So `charon_task_delegate()` takes the selector
+  once and the session delegate heard it **zero** times. So `revenant_task_delegate()` takes the selector
   being sent and falls through to the session's delegate when the task's own does not answer it. All
   seventeen call sites pass their own selector, which is what makes the `-respondsToSelector:` guards
   and the sends read the same answer — a guard and its send still cannot disagree about who was asked,
@@ -373,9 +373,9 @@ Three answers, and each one is a different piece of code:
   any way is refused.
 - **Reset to nil once the task has completed**, in both runs. The reset cannot go through
   `-setDelegate:`, which now refuses a task that has resumed and a task being completed has resumed, so
-  it clears the association directly through `-charon_resetTaskDelegate` — the same shape as
-  `CharonURLSessionMetrics.h`'s note calls: a method the loader itself calls, declared in
-  `CharonTaskDelegate15.h` so the call and the definition cannot disagree about its name. The
+  it clears the association directly through `-revenant_resetTaskDelegate` — the same shape as
+  `RevenantURLSessionMetrics.h`'s note calls: a method the loader itself calls, declared in
+  `RevenantTaskDelegate15.h` so the call and the definition cannot disagree about its name. The
   association was already `RETAIN_NONATOMIC`, so "strongly referenced until the task completes" was
   true of the port before this and still is; what was missing was the nil afterwards.
 
@@ -402,7 +402,7 @@ wording, and the measurement says which side is right. Read through the IMP, bec
 Three facts, and together they settle it.
 
 - **`-init` is NSObject's `-init`**, at NSObject's own IMP. The port already does exactly this:
-  `charon_intent()` in `NSPresentationIntent15.m` runs `[NSObject class]`'s `-init` through
+  `revenant_intent()` in `NSPresentationIntent15.m` runs `[NSObject class]`'s `-init` through
   `objc_msgSendSuper` rather than its own. So the port and the host agree on WHICH `-init` runs.
 - **`NSPresentationIntentKindParagraph` is 0**, the first enumerator of the enum at
   `NSAttributedString.h:297-298`. So a zeroed `intentKind` field reads as Paragraph. That is the whole

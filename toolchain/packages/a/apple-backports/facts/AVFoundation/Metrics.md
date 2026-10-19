@@ -5,7 +5,7 @@
 `registry/AVFoundation/metrics180.json` and `metrics260.json`.
 
 The whole surface is one header. SDK 16.4 ships **no `AVMetrics.h` at all**, so
-`CharonAVMetrics18.h` transcribes 26.2's own file - 498 lines, nineteen classes, two protocols - with one
+`RevenantAVMetrics18.h` transcribes 26.2's own file - 498 lines, nineteen classes, two protocols - with one
 stated change: all 26 `, visionos(<version>)` are dropped, because SDK 16.4's `availability.h` does not know
 the word and expanding it there is `error: expected ','`.
 
@@ -50,7 +50,7 @@ exists with the members the header declares, and nothing here constructs one.
 **`NSSecureCoding` is implemented on both roots.** `+supportsSecureCoding`, `-encodeWithCoder:` and
 `-initWithCoder:` are on `AVMetricEvent` and on `AVMetricMediaRendition` - the roots of the two hierarchies,
 not seventeen copies - and every subclass inherits all three, because none of them declares the conformance
-itself. Encoding goes through `packages/c/charon-coding/files/CharonCoding.h`, whose walker reads each
+itself. Encoding goes through `packages/r/revenant-coding/files/RevenantCoding.h`, whose walker reads each
 class's own ivar list from the object's class up to `NSObject`, so a subclass carries its parent's state
 without either naming it and a property added later is carried by the same code rather than by an edit to an
 archive method. All three objects build with **0 errors and 0 warnings**.
@@ -126,14 +126,14 @@ exempted in silence. It is the only such row of the 71.
 
 ### What it took to get the host build to compare the port and not itself
 
-The macOS SDK ships `AVMetrics.h` of its own, so `CharonAVMetrics18.h`'s guard excludes every declaration in
+The macOS SDK ships `AVMetrics.h` of its own, so `RevenantAVMetrics18.h`'s guard excludes every declaration in
 the host build and an unrenamed copy would compile the port's `@implementation AVMetricEvent` against
 Apple's declarations - **the probe would then compare the host against itself and report every row equal**.
-So the classes are renamed to `charon_host_*`, which needs three things, each of which failed first in a
+So the classes are renamed to `revenant_host_*`, which needs three things, each of which failed first in a
 way that read as a pass:
 
 1. **A prologue that copies the header's `@interface` blocks with the name prefixed, bodies included.** An
-   empty `@interface charon_host_X : NSObject @end` is not enough: the copy's `@synthesize` lines then have
+   empty `@interface revenant_host_X : NSObject @end` is not enough: the copy's `@synthesize` lines then have
    no declaration and clang stops with `property implementation must have its declaration in interface`.
 2. **The rename must reach `@interface` and `@implementation` and the categories**, not just the
    `@implementation` lines. Renaming only the implementation leaves the class extension with the old name,

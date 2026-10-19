@@ -1,7 +1,7 @@
 # Reuse: what was compared against, and why it was or was not taken
 
 The reviewer brief's rule (owner, 2026-09-28): a delivery names the open upstream it took from, or
-"searched: none" with the queries. This is that line for `charon@tipkit`.
+"searched: none" with the queries. This is that line for `revenant@tipkit`.
 
 **searched: none.** The queries and what each turned up are in
 `packages/a/appintents/facts/AppIntents/Reuse.md` — `gh search code "public protocol AppIntent
@@ -18,17 +18,17 @@ things a port of it would most likely be built from, and found nothing reusable:
 
 **What this module does reuse**, so the line is not read as "wrote everything from nothing":
 
-* **`charon@swift-runtime`** — the runtime a port carries; every recipe here declares it, and
+* **`revenant@swift-runtime`** — the runtime a port carries; every recipe here declares it, and
   `modules/apple/swift.lua` supplies the compile flags rather than this package re-deriving them.
-* **`charon@appintents`** — for `LocalizedStringResource`, which the recipe probes for and this
+* **`revenant@appintents`** — for `LocalizedStringResource`, which the recipe probes for and this
   release's Foundation does not have, and which therefore comes from the AppIntents module (the
   crutch is filed in `coordination/crutches.md`, open until Foundation Swift r2 carries it). Nothing
   here reimplements it.
-* **eidolon's `SwiftUI`** — the source the ten `View.tip*` rows are routed to, and the reason they
-  are not declared here: eidolon (`$HOME/Git/projects/ios/eidolon`, `eidolon/Sources/SwiftUI/`) has
+* **SwiftUI's `SwiftUI`** — the source the ten `View.tip*` rows are routed to, and the reason they
+  are not declared here: SwiftUI (`$HOME/Git/projects/ios/SwiftUI`, `SwiftUI/Sources/SwiftUI/`) has
   `View` with its `body` requirement, `ShapeStyle`, `Edge`, `Binding`,
   `PresentationBackgroundInteraction`, `EnvironmentValues` and `EnvironmentKey`, but it is compiled
-  only into `rtpkg`'s `eidolonrt` daemon target and there is no `charon@swiftui` package to depend on
+  only into `rtpkg`'s `swiftuirt` daemon target and there is no `revenant@swiftui` package to depend on
   yet. The ask is with the SwiftUI band; `README.md:40-43` and `facts/TipKit/Rendering.md` say so too.
 * **`packages/a/apple-backports/registry/CoreSpotlight/ios9.json`** — read through
   the generator's port headers (`tools/gen/cmd_headers.lua`); not this package's file.

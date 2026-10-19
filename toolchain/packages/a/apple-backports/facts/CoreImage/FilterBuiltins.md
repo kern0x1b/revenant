@@ -17,7 +17,7 @@ Each is exactly one call. Measured on the host for all 239:
     compared 478 of 239 port constructors against the host's own, 237 rendered and compared, 0 different
 
 Two comparisons per constructor: the filter the host's `+[CIFilter <selector>]` answers, and the filter the
-port's `+charonHost_<selector>` answers. For each pair the class, the `name`, the `inputKeys`, the `outputKeys`
+port's `+revenantHost_<selector>` answers. For each pair the class, the `name`, the `inputKeys`, the `outputKeys`
 and the whole `attributes` dictionary are equal, and for 237 of the 239 the rendered RGBA bytes over a fixed
 32×32 window at the origin are equal too. The window is fixed because a filter whose output is infinite —
 every blur — has no extent to render over.
@@ -37,7 +37,7 @@ the `CIAttributeType` and `CIAttributeClass` its attribute dictionary carries, a
   answers a nil image for one);
 - a rectangle: the synthetic image's own extent, because a rectangle's declared default is `"[0 0 0 0]"` — an
   empty region, over which an area histogram answers a nil image;
-- a string, an attributed string or a data: `"charon"` in the form the attribute dictionary declares;
+- a string, an attributed string or a data: `"revenant"` in the form the attribute dictionary declares;
 - a number: the range Apple's dictionary declares, largest first, then smallest, then the midpoint of the
   slider range, then 1.
 
@@ -93,7 +93,7 @@ appears at, measured over the 50 held rungs with `tools/cache-index/first-rung.l
 | `CIFilterBuiltins26.m` | 6 | no held rung: the ladder ends at 10.3.4, so their SDK availability places them at iOS 26.0 |
 
 `CIFilter` itself is the release's own class from iOS 5.0 (`first-rung.lua _OBJC_CLASS_$_CIFilter` → 5.0), so
-these are a category on it and not a second definition of it. `charon_collect` installs a category method only
+these are a category on it and not a second definition of it. `revenant_collect` installs a category method only
 where the class does not answer the selector, so a band at or above the release in the table gets the
 release's own constructor and a band below it gets this one; the band needs no `maximum` in the registry for
 that, and none is written.

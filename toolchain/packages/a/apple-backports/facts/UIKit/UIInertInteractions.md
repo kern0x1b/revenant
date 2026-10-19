@@ -38,8 +38,8 @@ delegate weakly, never handle writing, and `+pencilInputExpected` is NO. The del
 The eleven members of `UIScribbleInteractionDelegate` and `UIIndirectScribbleInteractionDelegate` are `absent` rather than inert, and
 the difference is measured rather than assumed: **the release carries neither protocol.** `objc.inventory`, read with
 
-    CHARON_ROOT=<checkout> xmake l tools/corpus/objc-inventory.lua ~/.charon/dyld/6.1.3/dyld_shared_cache_armv7
-    CHARON_ROOT=<checkout> xmake l tools/corpus/objc-inventory.lua ~/.charon/dyld/4.3/dyld_shared_cache_armv7
+    REVENANT_ROOT=<checkout> xmake l tools/corpus/objc-inventory.lua ~/.revenant/dyld/6.1.3/dyld_shared_cache_armv7
+    REVENANT_ROOT=<checkout> xmake l tools/corpus/objc-inventory.lua ~/.revenant/dyld/4.3/dyld_shared_cache_armv7
 
 finds `UIScribbleInteractionDelegate`, `UIIndirectScribbleInteractionDelegate`, `UIScribbleInteraction` and
 `UIIndirectScribbleInteraction` as neither a class nor a protocol in either cache. The same two runs read 11378 classes and 1171

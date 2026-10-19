@@ -66,7 +66,7 @@ answers, and they call the three delegate methods the header declares.
 argument is an enumeration** (`INUIHostedViewContextSiriSnippet`, `INUIHostedViewContextMapsCard`),
 not an `NSExtensionContext`, and the parameters come out of the interaction — which the port
 carries, donation and all. So both of the protocol's methods are implemented in full by
-`CharonIntentsUIHostedViewController` (`CharonIntentsUIHostedView.m`):
+`RevenantIntentsUIHostedViewController` (`RevenantIntentsUIHostedView.m`):
 
 * the interaction's parameters — its intent's own properties, by the key path an `INParameter`
   names, which is exactly what `-[INInteraction parameterValueForParameter:]` reads — become the
@@ -79,7 +79,7 @@ carries, donation and all. So both of the protocol's methods are implemented in 
 * the completions are answered with the size the content needs, and with the set of parameters
   that were really configured.
 
-The class is named as **Charon's own**, because the SDK declares the *protocol* and the class that
+The class is named as **Revenant's own**, because the SDK declares the *protocol* and the class that
 conforms to it is the application's: this is the port's, so an application has a conforming class
 to build on, and the name keeps it clear of any class Apple may add.
 
@@ -88,8 +88,8 @@ to build on, and the name keeps it clear of any class Apple may add.
 The category on `INImage` that IntentsUI declares is built in `IntentsUI/INImage+IntentsUI100.m`
 (`+imageWithUIImage:`, `+imageWithCGImage:`, `+imageSizeForIntentResponse:`) and
 `IntentsUI/INImage+IntentsUI110.m` (`-fetchUIImageWithCompletion:`, iOS 11). The image's bytes reach
-them through two seams on `INImage` in `Intents/CharonIntents100.m`: `-charon_imageData` and
-`+charon_imageWithName:data:width:height:`, which keeps the bytes it is given, nil included.
+them through two seams on `INImage` in `Intents/RevenantIntents100.m`: `-revenant_imageData` and
+`+revenant_imageWithName:data:width:height:`, which keeps the bytes it is given, nil included.
 
 Every behaviour below was asked of the Catalyst host's own IntentsUI, and the port answers the same
 questions: `tests/backports/host/inimage-bridge/run.sh` builds one probe twice, against the system and
@@ -126,7 +126,7 @@ and the port answers them by inheritance (the section "The six NS_UNAVAILABLE in
 `NSExtensionContext` is iOS 8's class (`Foundation/NSExtensionContext.h`, `ios(8.0)`), so iOS 6 has none, and the three
 members IntentsUI adds to it (`INUIHostedViewControlling.h`, iOS 10 and 11) have nothing to be sent to. The port defines
 the class in `Foundation/NSExtensionContext.m` (the Foundation library, which every library that needs it links),
-with its IntentsUI members in `IntentsUI/CharonNSExtensionContext+IntentsUI.m`, and answers what an application's own
+with its IntentsUI members in `IntentsUI/RevenantNSExtensionContext+IntentsUI.m`, and answers what an application's own
 context answers.
 
 Measured on Catalyst by `tests/backports/host/nsextension-context`, for a fresh context:
@@ -153,7 +153,7 @@ view controllers `NS_UNAVAILABLE`, so a compiled call would not be the measureme
 `tests/backports/host/intentsui-init` calls each through its IMP on a fresh allocation, as the Intents `-init` rows do.
 
 On Catalyst the host answers an instance of the named class for all six (`expected.txt`, six lines, each `isKind 1` and
-`exact 1`). The port's classes declare none of the six themselves: `CharonIntentsUI120.m` has `initWithStyle:`,
+`exact 1`). The port's classes declare none of the six themselves: `RevenantIntentsUI120.m` has `initWithStyle:`,
 `initWithShortcut:` and `initWithVoiceShortcut:`, and the superclass's initialisers answer the rest. The port matches the
 host line for line, and a planted category that answers nil for the button's `-init` makes the diff non-empty.
 

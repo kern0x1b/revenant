@@ -2,7 +2,7 @@
 
 Orientation for anyone — human or AI assistant — working on this repository.
 Read it before making changes. Task-specific playbooks live as skills under
-hades' `.agents/skills/` (revenant-build, revenant-deploy, revenant-test, revenant-debug, revenant-device); this file is
+revenant's `.agents/skills/` (revenant-build, revenant-deploy, revenant-test, revenant-debug, revenant-device); this file is
 the map.
 
 ## What this is
@@ -12,7 +12,7 @@ and the machinery that runs it. There are two ways the engine is used:
 
 1. **Standalone app** — the engine hosted in this repo's own application
    (`app/`), which exists to exercise the engine directly. Built by
-   `charon build --variant prefixed`.
+   `revenant build --variant prefixed`.
 2. **Safari substitution** — the engine dropped underneath the phone's own Mobile
    Safari by a MobileSubstrate tweak. This is the current focus; the screenshots
    in the README are of it.
@@ -36,7 +36,7 @@ this has happened. The package puts each in its own place.
 ## The Settings pane
 
 `platform/prefs/` builds `RevPrefs.bundle` — a native PreferenceBundle, built by
-CMake that Charon writes from `charon.toml`, like the dylibs beside it — that writes the `space.kern0x1b.rev` preferences domain the engine reads
+CMake that toolchain writes from `revenant.toml`, like the dylibs beside it — that writes the `space.kern0x1b.rev` preferences domain the engine reads
 (`NewTabStartPage`, `CustomURLEnabled`, `CustomURL`, `InjectedApps`). System
 `PSListController` cells are loaded from `platform/prefs/Resources/Root.plist`.
 
@@ -48,7 +48,7 @@ CMake that Charon writes from `charon.toml`, like the dylibs beside it — that 
   those two frameworks read that type with the old layout. The symptom is not a
   crash log: the engine initialises cleanly, Safari's chrome draws with no text at
   all, and the process disappears with no REVCRASH line and no crash report. After
-  any header change run the full `charon build`, which builds everything, then
+  any header change run the full `revenant build`, which builds everything, then
   deploy.
 - **Load-time undefined symbols.** A dylib that links clean (`ninja`/`clang`
   exit 0) can still fail to load on iOS 6, silently — dyld gives up and, for the
@@ -105,15 +105,15 @@ CMake that Charon writes from `charon.toml`, like the dylibs beside it — that 
 
 ## Where to look
 
-- Build: `charon build` (`charon build --variant prefixed` for the standalone application's engine); see `docs/building.md`. It ends with the device filesystem tree in `build/system/stage`.
-- Package: `charon package` copies
+- Build: `revenant build` (`revenant build --variant prefixed` for the standalone application's engine); see `docs/building.md`. It ends with the device filesystem tree in `build/system/stage`.
+- Package: `revenant package` copies
   `space.kern0x1b.rev_<version>_iphoneos-arm.deb`, engine frameworks included,
   into `build/<variant>/` and prints `package <path>`; `packaging/` holds only
   the `control` file and the `DEBIAN/postinst` script. The version is `version`
-  in `charon.toml`.
-- Deploy: `charon install` packages, copies each .deb to `/tmp`, runs
+  in `revenant.toml`.
+- Deploy: `revenant install` packages, copies each .deb to `/tmp`, runs
   `dpkg -i … && rm`, refuses a .deb whose app would replace another bundle id,
-  and runs `su mobile -c uicache` when the package holds an app; `charon deploy`
+  and runs `su mobile -c uicache` when the package holds an app; `revenant deploy`
   for the engine alone. Claim the device first (`revenant-device`).
 - Documentation: `docs/` (`architecture.md`, `network.md`, `compatibility.md`, `building.md`, `memory-and-caches.md`).
-- Playbooks: hades' `.agents/skills/revenant-{build,deploy,test,debug,device}/SKILL.md`.
+- Playbooks: revenant's `.agents/skills/revenant-{build,deploy,test,debug,device}/SKILL.md`.

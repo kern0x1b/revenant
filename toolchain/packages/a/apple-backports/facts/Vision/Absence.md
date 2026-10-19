@@ -11,23 +11,23 @@ This is the fact every `absent` row of the Vision library rests on, and it is a 
 releases rather than about this port.
 
 ```
-CHARON_ROOT=<worktree> xmake l tools/corpus/cache-census.lua VN 6.1.3 4.3 11.0 12.0
+REVENANT_ROOT=<worktree> xmake l tools/corpus/cache-census.lua VN 6.1.3 4.3 11.0 12.0
 ```
 
 ```
-6.1.3     $HOME/.charon/dyld/6.1.3/dyld_shared_cache_armv7
+6.1.3     $HOME/.revenant/dyld/6.1.3/dyld_shared_cache_armv7
          images 524, of which naming VN 0
          classes 11378, of which VN* 0
          protocols 1171, of which VN* 0
-4.3       $HOME/.charon/dyld/4.3/dyld_shared_cache_armv7
+4.3       $HOME/.revenant/dyld/4.3/dyld_shared_cache_armv7
          images 354, of which naming VN 0
          classes 7187, of which VN* 0
          protocols 564, of which VN* 0
-11.0      $HOME/.charon/dyld/11.0/dyld_shared_cache_arm64
+11.0      $HOME/.revenant/dyld/11.0/dyld_shared_cache_arm64
          images 1258, of which naming VN 0
          classes 52768, of which VN* 155 (<the 155 names elided>)
          protocols 8954, of which VN* 18 (<the 18 names elided>)
-12.0      $HOME/.charon/dyld/12.0/dyld_shared_cache_arm64
+12.0      $HOME/.revenant/dyld/12.0/dyld_shared_cache_arm64
          images 1368, of which naming VN 0
          classes 63192, of which VN* 222 (<the 222 names elided>)
          protocols 11426, of which VN* 23 (<the 23 names elided>)
@@ -49,7 +49,7 @@ zero is the release's.
 `Vision.framework/Vision`:
 
 ```
-CHARON_ROOT=<worktree> xmake l tools/corpus/cache-census.lua Vision.framework 11.0 12.0
+REVENANT_ROOT=<worktree> xmake l tools/corpus/cache-census.lua Vision.framework 11.0 12.0
 ```
 
 ```
@@ -126,8 +126,8 @@ is -- measured on three unrelated names before this one: `MTLCounterErrorDomain`
 
 ```
 printf 'VNAnimalIdentifierCat\tp\tp\ts\nVNAnimalIdentifierDog\tp\tp\ts\n' > .agent-work/runs/vision13/animals.syms
-CHARON_ROOT=<worktree> xmake l tools/corpus/cache-value.lua \
-    $HOME/.charon/dyld/16.0/dyld_shared_cache_arm64e .agent-work/runs/vision13/animals.syms
+REVENANT_ROOT=<worktree> xmake l tools/corpus/cache-value.lua \
+    $HOME/.revenant/dyld/16.0/dyld_shared_cache_arm64e .agent-work/runs/vision13/animals.syms
 ```
 
 ```
@@ -359,7 +359,7 @@ against, and a reader who wants the names asks Vision for them.
 
 ## 5. What this port does with a request whose work it cannot do
 
-`VNHandlers.m`'s `charon_vision_failure` answers `VNErrorNotImplemented` for every request it cannot
+`VNHandlers.m`'s `revenant_vision_failure` answers `VNErrorNotImplemented` for every request it cannot
 run, and `VNErrorUnsupportedRevision` for a revision the port's own table does not carry. That is
 where a request of this slice ends when a handler runs one, and it is why a class row here says the
 class is there and answers what a caller can test, rather than that the request works.
@@ -423,7 +423,7 @@ produces it for one library in the seconds a whole-tree gate build takes minutes
 `backports.compile()`, so the flags are the build's own and not a command line of its own:
 
 ```
-CHARON_ROOT=<checkout> xmake l tools/vision/armv7-objects.lua Vision <objects> 6.1.3
+REVENANT_ROOT=<checkout> xmake l tools/vision/armv7-objects.lua Vision <objects> 6.1.3
 ```
 
 **The earlier reading of this section was wrong in both numbers, and it was wrong for the tree it was
@@ -440,7 +440,7 @@ None of the 39 needs a row of its own, and that is not an assumption -- it is th
 asked over the list the command above writes:
 
 ```
-CHARON_ROOT=<worktree> REGISTRY_ROOT=<worktree>/packages/a/apple-backports \
+REVENANT_ROOT=<worktree> REGISTRY_ROOT=<worktree>/packages/a/apple-backports \
 MEMBERS=<worktree>/Vision130-members.txt xmake l tools/vision/check-rows.lua
 ```
 
@@ -524,7 +524,7 @@ xmake l tools/release-split.lua <objects> <split.tsv>
 ```
 
 ```
-CharonVisionBilinear.c.o   0 symbols   (no exported symbol at all: every symbol is internal)
+RevenantVisionBilinear.c.o   0 symbols   (no exported symbol at all: every symbol is internal)
 VNConstants.m.o            29          11.0
 VNHandlers.m.o              4          11.0
 VNObservations.m.o         34          11.0
@@ -616,10 +616,10 @@ xcrun clang -target arm64-apple-ios15.0-macabi -isysroot "$(xcrun --show-sdk-pat
 `registry/Vision/ios11.json`; the whole recipe is in the probe's own first comment.
 
 ```
-CharonVNDetectFaceCaptureQualityRequest        conforms130            conforms:  VNFaceObservationAccepting  NSCopying
-CharonVNRecognizeTextRequest                   conforms130            conforms:  VNRequestProgressProviding  NSCopying
-CharonVNRecognizedText                         conforms130            conforms:  VNRequestRevisionProviding  NSSecureCoding  NSCopying
-CharonVNDetectFaceLandmarksRequest             conforms130            conforms:  VNFaceObservationAccepting  NSCopying
+RevenantVNDetectFaceCaptureQualityRequest        conforms130            conforms:  VNFaceObservationAccepting  NSCopying
+RevenantVNRecognizeTextRequest                   conforms130            conforms:  VNRequestProgressProviding  NSCopying
+RevenantVNRecognizedText                         conforms130            conforms:  VNRequestRevisionProviding  NSSecureCoding  NSCopying
+RevenantVNDetectFaceLandmarksRequest             conforms130            conforms:  VNFaceObservationAccepting  NSCopying
 VNNoClassOfThisName (the control)              nil class              conforms to nothing: no
 
 VNRecognizeTextRequest progressHandler responds: responds, indeterminate = NO, usesLanguageCorrection = NO
@@ -794,7 +794,7 @@ the fifteen what it answers and **which class writes the body**. The two questio
 difference is the whole of the row: `class_getInstanceMethod` walks the superclass chain and answers YES
 for an inherited selector, while `class_copyMethodList` returns a class's own methods only. Asking the
 chain for the owner instead answers the leaf every time, and every inherited initializer then looks like
-the subclass's own -- a probe that made that mistake printed all fifteen as `defined-by=Charon<Class>` and
+the subclass's own -- a probe that made that mistake printed all fifteen as `defined-by=Revenant<Class>` and
 was wrong about all fifteen. `class_copyMethodList` is what the row rests on.
 
 The port's classes are the ones being asked, so no answer can come from the Vision of this host:
@@ -821,19 +821,19 @@ the same column for the unprefixed names.
 ```
 VNFaceLandmarkRegion       new                                responds=YES defined-by=NSObject (inherited)               from=vninit
 VNCoreMLModel              init                               responds=YES defined-by=NSObject (inherited)               from=vninit
-VNCoreMLRequest            init                               responds=YES defined-by=CharonVNRequest (inherited)        from=vninit
-VNCoreMLRequest            initWithCompletionHandler:         responds=YES defined-by=CharonVNImageBasedRequest (inherited) from=vninit
+VNCoreMLRequest            init                               responds=YES defined-by=RevenantVNRequest (inherited)        from=vninit
+VNCoreMLRequest            initWithCompletionHandler:         responds=YES defined-by=RevenantVNImageBasedRequest (inherited) from=vninit
 VNFaceLandmarkRegion       init                               responds=YES defined-by=NSObject (inherited)               from=vninit
 VNFaceLandmarks            init                               responds=YES defined-by=NSObject (inherited)               from=vninit
 VNImageRequestHandler      init                               responds=YES defined-by=NSObject (inherited)               from=vninit
-VNTargetedImageRequest     init                               responds=YES defined-by=CharonVNRequest (inherited)        from=vninit
-VNTargetedImageRequest     initWithCompletionHandler:         responds=YES defined-by=CharonVNImageBasedRequest (inherited) from=vninit
-VNTrackObjectRequest       init                               responds=YES defined-by=CharonVNRequest (inherited)        from=vninit
-VNTrackObjectRequest       initWithCompletionHandler:         responds=YES defined-by=CharonVNImageBasedRequest (inherited) from=vninit
-VNTrackRectangleRequest    init                               responds=YES defined-by=CharonVNRequest (inherited)        from=vninit
-VNTrackRectangleRequest    initWithCompletionHandler:         responds=YES defined-by=CharonVNImageBasedRequest (inherited) from=vninit
-VNTrackingRequest          init                               responds=YES defined-by=CharonVNRequest (inherited)        from=vninit
-VNTrackingRequest          initWithCompletionHandler:         responds=YES defined-by=CharonVNImageBasedRequest (inherited) from=vninit
+VNTargetedImageRequest     init                               responds=YES defined-by=RevenantVNRequest (inherited)        from=vninit
+VNTargetedImageRequest     initWithCompletionHandler:         responds=YES defined-by=RevenantVNImageBasedRequest (inherited) from=vninit
+VNTrackObjectRequest       init                               responds=YES defined-by=RevenantVNRequest (inherited)        from=vninit
+VNTrackObjectRequest       initWithCompletionHandler:         responds=YES defined-by=RevenantVNImageBasedRequest (inherited) from=vninit
+VNTrackRectangleRequest    init                               responds=YES defined-by=RevenantVNRequest (inherited)        from=vninit
+VNTrackRectangleRequest    initWithCompletionHandler:         responds=YES defined-by=RevenantVNImageBasedRequest (inherited) from=vninit
+VNTrackingRequest          init                               responds=YES defined-by=RevenantVNRequest (inherited)        from=vninit
+VNTrackingRequest          initWithCompletionHandler:         responds=YES defined-by=RevenantVNImageBasedRequest (inherited) from=vninit
 ```
 
 The control class is a `nil class`, so the `responds=YES` beside it is the reader seeing a class.

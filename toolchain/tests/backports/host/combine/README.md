@@ -10,7 +10,7 @@ DIFFERENTIAL: identical
 ```
 
 A differing line is a place where a caller of the two would see something different, and the
-run exits non-zero with the difference in `$TMPDIR/charon-combine-differential/diff.txt`.
+run exits non-zero with the difference in `$TMPDIR/revenant-combine-differential/diff.txt`.
 
 ## What it is
 
@@ -22,12 +22,12 @@ cancellation. The time-based cases use `TestScheduler` in `Harness.swift`, a typ
 to the public `Scheduler` protocol whose time the case drives, so a time-based operator is
 the same on both sides whatever the host's clock is doing.
 
-Every rule patches `0005` to `0008` of `packages/s/styx/patches` implement was taken from this
-table, and `packages/s/styx/facts/Combine/CombineKit.md` has each rule with what the host does.
+Every rule patches `0005` to `0008` of `packages/c/combine/patches` implement was taken from this
+table, and `packages/c/combine/facts/Combine/CombineKit.md` has each rule with what the host does.
 
 ## What it builds, and what it cannot
 
-The module is built here, from the patched sources an installed `charon@styx` holds, before
+The module is built here, from the patched sources an installed `revenant@combine` holds, before
 either probe is built against it. **That is the point.** A run that linked a prebuilt object
 would measure the object, so a change to the module's Swift could sit in the sources and the
 run would answer `identical`: a mutation of the source read as a pass, which is the one
@@ -44,7 +44,7 @@ The Foundation integration is not in the host copy — `src/Combine/Foundation` 
 `src/Combine/Schedulers` are removed — for the same reason: it is where
 `NotificationCenter.Publisher`, `Timer.publish`, the run loop and operation queue schedulers
 and KVO live. Those are measured on the device instead, by the probe in
-`packages/s/styx/facts/Combine/CombineKit.md`.
+`packages/c/combine/facts/Combine/CombineKit.md`.
 
 ## A module that does not build
 
@@ -62,7 +62,7 @@ DIFFERENTIAL: identical
 `coverage.sh` builds the armv7 module the way the package builds it, synthesises the
 interface out of it, and counts the corpus rows it carries with the corpus's own tool on both
 sides. It then compares the count — and each family of the rows it does not carry — with the
-table in `packages/s/styx/facts/Combine/CombineKit.md`, and fails when they disagree. The
+table in `packages/c/combine/facts/Combine/CombineKit.md`, and fails when they disagree. The
 numbers in the facts are a check, not a claim. With one family miscounted by one:
 
 ```
@@ -70,7 +70,7 @@ the facts file is stale:
   the facts say 7 rows for 'witnesses the compiler derives', there are 8
 ```
 
-`CHARON_SDK` and `CHARON_SWIFTC` are named rather than guessed: the store holds several
+`REVENANT_SDK` and `REVENANT_SWIFTC` are named rather than guessed: the store holds several
 builds of the toolchain and several of the 16.4 SDK, and only the pair the package used will
 accept `-target armv7-apple-ios6.1.3`.
 
@@ -81,7 +81,7 @@ comment — and `./run.sh` alone, with no separate build step:
 
 ```
 cases: cases 40
-DIFFERENTIAL: 21 differing lines, in .../charon-combine-differential/diff.txt
+DIFFERENTIAL: 21 differing lines, in .../revenant-combine-differential/diff.txt
 -merge/two/interleaved	value 1
 -merge/two/interleaved	value 2
 -merge/two/interleaved	value 3
@@ -102,7 +102,7 @@ Line restored, `./run.sh` alone again: `DIFFERENTIAL: identical`.
 
 ## Where the module's own sources come from
 
-They are not in this repository; `packages/s/styx/xmake.lua` fetches OpenCombine and applies
-the patches, and an installed `charon@styx` keeps the patched tree under `src/`. `run.sh` and
-`coverage.sh` take the newest one under `~/.xmake/packages/s/styx`, or `$COMBINE_SOURCES`
+They are not in this repository; `packages/c/combine/xmake.lua` fetches OpenCombine and applies
+the patches, and an installed `revenant@combine` keeps the patched tree under `src/`. `run.sh` and
+`coverage.sh` take the newest one under `~/.xmake/packages/c/combine`, or `$COMBINE_SOURCES`
 pointed at such a `src/`. They say so and stop if there is neither.

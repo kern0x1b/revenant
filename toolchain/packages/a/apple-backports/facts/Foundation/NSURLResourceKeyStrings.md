@@ -91,10 +91,10 @@ those keys answer the documented "no value" rather than a guess.
 
 ## The fifteen that arrived after the SDK this package builds against
 
-The build resolves `charon@iphoneos-sdk` to 16.4, and these fifteen arrived after it: eleven
+The build resolves `revenant@iphoneos-sdk` to 16.4, and these fifteen arrived after it: eleven
 calendar identifiers and the two sync-control keys of 26.0, the cookie attribute of 18.2 and the file
 protection level of 17.0. None of them has an `extern` declaration in that SDK, so
-`Foundation/CharonFoundationIdentifiers.h` declares the three groups, each gated on the version
+`Foundation/RevenantFoundationIdentifiers.h` declares the three groups, each gated on the version
 macro the SDK spells (`__IPHONE_17_0`, `__IPHONE_18_2`, `__IPHONE_26_0`, none of which 16.4 defines),
 and three objects carry the values, one per release group, for the reason "one object per group"
 above.
@@ -102,7 +102,7 @@ above.
 Their values were read out of the **host's own Foundation** by `dlsym` rather than out of a release's
 shared cache, and that is a departure from the method the rest of this file uses, so it is named
 here rather than left to be discovered: no `dyld_shared_cache` is held on this machine (none under
-`~/.xmake/packages/i` or `~/.charon/cache`), and the ladder has no release new enough to export
+`~/.xmake/packages/i` or `~/.revenant/cache`), and the ladder has no release new enough to export
 thirteen of the fifteen. The instrument is in the tree and it is the one this file's own test for a
 wrong value needs — `tests/backports/host/foundation-constants/` asks the host for every name the
 package carries, compares it with the port's, and mutates each value in turn to show the comparison
@@ -199,7 +199,7 @@ name it dates at 18.0 is an upper bound and not a measurement of 18.0. Read thro
 ```
 _NSFileProtectionCompleteWhenUserInactive                  18.0
 _NSURLFileProtectionCompleteWhenUserInactive               18.0
-_NSCalendarIdentifierCharonPlantedNoSuchName               none
+_NSCalendarIdentifierRevenantPlantedNoSuchName               none
 _NSHomeDirectory                                           3.0        (the control: a rung this machine holds exports it)
 ```
 

@@ -8,8 +8,8 @@ and which one is named in the row.
 
 | release | file | what it decides |
 | --- | --- | --- |
-| ARKitCore of the arm64e shared cache of **iOS 16.0** | `~/.charon/dyld/16.0/dyld_shared_cache_arm64e`, read only, in process | which accessors the release's class really has, and which of them are class methods |
-| the armv7 shared caches of **iOS 6.1.3** and **iOS 4.3** | `~/.charon/dyld/6.1.3/`, `~/.charon/dyld/4.3/` | what the port's own bands run on: 0 of their classes and 0 of their selectors is anything ARKit |
+| ARKitCore of the arm64e shared cache of **iOS 16.0** | `~/.revenant/dyld/16.0/dyld_shared_cache_arm64e`, read only, in process | which accessors the release's class really has, and which of them are class methods |
+| the armv7 shared caches of **iOS 6.1.3** and **iOS 4.3** | `~/.revenant/dyld/6.1.3/`, `~/.revenant/dyld/4.3/` | what the port's own bands run on: 0 of their classes and 0 of their selectors is anything ARKit |
 
 Both are read with this repository's own readers (`tools/corpus/skeleton-table.lua`,
 `tools/corpus/objc-inventory.lua` through `modules/apple/dyld.lua` and `modules/apple/objc.lua`). No
@@ -99,7 +99,7 @@ rather than a value invented.
 **The session reads no setting at all.** `-[ARSession runWithConfiguration:options:]`
 (`ARKit/ARSession.m:77-91`) is the whole of how a session is started, and it reads the configuration
 for `[[configuration class] isSupported]` and for the two run options and for nothing else.
-`CharonARTracker.h` - the tracker's entire interface - names no member that takes a configuration, a
+`RevenantARTracker.h` - the tracker's entire interface - names no member that takes a configuration, a
 map, an image, a skeleton or an environment probe. That one measurement is what makes the twelve
 `absent` rows absences rather than gaps, and it is why `@dynamic` is the honest spelling for them: with
 the line removed, clang synthesises the pair of accessors from the SDK header's own property, and they
@@ -170,7 +170,7 @@ commit: it already answers honestly everywhere it exists.
 
 `ARWorldTrackingConfiguration.environmentTexturing` is an `implemented` row that stores a value nothing
 builds a texture from: there is no `AREnvironmentProbeAnchor` in this tree and no member of
-`CharonARTracker.h` that takes a probe. It was decided and landed before this series, so it is
+`RevenantARTracker.h` that takes a probe. It was decided and landed before this series, so it is
 recorded here rather than changed by a series that was not asked about it.
 
 ## The harness

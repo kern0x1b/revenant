@@ -20,8 +20,8 @@ Both band ends were read as whole caches with the ladder's own architecture choi
 (`dyld.held_ladder({"armv7","armv7s"})`), which picks armv7 for both:
 
 ```
-CHARON_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua ~/.charon/dyld/6.1.3/dyld_shared_cache_armv7
-CHARON_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua ~/.charon/dyld/4.3/dyld_shared_cache_armv7
+REVENANT_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua ~/.revenant/dyld/6.1.3/dyld_shared_cache_armv7
+REVENANT_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua ~/.revenant/dyld/4.3/dyld_shared_cache_armv7
 ```
 
 Both through `coordination/heavy.sh`. Output, and the control that makes a zero mean something:
@@ -201,7 +201,7 @@ cannot be written from this slice. The substrate is present and measured: 6.1.3 
 with `items`, `insertItem:afterItem:`, `removeAllItems` and `initWithItems:`, and
 `_AVPlayerItemDidPlayToEndTimeNotification` first exports at **4.0**, so a looper is buildable here. But
 `check_registry` reads `found.members` from `carried_api()`, which counts every selector of every class
-the port's binaries declare and filters only names beginning with `Charon` - so a port-defined
+the port's binaries declare and filters only names beginning with `revenant` - so a port-defined
 `AVPlayerLooper` brings `-initWithPlayer:queueItems:`, `player`, `queueItems` and `disableLooping` with it,
 each of which needs a registry row of its own. Those four rows are not in this batch's slice, and the
 slice's rule is that rows outside it are not edited. So the class lands with a batch that owns its four

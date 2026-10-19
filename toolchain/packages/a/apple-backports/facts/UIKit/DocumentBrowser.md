@@ -8,7 +8,7 @@ one of them `@optional`, including the two pairs spelled two ways — `didPickDo
 
 The declaration is a **transcription**, not a design, and it lives in
 `UIKit/UIDocumentBrowserViewControllerDelegate.h` because a 6.1.3-era SDK has no
-UIDocumentBrowserViewController at all. `CharonDocumentBrowserTypes.h` carries the one enum and the
+UIDocumentBrowserViewController at all. `RevenantDocumentBrowserTypes.h` carries the one enum and the
 three `@class` lines the questions refer to, with no condition on which SDK is in use, so the same
 file works against every SDK the port builds with.
 
@@ -116,7 +116,7 @@ shared SDK. **Eighteen of the nineteen checks pass.**
 The one that does not:
 
     FAIL a reveal that imported answers with where it landed, not where it was asked from
-         -- /var/.../charon-dbr-elsewhere/wanted.txt
+         -- /var/.../revenant-dbr-elsewhere/wanted.txt
 
 `revealDocumentAtURL:importIfNeeded:completion:` imports beside the browser's own directory, and the
 document comes back at the URL it was asked from rather than where it landed. Writing the test is

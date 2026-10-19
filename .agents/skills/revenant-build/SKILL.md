@@ -16,21 +16,21 @@ from Conan, not `PATH`; Theos is not used.
 ./fetch-source.py     # webkit-254, a submodule on the fork's main branch
 ```
 
-One command builds the libraries iOS 6 predates (declared in `charon.toml`,
+One command builds the libraries iOS 6 predates (declared in `revenant.toml`,
 pinned in `conan.lock`), `libios6compat.a` and the engine:
 
 ```sh
-charon build
+revenant build
 ```
 
-It builds into `build/system`; `charon build --variant prefixed` builds the
+It builds into `build/system`; `revenant build --variant prefixed` builds the
 standalone application's engine into `build/prefixed`. Unchanged
 libraries come from the Conan cache. ccache is used only when set as the
 compiler launcher through `tools.cmake.cmaketoolchain:extra_variables`
 (`CMAKE_<LANG>_COMPILER_LAUNCHER` for C, CXX, OBJC and OBJCXX) in one's own
 `global.conf` or profile.
 
-A change to a WebCore header means a full `charon build` — a partial build leaves the
+A change to a WebCore header means a full `revenant build` — a partial build leaves the
 other frameworks on the old class size, and the result loads and misbehaves with
 no crash log. `docs/building.md` has the whole sequence.
 
@@ -38,33 +38,33 @@ no crash log. `docs/building.md` has the whole sequence.
 
 ## Safari-substitution artifacts
 
-The same `charon build` finishes them. Its steps are `[pipeline]` in
-`charon.toml`: `task:carry-check` runs first, before `build:static-library`;
+The same `revenant build` finishes them. Its steps are `[pipeline]` in
+`revenant.toml`: `task:carry-check` runs first, before `build:static-library`;
 after the engine come `check:exports`, `task:compat-audit` and
 `task:symbol-check`; then it builds loader, compat, TLS and prefs from the
-device libraries `charon.toml` declares (`build:device-library`) and lays
+device libraries `revenant.toml` declares (`build:device-library`) and lays
 everything out as the device filesystem in `build/system/stage` (frameworks in
 `stage/usr/lib/rev-fw`). The `prefixed` pipeline adds `task:prefix-exports`
 before the libraries and has no `task:symbol-check`. Every binary is stripped
 and signed with `ldid -S`.
 
 ```sh
-charon package
+revenant package
 ```
 
 packs that stage and copies
 `space.kern0x1b.rev_<version>_iphoneos-arm.deb` into `build/<variant>/`,
-printing `package <path>`. The version is `version` in `charon.toml`.
+printing `package <path>`. The version is `version` in `revenant.toml`.
 
 Every build ends its pipeline with `check:imports`, which refuses anything staged
 or bundled that imports a symbol iOS 6 does not export, checked against the
-phone's shared cache held in `~/.charon/dyld`. With the phone attached,
-`charon test --tier imports` fetches that cache once per machine; after that the
+phone's shared cache held in `~/.revenant/dyld`. With the phone attached,
+`revenant test --tier imports` fetches that cache once per machine; after that the
 build never needs the phone.
 
-A step of your own is a task in `charon.toml` - `[tasks.NAME]` with `script`,
+A step of your own is a task in `revenant.toml` - `[tasks.NAME]` with `script`,
 `shell` or `python` - placed in `[pipeline]` as `task:NAME`, or run alone with
-`charon task NAME`.
+`revenant task NAME`.
 
 ## After building an injected dylib — always verify it will load
 

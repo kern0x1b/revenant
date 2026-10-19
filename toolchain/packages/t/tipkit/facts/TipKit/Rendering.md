@@ -11,7 +11,7 @@ So the module splits the two halves and implements each in the place it belongs:
 
 | the framework's half | this module's answer |
 | --- | --- |
-| **the datastore** - a service that records donations, display counts and invalidations | `Tips.Store`: a plist in the app's own Application Support (`charon-tipkit/tips.plist`), read and written through `PropertyListSerialization`; the invalidations survive a relaunch, which is what the framework's own store does |
+| **the datastore** - a service that records donations, display counts and invalidations | `Tips.Store`: a plist in the app's own Application Support (`revenant-tipkit/tips.plist`), read and written through `PropertyListSerialization`; the invalidations survive a relaunch, which is what the framework's own store does |
 | **the rules** - `DonationFilter`, `DonatedWithin`, `LargestSubset`, `SmallestSubset`, combined with `&&` or `\|\|` | real: each condition is evaluated over the donations the app has sent, the operators compare as they are named (`equal` … `greaterThanOrEqual`), and a subset condition counts the groups the donations fall into |
 | **the eligibility** - `shouldDisplay`, `status`, the display count, the display duration, the display frequency | real: not invalidated, every rule holds, the frequency has passed, the options' count and duration allow it, and `status` is `pending`, `available` or `invalidated` over the same store |
 | **the presentation** - a popover the system animates over the app's views | the app's own: `TipUIPopoverViewController` is a real `UIViewController` that loads a `TipUIView` as its view and the app presents it over its own controller; `TipUIView` is a real `UIView` that sizes itself, rounds its corners and draws with the release's own drawing; the collection view and the reusable view are real `UICollectionViewCell`/`UIView` for an app that draws its tip in a list |
@@ -33,7 +33,7 @@ What is *not* there and why:
 
 `MacOSX27.sdk` carries `TipKit.framework`, so this module's differential ran against Apple's own
 (`the host-differential writeup, **not kept**; its results are in the facts beside this`, `.agent-work/host/tipkit-diff.txt`): the same probe against Apple's
-`TipKit` and against this module built as `CharonTipKit`, 37 lines each, **37 of 37 identical** after
+`TipKit` and against this module built as `RevenantTipKit`, 37 lines each, **37 of 37 identical** after
 the module name is normalised. What it changed:
 
 1. **`Tips.Status.invalidated` carries its reason.** Both interfaces declare
@@ -54,7 +54,7 @@ the module name is normalised. What it changed:
    `tipsDatastoreAlreadyConfigured` for real. `missingGroupContainerEntitlements` names a condition
    these releases do not have: an app-group container needs an app-group entitlement and iOS 6 has no
    facility for one. `invalidPredicateValueType` is raised by the typed predicate evaluation, and this
-   module's evaluation reads every donated value as text through `CharonDonationValue`, so a value
+   module's evaluation reads every donated value as text through `RevenantDonationValue`, so a value
    type it does not have cannot arise — a rule it cannot compare answers `false` instead. Both are
    declared because the framework declares them, so a port that catches one compiles; they are not
    raised here, and that is the whole of the difference.
@@ -67,7 +67,7 @@ not an argument of the condition at all — `Foundation.Predicate`'s `largestSub
 side of the comparison, and the interface's `LargestSubset` has no count member either. The port now
 reads the count the way the framework does: the condition takes the `DonationFilter` the rule wrote on
 the other side (`input.value` is how many, `input.op` is which way) and the key path to group by, and
-`CharonDonationCompare` — which already compares numerically — answers it. That is what moved
+`RevenantDonationCompare` — which already compares numerically — answers it. That is what moved
 TipKit from 245 to **247 of 321 placed**.
 
 **What the remaining 73 rows are** (`.agent-work/handoffs/2026-09-28-ledger-swift-digester-naming.md`,

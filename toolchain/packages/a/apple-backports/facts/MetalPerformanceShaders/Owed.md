@@ -97,7 +97,7 @@ So the ranking is owed surface, which is what the registry and the headers can c
 
 ## Read from
 
-- SDK: `$HOME/Git/projects/ios/charon/.agent-work/sdk-26.2/iPhoneOS26.2.sdk`
+- SDK: `$HOME/Git/projects/ios/revenant/.agent-work/sdk-26.2/iPhoneOS26.2.sdk`
 - registry: `packages/a/apple-backports/registry/MetalPerformanceShaders/absent_MetalPerformanceShaders.json`
 - headers: 95 under `System/Library/Frameworks/MetalPerformanceShaders.framework`, declaring 412 MPS types
 

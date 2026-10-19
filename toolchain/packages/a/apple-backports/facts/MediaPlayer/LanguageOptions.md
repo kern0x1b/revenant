@@ -11,12 +11,12 @@ it, and because a class's absence is a fact about the whole release rather than 
 reads ran through `coordination/heavy.sh`, in the slow lane, one per turn.
 
 ```
-CHARON_ROOT=<worktree> xmake l tools/corpus/objc-inventory.lua \
-  ~/.charon/dyld/6.1.3/dyld_shared_cache_armv7 > .agent-work/runs/mp-absent/inventory-6.1.3.tsv
+REVENANT_ROOT=<worktree> xmake l tools/corpus/objc-inventory.lua \
+  ~/.revenant/dyld/6.1.3/dyld_shared_cache_armv7 > .agent-work/runs/mp-absent/inventory-6.1.3.tsv
 12549 lines: 11378 classes, 1171 protocols
 
-CHARON_ROOT=<worktree> xmake l tools/corpus/objc-inventory.lua \
-  ~/.charon/dyld/4.3/dyld_shared_cache_armv7 > .agent-work/runs/mp-absent/inventory-4.3.tsv
+REVENANT_ROOT=<worktree> xmake l tools/corpus/objc-inventory.lua \
+  ~/.revenant/dyld/4.3/dyld_shared_cache_armv7 > .agent-work/runs/mp-absent/inventory-4.3.tsv
 7751 lines: 7187 classes, 564 protocols
 ```
 
@@ -198,7 +198,7 @@ accessor, because `MPChangeLanguageOptionCommandEvent90.m` needs a type for its 
 to compile against and the framework has no such class on this release.
 
 A first draft of `MPNowPlayingInfoLanguageOption90.m` restated the full contract under
-`#if defined(CHARON_MEDIAPLAYER_STANDIN)`, which is the idiom `MPMediaPlaylist93.m` uses for
+`#if defined(REVENANT_MEDIAPLAYER_STANDIN)`, which is the idiom `MPMediaPlaylist93.m` uses for
 `MPMediaPlaylist`. **It does not compile**, and the reason is specific:
 
 ```

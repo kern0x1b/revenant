@@ -1,21 +1,21 @@
-# Eidolon
+# SwiftUI
 
 **SwiftUI for iOS 6 — a from-scratch implementation of the SwiftUI API on UIKit, for armv7.**
 
 Apple's SwiftUI cannot run on iOS 6: it has never had an armv7 build, it needs Metal, and it drags in over four hundred
-system images the phone does not have. So Eidolon re-implements the *API* instead. It is a Swift module named
-`SwiftUI`, built on the UIKit of iOS 6, with [Styx](https://github.com/kern0x1b/styx), a Combine for iOS 6, standing in for
-Combine. An app written in ordinary SwiftUI syntax compiles against it and comes out as a native-looking iOS 6 app on a
+system images the phone does not have. So this project re-implements the *API* instead. It is a Swift module named
+`SwiftUI`, built on the UIKit of iOS 6, with [Combine](https://github.com/kern0x1b/revenant/tree/main/frameworks/Combine), a Combine for iOS 6, standing in for
+Apple's Combine. An app written in ordinary SwiftUI syntax compiles against it and comes out as a native-looking iOS 6 app on a
 phone from 2011.
 
 The module keeps Apple's name on purpose: the mangled names of every symbol an app takes from SwiftUI depend on it.
-Eidolon is the name of the project, the directory and the build targets.
+The project, its directory and its build targets carry the same name.
 
 ## What works
 
 A retained node tree over UIKit views, with a reconciler, a layout engine of its own and a scheduler that re-renders
 only what changed. The areas below are exercised by tests and by rendered scenarios; the full ledger — what is
-implemented, what is deliberately ignored and why, what is simplified — is in [`eidolon/README.md`](eidolon/README.md)
+implemented, what is deliberately ignored and why, what is simplified — is in [`SwiftUI/README.md`](SwiftUI/README.md)
 (in Russian) and is checked by the build.
 
 | Area | What there is |
@@ -64,33 +64,33 @@ exists.
   Only the nodes marked dirty are laid out again.
 - **Animation.** Ordinary properties are handed to `UIView.animate`; data that UIKit cannot interpolate is driven frame
   by frame by a display-link animator.
-- **Combine** is Styx, built with the same Swift runtime; it is a module named `Combine`, so apps write `import Combine`.
+- **Combine** is `frameworks/Combine`, built with the same Swift runtime; it is a module named `Combine`, so apps write `import Combine`.
 
 ## Requirements
 
-- macOS and the hades checkout this folder is in, configured for iOS at its top (hades' README: the charon addon of
-  the checkout, `xmake f -p iphoneos -a armv7`): the module is the `SwiftUI` target, Styx the `Combine` and
+- macOS and the revenant checkout this folder is in, configured for iOS at its top (revenant's README: the revenant addon of
+  the checkout, `xmake f -p iphoneos -a armv7`): the module is the `SwiftUI` target, Combine the `Combine` and
   `CombineHelpers` targets, and `swift-runtime`, `libcxx`, `apple-compat`, the iOS SDK, `llvm`, `ld64` and `ldid` the
-  charon packages the project requires. `pkg-env.sh` asks the hades project where each is (`xmake where`, `xmake show`).
-  An app outside hades takes Eidolon as the package `charon@eidolon` instead.
-- To run the tests and rendered scenarios: the Charon emulator (Shade), which `xmake emulate` drives — the port in
-  `eidolon/` builds the demo app, the snapshot bundle and the test binary as packages, and the emulator image,
+  toolchain packages the project requires. `pkg-env.sh` asks the revenant project where each is (`xmake where`, `xmake show`).
+  An app outside revenant takes SwiftUI as the package `revenant@swiftui-uikit` instead.
+- To run the tests and rendered scenarios: the toolchain's emulator (`emulator/`), which `xmake emulate` drives — the port in
+  `SwiftUI/` builds the demo app, the snapshot bundle and the test binary as packages, and the emulator image,
   the device and the release are named on the command line (`-d iPhone4,1 -r 6.1.3`). The addon must be one that has
-  `xmake emulate launch` (Charon v0.8.14 or later); `CHARON_ADDON` names it, and `CHARON_REPO` a Charon checkout to
+  `xmake emulate launch` (revenant v0.8.14 or later); `REVENANT_ADDON` names it, and `REVENANT_REPO` a toolchain checkout to
   take the packages from.
-- To measure on hardware: an iPhone 4S or an iPad 2 on iOS 6.1.3, reached through Charon's device tooling
-  (`CHARON_MODULES` names the `modules` directory of a Charon checkout).
+- To measure on hardware: an iPhone 4S or an iPad 2 on iOS 6.1.3, reached through Revenant's device tooling
+  (`REVENANT_MODULES` names the `modules` directory of a toolchain checkout).
 
 Machine-local paths go in `local.env` (git-ignored); nothing personal is tracked.
 
 ## Build
 
 ```bash
-eidolon/build.sh        # module, demo app, tests and probe -> eidolon/out/EidolonDemo.app
-xmake f -P eidolon -p iphoneos -a armv7 -y   # the same, as a Charon port: the app and the tests as packages
+SwiftUI/build.sh        # module, demo app, tests and probe -> SwiftUI/out/SwiftUIDemo.app
+xmake f -P SwiftUI -p iphoneos -a armv7 -y   # the same, as a Revenant port: the app and the tests as packages
 ```
 
-The build begins with `xmake l eidolon/coverage.lua --check --before-build`, which refuses to continue if the ledger and the code
+The build begins with `xmake l SwiftUI/coverage.lua --check --before-build`, which refuses to continue if the ledger and the code
 disagree. The count of invented names is not part of that: it is read from `bridge/api/invented.txt`, which
 `bridge/api-surface.sh` makes from the module the build produces, so a fresh tree runs the build, then api-surface.sh,
 then a plain `xmake l coverage.lua --check`, which compares that count with the README.
@@ -102,7 +102,7 @@ Everything is compiled with availability checking **on**, against the same Swift
 ../run-emu.sh                                           # the engine tests, in the emulator
 ../snapshots.sh [--accept]                              # rendered scenarios against tree references
 ../perf.sh                                              # in-app timings of deeply nested layouts
-xmake emulate -P eidolon -d iPhone4,1 -r 6.1.3 launch space.kern0x1b.eidolon.demo
+xmake emulate -P SwiftUI -d iPhone4,1 -r 6.1.3 launch space.kern0x1b.swiftui.demo
 xmake l coverage.lua --check                            # the ledger, checked against the code
 ../bridge/prepare-fw.sh && ../bridge/api-surface.sh     # the typed API diff against Apple's interface
 ```
@@ -111,16 +111,16 @@ xmake l coverage.lua --check                            # the ledger, checked ag
 `application:didFinishLaunchingWithOptions:`; the engine tests are a console binary and go through `xmake emulate run`.
 
 `bridge/guest-abi-check.sh` is gone: it built for arm64 with the iOS 16.4 SDK's stdlib, not the runtime the port ships
-(the reason and the measurement are in `eidolon/README.md`, in its section on the two builds of the module).
+(the reason and the measurement are in `SwiftUI/README.md`, in its section on the two builds of the module).
 
 ## Repository layout
 
 | Path | Holds |
 | --- | --- |
-| `xmake.lua` | the `SwiftUI` target, and the targets of `eidolon/` and `rtpkg/`, as part of the hades project |
-| `eidolon/` | the module (`Sources/SwiftUI`), the demo app, the engine tests, the probe, the snapshot references, the coverage ledger, and the targets (`xmake.lua`, `control`, `Info.plist`) of the app, the snapshot bundle and the tests for `xmake emulate` |
+| `xmake.lua` | the `SwiftUI` target, and the targets of `SwiftUI/` and `rtpkg/`, as part of the revenant project |
+| `SwiftUI/` | the module (`Sources/SwiftUI`), the demo app, the engine tests, the probe, the snapshot references, the coverage ledger, and the targets (`xmake.lua`, `control`, `Info.plist`) of the app, the snapshot bundle and the tests for `xmake emulate` |
 | `bridge/` | the typed API diff against Apple's interface, the invented-name gate, and the name lists they use |
-| `rtpkg/` | `eidolonrt`, a daemon of Styx and the runtime with the backports, as a target of the hades project |
+| `rtpkg/` | `swiftuirt`, a daemon of Combine and the runtime with the backports, as a target of the revenant project |
 | `docs/` | the research (in Russian) |
 | `*.sh`, `device.lua` | run the emulator, take snapshots and timings, reach a device |
 
@@ -128,10 +128,10 @@ xmake l coverage.lua --check                            # the ledger, checked ag
 
 | Document | About |
 | --- | --- |
-| [`eidolon/README.md`](eidolon/README.md) | the ledger: what is implemented, ignored, simplified or missing; measurements |
+| [`SwiftUI/README.md`](SwiftUI/README.md) | the ledger: what is implemented, ignored, simplified or missing; measurements |
 | [`docs/research.md`](docs/research.md) | why Apple's SwiftUI cannot be ported, and the design of this implementation (Russian) |
 | [`bridge/README.md`](bridge/README.md) | the guest build by hand: the sample app, the slot table |
-| [`../styx/docs/TEST-RESULTS.md`](../styx/docs/TEST-RESULTS.md) | OpenCombine's own tests against Styx, the `Combine` this module re-exports, on iOS 6 |
+| [`../Combine/docs/TEST-RESULTS.md`](../Combine/docs/TEST-RESULTS.md) | OpenCombine's own tests against Combine, the `Combine` this module re-exports, on iOS 6 |
 | [`AGENTS.md`](AGENTS.md) | the contributor guide |
 
 ## Trademarks

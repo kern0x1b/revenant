@@ -115,7 +115,7 @@ seven offsets each) and comparing the cells that are shown and what the handler 
   them that do not scroll. It is as tall as the row, and its offset is the distance the row has moved.
 - The offset runs from zero to the row's width less the viewport's (the collection view's width less the section's insets, but
   see Group paging centered), and a row that fits does not scroll. An offset set beyond it is clamped; the port's
-  hidden `charon_scrollSection:toOffset:settle:` (used by the tests) is the setter.
+  hidden `revenant_scrollSection:toOffset:settle:` (used by the tests) is the setter.
 - Continuous: any offset. Continuous group leading boundary and group paging: an offset at rest is a group's leading edge (clamped).
   Paging: a multiple of the viewport's width, the nearest one, and the end of the row if the offset is at or past it. Group paging
   centered: a group centered in the viewport, the row's ends given that much room.
@@ -167,7 +167,7 @@ to completion on the iPad - nine checkpoints through the method, including one r
 `[drag_view layoutIfNeeded]` returns - but the next step, queued separately with
 `dispatch_after`/`dispatch_get_main_queue()`, never ran: no crash, no uncaught exception. Band
 11-12 localised this to between the two steps and excluded a hang inside the port's own
-`charon_offsetOfSection:` (the stdout log is line-buffered and flushed after every write, so a
+`revenant_offsetOfSection:` (the stdout log is line-buffered and flushed after every write, so a
 checkpoint at the entry of the next step would have appeared even if that step's body never
 returned; it never appeared at all, meaning the step's block itself was never delivered). None of
 the 26 checks that measured this layout on real hardware before this one exercised self-sizing
@@ -178,31 +178,31 @@ What was found reading the port's own code, not measured on the device (the devi
 11-12's own port work), and re-checked once more against a coordinator's reading of the same code
 before this section was written: the two changes below are not two independent gaps, one primary
 and one defensive - they are one mechanism, an unbounded reschedule of the settle pass, made into a
-live lock by the run loop primitive `charon_note:` used to reschedule with.
+live lock by the run loop primitive `revenant_note:` used to reschedule with.
 
-**The loop, traced through `charon_settleMeasurements` (`UICollectionViewCompositionalLayout.m`).**
+**The loop, traced through `revenant_settleMeasurements` (`UICollectionViewCompositionalLayout.m`).**
 `_pending = nil;` runs unconditionally at the very top of the method, before anything is measured.
-Nothing in the method - or in `charon_note:`, the only place that ever sets `_pending` again -
-tracks how many times a settle round has already run for the same content. So any `charon_note:`
+Nothing in the method - or in `revenant_note:`, the only place that ever sets `_pending` again -
+tracks how many times a settle round has already run for the same content. So any `revenant_note:`
 call that results from this round's own work, however it is triggered, finds `_pending` empty and
-immediately calls `charon_layout_perform` to schedule another round: the batch this round is
+immediately calls `revenant_layout_perform` to schedule another round: the batch this round is
 processing is not exempt from re-triggering the next one. Two calls inside the method can trigger
-it before the method even returns: `[self charon_solveView:view]`, called mid-loop for every
+it before the method even returns: `[self revenant_solveView:view]`, called mid-loop for every
 changed measurement but one, recomputes the full solved-section state unguarded by `_measuring` -
-it does not call `charon_note:` itself, but leaves the layout in a state where the next attribute
+it does not call `revenant_note:` itself, but leaves the layout in a state where the next attribute
 query will, through `layoutAttributesForElementsInRect:`, for any element still short of its
 estimate. `invalidateLayoutWithContext:`, called at the end for every accumulated preferred-size
-context, *is* wrapped in `_measuring = YES` here, which blocks `charon_note:` for any query UIKit
+context, *is* wrapped in `_measuring = YES` here, which blocks `revenant_note:` for any query UIKit
 answers synchronously while that context is being applied - one of the two paths is guarded, the
 other is not.
 
 Whether UIKit answers that mid-loop's pending query synchronously (closing the loop within this
-one call to `charon_settleMeasurements`) or on its own next layout pass (closing it one run-loop
-turn later, across two calls to `charon_layout_perform`) was not settled by reading source alone -
+one call to `revenant_settleMeasurements`) or on its own next layout pass (closing it one run-loop
+turn later, across two calls to `revenant_layout_perform`) was not settled by reading source alone -
 that is Apple's own `UICollectionView` internals answering, not this file. What *is* settled by
 reading source alone: nothing bounds how many times this can repeat, on either timing, as long as
 an orthogonal section's fixed measuring dimension keeps changing round over round. With
-`CFRunLoopPerformBlock`/`CFRunLoopWakeUp` - the primitive `charon_layout_perform` used before this
+`CFRunLoopPerformBlock`/`CFRunLoopWakeUp` - the primitive `revenant_layout_perform` used before this
 patch - each reschedule forces the very next run loop pass to service it ahead of whatever else
 that pass already had queued, which is exactly what turns an unbounded-but-eventually-terminating
 retry into a live lock: a chain of rounds that keeps forcing itself to the front never lets the run
@@ -222,7 +222,7 @@ now takes its fair turn on the same queue instead of being forced to wait for a 
 finding new work to service first. Twelve was chosen generously against every self-sizing
 configuration this band has seen settle in one or two rounds, not measured against a real
 non-converging case, since none was reproduced; `_settleRounds` logs once through
-`charon_layout_say_once` if the cap is ever reached, so a configuration that genuinely cannot
+`revenant_layout_say_once` if the cap is ever reached, so a configuration that genuinely cannot
 converge is recorded rather than silently accepted as done.
 
 Neither fix has been confirmed against the actual hang on hardware - the device is currently held
@@ -240,7 +240,7 @@ the entry into the next `gesture_step` after `useDragView:1`, never appeared, ac
 self-sizing hang and does not touch the orthogonal-scrolling hang** - they are two different
 mechanisms, not one, and the earlier "one mechanism" framing in this section was wrong about that.
 `useDragView:1`'s own section (`HG(AB(200), AB(100), @[IT(FW(1), FH(1))])`) uses no estimated
-dimension at all, so `charon_note:`/`charon_settleMeasurements`/`charon_layout_perform` - the
+dimension at all, so `revenant_note:`/`revenant_settleMeasurements`/`revenant_layout_perform` - the
 entire self-sizing settle chain discussed above - is never even entered for it; whatever stalls
 this path is somewhere else in the port's own code, not there. Band 11-12 also flagged that its own
 measurement is not airtight: the `printf`+`fflush` per checkpoint adds delay each pass, which could
@@ -256,7 +256,7 @@ not a hang, and not the port. Measured on the 4S: a sampler thread that writes w
 `CFRunLoopCopyCurrentMode` and one calling `printf`, and the process was gone about ten seconds
 after launch. A handler on an alternate stack caught SIGSEGV on the main thread in
 `objc_msgSend`, called from the test's own `run_next` (`device/gesture.m`) as the first
-`dispatch_after` step ran. The stand had been built through `@addon/charon/app` without
+`dispatch_after` step ran. The stand had been built through `@addon/revenant/app` without
 `-fobjc-arc`, so `gesture.m`'s static `queue`, an autoreleased array, dangled once the pool
 drained. Such a death leaves no crash report on this stand, which is why three runs read it as a
 hang. Built with ARC, the gesture phase runs to its end: `checks=46 failures=10`, real
@@ -264,7 +264,7 @@ differences, each followed up on its own.
 
 This retracts the reentrancy hypothesis: that adding the section's pan recognizer from inside the
 collection view's first `-layoutSubviews` stalled the run loop. The `dispatch_async` deferral
-written for it and its three `CHARON-DIAG` lines are gone, and the recognizer is set up
+written for it and its three `REVENANT-DIAG` lines are gone, and the recognizer is set up
 synchronously again. Measured on the 4S with the ARC-built stand, one
 band's `libUIKitBackports.dylib` from the same tree swapped in each way: deferred and synchronous
 give the same 36 passing checks and the same 10 failures, detail for detail, and neither process
@@ -307,7 +307,7 @@ do; with content 480, {10,-10,100,500} gets none. The transform plays no part: 0
 0.3 rad, has the bounding frame {202.7,-15.4,222.6,272.7}, and the same frame with no transform is lost too, while a
 smaller turn or scale is shown. The system's layout shows it.
 
-**This is a workaround, not a repair, and it is a crutch on record** (`coordination/crutches.md`, "charon: compositional layout
+**This is a workaround, not a repair, and it is a crutch on record** (`coordination/crutches.md`, "revenant: compositional layout
 answers an element spanning the bounds twice on iOS 6"). It rests on the private object keeping the last attributes it was
 given for an index path (`[attributes copy]` in an array of its own by the element's index; the pages hold only which indexes
 to look at). No document of Apple's names that order; it was measured, not specified. The layout therefore gives an element
@@ -331,7 +331,7 @@ Measured on an iPad 2 (6.1.3) with a plain layout and the release's UIKit alone 
 `.agent-work/runs/cvdata/probe`, `probe-x`): with the true attributes only, the four frames above give two cells; with the cut
 one first, all four, each at its own frame; with the cut one last, four cells at the cut frames, which is the last-wins storage.
 The same holds along x (content 244 in a 480 x 320 view, the four frames transposed: two cells, four at their own frames, four
-at the cut frames), so both branches of `charon_spans` are measured. Not measured: iOS 6.0 and 7 to 10 (no such device; the
+at the cut frames), so both branches of `revenant_spans` are measured. Not measured: iOS 6.0 and 7 to 10 (no such device; the
 iPad 2 and the 4S both run 6.1.3, and the release check `NSFoundationVersionNumber <= 6.1` cannot tell 6.0 or 5.x from it). The
 workaround is done for iOS 6 only; the class has the same selectors and ivars in every armv7 cache to 9.3.6, but whether the
 object loses the element on 7 to 10, and whether it keeps the last attributes there, is open, and a second attributes on a release
@@ -380,7 +380,7 @@ still fails "modified at 250".
 
 ## Where the port differs, measured
 
-The random layouts of the differential test (`CHARON_FUZZ_ROUNDS`) put a description together from the features above and compare the
+The random layouts of the differential test (`REVENANT_FUZZ_ROUNDS`) put a description together from the features above and compare the
 two answers. With one feature at a time, from about one layout in twenty to none differs; with all of them at once about three in ten
 do, nearly all in the situations below, which the fixed layouts do not reach:
 

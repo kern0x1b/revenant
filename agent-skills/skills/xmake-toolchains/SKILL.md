@@ -1,15 +1,15 @@
 ---
 name: xmake-toolchains
-description: Reference for the compiler side of an old-iOS app built with Charon and xmake 3.1.1 — what the apple-ios toolchain is made of (clang from the charon llvm package, ld64 from cctools-port, the SDK package, ldid), how the rules bind it to each target and the include to each package, what every compile and link gets (-target, -miphoneos-version-min, -isysroot, -femulated-tls, the weak-reference runtime flag, the blocks runtime, IPHONEOS_DEPLOYMENT_TARGET), the refusal when the architecture and apple_minimum disagree, what changes when either changes, how a universal armv7+arm64 app is built in slices and merged, why Homebrew llvm must be installed although it is not the compiler, and what not to use (Xcode, --toolchain, set_toolchains, the simulator, --target_minver). Use when choosing or changing architectures or the lowest release, when a configure or build refuses an architecture, or when you need to see exactly how a file is compiled and linked.
+description: Reference for the compiler side of an old-iOS app built with the toolchain and xmake 3.1.1 — what the apple-ios toolchain is made of (clang from the toolchain llvm package, ld64 from cctools-port, the SDK package, ldid), how the rules bind it to each target and the include to each package, what every compile and link gets (-target, -miphoneos-version-min, -isysroot, -femulated-tls, the weak-reference runtime flag, the blocks runtime, IPHONEOS_DEPLOYMENT_TARGET), the refusal when the architecture and apple_minimum disagree, what changes when either changes, how a universal armv7+arm64 app is built in slices and merged, why Homebrew llvm must be installed although it is not the compiler, and what not to use (Xcode, --toolchain, set_toolchains, the simulator, --target_minver). Use when choosing or changing architectures or the lowest release, when a configure or build refuses an architecture, or when you need to see exactly how a file is compiled and linked.
 ---
 
-Derived from the `xmake-toolchains` and `xmake-cross-compilation` skills of xmake-io/xmake-skills at `ef67caa` (Apache-2.0), rewritten and modified for Charon.
+Derived from the `xmake-toolchains` and `xmake-cross-compilation` skills of xmake-io/xmake-skills at `ef67caa` (Apache-2.0), rewritten and modified for the toolchain.
 
 # The apple-ios toolchain
 
-An app for old iOS is cross-compiled on the Mac by Charon's `apple-ios` toolchain. You do not
-choose or define a toolchain: each Charon rule sets `apple-ios` on its target when the target
-loads, and the `@addon/charon/apple-ios` include hands it, as a config, to every package the
+An app for old iOS is cross-compiled on the Mac by Revenant's `apple-ios` toolchain. You do not
+choose or define a toolchain: each toolchain rule sets `apple-ios` on its target when the target
+loads, and the `@addon/revenant/apple-ios` include hands it, as a config, to every package the
 project requires. What you choose is the platform (`iphoneos`), the architecture and
 `apple_minimum`. Read `PROJECT.md` first: its `## Target` names the lowest release, the devices
 and the architectures. Which architecture runs which releases is the skill `project`'s (step 2).
@@ -18,13 +18,13 @@ and the architectures. Which architecture runs which releases is the skill `proj
 
 | Part | Package |
 | --- | --- |
-| compiler | `charon@llvm` 23.1.1: clang built from source, with Charon's patches for emulated thread-locals and atomic library calls |
-| linker | `charon@ld64` 956.6: Apple's ld64 from cctools-port, the linker that still inserts branch islands for armv7 |
-| SDK | `charon@iphoneos-sdk` 16.4, with the startup objects (`crt1.o`, `crt1.3.1.o`, `dylib1.o`, `bundle1.o`), `libgcc_s.1.tbd`, the blocks runtime and arclite added for old releases |
-| signing | `charon@ldid` |
+| compiler | `revenant@llvm` 23.1.1: clang built from source, with Revenant's patches for emulated thread-locals and atomic library calls |
+| linker | `revenant@ld64` 956.6: Apple's ld64 from cctools-port, the linker that still inserts branch islands for armv7 |
+| SDK | `revenant@iphoneos-sdk` 16.4, with the startup objects (`crt1.o`, `crt1.3.1.o`, `dylib1.o`, `bundle1.o`), `libgcc_s.1.tbd`, the blocks runtime and arclite added for old releases |
+| signing | `revenant@ldid` |
 
 No Xcode is involved. **Homebrew's `llvm` must still be installed**: it is not the compiler, but
-building `charon@ld64` looks for `llvm-config` in `$LLVM_PREFIX/bin`, `/opt/homebrew/opt/llvm/bin`
+building `revenant@ld64` looks for `llvm-config` in `$LLVM_PREFIX/bin`, `/opt/homebrew/opt/llvm/bin`
 or `/usr/local/opt/llvm/bin`, and without it stops with `ld64 links libLTO, and cctools' configure
 finds it through llvm-config; install a full LLVM, such as brew install llvm`. The skill `install`
 puts it in place.
@@ -81,7 +81,7 @@ the truth, not the SDK's headers.
 
 Only when `PROJECT.md` lists 64-bit devices; the target line, the configured architecture and the
 plist are the skill `project`'s (step 2). What happens underneath: `xmake deb` builds each other
-architecture in its own folder, `build/.charon/slices/<arch>/`, for the first release it runs when
+architecture in its own folder, `build/.revenant/slices/<arch>/`, for the first release it runs when
 `apple_minimum` is older — the slice build prints `note: the arm64 slice is built for iOS 7.0,
 the first release an arm64 device runs; apple_minimum <r> holds for the armv7 slice` — then
 merges the bundles with `lipo`, and checks and signs the result per architecture.
@@ -96,16 +96,16 @@ architecture, and `lipo -archs` on the executable inside the package prints `arm
 
 ## 5. What not to use
 
-- `--toolchain=`, `set_toolchains(…)`, `--sdk=`, `--cc=`, `--ld=`: the Charon rule sets
+- `--toolchain=`, `set_toolchains(…)`, `--sdk=`, `--cc=`, `--ld=`: the toolchain rule sets
   `apple-ios` on each target from the pinned packages when the target loads; a compiler or SDK
   named by hand is not the one the checks and the lock files assume.
 - `-p iphonesimulator`, `-p macosx` for the app, `--target_minver=`, `--xcode_sdkver=`,
-  `--appledev=`: those belong to xmake's Xcode-based platform. Charon builds for devices only,
+  `--appledev=`: those belong to xmake's Xcode-based platform. The toolchain builds for devices only,
   and the lowest release is `apple_minimum`. Given on the configure line they also reach a
   macOS host-test target (skill `xmake-tests`) and change its target triple and SDK.
 - The Command Line Tools' `clang`, `cc` or Homebrew's `clang` for anything that runs on the device
   (skill `build`, `Bad system call: 12`).
-- `xmake show -l toolchains` to find Charon's: it lists xmake's own toolchains and the project's,
+- `xmake show -l toolchains` to find Revenant's: it lists xmake's own toolchains and the project's,
   not an addon's. Look at a target with `xmake show -t <Name>` instead.
 
 ## Traps
@@ -115,8 +115,8 @@ architecture, and `lipo -archs` on the executable inside the package prints `arm
   refused below the first release it runs.
 - `armv6` for a 3GS or later → armv7. Reason: armv6 runs only up to 4.2.1; every device from the
   3GS on runs armv7.
-- Uninstalling Homebrew's `llvm` because "Charon brings its own clang" → keep it. Reason: whenever
-  `charon@ld64` has to be built (a clean machine, a tag whose linker recipe changed) it needs
+- Uninstalling Homebrew's `llvm` because "Revenant brings its own clang" → keep it. Reason: whenever
+  `revenant@ld64` has to be built (a clean machine, a tag whose linker recipe changed) it needs
   `llvm-config`.
 - Silencing `-Wincompatible-sysroot` or trusting the SDK's availability annotations → rely on the
   import check. Reason: the SDK is iOS 16.4; only the release's own libraries say what exists.

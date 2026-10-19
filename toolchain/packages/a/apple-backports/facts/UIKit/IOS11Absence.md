@@ -8,11 +8,11 @@ release really does not answer the name. This page is that check for the file, r
 
 ## The measurement
 
-    CHARON_ROOT=<worktree> sh packages/a/apple-backports/facts/UIKit/ios11-absence-census.sh
+    REVENANT_ROOT=<worktree> sh packages/a/apple-backports/facts/UIKit/ios11-absence-census.sh
 
 The script beside this page asks every owner-scoped name the file's `absent` rows name, one release at
 a time, through `tools/corpus/objc-inventory.lua` — the tree's own reader, reading each release's own
-dyld shared cache. It needs no SDK and no compiler, only the held caches under `$HOME/.charon/dyld`.
+dyld shared cache. It needs no SDK and no compiler, only the held caches under `$HOME/.revenant/dyld`.
 
 **The control is in every line.** Each rung prints its class and protocol counts before its answers,
 and 11.0 is a rung the slice's names genuinely exist on: `adjustedContentInsetDidChange=PRESENT`,
@@ -116,7 +116,7 @@ It does not settle whether the **port** could carry a name anyway. That is the o
 (only GameKit's `GKFocusButton` and PhotoLibrary's `PLCameraFocusView` carry "Focus" in either cache),
 spring loading needs a drag that leaves the application, the paste configuration is read by a menu
 this release has not got, and the extension-side owners need an extension host. The one row of the
-family whose substrate the port supplies — `UITextDropProposal`, which `CharonTextDropRequest` holds
+family whose substrate the port supplies — `UITextDropProposal`, which `RevenantTextDropRequest` holds
 and `UITextView+TextDragDrop11.m` stores a delegate's answer into — is the one this band wrote; see
 `TextDragAndDrop.md`.
 
@@ -125,7 +125,7 @@ and `UITextView+TextDragDrop11.m` stores a delegate's answer into — is the one
 `UITextDropProposal` moved `absent` → `implemented`, so it is the band and not the audit. The port was
 already typed over the class it did not define:
 
-    CharonTextDragDrop11.h:22   @property (nonatomic, strong) UITextDropProposal *proposal;
+    RevenantTextDragDrop11.h:22   @property (nonatomic, strong) UITextDropProposal *proposal;
     UITextView+TextDragDrop11.m:346   request.proposal = (UITextDropProposal *)objc_msgSend(delegate, …);
 
 `objc.code_map` over UIKit of iOS 11.0 arm64 gives the class its superclass (`UIDropProposal`), four

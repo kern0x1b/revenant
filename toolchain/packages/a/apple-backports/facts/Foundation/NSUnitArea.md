@@ -34,7 +34,7 @@ A unit that ICU has no measure unit for carries none, and is built with
 
 ## Differences from iOS 10
 
-Charon takes the corrected numbers: a measurement asked for in stones is asked
+The toolchain takes the corrected numbers: a measurement asked for in stones is asked
 for in stones, not in the defect Apple itself withdrew.
 
 - `squareFeet`: iOS 10 uses coefficient 0.092903, constant 0. The corrected value is used.

@@ -2,7 +2,7 @@
 
 What `files/CloudKit/CKError.swift` carries, what it was checked against, and where it differs from
 the host. Every number here was produced by the commands named in it, on 2026-10-16, from the
-`v-impl-swift-apps` worktree of charon.
+`v-impl-swift-apps` worktree of the toolchain.
 
 ## What is carried
 
@@ -25,7 +25,7 @@ recipe does not name `files/CloudKit`, so the runtime digest is unchanged and no
   (CKErrorCode, 37 values, 1 to 37). The file's cases are these values, paired by name with the
   swift.tsv rows (37 of 37 pair, none missing).
 - Domain and keys: `CKErrorDomain`, `CKPartialErrorsByItemIDKey` = "CKPartialErrors",
-  `CKErrorRetryAfterKey` = "CKRetryAfter". Charon's backports define the same three strings
+  `CKErrorRetryAfterKey` = "CKRetryAfter". Revenant's backports define the same three strings
   (`packages/a/apple-backports/CloudKit/CKConstants8.m`), and the host reads the same values (below).
 
 ## Measured against the host

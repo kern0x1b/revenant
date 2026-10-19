@@ -8,7 +8,7 @@ declaration, so the object carries one release and nothing else does.
 ## What decided that this is work and not a missing capability
 
 The release's own cache, read with `tools/corpus/objc-inventory.lua` over
-`$HOME/.charon/dyld/16.0/dyld_shared_cache_arm64e`: **none of the three declares an encode of its own.**
+`$HOME/.revenant/dyld/16.0/dyld_shared_cache_arm64e`: **none of the three declares an encode of its own.**
 `MPSImageStatisticsMinAndMax`'s entire instance list is `-clipRectSource`, `-initWithCoder:device:` and
 `-initWithDevice:`; `MPSImageStatisticsMean`'s is the same three. So the walk is the one they **inherit**
 from `MPSUnaryImageKernel`, and `MPSUnaryImageKernel` is a class this port already carries (`image.json`,
@@ -22,18 +22,18 @@ The base does not carry the encode and the three concrete classes each implement
 
 ## The walk, and what it reuses
 
-The read is `CharonMPSImageReadRegion` and the write `CharonMPSImageWriteRegion`, the same pair every
-`MPSImage` kernel in this package uses, with `CharonMPSImageLoad` / `CharonMPSImageStore` at the image's
-own element width. The window is `CharonMPSImageResolvedRegion` — which intersects a clip rectangle with
-the image, as `MPSImageStatistics.h:30-31` requires by name — and `CharonMPSImageRegionIsEmpty` is what
+The read is `RevenantMPSImageReadRegion` and the write `RevenantMPSImageWriteRegion`, the same pair every
+`MPSImage` kernel in this package uses, with `RevenantMPSImageLoad` / `RevenantMPSImageStore` at the image's
+own element width. The window is `RevenantMPSImageResolvedRegion` — which intersects a clip rectangle with
+the image, as `MPSImageStatistics.h:30-31` requires by name — and `RevenantMPSImageRegionIsEmpty` is what
 says a window with no pixels does no work at all.
 
-**One thing this file had to set itself, and it is worth naming.** `CharonMPSImageReadRegion` sets the
+**One thing this file had to set itself, and it is worth naming.** `RevenantMPSImageReadRegion` sets the
 region's element `count` on a **copy** of the layout it is handed (`MPSImageWalk13.m:176-205`), so the
-caller's layout keeps the zero its `memset` leaves — and the guard in `CharonMPSImageLoad` then refuses
+caller's layout keeps the zero its `memset` leaves — and the guard in `RevenantMPSImageLoad` then refuses
 every load. Measured on this host, 2026-10-01: the first run of this differential printed nine
 `MPSImage: the walk asked for element N of a region of 0 element(s) (3x3 pixels, 1 channel(s))` refusals
-and answered zeros. `CharonMPSImageMapUnary` sets the count the same way and says so in its own comment,
+and answered zeros. `RevenantMPSImageMapUnary` sets the count the same way and says so in its own comment,
 and `MPSImageTranspose13.m:52-53` does the same. This file sets it on both layouts, before the read.
 
 ## What the header fixes, and what it does not
@@ -61,7 +61,7 @@ edge. Measured: the refusal case prints exactly that and writes nothing.
 A minimum and a maximum **select** values the source already holds, so they are exact and are compared
 for **equality** — a copy that moved a bit is a copy that moved a bit. A mean and a variance **divide**,
 and dividing cannot be exact in binary, so each sum is taken in `double` and divided **once**, leaving the
-answer within one whole float32 ulp. That is the split `CharonNNReduceReference.h` and `mps-reference.h`
+answer within one whole float32 ulp. That is the split `RevenantNNReduceReference.h` and `mps-reference.h`
 already state for the reduce families, applied here rather than reinvented.
 
 The **variance is the mean of the squared deviations**, `sum((x - mean)^2) / count`, and not the mean of
@@ -71,12 +71,12 @@ subject.
 
 ## The measurement
 
-    $ cd $HOME/Git/projects/ios/charon && sh tests/backports/host/mpsstatistics/run.sh
+    $ cd $HOME/Git/projects/ios/revenant && sh tests/backports/host/mpsstatistics/run.sh
     system: 15 cases, 0 died on the missing encoder
     compared 23 mismatches 0
     PASS: 23 elements compared, 0 mismatches
 
-**What the oracle is, and is not.** `CharonMPSStatisticsReference.h` is the header's own sentences written
+**What the oracle is, and is not.** `RevenantMPSStatisticsReference.h` is the header's own sentences written
 as arithmetic in plain C; it takes the source values and the operation as arguments and **never names the
 port's class**, so a case that agrees is two implementations of one sentence and not one implementation
 compared with itself. No number on these rows is a measurement of Apple's code: this host's AGX family

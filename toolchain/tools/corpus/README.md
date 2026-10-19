@@ -2,30 +2,30 @@
 
 These tools measure which iOS API missing on iOS 6.1.3 the demand corpus (ten self-built open-source
 App Store apps) actually calls, and rank that demand for the backport bands. Every tool is Lua, run
-with `xmake l` from the charon checkout.
+with `xmake l` from the toolchain checkout.
 
 ## Tools and data are found in different places
 
 - **Tools** sit beside this file. A tool finds its neighbours through `import(..., {rootdir = os.scriptdir()})`
   and its shared modules through `modules/` next to `tools/`.
-- **Data** lives under `$CHARON_CORPUS_ROOT/corpus/`, resolved by `modules/workspace.lua` (`corpus()`).
-  `CHARON_CORPUS_ROOT` defaults to `$HOME/Git/projects/ios/coordination`. Every tool refuses to run, naming
+- **Data** lives under `$REVENANT_CORPUS_ROOT/corpus/`, resolved by `modules/workspace.lua` (`corpus()`).
+  `REVENANT_CORPUS_ROOT` defaults to `$HOME/Git/projects/ios/coordination`. Every tool refuses to run, naming
   the path it checked, when that `corpus/` directory is missing. None falls back to an empty default.
-- **Run output and scratch** go to `$HOME/.cache/hades/<task>/` (`workspace.run`/`workspace.fresh`; the task
-  is `HADES_TASK` or the checkout's folder name), never into the checkout. The iPhoneOS 26.2 SDK is
-  `workspace.sdk()` (`CHARON_GEN_SDK` overrides it).
+- **Run output and scratch** go to `$HOME/.revenant/cache/<task>/` (`workspace.run`/`workspace.fresh`; the task
+  is `REVENANT_TASK` or the checkout's folder name), never into the checkout. The iPhoneOS 26.2 SDK is
+  `workspace.sdk()` (`REVENANT_GEN_SDK` overrides it).
 
 Overrides, for a scratch run that must not touch the shared data:
 
 | Variable | Redirects |
 | --- | --- |
-| `CHARON_CORPUS_ROOT` | the whole data directory (point it at a scratch copy with the inputs a step reads) |
-| `CHARON_REGISTRY_TSV` | the registry export (default `$HOME/.cache/hades/<task>/registry-export/carried-registry.tsv`, `xmake l modules/workspace.lua run registry-export`) |
-| `CHARON_CACHES_DIR` | the cache ladder directory (`caches/`) |
-| `CHARON_TREE_DIR` | the source tree `verify.lua` checks definitions against |
-| `CHARON_BUILT_EXPORTS` | the built-exports file `gen-report.lua` reads |
-| `CHARON_WEAK_IMPORTS_OUT` | the output of `weak-imports.lua` (or give it as argument 2) |
-| `CHARON_ROOT` | the checkout the dyld readers load their modules from (`cache-value.lua`, `dump-cache.lua`, `corpus-scan.lua`) |
+| `REVENANT_CORPUS_ROOT` | the whole data directory (point it at a scratch copy with the inputs a step reads) |
+| `REVENANT_REGISTRY_TSV` | the registry export (default `$HOME/.revenant/cache/<task>/registry-export/carried-registry.tsv`, `xmake l modules/workspace.lua run registry-export`) |
+| `REVENANT_CACHES_DIR` | the cache ladder directory (`caches/`) |
+| `REVENANT_TREE_DIR` | the source tree `verify.lua` checks definitions against |
+| `REVENANT_BUILT_EXPORTS` | the built-exports file `gen-report.lua` reads |
+| `REVENANT_WEAK_IMPORTS_OUT` | the output of `weak-imports.lua` (or give it as argument 2) |
+| `REVENANT_ROOT` | the checkout the dyld readers load their modules from (`cache-value.lua`, `dump-cache.lua`, `corpus-scan.lua`) |
 
 ## The batch, in order
 
@@ -43,7 +43,7 @@ before anything regenerates, and the hint ledger is read before the registry bas
 3. Registry export: `xmake l tools/corpus/export-registry.lua <checkout-root> <outfile>`, with
    `<checkout-root>` the `packages/a/apple-backports` directory of the checkout. Write the export to the
    default run-folder path (`$(xmake l modules/workspace.lua run registry-export)/carried-registry.tsv`), or
-   point `CHARON_REGISTRY_TSV` at the file; `regen.lua` and the tools read the same default.
+   point `REVENANT_REGISTRY_TSV` at the file; `regen.lua` and the tools read the same default.
 4. Ranking: `xmake l tools/corpus/regen.lua <batch-label>` saves the previous list, runs `crash-demand.lua`,
    runs `hint-track.lua <batch-label>` (appends decided hints to `hint-ledger.tsv` and
    `absent-reversals.tsv`, reading the saved previous list), then saves the registry export as
@@ -52,7 +52,7 @@ before anything regenerates, and the hint ledger is read before the registry bas
    symbols into `weak-imports-ranked.tsv`; then `xmake l tools/corpus/weak-per-image.lua <dir-of-nm-outputs> [--any]`
    attributes them to the images that import them (`weak-imports-by-image{,-any}.tsv`).
 6. Report: `xmake l tools/corpus/gen-report.lua` (no arguments) writes `band-*.tsv` and `corpus-report.md`.
-   Run it after a full re-ingest; it reads `absent/*.absent.tsv` for the Katabasis cross-check column.
+   Run it after a full re-ingest; it reads `absent/*.absent.tsv` for the recompiler cross-check column.
 7. Canon exports, after each canon build: `xmake l tools/corpus/built-exports.lua <canon-run>` writes the
    list `gen-report.lua` reads for `LAUNCH-BLOCK`, under a first line naming the canon's version. A list
    older than the canon shows that version in the report.
@@ -70,7 +70,7 @@ The generator's surface, which replaces the corpus table for the tools that read
 
 Read-only readers of a dyld shared cache, through `modules/apple/dyld.lua`:
 
-- `CHARON_ROOT=<checkout> xmake l tools/corpus/cache-value.lua <cache> <symbols>` reads the value of
+- `REVENANT_ROOT=<checkout> xmake l tools/corpus/cache-value.lua <cache> <symbols>` reads the value of
   exported data symbols (one symbol per line: name, width, pointer flag, string flag).
 - `xmake lua tools/cache-extract.lua <modules> <cache> <install> <outfile>` writes one image of a cache out
   as a Mach-O file, for a reader that needs the image's own symbol table (32-bit images).
@@ -105,7 +105,7 @@ Not tracked in git: it holds ingest output that changes on every run.
 | `caches/<release>.tsv` | the output of `dump-cache.lua`, redirected (the symbol ladder); `caches/sel/<release>.strings` by `strings -a` over each cache, no tool in this tree (see "Two cache ladders") |
 | `crash-demand-top.tsv`, `crash-demand-ambiguous-owners.tsv`, `crash-demand-dropped.tsv` | `crash-demand.lua` (no arguments) |
 | `selector-demand-7-10.tsv`, `selector-demand-FUIKit.tsv` | `selector-demand.lua extract` (the caches, slow), then `selector-demand.lua report` |
-| `static-candidates-demand.tsv` | `static-candidates.lua <surface-diff --list output>` (argument 2 or `CHARON_STATIC_CANDIDATES_OUT` redirects it) |
+| `static-candidates-demand.tsv` | `static-candidates.lua <surface-diff --list output>` (argument 2 or `REVENANT_STATIC_CANDIDATES_OUT` redirects it) |
 | `hint-ledger.tsv`, `absent-reversals.tsv`, `crash-demand-prev.tsv` | `hint-track.lua`, and `regen.lua` for the saved list |
 | `registry-last.tsv` | `regen.lua` (the registry export, after the hint step has read the old one) |
 | `weak-imports-ranked.tsv`, `weak-imports-by-image{,-any}.tsv` | `weak-imports.lua`, `weak-per-image.lua` |
@@ -118,13 +118,13 @@ Not tracked in git: it holds ingest output that changes on every run.
 | `impl-source-trees/` | `tools/gen.lua impl-index` |
 | `sdk-surface-model.tsv` | `tools/gen.lua surface` (written to `--out`) |
 | `decision-overrides.tsv` | hand-maintained: Coordinator verdicts the registry export does not carry yet |
-| `absent/*.absent.tsv` | merged from Katabasis; read by `gen-report.lua` |
+| `absent/*.absent.tsv` | merged from the recompiler; read by `gen-report.lua` |
 
 ## Universes, tests and callers
 
 - The selector universe that `crash-demand.lua`, `selector-demand.lua` and `static-candidates.lua` read is the
   stock 6.0 armv7 cache, through `aggregate.selector_universe()` (apple.objc's `known_selectors`); the class
-  universe is `aggregate.class_universe()` (apple.objc's `inventory`). Neither reads `~/.charon/dyld` directly.
+  universe is `aggregate.class_universe()` (apple.objc's `inventory`). Neither reads `~/.revenant/dyld` directly.
 - `sdk-<v>-surface.tsv` (the 26.2 table) is read by `tests/backports/host/combine/coverage.sh` and
   `tests/backports/host/matter/run.sh`; `tools/gen surface` writes a different table (`sdk-surface-model.tsv`).
 - `tools/corpus/tests/corpus_test.lua`, which the light guard runs, holds the text-matcher and json_order checks

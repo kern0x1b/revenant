@@ -191,14 +191,14 @@ for, one class and one export table at a time:
 That is the whole of the window: the release carries the class for four releases and exports it for
 none, so a band of 10.0.1 to 10.3.4 that linked the class implementation held two classes of one name
 in every process and the runtime kept the one it registered first. The name therefore goes through
-`charon_alias.h` - what `modules/apple/backports.lua`'s own `check_categories` asks for when it reads
+`revenant_alias.h` - what `modules/apple/backports.lua`'s own `check_categories` asks for when it reads
 this reading, and what `MDLMeshBufferZoneDefault`, `HKCDADocument`, `NSTextList` and `NSTextTab`
 already are. `MPSUnaryImageKernel` is the superclass the alias is declared with, and that one *is*
 exported from 10.0.1 (measured, `apple.dyld` over the armv7s caches of 10.0.1 and 10.3.4), so the
 proxy's chain is the release's own `MPSUnaryImageKernel` on those bands and the port's below 10.0.1.
 
 **What it costs, and why the Laplacian kernels refuse on those four bands.** `attach.c`'s
-`charon_adopt_methods` replaces the proxy's own copy of every member the release's class already has,
+`revenant_adopt_methods` replaces the proxy's own copy of every member the release's class already has,
 and the list above is all five members of this class. So on 10.0.1 to 10.3.4:
 
 - a pyramid a program builds through our `MPSImageLaplacianPyramid` gets the **release's**
@@ -207,7 +207,7 @@ and the list above is all five members of this class. So on 10.0.1 to 10.3.4:
   `kernelWidth` and `kernelHeight` and keeps the weights themselves private - and no header declares
   them, so this port cannot read them, by any public mechanism;
 - `MPSImageLaplacianPyramidSubtract` and `MPSImageLaplacianPyramidAdd` read the weights through
-  `-charon_mps_filter`, which answers NULL there, and they **refuse by name** rather than interpolate
+  `-revenant_mps_filter`, which answers NULL there, and they **refuse by name** rather than interpolate
   with a filter this port never wrote. Their rows and MPSImagePyramid's row say so.
 
 Below 10.0.1 nothing of this happens: the release has no class of the name, the proxy IS the class,
@@ -255,7 +255,7 @@ any other reason is still red. The **system** side of that case is the measureme
 release's own `MPSImageConversion` answers a NULL `conversionInfo` by returning the same four values it
 was given, which is a no-op, and a class whose one job is a conversion that answers a copy is not that
 class. It cannot be a shared **C** function:
-`CharonMPSConvolveRegion` is `static` in that file, and `charon/AGENTS.md` records that a C function
+`RevenantMPSConvolveRegion` is `static` in that file, and `toolchain/AGENTS.md` records that a C function
 called across objects is `Undefined symbols` in the bands where the exporting file is not carried,
 because an object is placed by the release whose API it defines. So one **method** on `MPSUnaryImageKernel`
 is what crosses, and it is what this commit adds.
@@ -267,7 +267,7 @@ answered `c = 1`; the release answers `c = 0`. ReLU's formula does not use `c`, 
 numbers were identical either way** and a tolerance comparison passed. A caller reading `-c` on a ReLU
 would have read 1 where the release reads 0. The property lines are compared as text for exactly this.
 
-**The shared plane is the wrong layout for this port's `MPSImage`.** `CharonMPSCnn.h`'s plane addresses
+**The shared plane is the wrong layout for this port's `MPSImage`.** `RevenantMPSCnn.h`'s plane addresses
 channel `c` at row `channel*height` with a stride of `width` times one element, which is **planar**.
 This port's `MPSImage13.m:50-72` makes `MTLPixelFormatR32Float` / `RG32Float` / `RGBA32Float`, and
 `MPSImageWalk13.m:65` states the consequence:
@@ -279,7 +279,7 @@ So every case that **crosses** channels read half a row per step, the texture as
 zeros. **Every single-channel case was green throughout** — which is why only the channel-crossing cases
 found it, and why it would have been invisible in the sibling `mpscnn` harness where every case is one
 channel. This object therefore walks through the four helpers the image family already shares
-(`CharonMPSImageReadRegion`, `CharonMPSImageLoad`, `CharonMPSImageWriteRegion`).
+(`RevenantMPSImageReadRegion`, `RevenantMPSImageLoad`, `RevenantMPSImageWriteRegion`).
 
 The shared header is **not** changed here: `MPSCNNPooling10.m` and `MPSCNNBatchNormalization12.m` use its
 plane, those bands own those objects, and a defect in a shared header is fixed by the band that owns it.

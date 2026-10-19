@@ -61,14 +61,14 @@ Apple never reaches.
 **The host is not the oracle for the protocol.** Its header declares `AVCaptureSessionControlsDelegate` at
 `AVCaptureSession.h:717` and its runtime has no such protocol object: `NSProtocolFromString` answers nil and
 none of the 2141 protocols in the process carries that name. So the protocol row is answered by the port's
-own declaration - `CharonAVFoundationProtocols.h`, transcribed by `tools/transcribe-protocols.py@52253c0650` - and by the
+own declaration - `RevenantAVFoundationProtocols.h`, transcribed by `tools/transcribe-protocols.py@52253c0650` - and by the
 generated `AVFoundationBackportsProtocols18.m` that emits its metadata into every band.
 
 ## What the releases carry, measured
 
 | release | what was read | answer |
 | --- | --- | --- |
-| 6.1.3 armv7 cache | `tools/corpus/objc-inventory.lua` over `~/.charon/dyld/6.1.3/dyld_shared_cache_armv7` | `AVCaptureSession` answers **none** of the eleven; its own method list is `-addInput:`, `-addOutput:`, `-commitConfiguration`, ... |
+| 6.1.3 armv7 cache | `tools/corpus/objc-inventory.lua` over `~/.revenant/dyld/6.1.3/dyld_shared_cache_armv7` | `AVCaptureSession` answers **none** of the eleven; its own method list is `-addInput:`, `-addOutput:`, `-commitConfiguration`, ... |
 | 6.1.3 armv7 cache | same | no `AVCaptureControl`, no `AVCaptureSessionControlsDelegate` |
 | 18.0 arm64e cache | same | `AVCaptureControl` is there, superclass `NSObject`, and owns `-isEnabled` and `-setEnabled:` among fourteen others; the protocol is there with exactly the four methods |
 | 18.0 arm64e cache | same | **no class carries any of the ten `AVCaptureSession` controls selectors** - not `AVCaptureSession`, not any other class in 221703 class and protocol entries. The class symbol is exported by 18.0 and the controls members are not in that cache's own metadata, which is why the session's members are the port's rows and not "the release's own" |

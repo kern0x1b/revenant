@@ -18,7 +18,7 @@ $ xmake l tools/objc-init-members.lua 16.0 arm64e HMHome HMAction HMZone HMUser 
       HMAccessoryBrowser HMAccessoryOwnershipToken HMNetworkConfigurationProfile HMAccessorySetupManager \
       HMHomeAccessControl HMCharacteristicWriteAction HMHomeManager HMRoom HMServiceGroup HMTimerTrigger \
       HMAccessControl HMActionSet HMCalendarEvent HMPresenceEvent HMDurationEvent
-source $HOME/.charon/dyld/16.0/dyld_shared_cache_arm64e
+source $HOME/.revenant/dyld/16.0/dyld_shared_cache_arm64e
 NSObject                                     super=nil                          -init=yes +init=yes +new=yes
 HMHome                                       super=NSObject                     -init=yes +init=no  +new=no
 HMAction                                     super=NSObject                     -init=yes +init=no  +new=no
@@ -96,7 +96,7 @@ and `HKDeletedObject` is the one that does not. The earlier HealthKit facts, whi
 `-init` of their own, were measured on an older release and do not describe 16.0. The eight are measured at run
 time instead, on the macOS host (`tests/backports/host/init-inherited/host.sh`): each raises
 `NSInvalidArgumentException` with the reason `The -init method is not available on <class>` from `-init` and from
-`+new`, and the port's class answers the same. They are `implemented` with `CHARON_HEALTHKIT_UNCREATABLE_INIT`, and
+`+new`, and the port's class answers the same. They are `implemented` with `REVENANT_HEALTHKIT_UNCREATABLE_INIT`, and
 `facts/HealthKit/HealthKit8Absent.md` section 4 holds the output. `HKDeletedObject` and the `+new` of `HKClinicalRecord` are
 closed here as well: the first inherits NSObject's pair on 16.0, and the second reaches the `-init` the port raises
 through NSObject's `+new`.

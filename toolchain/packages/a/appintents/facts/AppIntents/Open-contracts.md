@@ -64,14 +64,14 @@ repeat the old total.
 | --- | --- |
 | `IntentParameter.<Unit>.==(a:b:)` for 26 unit types and `ValueState.==(lhs:rhs:)` — **27** | the digester prints each type's cases and `hashValue` and no equality member. Three hypotheses were tried on the built module and all three are refuted: not enums only (`IntentPerson.Handle` is a struct), not synthesised only (`IntentParameter.Acceleration` declares its `==` in `Units.swift:21`), not nesting in a generic type (`InputConnectionBehavior` is top-level). The discriminator is not identified |
 | `IntentPerson.Handle`/`.Handle.Value`/`.Handle.Label`/`.Name`/`.Identifier` — 14, of which the 5 `==` are **placed by a typecheck call site** and the 8 `init(from:)`/`encode(to:)` are here | same behaviour, same refutations. The `==` rows were placed by `the equality probe, **now `packages/a/appintents/tests/probe-appintents-equality.swift`**` typechecking against Apple's AppIntents and against this module, both exit 0; the coding members need a call site, and a call site for them needs an *instance* of each type |
-| `AttributedStringFromStringResolver` — 7, and it is not this one | **all three are declared**: `==` and `hash(into:)` come from `Resolver: Hashable, Sendable` (the port's own `Resolver` carries it, `Values.swift:210`) and `resolve(from:context:)` is at `Gated.swift:53`. The 7 rows are the *gated* ones: the whole type is behind `CHARON_APPINTENTS_ATTRIBUTED_STRING`, and the recipe's own probe measures that this runtime has no `AttributedString` |
+| `AttributedStringFromStringResolver` — 7, and it is not this one | **all three are declared**: `==` and `hash(into:)` come from `Resolver: Hashable, Sendable` (the port's own `Resolver` carries it, `Values.swift:210`) and `resolve(from:context:)` is at `Gated.swift:53`. The 7 rows are the *gated* ones: the whole type is behind `REVENANT_APPINTENTS_ATTRIBUTED_STRING`, and the recipe's own probe measures that this runtime has no `AttributedString` |
 
 ## 4. Rows that are another band's — 16 rows
 
 `String.IntentInputOptions.CapitalizationType.==(a:b:)`, `Measurement` ×4, `Calendar` ×4,
 `AttributedString` ×4: the Foundation Swift r2 types, gated in `Sources/AppIntents/Gated.swift` behind
-`CHARON_APPINTENTS_ATTRIBUTED_STRING`, `CHARON_APPINTENTS_MEASUREMENT` and
-`CHARON_APPINTENTS_RECURRENCE_RULE`, each measured by a probe in `xmake.lua:118-133` and not assumed.
+`REVENANT_APPINTENTS_ATTRIBUTED_STRING`, `REVENANT_APPINTENTS_MEASUREMENT` and
+`REVENANT_APPINTENTS_RECURRENCE_RULE`, each measured by a probe in `xmake.lua:118-133` and not assumed.
 The probe is what says `'Measurement' is only available in iOS 10.0 or newer` on this release, so the
 rows are `missing` by the truth and belong to the Foundation port.
 
@@ -133,7 +133,7 @@ find the protocols that *declare* a member of that name in that module's interfa
 row's owner's refinement chain to see whether the declaring protocol is on it. Interfaces read:
 `AppIntents.framework/Modules/AppIntents.swiftmodule/arm64e-apple-macos.swiftinterface` (the macOS 27
 SDK, since the 26.2 one is not on this machine) and this package's own copies of the three kit
-interfaces in `the 26.2 interface copies, **no longer read**: the census reads the machine's own `charon@iphoneos-sdk` 26.2 install`.
+interfaces in `the 26.2 interface copies, **no longer read**: the census reads the machine's own `revenant@iphoneos-sdk` 26.2 install`.
 
 | module | rows that name an inherited member | which protocol declares it | does the port cover it through that protocol |
 | --- | --- | --- | --- |

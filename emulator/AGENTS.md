@@ -1,35 +1,35 @@
 # Contributor guide
 
-Working notes for whoever is changing Shade, human or AI.
+Working notes for whoever is changing the emulator, human or AI.
 
 ## What this is
 
 An emulator that boots a legacy iOS firmware's own userland. It does not emulate
 hardware registers: it emulates an XNU kernel (system calls, Mach, IOKit) and the
 devices the firmware asks about, and lets the firmware's real launchd, daemons and
-frameworks run on top, on a JIT-translated ARM CPU (Dynarmic: hades' `dynarmic` package, an upstream
+frameworks run on top, on a JIT-translated ARM CPU (Dynarmic: revenant's `dynarmic` package, an upstream
 commit with our patches, in `third_party/packages/d/dynarmic`).
 
 ## Build and run
 
-Shade builds with xmake from the top of hades: `xmake f -y`, `xmake build shade`, `xmake test`. Each
-module folder has an `xmake.lua` with its libraries; `shade/xmake.lua` holds the options, the packages
-and the two rules every target uses (`shade.module`: C++20, the warnings, the module's `include/` as its
-public include root, LTO in release; `shade.glsl`: the Vulkan shaders through `shade_glsl_to_spirv`, the host tool in `tools/glsl` on the glslang
+The emulator builds with xmake from the top of revenant: `xmake f -y`, `xmake build emulator`, `xmake test`. Each
+module folder has an `xmake.lua` with its libraries; `emulator/xmake.lua` holds the options, the packages
+and the two rules every target uses (`emulator.module`: C++20, the warnings, the module's `include/` as its
+public include root, LTO in release; `emulator.glsl`: the Vulkan shaders through `emulator_glsl_to_spirv`, the host tool in `tools/glsl` on the glslang
 library, which writes each shader as the C word list the renderer includes; it is a build fence, so the renderer's
 shaders wait for it). The program is
-`build/macosx/arm64/release/shade`, with SwiftShader's `libvk_swiftshader.dylib` (charon's `swiftshader`
+`build/macosx/arm64/release/emulator`, with SwiftShader's `libvk_swiftshader.dylib` (Revenant's `swiftshader`
 package) copied beside it: the Vulkan renderer loads that file by path through the loader, and without a
-usable driver a boot falls back to the reference renderer with one log line. The skill `shade-boot` (hades' `.agents/skills/shade-boot/SKILL.md`)
+usable driver a boot falls back to the reference renderer with one log line. The skill `emulator-boot` (revenant's `.agents/skills/emulator-boot/SKILL.md`)
 builds it, boots a root filesystem and reads the log.
 
-The kernel's libraries share `shade_kernel_api`, a target with no sources that carries the kernel's
+The kernel's libraries share `emulator_kernel_api`, a target with no sources that carries the kernel's
 include root and the modules its headers name, so a kernel library gets the contract without linking
-back to `shade_kernel`. `shade_graphics` writes `boot_placeholder.hpp` (the PNG in `assets/` as a byte
+back to `emulator_kernel`. `emulator_graphics` writes `boot_placeholder.hpp` (the PNG in `assets/` as a byte
 array) when it is configured, and only when the content changed. The guest probe in `tools/guest` is a
-target only when `--shade_guest_rootfs` and `--shade_armv6_ld` are given: it needs the cctools-port
+target only when `--emulator_guest_rootfs` and `--emulator_armv6_ld` are given: it needs the cctools-port
 ARMv6 linker (`tools/bootstrap_armv6_ld.sh`) and a root filesystem to link against;
-`xmake build shade_install_guest_dns_probe` puts it and its launchd job into that root filesystem.
+`xmake build emulator_install_guest_dns_probe` puts it and its launchd job into that root filesystem.
 Persistent IR artifacts are keyed on `DYNARMIC_BUILD_FINGERPRINT`, which the dynarmic package defines
 from its commit and its patches' checksums.
 
@@ -66,11 +66,11 @@ from its commit and its patches' checksums.
   Describe devices from a registry dump of a real one, never from a guess.
 - **A fault ends the process.** A CPU fault - a bad access, a non-executable page -
   ends the guest process; no Mach exception and no signal is raised yet.
-- **Names the emulator writes.** `.shade-device-state` (the device state next to a
-  run), `.shade-cache`, `shade-shared-cache-<uid>` in the temporary directory, and
+- **Names the emulator writes.** `.emulator-device-state` (the device state next to a
+  run), `.emulator-cache`, `emulator-shared-cache-<uid>` in the temporary directory, and
   the label the device's class keys are derived under in `src/crypto/host`; changing
   the last invalidates every saved device state.
-- **Logs are the interface.** Charon reads the emulator's log lines
+- **Logs are the interface.** The toolchain reads the emulator's log lines
   (`[process] spawn-setexec`, `[cpu] fatal`, `[display] frame=`); do not reword them
   without changing its reader.
 
@@ -82,5 +82,5 @@ from its commit and its patches' checksums.
   writing agent's own `Co-Authored-By:` trailer.
 - No personal data in tracked files: no device addresses, host names or absolute
   paths.
-- Version numbers are Shade's own, from `v0.1.0`; `CHANGELOG.md` records every
+- Version numbers are the emulator's own, from `v0.1.0`; `CHANGELOG.md` records every
   release.

@@ -17,7 +17,7 @@ the 50 held rungs:
 
     $ xmake l tools/cache-index/first-rung.lua < <the 35 names, one per line>
     _NSFileSize                                     3.0      <- the control
-    NSCharonW07ControlNameThatNoReleaseCarries      NONE    <- the negative control
+    NSRevenantW07ControlNameThatNoReleaseCarries      NONE    <- the negative control
     _OBJC_CLASS_$_AVAggregateAssetDownloadTask       11.0
     _OBJC_CLASS_$_AVAssetDownloadStorageManagementPolicy 11.0
     _OBJC_CLASS_$_AVAssetDownloadStorageManager      11.0
@@ -61,10 +61,10 @@ owner.
 **Both host ends, class-scoped, in one differential** - the driver's own reader over the armv7
 caches, and the control is in the same dump:
 
-    $ CHARON_ROOT=<worktree> xmake l tools/corpus/objc-inventory.lua \
-        ~/.charon/dyld/6.1.3/dyld_shared_cache_armv7 > objc-6.1.3.tsv
-    $ CHARON_ROOT=<worktree> xmake l tools/corpus/objc-inventory.lua \
-        ~/.charon/dyld/4.3/dyld_shared_cache_armv7 > objc-4.3.tsv
+    $ REVENANT_ROOT=<worktree> xmake l tools/corpus/objc-inventory.lua \
+        ~/.revenant/dyld/6.1.3/dyld_shared_cache_armv7 > objc-6.1.3.tsv
+    $ REVENANT_ROOT=<worktree> xmake l tools/corpus/objc-inventory.lua \
+        ~/.revenant/dyld/4.3/dyld_shared_cache_armv7 > objc-4.3.tsv
 
 | | 6.1.3 (armv7) | 4.3 (armv7) |
 | --- | --- | --- |
@@ -104,8 +104,8 @@ census. A row is never written from a run that printed CONTROL FAILED.
 **A reader-independent cross-check** - the raw strings of the 6.1.3 cache, `strings -a` piped to
 `grep -xE`, which agrees with the reader on the one class the whole `AVAsset` story turns on:
 
-    $ strings -a ~/.charon/dyld/6.1.3/dyld_shared_cache_armv7 | grep -xE \
-        'AVMutableAsset|AVMediaSelection|AVAsset|AVCaptureDevice|AVAssetWriterInput|AVMutableComposition|CharonW07NothingHere|AVPlayerItem|AVCaptureDeviceFormat'
+    $ strings -a ~/.revenant/dyld/6.1.3/dyld_shared_cache_armv7 | grep -xE \
+        'AVMutableAsset|AVMediaSelection|AVAsset|AVCaptureDevice|AVAssetWriterInput|AVMutableComposition|RevenantW07NothingHere|AVPlayerItem|AVCaptureDeviceFormat'
     3 AVAsset              1 AVPlayerItem     1 AVMutableComposition
     1 AVCaptureDeviceFormat  1 AVCaptureDevice  1 AVAssetWriterInput
 
@@ -165,7 +165,7 @@ release's own limit for its scale and crop: `max(1, min(width, height) * 0.0625)
 dimensions, read out of the format description 6.1.3 really has. The maximum is that value for the
 device's active format; 6.1.3 has an active format only inside a running session, and there the
 answer is 1 outside one, which is the same range the port's own zoom setter checks
-(`AVCaptureDevice+VideoZoom7.m`, `charon_check_zoom`).
+(`AVCaptureDevice+VideoZoom7.m`, `revenant_check_zoom`).
 
 The minimum is 1, and this is a measured constant rather than a guess: the port's own zoom cannot go
 below 1 - `setVideoZoomFactor:` raises `NSRangeException` for a smaller factor, as 7.0 does - and
@@ -283,7 +283,7 @@ classes of 6.0, present at both band ends):
   `getter=is...` (`AVCaptureSession.h:985` and `:995`, the properties being declared on
   `AVCaptureConnection`), so those three are the selectors an application compiled against the real
   SDK sends, and the property name itself is not a selector. The refusal of the flag is said once
-  through `../CharonSayOnce.h`, the seam the rest of the port uses for it.
+  through `../RevenantSayOnce.h`, the seam the rest of the port uses for it.
 
 **The rows keep their place in `absent_AVFoundation.json`.** That file has carried `implemented`
 rows for a while - `-setExposureTargetBias:completionHandler:` among them - so these four were
@@ -299,7 +299,7 @@ metadata:
     $ for r in 6.1.3 4.3; do for s in maxAvailableVideoZoomFactor minAvailableVideoZoomFactor \
         cameraIntrinsicMatrixDeliverySupported cameraIntrinsicMatrixDeliveryEnabled \
         setCameraIntrinsicMatrixDeliveryEnabled focusMode videoScaleAndCropFactor; do
-        printf '%s %s %s\n' $r $s "$(strings -a ~/.charon/dyld/$r/dyld_shared_cache_armv7 | grep -cxF $s)"; done; done
+        printf '%s %s %s\n' $r $s "$(strings -a ~/.revenant/dyld/$r/dyld_shared_cache_armv7 | grep -cxF $s)"; done; done
     6.1.3 maxAvailableVideoZoomFactor 0            4.3 maxAvailableVideoZoomFactor 0
     6.1.3 minAvailableVideoZoomFactor 0            4.3 minAvailableVideoZoomFactor 0
     6.1.3 cameraIntrinsicMatrixDeliverySupported 0  4.3 cameraIntrinsicMatrixDeliverySupported 0

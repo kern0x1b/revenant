@@ -7,14 +7,14 @@ and what iOS 6 lacks of it is linked in from the toolchain's `apple-compat`.
 Host requirements: `conan` and the Command Line Tools. Conan installs the rest,
 the SDK included - `iphoneos-sdk` fetches it from [theos/sdks](https://github.com/theos/sdks):
 `cmake` and `ninja` from ConanCenter, `ldid` (ad-hoc signing) and the `ld64`
-linker from Charon. Xcode is not needed and is not installed here, and
+linker from the toolchain. Xcode is not needed and is not installed here, and
 neither is Theos - the Command Line Tools carry the compiler and its runtime,
 and `strip`, `otool`, `nm` and `install_name_tool` are found through them. The
 Python that runs WebKit's generators and the check scripts is the one Conan runs
 in; nothing is taken from `PATH`.
 
 The first build of `ld64` on a machine also needs an LLVM, because cctools'
-configure runs `llvm-config` to find `libLTO`; Charon reads the path
+configure runs `llvm-config` to find `libLTO`; the toolchain reads the path
 from `LLVM_PREFIX` once, so `export LLVM_PREFIX="$(brew --prefix llvm)"` before
 it. Afterwards the package is in the Conan cache and nothing asks again.
 
@@ -43,13 +43,13 @@ apply.
 
 ## 2. The libraries iOS 6 cannot supply
 
-They are declared, not scripted. `charon.toml` names them and `conan.lock` pins
+They are declared, not scripted. `revenant.toml` names them and `conan.lock` pins
 the exact recipe and binary of each; `recipes/` holds the recipe for every one,
 and each names a git URL and a commit rather than vendoring a copy:
 
 | Package | Why the system copy will not do |
 | --- | --- |
-| `libcxx/23.1.1@charon/stable` | iOS 6 ships a 2012 libc++; C++23 needs a current one |
+| `libcxx/23.1.1@revenant/stable` | iOS 6 ships a 2012 libc++; C++23 needs a current one |
 | `icu/78.3@revenant/stable` | the system ICU predates WebKit's minimum, and text segmentation with it has no zero-width joiner |
 | `openssl/4.0.2@revenant/stable` | TLS 1.2/1.3 and Web Crypto |
 | `libpsl/0.23.3+5.ga629c83@revenant/stable` | public-suffix lookups this CFNetwork does not do |
@@ -65,41 +65,41 @@ wrong order does not fail - it quietly builds against a recipe that cannot
 cross-compile for armv7. The namespace makes a bare `icu/78.3` unresolvable
 from these indexes, so a reference that forgets it is an error instead.
 
-`@charon/stable` belongs to what Charon serves and every port shares.
+`@revenant/stable` belongs to what the toolchain serves and every port shares.
 The libraries this port builds for itself are `@revenant/stable`: another port
 on the same machine builds its own OpenSSL with its own choices, and two recipes
 behind one reference overwrite each other's packages in the shared cache.
 
 The target is `[platform] use = "apple-ios"` with armv7 and iOS 6.0 in
-`charon.toml`; the toolchain's platform file says what is true of that target.
+`revenant.toml`; the toolchain's platform file says what is true of that target.
 What is this port's own - C++23, and tuning for the Cortex-A9 in the iPhone 4S
-and iPad 2 - is `[target]`, and Charon writes the whole profile from both. A 3GS is a
+and iPad 2 - is `[target]`, and the toolchain writes the whole profile from both. A 3GS is a
 Cortex-A8, and another port on the same toolchain has no reason to inherit
 either choice.
 
 Register the two indexes once, the toolchain's and this repository's:
 
 ```sh
-charon setup <charon>
+revenant setup <revenant>
 ```
 
 That installs the toolchain's configuration - profiles, settings, hooks and
-Charon itself - and registers both recipe indexes ahead of the general remotes.
-`charon build`, `charon deploy`, `charon test` and the rest are Charon itself; it
+The toolchain itself - and registers both recipe indexes ahead of the general remotes.
+`revenant build`, `revenant deploy`, `revenant test` and the rest are the toolchain itself; it
 lives in the toolchain, not here, so every port gets the same verbs. This
-repository declares itself to it in `charon.toml` and carries nothing else of the
+repository declares itself to it in `revenant.toml` and carries nothing else of the
 build. The phone's address comes from `device.env` at the root of the
 checkout, and from nowhere else.
 
-`conan config install` copies rather than references, so run `charon setup` again
-after the toolchain changes. `charon provenance` says which copy is answering.
+`conan config install` copies rather than references, so run `revenant setup` again
+after the toolchain changes. `revenant provenance` says which copy is answering.
 
-`charon build` writes `build/system/conan/charon-deps.env` through the
-`charon-base` generator, straight from the dependency graph - one
-`CHARON_HOST_<NAME>=path` line per library and `CHARON_BUILD_<NAME>=path` per build
-tool, so `CHARON_BUILD_LD64` is the linker. Nothing names a version, an
+`revenant build` writes `build/system/conan/revenant-deps.env` through the
+`revenant-base` generator, straight from the dependency graph - one
+`REVENANT_HOST_<NAME>=path` line per library and `REVENANT_BUILD_<NAME>=path` per build
+tool, so `REVENANT_BUILD_LD64` is the linker. Nothing names a version, an
 architecture or a folder layout. Change a version in
-`charon.toml` and everything follows. Building builds whatever is missing and
+`revenant.toml` and everything follows. Building builds whatever is missing and
 reuses whatever is not.
 
 `libios6compat.a` holds only this port's own stubs. It used to carry copies of
@@ -109,7 +109,7 @@ engine now links both packages directly.
 
 `libios6compat.a` - the symbols this OS predates, see
 [compatibility.md](compatibility.md) - is this port's own code, built by the
-engine's recipe from the `[[static-library]]` block of `charon.toml` before the
+engine's recipe from the `[[static-library]]` block of `revenant.toml` before the
 engine itself.
 
 `scripts/check-cacert.py` builds nothing: it verifies the trust store the
@@ -119,11 +119,11 @@ standalone application carries against the hash this project reviewed, and with
 ## 3. The engine
 
 ```sh
-charon build
+revenant build
 ```
 
-`charon.toml` declares the whole build, the way a Gradle build file does, and
-Charon writes the recipe from it: that recipe
+`revenant.toml` declares the whole build, the way a Gradle build file does, and
+The toolchain writes the recipe from it: that recipe
 installs the libraries, writes the CMake toolchain and cache - every path taken
 from the dependency graph, the linker from the `ld64` package - and then runs
 the steps in the order that fails cheapest first:
@@ -138,18 +138,18 @@ the steps in the order that fails cheapest first:
 7. the frameworks laid out as the iOS 6 system frameworks they replace, beside
    the C++ runtime and everything from step 6, as the whole device filesystem
    tree in `build/system/stage`
-8. `dyld-imports-check` from Charon, when the phone's shared cache is
+8. `dyld-imports-check` from the toolchain, when the phone's shared cache is
    configured
 
 Everything lands in `build/system`. The `.deb` is a separate step,
 described in [the package](#4-the-package). Why each CMake setting has the
 value it has is in [engine-configuration.md](engine-configuration.md).
 
-A change to any recipe here or in Charon changes its revision, and
+A change to any recipe here or in the toolchain changes its revision, and
 `conan.lock` has to follow in the same commit:
 
 ```sh
-charon build --lockfile= --update
+revenant build --lockfile= --update
 ```
 
 A stale lock does not fail on the machine that made the change - the old
@@ -164,7 +164,7 @@ can sit in a process beside the system one. When a process takes our frameworks
 through `DYLD_FRAMEWORK_PATH` the system engine is never loaded, there is
 nothing to collide with, and UIKit needs the classes under their real names - it
 links `_OBJC_CLASS_$_WebView`, not a prefixed spelling. The recipe therefore
-builds the unprefixed engine by default; `charon build --variant prefixed` builds the prefixed
+builds the unprefixed engine by default; `revenant build --variant prefixed` builds the prefixed
 one for the standalone application.
 
 **The recipe arranges that build as the system frameworks a process expects**,
@@ -184,34 +184,34 @@ here, which turned a call into a store into `__TEXT` and a bus error.
 
 ```sh
 python3 tools/compat-audit.py --compat build/system/compat/libios6compat.a \
-    --engine-build build/system --icu "$CHARON_HOST_ICU"
+    --engine-build build/system --icu "$REVENANT_HOST_ICU"
 ```
 
 **Every import has to exist on the phone.** The SDK the engine compiles against
 is years newer than the system it runs on, so a call can link cleanly against a
 function iOS 6 never had. Nothing fails at load: the import is bound lazily, and
 the process dies the first time the call is made. A plain `ws://` WebSocket did
-exactly that. `dyld-imports-check`, a tool_requires from Charon because
+exactly that. `dyld-imports-check`, a tool_requires from the toolchain because
 the other port needs it too, compares every non-weak import in the staged tree -
 the frameworks, the C++ runtime, the tweak and TLS dylibs and the Settings
 bundle - with what the phone's own shared cache exports, and the build runs it
 once it knows where a copy of that cache is:
 
 ```sh
-charon device fetch /System/Library/Caches/com.apple.dyld/dyld_shared_cache_armv7 build/
-charon build \
+revenant device fetch /System/Library/Caches/com.apple.dyld/dyld_shared_cache_armv7 build/
+revenant build \
     -c user.apple-ios:dyld_shared_cache="$PWD/build/dyld_shared_cache_armv7"
 ```
 
 `build/` is reproducible and gitignored.
 
-**A change to a WebCore header means a full build - `charon build`, which builds
+**A change to a WebCore header means a full build - `revenant build`, which builds
 everything.** A partial build leaves
 WebKit and WebKitLegacy compiled against the old class size, and the result loads
 and then behaves wrongly — empty text in the interface, and a silent death with no
 crash log. This has cost more than one debugging session.
 
-`charon build --variant prefixed`
+`revenant build --variant prefixed`
 builds the same source with the class prefix applied, into
 `build/prefixed`, for a build that has to coexist with the system
 engine in one process. The shipped build is the unprefixed one; see
@@ -220,19 +220,19 @@ engine in one process. The shipped build is the unprefixed one; see
 ## 4. The package
 
 ```sh
-charon package
+revenant package
 ```
 
-`charon build` has already built everything around the engine - the
-`[[device-library]]` blocks of `charon.toml` build `RevSafari.dylib`,
+`revenant build` has already built everything around the engine - the
+`[[device-library]]` blocks of `revenant.toml` build `RevSafari.dylib`,
 `rev-safari-compat.dylib`, `rev-TLS.dylib` and
 `RevPrefs.bundle` - and laid it out with the engine in
-`build/system/stage`. `charon package` runs the recipe's
+`build/system/stage`. `revenant package` runs the recipe's
 `package()`, which copies that tree into `<package folder>/root` and writes
 `<package folder>/deb/space.kern0x1b.rev_<version>_iphoneos-arm.deb` with
-charon-apple's `DebianPackage`: `debian-binary`, `control.tar.gz` and
+revenant-apple's `DebianPackage`: `debian-binary`, `control.tar.gz` and
 `data.tar.lzma`, the same members `dpkg-deb` writes. To release a new version,
-change `version` in `charon.toml` and build. `packaging/` holds only
+change `version` in `revenant.toml` and build. `packaging/` holds only
 `packaging/control`, which carries no version of its own, and
 `packaging/DEBIAN/postinst`.
 
@@ -240,7 +240,7 @@ One `.deb` carries the loader and its MobileSubstrate filter, the compatibility
 and hook dylib, the TLS library, the Settings bundle with its PreferenceLoader
 entry, the C++ runtime and the engine frameworks.
 
-Two settings on the `rev-safari-compat` device library in `charon.toml` are not
+Two settings on the `rev-safari-compat` device library in `revenant.toml` are not
 optional: the compat dylib is
 built without `_FORTIFY_SOURCE` and without libc++ (`-nostdlib++`), because the `__*_chk` symbols
 are linkage this release never had and the engine carries its own C++ runtime — a
@@ -252,14 +252,14 @@ Copy `device.env.example` to `device.env` and fill in the address and password;
 neither is in the repository.
 
 ```sh
-charon deploy    # engine only: back up, push the staged frameworks, restart Safari
+revenant deploy    # engine only: back up, push the staged frameworks, restart Safari
 ```
 
 For everything else, install the package the way any tweak is installed:
 
 ```sh
-charon device copy "<package folder>/deb/space.kern0x1b.rev_<version>_iphoneos-arm.deb" /tmp/rev.deb
-charon device run 120 "dpkg -i /tmp/rev.deb"
+revenant device copy "<package folder>/deb/space.kern0x1b.rev_<version>_iphoneos-arm.deb" /tmp/rev.deb
+revenant device run 120 "dpkg -i /tmp/rev.deb"
 ```
 
 ## The engine without Safari
@@ -277,13 +277,13 @@ this engine, because it drives its view through the *system* WebCore's
 `UIWebView`'s own implementation would.
 
 ```sh
-charon build --variant prefixed
-charon run --wait 20
+revenant build --variant prefixed
+revenant run --wait 20
 ```
 
 The prefixed build ends in `build/prefixed/RevWebViewHost.app`,
 the engine and the C++ runtime bundled inside it and its version taken from
-`charon.toml`; `charon package --variant prefixed` puts it in
+`revenant.toml`; `revenant package --variant prefixed` puts it in
 `<package folder>/RevWebViewHost.app`. The runner installs it, opens it through its
 `revwebviewhost:` scheme and brings back the log. It needs the device
 address in `device.env` at the root of the checkout, as everything that reaches
@@ -410,7 +410,7 @@ outlive any macOS release:
 
 - the compiler: any recent LLVM, Homebrew's `llvm` is enough - `armv7-apple-ios6.0`
   is a supported target;
-- the linker: the `ld64` package from Charon - ld64 956.6 built from
+- the linker: the `ld64` package from the toolchain - ld64 956.6 built from
   `cctools-port`, which supports armv7, reads `.tbd` stubs through
   `apple-libtapi`, and does LTO through the same LLVM;
 - the SDK: the iOS 16.4 SDK from theos/sdks, which has never depended on

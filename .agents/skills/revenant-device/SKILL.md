@@ -1,14 +1,14 @@
 ---
 name: revenant-device
-description: Reach a jailbroken legacy-iOS device from this repo — claim it with `xmake device`, then run a command, copy or fetch a file with `charon device`, tell whether it is actually alive, and read a "Permission denied" or connection-reset failure correctly instead of assuming the credentials are wrong. Use whenever a task needs to touch a real device (not the shade emulator).
+description: Reach a jailbroken legacy-iOS device from this repo — claim it with `xmake device`, then run a command, copy or fetch a file with `revenant device`, tell whether it is actually alive, and read a "Permission denied" or connection-reset failure correctly instead of assuming the credentials are wrong. Use whenever a task needs to touch a real device (not the emulator).
 ---
 
 # Device access
 
-In this repo the transport is the Conan `charon device` verb
-(`charon/config/extensions/charon/device.py`) — never hand-rolled `ssh`/`scp` to a guessed
+In this repo the transport is the Conan `revenant device` verb
+(`toolchain/config/extensions/revenant/device.py`) — never hand-rolled `ssh`/`scp` to a guessed
 host/port. It does **not** check claims and does **not** check which device a tunnel serves, so
-claim through charon's `xmake device` first.
+claim through Revenant's `xmake device` first.
 
 ## Claim, work, release
 
@@ -17,24 +17,24 @@ stop — wait, never override. `xmake device` works in any directory holding `de
 `xmake.lua` needed), so run it from this repo's root:
 
 ```
-export CHARON_DEVICE_HOLDER=<name>
+export REVENANT_DEVICE_HOLDER=<name>
 xmake device list                      # attached devices, their tunnels, current holders
-xmake device --minutes=30 claim        # -d ipad2 or CHARON_DEVICE=ipad2 picks device.ipad2.env
-charon device run <seconds> "<command>"
-charon device copy <local> <remote>
-charon device fetch <remote> <local>
-charon device where                    # host:port the env file names
-charon device log [seconds] [text]     # idevicesyslog, filtered
+xmake device --minutes=30 claim        # -d ipad2 or REVENANT_DEVICE=ipad2 picks device.ipad2.env
+revenant device run <seconds> "<command>"
+revenant device copy <local> <remote>
+revenant device fetch <remote> <local>
+revenant device where                    # host:port the env file names
+revenant device log [seconds] [text]     # idevicesyslog, filtered
 xmake device release
 ```
 
-- `CHARON_DEVICE=ipad2` (or `charon --device ipad2 ...`) makes `charon device`, `charon install`,
-  `charon deploy` and `charon test` read `device.ipad2.env` too; keep it set for the whole session.
+- `REVENANT_DEVICE=ipad2` (or `revenant --device ipad2 ...`) makes `revenant device`, `revenant install`,
+  `revenant deploy` and `revenant test` read `device.ipad2.env` too; keep it set for the whole session.
 - A claim over a USB tunnel needs `DEVICE_UDID` in the env file; `xmake device list` shows it.
 - `device.env` is gitignored, so a new worktree has none: copy the main checkout's, never commit it.
 - `nothing names a phone`: the env file the command picked does not exist in this directory.
 
-Each `charon device` command reads the env file (`DEVICE_UDID` / `DEVICE_HOST` / `DEVICE_PORT` /
+Each `revenant device` command reads the env file (`DEVICE_UDID` / `DEVICE_HOST` / `DEVICE_PORT` /
 `DEVICE_PASSWORD`, else the environment) and, when a `127.0.0.1` port is closed, restarts
 `iproxy <port> 22 -u <DEVICE_UDID>` before running, so a dead tunnel reads as "connection refused"
 rather than a hang. The well-known default password on a freshly jailbroken device is `alpine`;
@@ -44,7 +44,7 @@ nothing more specific than that belongs in a tracked file, a commit, or this ski
 
 It means the command reached the wrong device. On a host running a USB tunnel (`iproxy`), a port
 number by itself reaches whichever device that tunnel currently serves. `xmake device run` checks
-this and raises `port %s tunnels to %s, not to %s`; `charon device` has no such check (it only
+this and raises `port %s tunnels to %s, not to %s`; `revenant device` has no such check (it only
 restarts a tunnel that is down), so a live tunnel to the other phone fails at the credential stage
 and reads exactly like a wrong password.
 
@@ -57,7 +57,7 @@ and reads exactly like a wrong password.
 
 - Liveness: `launchctl list | grep com.apple.SpringBoard` or `killall -0 <process>`. The device
   has no `ps`, `head`, `tail`, `wc`, `uptime`, `nohup` or `timeout`; trim output on the host
-  (`charon device run 12 "..." | tail`).
+  (`revenant device run 12 "..." | tail`).
 - A screenshot (`/usr/bin/shot`, always writes to `/tmp/screenshot.png` regardless of any path
   argument) confirms whether the UI is actually up.
 - `kex_exchange_identification: read: Connection reset by peer` while the tunnel is still

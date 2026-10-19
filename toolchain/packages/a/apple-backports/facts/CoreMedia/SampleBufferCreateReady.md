@@ -73,7 +73,7 @@ The block's lifetime is the buffer's if the holder is attached to the buffer: th
 released with the buffer, whatever path the buffer takes. `CMSetAttachment` is public at `ios(4.0)`, so
 nothing private is involved, and the trampoline only calls the block and never frees.
 
-**Measured, what the attachment is visible to**, with `CMSetAttachment(sbuf, CFSTR("CharonMakeDataReadyHolder"), value,
+**Measured, what the attachment is visible to**, with `CMSetAttachment(sbuf, CFSTR("RevenantMakeDataReadyHolder"), value,
 kCMAttachmentMode_ShouldNotPropagate)` on a sample buffer the release created:
 
 | query | answer |
@@ -88,11 +88,11 @@ kCMAttachmentMode_ShouldNotPropagate)` on a sample buffer the release created:
 So the key is reachable only by a caller that asks for `ShouldNotPropagate` attachments - which is
 exactly the "my own private attachments" query - and by `CMGetAttachment` with that one string. It is
 invisible to `CMSampleBufferGetSampleAttachmentsArray`, which is the call an application iterating a
-sample buffer's attachments actually makes. A key beginning with `Charon` cannot collide with an Apple
+sample buffer's attachments actually makes. A key beginning with `revenant` cannot collide with an Apple
 one.
 
 **The CFType holder works, and it settles one more thing.** With the holder as a `CFType` rather than an
-Objective-C object - registered under the private name `CharonMakeDataReadyHolder`, with a copy
+Objective-C object - registered under the private name `RevenantMakeDataReadyHolder`, with a copy
 function that is the identity, a release that frees the block and the holder, and the pointer's own
 address as its hash - the port's creators build and run: `create 0`, the buffer not ready, and the block
 run exactly once. **The bridged Objective-C refcon was what the release would not accept**; a CFType

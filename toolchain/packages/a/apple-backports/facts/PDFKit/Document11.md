@@ -37,11 +37,11 @@ the host's `PDFDocument` has no `documentAttributes` and no `documentAttribute:`
 ## What the crash was, and what the ownership change is
 
 **The crash was missing bodies.** Repeated rewrites of PDFDocument11.m dropped the definitions of
--charon_readAttributes, -documentAttribute:, -pageAtIndex: and -pageCount while CharonPDFKit.h kept
+-revenant_readAttributes, -documentAttribute:, -pageAtIndex: and -pageCount while RevenantPDFKit.h kept
 declaring them, and `-respondsToSelector:` answers YES for a declared method with no body — which is how
 a method that does not exist reached a differential printing "the port has it=1". The crash was always
 
-    -[PDFDocument charon_readAttributes]: unrecognized selector sent to instance …
+    -[PDFDocument revenant_readAttributes]: unrecognized selector sent to instance …
 
 and the compiler's `-Wincomplete-implementation` was naming them while I read CF ownership.
 
@@ -73,7 +73,7 @@ support. Both controls now bite:
 
     control A, the true inverse (the page retain/release AND pageAtIndex's release re-added)  exit=1
     control B, pageCount planted to answer one more than the release says
-      DIFFER  charon-fixture-3.pdf.pageCount  host='3' port='4'
+      DIFFER  revenant-fixture-3.pdf.pageCount  host='3' port='4'
       COMPARED 10 MISMATCHES 3  (not compared: 15)                                             exit=1
 
 ## What -init answers, measured on this host
@@ -89,7 +89,7 @@ initWithURL:, or initWithData:" — do not agree with each other, and the host s
 
 So `-init` is a third **designated** initializer that makes an empty document, while nil data and a
 nil URL give nil. All three call `[super init]` and none calls another, which is the shape
-`-Wobjc-designated-initializers` asks for; the private `-charon_setUpWithData:` is an ordinary method
+`-Wobjc-designated-initializers` asks for; the private `-revenant_setUpWithData:` is an ordinary method
 for the same reason.
 
 ## The fixtures carry text now, and one comparison is owed
@@ -221,7 +221,7 @@ will hit the same layout-heuristic wall that put `-string` in `inert` with a mea
 ## PDFView windowless, measured - and the plan's cases corrected by it
 
 `tools/host-view-windowless.m` asks the host's PDFView with NO WINDOW and never shown, which is the
-port's position too.  Measured on box-all, charon-fixture-3 and box-rotated, identical on all three:
+port's position too.  Measured on box-all, revenant-fixture-3 and box-rotated, identical on all three:
 
     window                 (nil)          document      (nil) before a document, an-object after, (nil) again
     currentPage            an-object as soon as a document is set - no window, no page shown
@@ -344,7 +344,7 @@ find one, and a census must not count one:
                                                           would describe a member that class has
                                                           never had.
 
-The port does not implement any of them, and `CharonPDFKit.h:46-49` says so where a reader looks for
+The port does not implement any of them, and `RevenantPDFKit.h:46-49` says so where a reader looks for
 what the port offers.  `tools/declared-check.py` is the mechanical form of that sentence: it reads every
 PDFKit registry row against the 26.2 headers of the member's OWN class and names any row that does not
 name a declared member, so a row like these cannot be added again by accident.
@@ -390,25 +390,25 @@ middle row is the one a rule written from the first alone gets wrong: drawn bott
 top-first.  `cgfixture-lines.pdf`, three runs at y = 360, 340, 320, is the three-run case, and it found
 the defect on its first run.
 
-THE COORDINATES MUST BE DERIVED.  A probe using a fixed rect at y=360 answers "page 1" on charon-fixture-1
-and EMPTY on charon-fixture-3 - the same text, the same page index, because the two fixtures draw at y=360
+THE COORDINATES MUST BE DERIVED.  A probe using a fixed rect at y=360 answers "page 1" on revenant-fixture-1
+and EMPTY on revenant-fixture-3 - the same text, the same page index, because the two fixtures draw at y=360
 and y=752.  A selection is POSITIONAL, and a typed-in coordinate is a fixture that passes for the wrong
 reason.  The committed probe reads the text matrix out of the page's own content stream and asks at the
 text:
 
-    $ .agent-work/fin/sel-probe3 .agent-work/runs/pdfkit-document/fixtures/charon-fixture-{1,3,0}.pdf
+    $ .agent-work/fin/sel-probe3 .agent-work/runs/pdfkit-document/fixtures/revenant-fixture-{1,3,0}.pdf
 
-    charon-fixture-1.pdf  text at (20,360)  rect=15,355,100,25
+    revenant-fixture-1.pdf  text at (20,360)  rect=15,355,100,25
       rect -> page 1    word -> page  ranges=1  bounds=20.0000,357.2400,26.6952,12.0000    line -> page 1  byLine=1
-    charon-fixture-3.pdf  text at (20,752)  rect=15,747,100,25
+    revenant-fixture-3.pdf  text at (20,752)  rect=15,747,100,25
       rect -> page 1    word -> page  ranges=1  bounds=20.0000,749.2400,26.6952,12.0000    line -> page 1  byLine=1
-    charon-fixture-0.pdf  text at (0,0)     rect=-5,-5,100,25
+    revenant-fixture-0.pdf  text at (0,0)     rect=-5,-5,100,25
       rect -> (empty)   word -> (empty) ranges=0  bounds=inf,inf,0.0000,0.0000              line -> (empty) byLine=0
 
 FOUR ANSWERS, and each one is a boundary the port will have to meet:
 
 1. AN ABSENT SELECTION IS AN EMPTY ONE, not nil.  A selection made at a point with no text under it
-   answers an OBJECT whose -string is "" and whose range count is 0 - measured on charon-fixture-0, which
+   answers an OBJECT whose -string is "" and whose range count is 0 - measured on revenant-fixture-0, which
    draws no text at all.  "No text here" and "a selection with no text" are the same answer.
 
 2. AN EMPTY SELECTION'S -boundsForPage: IS NOT A RECT.  It answers {inf, inf, 0, 0} - an INFINITE origin

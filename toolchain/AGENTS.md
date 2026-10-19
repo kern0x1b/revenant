@@ -11,10 +11,10 @@ If the effort has to be rebuilt from nothing - every session gone - read
 travel through, the known traps, and the restart procedure. This file stays the
 map of the code.
 
-Charon builds legacy Apple platforms for [xmake](https://xmake.io) and Conan:
+The toolchain builds legacy Apple platforms for [xmake](https://xmake.io) and Conan:
 armv6 (iPhone OS 2.0-4.2.1), armv7 (from iPhone OS 3.0), armv7s (from iOS 6) and
 arm64 (from iOS 7), driven by clang from the `llvm` package with no Xcode. A
-port is an ordinary declaration in each module; Charon adds only what the build
+port is an ordinary declaration in each module; the toolchain adds only what the build
 system does not already know about these platforms:
 
 - an **addon / driver** - the `apple-ios` toolchain, the `tweak`/`daemon`/`app`
@@ -23,7 +23,7 @@ system does not already know about these platforms:
   against the device's own dyld shared cache), strip and `ldid` signing,
   reproducible Debian packages, and the device transport;
 - a **package repository** - the SDK, ld64 (cctools-port), ldid, libplist, the
-  C++ runtime, and the libraries ports share, each under `charon@name`.
+  C++ runtime, and the libraries ports share, each under `revenant@name`.
 
 The driver is meant to be as usable for other platforms (old macOS, current iOS,
 Android) as it is here; iOS 6 is the first platform it targets, not its limit.
@@ -34,10 +34,10 @@ Android) as it is here; iOS 6 is the first platform it targets, not its limit.
   and the values each reads, the Conan driver, the package layout, packaging and
   the linker. Start here for anything task-specific.
 - **`DESIGN.md`** - how the pieces fit and *why*, including the Gradle/Maven ->
-  Charon mapping for anyone arriving from the JVM world.
-- **Skills** (hades' `.agents/skills/`): `backports-gate` - gating apple-backports and reading the
+  The toolchain mapping for anyone arriving from the JVM world.
+- **Skills** (revenant's `.agents/skills/`): `backports-gate` - gating apple-backports and reading the
   verdict; `corpus-regen` - the registry export and demand data after a push; `emulate-port` -
-  `xmake emulate`. The xmake reference skills are the pinned `xmake-skills` plugin (hades' `.claude/settings.json`).
+  `xmake emulate`. The xmake reference skills are the pinned `xmake-skills` plugin (revenant's `.claude/settings.json`).
 - **Workspace-wide procedures** are skills in `$HOME/Git/projects/ios/.agents/skills/`:
   `device-session` (claim, run, install, launch, tap on a real device), `canon-install`,
   `patch-merge`, `worktree-sweep`, `session-handoff`, `band-launch`, `band-supervise`. A session
@@ -47,8 +47,8 @@ Android) as it is here; iOS 6 is the first platform it targets, not its limit.
 
 | Path | Holds |
 | --- | --- |
-| `config/` | Conan configuration: settings, hooks, and the `charon` driver + platform facts under `config/extensions/`. |
-| `recipes/` | Conan recipes - the SDK, ld64, ldid, libplist, libcxx, the imports check, and the `charon-base` / `charon-apple` bases every port extends. |
+| `config/` | Conan configuration: settings, hooks, and the `revenant` driver + platform facts under `config/extensions/`. |
+| `recipes/` | Conan recipes - the SDK, ld64, ldid, libplist, libcxx, the imports check, and the `revenant-base` / `revenant-apple` bases every port extends. |
 | `modules/` | build modules / ports. `modules/gyb/` is the only gyb: Swift's `gyb.py` and the Python its templates run, in Lua (README, "No Python runs in that build"); nothing here calls Python to expand a template. |
 | `packages/` | package definitions. |
 | `plugins/` | build plugins. |
@@ -96,7 +96,7 @@ Each entry: wrong pattern -> right pattern -> the mechanical reason.
 
 - **Device-side binaries and the toolchain.** Wrong: building a device-side binary - including a
   throwaway probe - with the host's own `cc`/`clang`. Right: build it through a `target()` using
-  `@addon/charon/daemon` (or `app`/`tweak`) against this driver's `apple-ios` toolchain, same as
+  `@addon/revenant/daemon` (or `app`/`tweak`) against this driver's `apple-ios` toolchain, same as
   any port. Reason: a Mach-O built for the wrong target crashes with `Bad system call: 12`
   (SIGSYS) before its own code runs on the device's old kernel - indistinguishable from a
   codesigning/sandbox rejection by symptom alone.
@@ -127,7 +127,7 @@ Each entry: wrong pattern -> right pattern -> the mechanical reason.
   keep comments in files on that pipeline ASCII-only. Reason: the tool renames selectors by byte
   offset from a clang AST dump, so one multi-byte UTF-8 character shifts every later offset and
   corrupts an unrelated selector further down the file (e.g. `component:fromDate:` becomes
-  `ccharonHost_omponent:fromDate:`).
+  `crevenantHost_omponent:fromDate:`).
 
 - **Mixing `NSInteger` and `NSUInteger`.** Wrong: subtracting an `NSUInteger` (e.g.
   `calendar.firstWeekday`) from a smaller `NSInteger` without a cast. Right: cast the `NSUInteger`
@@ -135,15 +135,15 @@ Each entry: wrong pattern -> right pattern -> the mechanical reason.
   promote the signed side to unsigned, so the result wraps to a huge positive number instead of
   going negative - wrong answer, no crash, no warning.
 
-- **`charon.libraries` and `verify_placed`.** Wrong: a `daemon`/`app`/`tweak` target
+- **`revenant.libraries` and `verify_placed`.** Wrong: a `daemon`/`app`/`tweak` target
   `add_requires`s a backport package and `add_packages`s it, but link still fails with "these
   imports are not exported by the device's iOS ... neither the device nor this build provides".
-  Right: add `set_values("charon.libraries", "<the alias add_requires gave the package>")` to the
+  Right: add `set_values("revenant.libraries", "<the alias add_requires gave the package>")` to the
   target. Reason: `modules/apple/platform.lua`'s `verify_placed` takes the plain, weak-linked path
-  whenever `target:values("charon.libraries")` is empty and the target shares no runtime, and that
+  whenever `target:values("revenant.libraries")` is empty and the target shares no runtime, and that
   path does not recognize the backport dylib as build-provided; `set_values` switches it to the
-  branch that copies the library in and retargets the load command. Related trap: `@addon/charon/*`
-  resolves to a version-pinned copy of this repository (`~/.xmake/addons/charon/<version>/`), not
+  branch that copies the library in and retargets the load command. Related trap: `@addon/revenant/*`
+  resolves to a version-pinned copy of this repository (`~/.xmake/addons/revenant/<version>/`), not
   the working tree `add_repositories` points at, so an uncommitted edit under `modules/` never
   reaches a build that includes the addon by version - only a commit does.
 
@@ -151,7 +151,7 @@ Each entry: wrong pattern -> right pattern -> the mechanical reason.
   or replacing a release method there with no category carrying its selector. Right: decide on the
   release alone, and keep a same-selector category beside the replacement, as apple-backports'
   `Foundation/NSBundle+ReceiptURL.m` does. Reason: `+load` runs before `attach.c`'s constructor
-  attaches `__DATA,__charon_catlist`, and the registry check counts only selectors categories add.
+  attaches `__DATA,__revenant_catlist`, and the registry check counts only selectors categories add.
 
 - **`git format-patch --no-walk` takes SHAs, not a range.** Wrong:
   `git format-patch --no-walk 716270c33..HEAD`, which makes git treat the whole `A..B` string as one
@@ -171,15 +171,15 @@ Each entry: wrong pattern -> right pattern -> the mechanical reason.
   cause, and the noise hides the real edit from every reader and from the review.
 
 - **A seam the port owns needs a registry row only when it is an Apple API.** Wrong: adding a helper
-  the test reads through a library class - `-[UIPasteboard charonRecordOptions:]` - and calling it
+  the test reads through a library class - `-[UIPasteboard revenantRecordOptions:]` - and calling it
   "not API, it carries no release", which is what a reviewer's verdict said. Right: an Objective-C
   seam selector on an Apple class keeps its row, as `registry/MetalPerformanceShadersGraph/graph.json`
-  does for its 13 `-[MPSGraph charon_mps_...]` rows, each `implemented`. A `charon_` C function that a
+  does for its 13 `-[MPSGraph revenant_mps_...]` rows, each `implemented`. A `revenant_` C function that a
   library exports for another library of the package is different: it is not Apple API, so it has no
-  row. It is declared with `CHARON_SEAM` before its return type, on a line of its own, in a header
+  row. It is declared with `REVENANT_SEAM` before its return type, on a line of its own, in a header
   and in its definition, and `seam_symbols()` (modules/apple/backports.lua) reads that declaration so
   `link()` keeps the symbol exported. Reason: the registry is what the SDK declares; the gate counts a
-  `charon_` name as internal, so such a row could only be unsatisfiable. A registered `charon_` C
+  `revenant_` name as internal, so such a row could only be unsatisfiable. A registered `revenant_` C
   function is the failure the 6.1.3 gate reported as "listed as implemented, but nothing of that name
   is built", and the registry-check exception the other shape would need is the weakening this avoids.
 
@@ -225,7 +225,7 @@ Each entry: wrong pattern -> right pattern -> the mechanical reason.
   compile output all exists, which is what makes it expensive to diagnose. A gate, `release-split`
   and the canon build run as the only coroutine of their own and are unaffected.
 
-- **A working copy installed as the addon.** Wrong: a scratch project with `add_addons("charon")`
+- **A working copy installed as the addon.** Wrong: a scratch project with `add_addons("revenant")`
   whose `add_repositories` points at a worktree or a clone, run against the shared `~/.xmake`.
   Right: check a package or a module through `coordination/build-gate.lua`'s checkout argument, or
   inside a test that sets its own `XMAKE_GLOBALDIR`, as `tests/addon/store_test.lua` does. Reason: on xmake 3.1.1

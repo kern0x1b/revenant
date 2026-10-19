@@ -12,21 +12,21 @@ cp device.env.example device.env
 # set DEVICE_HOST, DEVICE_PORT, DEVICE_PASSWORD in device.env (gitignored)
 ```
 
-Charon reads it: `charon device run <timeout> "<cmd>"`,
-`charon device copy <local> <remote>` and `charon device fetch <remote> <local>`.
+The toolchain reads it: `revenant device run <timeout> "<cmd>"`,
+`revenant device copy <local> <remote>` and `revenant device fetch <remote> <local>`.
 Scripts import it instead of building SSH option strings of their own.
-Claim the device before any of this; `charon device` does not check claims — see
+Claim the device before any of this; `revenant device` does not check claims — see
 `.agents/skills/device-ssh-access`.
 
 ## Push everything
 
-`charon build` stages the whole substitution; one command packs and installs it:
+`revenant build` stages the whole substitution; one command packs and installs it:
 
 ```sh
-charon install
+revenant install
 ```
 
-It runs `charon package` (which copies the .deb into `build/<variant>/` and
+It runs `revenant package` (which copies the .deb into `build/<variant>/` and
 prints `package <path>`), copies each .deb to `/tmp` on the phone, runs
 `dpkg -i <deb> && rm -f <deb>`, refuses a .deb whose `/Applications/<App>.app`
 would replace an installed app with another bundle id, and runs
@@ -37,7 +37,7 @@ needed.
 For the engine alone, without rebuilding the package:
 
 ```sh
-charon deploy
+revenant deploy
 ```
 
 It backs up each framework binary to `/usr/lib/rev-fw.bak/<Framework>`, copies
@@ -60,16 +60,16 @@ The package puts each file where it belongs:
 
 - **Never overwrite the loader with the compat dylib or vice versa** — they are
   different files; swapping them drops Safari to the system engine.
-- **Keep `/usr/lib/rev-fw.bak/`**: only `charon deploy` makes it, and it holds the
-  engine binaries it replaced. `charon install` keeps no backup; the way back
+- **Keep `/usr/lib/rev-fw.bak/`**: only `revenant deploy` makes it, and it holds the
+  engine binaries it replaced. `revenant install` keeps no backup; the way back
   there is reinstalling an earlier .deb — see `.claude/skills/debug`.
 - **Iterating on the Settings pane needs no respring:** redeploy the bundle, then
-  `charon device run 15 "killall Preferences"` and reopen it. A respring re-locks the
+  `revenant device run 15 "killall Preferences"` and reopen it. A respring re-locks the
   device.
 
 ## After deploying
 
-Respring with `charon device run 15 "killall SpringBoard"`, wait for it to come back
+Respring with `revenant device run 15 "killall SpringBoard"`, wait for it to come back
 (`launchctl list | grep com.apple.SpringBoard`), then verify — see
 `.claude/skills/test`.
 

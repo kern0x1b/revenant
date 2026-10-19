@@ -71,7 +71,7 @@ so the view is missing on every release the port carries, not only on 6.1.3.
 `ARDirectionalLightEstimate` is `absent` and its row had to be re-grounded to say why, because the
 first version leaned on the parent as a substrate and the parent is not one. What the port
 actually does: `ARLightEstimate` (`ARFrame.m:302`) holds two scalars, the frame builds it from the
-tracker's two numbers (`ARFrame.m:366`), and `CharonARTracker.m:642-643` fills those in as the
+tracker's two numbers (`ARFrame.m:366`), and `RevenantARTracker.m:642-643` fills those in as the
 fixed pair **1000** and **6500** in `-init` — they are set once and never measured from a frame.
 There is no ambient estimator in the port, and no direction anywhere: `primaryLightDirection` and
 `directionalLightEstimate` are in no source file of this package, and `-primaryLightDirection` is in
@@ -124,7 +124,7 @@ call raises, which is the honest thing for an application that asked.
 
 ## The tracker
 
-`CharonARTracker.m` is a visual-inertial tracker, and it is this tree's own work. Once per camera
+`RevenantARTracker.m` is a visual-inertial tracker, and it is this tree's own work. Once per camera
 frame:
 
 1. **Features.** A Shi-Tomasi corner score over an 8x8 grid, the best of each cell kept, a third
@@ -267,7 +267,7 @@ wrong, and the correction is the measurement below.**
 `NS_UNAVAILABLE` on a declaration says the SDK does not want a caller to use it. It does **not** say
 the method is absent from the class, and for ARKit the two come apart. Measured over ARKit of the
 arm64e shared cache of iOS 16.0 with `modules/apple/objc.lua`'s own inventory
-(`CHARON_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua ~/.charon/dyld/16.0/dyld_shared_cache_arm64e`,
+(`REVENANT_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua ~/.revenant/dyld/16.0/dyld_shared_cache_arm64e`,
 143137 classes read), each class's **own** method list answers:
 
 | | rows | what Apple's own metadata says | status |
@@ -293,7 +293,7 @@ and Apple's runtime metadata has `-init` in the class's own list all the same. B
 the mark is the SDK telling a caller not to build the abstract base directly, and the method is there
 underneath, which is exactly what the six configuration subclasses chain to - their own blocks
 re-declare `- (instancetype)init;` with no mark at `ARConfiguration.h:114`. So `ARConfiguration.m`
-now defines `-init`, and `initCharonCommon` - the private seam the subclasses already chained to -
+now defines `-init`, and `initRevenantCommon` - the private seam the subclasses already chained to -
 goes through it.
 
 **The controls, without which the read means nothing.** 28851 of the cache's classes carry `-init` in
@@ -313,7 +313,7 @@ of the 6.1.3 armv7 cache begin `AR`, as this file's `ARDepthData` row records - 
 answer is the port's own metadata against Apple's, and Apple's answer is now read off Apple's own
 image rather than off a header.
 
-## The skeleton joint names, read out of a held cache with charon's own reader
+## The skeleton joint names, read out of a held cache with Revenant's own reader
 
 `ARSkeletonDefinition`'s table is **data inside `ARKitCore`**, not symbols and not in any header, so
 the ObjC inventory cannot reach it. Read here with `modules/apple/dyld.lua`'s `open_cache` through a
@@ -321,8 +321,8 @@ new reader, `tools/corpus/cfstring-run.lua` - one 32-byte record at a time, boun
 process, no `ipsw`:
 
 ```
-CHARON_ROOT=$PWD xmake l tools/corpus/cfstring-run.lua \
-    ~/.charon/dyld/16.0/dyld_shared_cache_arm64e 1e0be3550 20
+REVENANT_ROOT=$PWD xmake l tools/corpus/cfstring-run.lua \
+    ~/.revenant/dyld/16.0/dyld_shared_cache_arm64e 1e0be3550 20
 ```
 
 ### The eight exported constants, and their values
@@ -406,8 +406,8 @@ unrelated place: the class-method column of `NSObject` begins `-CA_addValue:mult
 instance list and own class list separately, over the whole cache:
 
 ```
-$ CHARON_ROOT=$PWD xmake l tools/corpus/class-selector-census.lua \
-      ~/.charon/dyld/16.0/dyld_shared_cache_arm64e -new | tail -1
+$ REVENANT_ROOT=$PWD xmake l tools/corpus/class-selector-census.lua \
+      ~/.revenant/dyld/16.0/dyld_shared_cache_arm64e -new | tail -1
 #own instance 3  class 523  both 0  of 143137 classes
 ```
 

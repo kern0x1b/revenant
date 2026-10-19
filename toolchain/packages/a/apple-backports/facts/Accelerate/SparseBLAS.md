@@ -51,12 +51,12 @@ Three things follow, and the last one is the load-bearing one:
 
 ### The 58 `_complex` variants: measured, and NOT yet carried
 
-The iOS 26.2 SDK this port has, at `$HOME/Git/projects/ios/charon/.agent-work/sdk-26.2/iPhoneOS26.2.sdk`,
+The iOS 26.2 SDK this port has, at `$HOME/Git/projects/ios/revenant/.agent-work/sdk-26.2/iPhoneOS26.2.sdk`,
 declares all fifty-eight in its own `Sparse/BLAS.h`, and `Sparse/Types.h` adds the two matrix types
 `sparse_matrix_float_complex` and `sparse_matrix_double_complex`. The declarations are the sixty-nine
 beside them with `_Complex` substituted, and a transcription of them, the two matrix types completed with
 the same body the real ones have, and an implementation of all fifty-eight are written and held in this
-worktree's `.agent-work/wip/sparsecomplex/` — `SparseComplex18.m` (1 700 lines), `CharonSparseComplex.h`
+worktree's `.agent-work/wip/sparsecomplex/` — `SparseComplex18.m` (1 700 lines), `RevenantSparseComplex.h`
 (the fifty-eight declarations) and `host/differential.m`, the host differential.
 
 **They are not in this delivery, because their host differential is red**: 158 checks pass and 41 fail.
@@ -149,7 +149,7 @@ in both halves is an axpy and the inner product in both is a loop.
 ## What the arithmetic is made of
 
 A matrix is a list of rows, each a run of `(column, value)` pairs kept sorted by column
-(`Accelerate/CharonSparseBLAS.h`). That is the whole storage, and every operation is either a walk of the
+(`Accelerate/RevenantSparseBLAS.h`). That is the whole storage, and every operation is either a walk of the
 stored entries or a call into the release's own BLAS over one of them:
 
 | operation | what it is made of |
@@ -326,7 +326,7 @@ in the differential, which checks the port against the header's rule for exactly
      answering alike: the columns `{2,0,1}` answer 2.2 1.1 3.3 / 5.5 4.4 6.6 — swap column 0 with 2, then 1
      with 0, then 2 with 1 — and `{1,0,2}` answer the matrix unchanged, for the same reason; `{0,0,0}`
      answers 3.3 1.1 2.2 / 6.6 4.4 5.5. The rows `{1,0}` answer the matrix unchanged and `{0,0}` answer it
-     with the two rows exchanged. `CharonSparsePermuteRows` and `CharonSparsePermuteColumns` do exactly
+     with the two rows exchanged. `RevenantSparsePermuteRows` and `RevenantSparsePermuteColumns` do exactly
      that, and the differential asks both sides the same way.
    - `sparse_get_matrix_property` with a negative name answers uninitialised memory — measured, -1 reads
      -520093697 on a fresh matrix. The port answers 0. The name is one the header does not declare.
@@ -343,11 +343,11 @@ in the differential, which checks the port against the header's rule for exactly
 The review of 2026-09-28 (`coordination/reviews/2026-09-28-api-sparseblas.md`) returned CHANGES with three
 blockers and three minors. All six are fixed; this is what each one was and what the fix measures.
 
-1. **A transposed level-3 product read through a NULL row pointer** — `CharonSparseProductDense` and
-   `CharonSparseProductSparse` bound the row of the operand they walk to `NULL` when the operand is
+1. **A transposed level-3 product read through a NULL row pointer** — `RevenantSparseProductDense` and
+   `RevenantSparseProductSparse` bound the row of the operand they walk to `NULL` when the operand is
    transposed and then read `line->value` from it, so `CblasTrans` took the process down on all four
    level-3 entry points. The entry the walk is at is `A[r, c]` in both cases and is now read through
-   `CharonSparseElementAt`, the same lookup the trace, the norms and the triangular solve use. The
+   `RevenantSparseElementAt`, the same lookup the trace, the norms and the triangular solve use. The
    differential now asks `CblasTrans` of all four: for a 3x2 `A` with a 3x2 `B` in both layouts
    (`a sparse product, CblasTrans, both layouts`), and for the dense form with a 3x2 `A` and a 3xN `B` in
    both transposes and both layouts (`a dense product, both transposes`), and every one agrees with the
@@ -369,13 +369,13 @@ blockers and three minors. All six are fixed; this is what each one was and what
    every one of the sixty-nine rows is called.
 4. **A block commented as the transposed case passed `CblasNoTrans`** — the transposes went in, and the
    `A` is a 3x2 so the transpose is the header's own legal shape.
-5. **A comment named a function not in the tree** — closed: `CharonComplexElementAt` belonged to the
+5. **A comment named a function not in the tree** — closed: `RevenantComplexElementAt` belonged to the
    complex half, and the comment now says what the shared body is for without naming a reader. Re-checked
-   in the rebased tree: `grep -rn CharonComplex packages/ tests/` returns the facts file's own record of
+   in the rebased tree: `grep -rn RevenantComplex packages/ tests/` returns the facts file's own record of
    the fix and nothing in any code comment.
 6. **A computed-and-discarded search** — closed: the transposed triangular solve searched for an entry
-   that `CharonSparseElementAt` searches for again. Re-checked: no `(void)at` remains anywhere in the
-   port's Accelerate sources, and the only `CharonSparseSearch` in the transposed block is the one whose
+   that `RevenantSparseElementAt` searches for again. Re-checked: no `(void)at` remains anywhere in the
+   port's Accelerate sources, and the only `RevenantSparseSearch` in the transposed block is the one whose
    result is tested.
 
 And finding C, "sixteen of sixty-nine called by neither test".
@@ -416,7 +416,7 @@ header and not against the host.
 
 **The mutation, on the new cases.** Two, one per kind of case the r4 review named:
 
-- `CharonSparseMake`'s `totalColumns += width[j];` given a second `totalColumns += 1;` →
+- `RevenantSparseMake`'s `totalColumns += width[j];` given a second `totalColumns += 1;` →
   **360 checks, 8 failures**, and the new `a double variable block matrix` is one of the eight
   (`FAIL a double variable block matrix: rows, columns and every block dimension`), with five
   `block create` and one `variable block create` and one `a block entry` beside it. Restored: 365 / 0.
@@ -430,8 +430,8 @@ right: one changes a column count and the other a transpose argument, and each c
 mutation that touches what it tests.
 
 **Reuse.** The complex half reuses the real half's whole row structure and its whole scalar storage —
-`CharonSparseRow`, `CharonSparseSearch`, `CharonSparseGrow` and the four matrix bodies all live in
-`CharonSparseBLAS.h` and are shared, so there is one row machinery in this family and not two — and it
+`RevenantSparseRow`, `RevenantSparseSearch`, `RevenantSparseGrow` and the four matrix bodies all live in
+`RevenantSparseBLAS.h` and are shared, so there is one row machinery in this family and not two — and it
 reuses the release's own complex BLAS, `cblas_caxpy`, `cblas_caxpy`'s double twin `cblas_zaxpy`,
 `cblas_ccopy`, `cblas_zcopy`, `cblas_cgemv`, `cblas_zgemv`, `cblas_cherk` and `cblas_zherk`, all measured at
 **4.0** by the ladder, and the release's LAPACK `ssyev_` and `dsyev_`, also at 4.0. It vendors nothing and
@@ -626,7 +626,7 @@ the package's.
 
 It is wired the way the ruling says: `backports.lua`'s Accelerate row carries
 `archives = {"suitesparse-ordering"}`, and `packages/a/apple-backports/xmake.lua` declares
-`add_deps("charon@suitesparse-ordering v7.12.2", {alias = "suitesparse-ordering"})`, without which the gate
+`add_deps("revenant@suitesparse-ordering v7.12.2", {alias = "suitesparse-ordering"})`, without which the gate
 refuses with `apple-backports links the archive suitesparse-ordering and its recipe declares no dependency
 with that alias` — which is what it did, and the dep is the fix.
 
@@ -640,8 +640,8 @@ Accelerate row and the `add_deps` beside it, and the only conflict was an adjace
 keeping main's `GraphicsBackports` row and adding mine after it.
 
 **Where it stops, and the bare assertion answered by the compiler's own line.** A scratch project
-(`add_repositories` at the checkout, `add_addons("charon v0.1.0")`, `set_defaultplat("iphoneos")`,
-`add_requires("charon@suitesparse-ordering v7.12.2")`) and `xmake f -c -y` puts the failure where the
+(`add_repositories` at the checkout, `add_addons("revenant v0.1.0")`, `set_defaultplat("iphoneos")`,
+`add_requires("revenant@suitesparse-ordering v7.12.2")`) and `xmake f -c -y` puts the failure where the
 `assertion failed!` hid it:
 
 ```
@@ -735,7 +735,7 @@ backports.lua packages/a/apple-backports/xmake.lua` is:
 
 1. `backports.lua`'s Accelerate row, which gains `archives = {"suitesparse-ordering"}` and the six lines of
    comment above it saying why the archive is not API and which parts of SuiteSparse are absent from it;
-2. `apple-backports/xmake.lua`'s `add_deps("charon@suitesparse-ordering v7.12.2", {alias = …})` and the four
+2. `apple-backports/xmake.lua`'s `add_deps("revenant@suitesparse-ordering v7.12.2", {alias = …})` and the four
    lines of comment above it.
 
 That is the whole of it. **LIBRARIES is main's plus mine, with no duplicate** — and checking that is what
@@ -829,7 +829,7 @@ nothing about any category file — there is none here.
 
 ## The complex half: where it lives and what is and is not held
 
-`SparseComplex18.m` and `CharonSparseComplex.h` sit in `tests/backports/host/sparsecomplex/`, beside the
+`SparseComplex18.m` and `RevenantSparseComplex.h` sit in `tests/backports/host/sparsecomplex/`, beside the
 differential that holds them, and `run.sh` resolves the root and both source paths from its own location.
 They are **beside the test and not in `packages/a/apple-backports/Accelerate/`** for a reason the gate
 enforces rather than a preference: that folder is the library, a file in it is built, and a built symbol
@@ -878,7 +878,7 @@ host has not materialised that product and an elementwise read of it takes its p
 every mismatch was cut to seven characters — which is why every failure used to end in `status `.
 
 **The differential can fail.** One line of `SparseComplex18.m` mutated, `(float complex *)y + to` to
-`+ (to - 1)` in `CharonComplexVectorProduct`, and:
+`+ (to - 1)` in `RevenantComplexVectorProduct`, and:
 
 ```
 MUTATED:  41 checks, 6 failures

@@ -8,7 +8,7 @@ Photos.framework, and what it would take for each row to become `implemented`.
 
 ## The values, and where they were read
 
-`tools/corpus/cache-value.lua` over `$HOME/.charon/dyld/16.0/dyld_shared_cache_arm64e` -- a split
+`tools/corpus/cache-value.lua` over `$HOME/.revenant/dyld/16.0/dyld_shared_cache_arm64e` -- a split
 cache, a 393216-byte header and the bodies in `.01` ... `.44`, read through the port's own cache reader
 (`modules/apple/dyld.lua`) because the address space of a split cache and the slide a stored pointer
 carries are that code's business, not a second parser's. The tool prints, per symbol, the image that
@@ -44,8 +44,8 @@ the same run and each is a string equal to its own name, so what that file does 
 that can now be repeated.
 
 ```
-$ CHARON_ROOT=$PWD xmake l tools/corpus/cache-value.lua \
-    $HOME/.charon/dyld/16.0/dyld_shared_cache_arm64e symbols.tsv
+$ REVENANT_ROOT=$PWD xmake l tools/corpus/cache-value.lua \
+    $HOME/.revenant/dyld/16.0/dyld_shared_cache_arm64e symbols.tsv
 #cache	arm64e	8
 PHLivePhotoShouldRenderAtPlaybackTime	/System/Library/Frameworks/Photos.framework/Photos	0x1d5e7fcc8	30b8dfdf01002000	3755980848	9007207305689136	...	0x1dfdfb830	LivePhotoShouldRenderAtPlaybackTime	8	264
 ```

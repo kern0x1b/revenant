@@ -51,7 +51,7 @@ and **throw the answer away**: the ivar stays empty, so `-controlPoint1` and
 curve really is (0.42, 0) to (0.58, 1), reads as two zero points.
 
 A later UIKit keeps the resolved function, and those properties answer the real
-points. Charon keeps it too, by the same rule as the coefficients in Foundation:
+points. The toolchain keeps it too, by the same rule as the coefficients in Foundation:
 a property documented to answer a curve's control points and answering zeroes
 instead is a defect Apple itself corrected, and carrying it forward would be
 carrying a bug with our name on it. Nothing else changes - the type stays

@@ -1,19 +1,19 @@
 ---
 name: backports
-description: Use API that later iOS releases added (UIStackView, layout anchors, UIAlertController, NSURLSession, NSURLComponents, UNUserNotificationCenter, WKWebView, Core Data's persistent container and more) in an app for an older release through Charon's `charon@apple-backports` — decide per API between a backport, the release's own older API and a version check; look the API up in the backports registry; choose the package's configs (uikit, corelocation, coredata, webkit and the rest); declare it in xmake.lua; read the build's warnings; know what the app's .deb then depends on. Use when the app's code needs an API newer than `apple_minimum`, when the build warns about weak imports or selectors the release lacks, or when `xmake deb` refuses one.
+description: Use API that later iOS releases added (UIStackView, layout anchors, UIAlertController, NSURLSession, NSURLComponents, UNUserNotificationCenter, WKWebView, Core Data's persistent container and more) in an app for an older release through Revenant's `revenant@apple-backports` — decide per API between a backport, the release's own older API and a version check; look the API up in the backports registry; choose the package's configs (uikit, corelocation, coredata, webkit and the rest); declare it in xmake.lua; read the build's warnings; know what the app's .deb then depends on. Use when the app's code needs an API newer than `apple_minimum`, when the build warns about weak imports or selectors the release lacks, or when `xmake deb` refuses one.
 ---
 
 # Backports
 
 The SDK the toolchain compiles against is a modern one (iOS 16), so its headers declare API the
 target release does not have. What the device really exports is decided by that release's own
-libraries, and Charon checks every import of the app against them. When the app needs an API
+libraries, and the toolchain checks every import of the app against them. When the app needs an API
 added after `apple_minimum`, there are three native answers, per API:
 
-1. **A backport** — `charon@apple-backports` implements it for the older release, in libraries
+1. **A backport** — `revenant@apple-backports` implements it for the older release, in libraries
    installed on the device by their own package. The app calls the API as if the release had it.
    A C call of the system library (`clock_gettime`, `dispatch_get_global_queue` with a class of
-   service, …) comes instead from `charon@apple-compat`, linked into the app (skill `objc`).
+   service, …) comes instead from `revenant@apple-compat`, linked into the app (skill `objc`).
 2. **The release's own API** — the older way to do the same thing (for example `UIAlertView`
    instead of `UIAlertController` when the backport's behaviour is not what the app needs).
 3. **A version check** — `respondsToSelector:`, `[Class class] != nil` in Objective-C,
@@ -21,7 +21,7 @@ added after `apple_minimum`, there are three native answers, per API:
    skill `swift` §5), and a path for the release that lacks it.
 
 Never silence the check instead: no `-disable-availability-checking`, no
-`charon.waive.weak-imports` to get a package through, no copying a system library into the app.
+`revenant.waive.weak-imports` to get a package through, no copying a system library into the app.
 Read `PROJECT.md` first: `## Code` lists the backports and the API that needs each.
 
 ## 1. Look the API up
@@ -35,9 +35,9 @@ xmake where apple-backports            # prints the install folder
 <folder>/share/registry/<Framework>/*.json   (and <folder>/share/registry/<Framework>.json)
 ```
 
-Before that, read the same files in the Charon repository at the pinned tag
-(`packages/a/apple-backports/registry/` at `charon-repo-0.8.10` on GitHub, or in the project's
-clone under `.xmake/<host>/<arch>/repositories/charon/` once `xmake f` has run). Search the API as
+Before that, read the same files in the toolchain repository at the pinned tag
+(`packages/a/apple-backports/registry/` at `revenant-repo-0.8.10` on GitHub, or in the project's
+clone under `.xmake/<host>/<arch>/repositories/revenant/` once `xmake f` has run). Search the API as
 the app writes it: a class `UIStackView`, a method `+[NSLayoutConstraint activateConstraints:]`
 or `-[UIView centerXAnchor]`, a property as `Class.property` (both accessors in one entry, e.g.
 `UIScreen.captured`), a function `Name()`, a constant by its symbol. A property may also
@@ -73,24 +73,24 @@ that implements the class (`@implementation UIStackView` is in `UIKit/`), not th
 folder, which follows the SDK's framework and can differ (`UNUserNotificationCenter` is
 registered under `UserNotifications` and implemented in `UIKit/`).
 
-At Charon 0.8.10: `uikit` (for an application; UIKit, layout anchors, stack views, alerts,
+At revenant 0.8.10: `uikit` (for an application; UIKit, layout anchors, stack views, alerts,
 notifications), `corelocation`, `avfoundation`, `coredata`, `security`, `webkit` (WKWebView over the
 release's UIWebView), `graphics`, `localauthentication`, `opengles`, `safariservices`,
 `authenticationservices`, `backgroundtasks`, `photos`, `gamecontroller`, `metal`, `coretelephony`,
-`accelerate`. The package's `xmake.lua` describes each (`add_configs`). Charon after 0.8.10 adds
+`accelerate`. The package's `xmake.lua` describes each (`add_configs`). The toolchain after 0.8.10 adds
 `vision`, `metalkit`, `contacts`, `callkit`, `corespotlight`, `pushkit`, `javascriptcore`,
 `scenekit`, `mediaplayer` and `avkit`, and changes what `metal` does: none of them exists at the
-0.8.10 pin — if the app needs one, tell the user it needs a newer Charon and stop.
+0.8.10 pin — if the app needs one, tell the user it needs a newer the toolchain and stop.
 
 Enable only what the app calls: each library loads its framework into the process.
 
 ## 3. Declare it
 
-In `xmake.lua`, the require with the alias **exactly** `apple-backports` (Charon finds the package
+In `xmake.lua`, the require with the alias **exactly** `apple-backports` (the toolchain finds the package
 by that name; under any other alias it writes no backports package and no `Depends` on it):
 
 ```
-add_requires("charon@apple-backports", {alias = "apple-backports", configs = {uikit = true}})
+add_requires("revenant@apple-backports", {alias = "apple-backports", configs = {uikit = true}})
 ```
 
 and on the app's target:
@@ -99,8 +99,8 @@ and on the app's target:
 add_packages("apple-backports")
 ```
 
-Nothing else: not `app.frameworks`, not `charon.libraries`, no `add_links`. The backports are
-one copy per process and live in `/usr/lib/charon/org.charon.apple-backports/` on the device,
+Nothing else: not `app.frameworks`, not `revenant.libraries`, no `add_links`. The backports are
+one copy per process and live in `/usr/lib/revenant/org.revenant.apple-backports/` on the device,
 installed by their own package; the app's bundle carries none of them. Then configure:
 `xmake f -c -y > .logs/configure.log 2>&1`.
 
@@ -141,10 +141,10 @@ Build with `xmake -y -v > .logs/build.log 2>&1` — xmake prints only the first 
 
 ## 6. What the package then needs
 
-`xmake deb` writes `build/org.charon.apple-backports_<release>+<digest>_iphoneos-arm.deb` beside the
-app's package and adds `org.charon.apple-backports (>= <release>+<digest>)` to the app's `Depends`
+`xmake deb` writes `build/org.revenant.apple-backports_<release>+<digest>_iphoneos-arm.deb` beside the
+app's package and adds `org.revenant.apple-backports (>= <release>+<digest>)` to the app's `Depends`
 (skill `package`). The backports package holds the libraries once per band under
-`/usr/lib/charon/org.charon.apple-backports/bands/<first release>/` and a `bands/ranges` file; its
+`/usr/lib/revenant/org.revenant.apple-backports/bands/<first release>/` and a `bands/ranges` file; its
 `postinst` reads the device's `ProductVersion` and links the band whose range holds it, and refuses
 a release outside every band. The same happens in the emulator's image (skill `emulate`).
 
@@ -155,18 +155,18 @@ and the build log with no weak-import or selector warning left.
 
 - Trusting the SDK header ("it compiles, so iOS 6 has it") → the header is iOS 16's; only the
   import check against the release's own libraries says what exists.
-- `alias = "backports"` or any other alias → the libraries still link, but Charon finds the package
+- `alias = "backports"` or any other alias → the libraries still link, but the toolchain finds the package
   only as `apple-backports` and no longer counts them as provided: the build turns green with
   `weakly imports N symbols … : _OBJC_CLASS_$_UIStackView …` and the selector warning after
   `build ok`, and `xmake deb` refuses with `these imports are not exported by the device's iOS:`
   and writes no package. The alias is exactly `apple-backports`.
 - A config left out → the build still succeeds (weak import, selectors); only a warning says so,
   and only the class half is refused by `xmake deb`. Read the `-v` log.
-- `charon.waive.weak-imports` to get `xmake deb` through → the class is NULL on the device and the
+- `revenant.waive.weak-imports` to get `xmake deb` through → the class is NULL on the device and the
   first use crashes; fix the config or guard the call.
 - Copying a backports `.dylib` into the app bundle or the app's package → two copies of a class in
   one process are two classes; the backports come only from their own package.
-- An API only on Charon main (a config missing at the pin) → not available at 0.8.10; ask the user
+- An API only on the toolchain main (a config missing at the pin) → not available at 0.8.10; ask the user
   before moving the pin.
 - `absent` read as "call it anyway" → the release has nothing behind it: the app must take the
   older path, whether the entry is absent by decision (security, saving, permissions, the network)

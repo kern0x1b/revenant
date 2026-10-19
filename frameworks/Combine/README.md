@@ -1,20 +1,20 @@
-# Styx
+# Combine
 
 **Combine for the platforms Apple's framework never reached — one `import Combine`, down to iOS 6, armv7.**
 
-Styx is [OpenCombine], a source-level reimplementation of Apple's [Combine]
+Combine is [OpenCombine], a source-level reimplementation of Apple's [Combine]
 reactive framework, with a short series of patches that make it vend a single
 module named `Combine`, so code written against the system framework —
 `ObservableObject`, `@Published`, publishers, subjects, schedulers,
 `Timer.publish`, `NotificationCenter.publisher` — builds and runs unchanged on
 systems that have no Combine of their own: legacy iOS (tested on iOS 6.1.3,
-armv7). It is built for the [Charon] toolchain's legacy-iOS work, where it is
-the reactive layer under [Eidolon]'s SwiftUI.
+armv7). It is built for the legacy-iOS work of the [toolchain], where it is
+the reactive layer under [SwiftUI].
 
-Styx is not a fork. The code is OpenCombine's, pinned at one upstream commit;
-what is ours is the patch series in `charon/packages/s/styx/patches/`, applied by
-the `charon@styx` recipe, and the targets in this folder that build the patched
-sources inside hades.
+Combine is not a fork. The code is OpenCombine's, pinned at one upstream commit;
+what is ours is the patch series in `toolchain/packages/c/combine/patches/`, applied by
+the `revenant@combine` recipe, and the targets in this folder that build the patched
+sources inside revenant.
 
 ## What it does
 
@@ -38,7 +38,7 @@ sources inside hades.
 
 ## How it works
 
-The `charon@styx` recipe fetches OpenCombine at its pinned commit and applies
+The `revenant@combine` recipe fetches OpenCombine at its pinned commit and applies
 the patches in order. The patches carry only content edits. Putting the three
 upstream modules together is the build's work: the recipe installs the patched
 sources as one tree, `src/Combine` holding `Sources/OpenCombine` with
@@ -49,25 +49,25 @@ holding upstream's tests and `src/utils` the header of its gyb templates.
 
 There are two ways to take it:
 
-- `charon@styx` as it is: the recipe compiles that tree against
-  `charon@swift-runtime` and installs `libCombine.a`, `libCombineHelpers.a` and
+- `revenant@combine` as it is: the recipe compiles that tree against
+  `revenant@swift-runtime` and installs `libCombine.a`, `libCombineHelpers.a` and
   the `Combine` module.
-- `charon@styx` with `sources = true`: the recipe installs only the tree, and
-  the project compiles it. This is what hades does.
+- `revenant@combine` with `sources = true`: the recipe installs only the tree, and
+  the project compiles it. This is what revenant does.
 
 ## Build
 
-Inside hades, `xmake.lua` requires `charon@styx` with `sources = true` and makes
-two targets of the hades project for iOS (`xmake f -p iphoneos -a armv7` at the
-hades top) from the installed tree: `Combine`, the one module, and
+Inside revenant, `xmake.lua` requires `revenant@combine` with `sources = true` and makes
+two targets of the revenant project for iOS (`xmake f -p iphoneos -a armv7` at the
+revenant top) from the installed tree: `Combine`, the one module, and
 `CombineHelpers`, the C++ helper it imports. A target of another member links it
 with `add_deps("Combine")`.
 
-Outside hades, the legacy-iOS (armv7) build is taken through Charon as a
+Outside revenant, the legacy-iOS (armv7) build is taken through the toolchain as a
 package dependency:
 
 ```lua
-add_requires("charon@styx", {alias = "combine"})
+add_requires("revenant@combine", {alias = "combine"})
 add_packages("combine")
 ```
 
@@ -78,7 +78,7 @@ the module as one daemon, with the XCTest shim of `harness/XCTest.swift`; the
 test list is found by `harness/discover.lua` and leaves out what
 `harness/skip.txt` names. `xmake emulate run` starts it in the guest, and its
 exit status is the verdict. `xmake test CombineGenerated` expands each gyb
-template with charon's gyb (`charon/modules/gyb`) and checks the `GENERATED-*`
+template with Revenant's gyb (`toolchain/modules/gyb`) and checks the `GENERATED-*`
 source beside it is that expansion byte for byte.
 
 ## Usage
@@ -110,7 +110,7 @@ Timer.publish(every: 1, on: .main, in: .common)
 | `xmake.lua` | the `Combine` and `CombineHelpers` targets on the patched tree, `CombineTests` and its `CombineXCTest` shim, and `CombineGenerated`, the gyb check |
 | `harness/` | the XCTest shim, the test discovery, the skip list and the Debian control of the test daemon |
 | `docs/` | the test results |
-| `../../charon/packages/s/styx/` | the recipe and the patch series |
+| `../../toolchain/packages/c/combine/` | the recipe and the patch series |
 
 ## Documentation
 
@@ -136,5 +136,5 @@ openly — see the commit history.
 
 [OpenCombine]: https://github.com/OpenCombine/OpenCombine
 [Combine]: https://developer.apple.com/documentation/combine
-[Charon]: https://github.com/kern0x1b/charon
-[Eidolon]: https://github.com/kern0x1b/eidolon
+[toolchain]: https://github.com/kern0x1b/revenant/tree/main/toolchain
+[SwiftUI]: https://github.com/kern0x1b/revenant/tree/main/frameworks/SwiftUI

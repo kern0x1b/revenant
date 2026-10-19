@@ -43,7 +43,7 @@ is how the header says an observer tells the two apart, and with the four argume
 the element, stopping where the unit answers an error — the only way in, and the way a v2 host of that
 release did it. `AudioUnitParameterInfo` is **not declared by SDK 26.2 at all** (its
 `AudioUnitProperties.h` names the property and its value type and nothing else); the struct in
-`CharonAUAudioUnit.h` is transcribed from SDK 15.6's `AudioUnitProperties.h:1622`, whose field order
+`RevenantAUAudioUnit.h` is transcribed from SDK 15.6's `AudioUnitProperties.h:1622`, whose field order
 is the ABI the release answers.
 
 Two names that must be kept apart, and were not at first: the fixed 52-byte `name` in the struct is
@@ -100,17 +100,17 @@ automation observer, which is carried.
 
 ## Two traps in this code
 
-- **An `@implementation` in a header is emitted by every source that imports it.** `CharonAUParameterImpl`
-  was defined in `CharonAUAudioUnit.h` and the link failed with a duplicate
-  `_OBJC_CLASS_$_CharonAUParameterImpl` (and one per ivar) for every object. The `@interface` stays in
+- **An `@implementation` in a header is emitted by every source that imports it.** `RevenantAUParameterImpl`
+  was defined in `RevenantAUAudioUnit.h` and the link failed with a duplicate
+  `_OBJC_CLASS_$_RevenantAUParameterImpl` (and one per ivar) for every object. The `@interface` stays in
   the header; the `@implementation` and its explicit `@synthesize` lines are in
-  `CharonAVFAudioCommon.m`, once.
-- **The build SDK is 16.4, not 26.2.** `build-gate.lua` resolves `charon@iphoneos-sdk` to 16.4 and every
+  `RevenantAVFAudioCommon.m`, once.
+- **The build SDK is 16.4, not 26.2.** `build-gate.lua` resolves `revenant@iphoneos-sdk` to 16.4 and every
   gate log line says `sdk=16.4`, so an API newer than that has no `@interface` at all and an
   `@implementation` written without one is a root class — `[super init]` becomes an error and
   `[Class alloc]` undeclared. That is exactly what the gate said:
   `error: 'AVAudioSessionCapability' cannot use 'super' because it is a root class`.
-  `CharonAVFAudioNew.h` declares the three such classes (`AVAudioApplication` 17.0,
+  `RevenantAVFAudioNew.h` declares the three such classes (`AVAudioApplication` 17.0,
   `AVAudioSessionCapability` 26.0, `AVAudioSessionPortExtensionBluetoothMicrophone` 26.0),
   transcribed from SDK 26.2 and checked absent in 16.4 first, so the day the build SDK moves past them
   the header can go away instead of shadowing the real declarations.

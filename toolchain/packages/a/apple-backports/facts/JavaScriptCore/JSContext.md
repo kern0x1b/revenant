@@ -135,10 +135,10 @@ the object it returns, or a TypeError "Objective-C blocks called as constructors
   getter and setter, and those accessors are not methods of their own (`typeof obj.setX` is undefined), as
   on the host; but the port answers them on the wrapper itself (`obj.hasOwnProperty('x')` is true), where
   the release keeps them on a prototype object per class (false there).
-- **The JavaScript class name of a wrapper** is the bridge's own (`[object CharonOpaqueObject]`,
-  `[object CharonExportObject]`) where the host shows the Objective-C class (`[object NSURL]`), so
+- **The JavaScript class name of a wrapper** is the bridge's own (`[object RevenantOpaqueObject]`,
+  `[object RevenantExportObject]`) where the host shows the Objective-C class (`[object NSURL]`), so
   `String(wrapper)` differs.
-- **Promises** are the release engine's own ES5 script (CharonJSPromise.m, `CharonPromiseSource`) over native
+- **Promises** are the release engine's own ES5 script (RevenantJSPromise.m, `RevenantPromiseSource`) over native
   helpers; a context made by `-init` gets a global `Promise` (the iOS 6 global has none) - writable,
   configurable and not enumerable, as the host's - and a context adopted from a web view page does not. Reactions run when the outermost Objective-C call into JavaScript returns;
   jobs queued with no such call on the stack (script run through the C API directly, a page) run on the
@@ -157,7 +157,7 @@ the object it returns, or a TypeError "Objective-C blocks called as constructors
   to release as the collection ends (WebKit's `Heap::releaseSoon`), still inside the call that collected;
   the C API has no end-of-collection hook, so each thread releases what it queued at its own next
   outermost call into script or next run-loop turn, whichever comes first, and at its exit (JSInternal.m,
-  `charon_js_release_soon`). Measured on the host (checks.m `CheckReleaseAfterCollection`,
+  `revenant_js_release_soon`). Measured on the host (checks.m `CheckReleaseAfterCollection`,
   `CheckReleaseThread`): the release's owner is released by the time the collection returns, the port's
   on the next turn, never inside the collection, never by another thread that calls into script, and a
   thread's turn is not held up by another thread's queue. The one case left: a thread that has no run
@@ -206,19 +206,19 @@ JavaScriptCore-7536.26.7's source (OS X 10.8.2's, the same 536 branch):
 
 ## Two build-system defects this port's own files exposed, both in `modules/apple/backports.lua`
 
-**Charon's own internal helpers must not share an object file with a class the band reexports -
-fixed.** `charon_js_box`, `charon_js_unbox`, `charon_ns_string`, `charon_js_push_callback` and
-`charon_js_pop_callback` used to live in `JSValue.m` and `JSContext.m`, next to the `JSValue`/
+**Revenant's own internal helpers must not share an object file with a class the band reexports -
+fixed.** `revenant_js_box`, `revenant_js_unbox`, `revenant_ns_string`, `revenant_js_push_callback` and
+`revenant_js_pop_callback` used to live in `JSValue.m` and `JSContext.m`, next to the `JSValue`/
 `JSContext` classes themselves. `band()` correctly reexports those two classes from the system on
 any release from iOS 7.0 (where JavaScriptCore is genuinely there) - and drops their whole object
 file doing it, taking the five helpers with it, even though `JSExportBridge.m` (whose own class,
-`CharonExportBinding`, is never a real SDK name and so is always kept) calls them
-unconditionally on every band. That produced "Undefined symbols: _charon_js_box" at `write_deb`'s
+`RevenantExportBinding`, is never a real SDK name and so is always kept) calls them
+unconditionally on every band. That produced "Undefined symbols: _revenant_js_box" at `write_deb`'s
 multi-band link only, never at a single-release `build()`, which never reexports anything -
 confirmed by instrumenting `link()` directly (not committed): kept every JavaScriptCore object on
 the 6.1.3 band, kept only `JSExportBridge.o` on the 7.0 band. Fixed by moving all five, plus the
 block/opaque-object `JSClassRef` machinery and the pthread callback frame stack they depend on,
-into `JSInternal.m`, which defines nothing but Charon's own names - `band()` always keeps it
+into `JSInternal.m`, which defines nothing but Revenant's own names - `band()` always keeps it
 regardless of what else in the library gets reexported.
 
 **`-framework X` embeds the SDK's own install path for X, not the band's - fixed, generalized
@@ -246,16 +246,16 @@ not - the rewrite-after-linking approach needs no such declaration, since the or
 
 **A third defect, found trying to make the first one fail loudly instead of as a bare linker
 error, is real and still open.** The idea: after `band()` picks `kept`, check that every
-`charon_`/`Charon`-prefixed symbol a kept object references undefined is actually defined
+`revenant_`/`revenant`-prefixed symbol a kept object references undefined is actually defined
 somewhere in `kept`, and name the object and the (likely reexported-away) object that should have
 carried it, instead of leaving the discovery to whatever `Undefined symbols` the linker happens to
 print. Implemented and reverted (not committed) after it fired a false positive on a single-release
-`build()`: `CharonMetalEncoder.o needs _CharonMetalBindEpoch`, naming no provider, for a symbol
+`build()`: `RevenantMetalEncoder.o needs _RevenantMetalBindEpoch`, naming no provider, for a symbol
 that links and runs fine today. The classification of "undefined, external" symbols from the
 Mach-O `nlist` table (`kind & 0x0E == 0x00 and kind & 0x01 ~= 0`) does not distinguish a true
 `N_UNDF` external reference from a **common symbol** (`N_UNDF` with a nonzero value field, a
 tentative definition the linker resolves without another object defining it) or a **weak
-definition**, and `_CharonMetalBindEpoch` is one of those, not a true undefined reference. A
+definition**, and `_RevenantMetalBindEpoch` is one of those, not a true undefined reference. A
 version of this check worth trying again needs to read the `nlist` value field (zero for a true
 undefined reference, nonzero for a common symbol) and the `N_WEAK_DEF`/`N_WEAK_REF` bits
 (`n_desc`, not `n_type`) before deciding a symbol is genuinely missing - left open rather than

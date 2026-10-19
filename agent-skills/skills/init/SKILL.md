@@ -52,7 +52,7 @@ something the stack cannot do, say what fails and where, and ask again.
    below that needs the link flag the skill `project` gives). Each device has a highest release it
    can run: check the pair against the devices in node 4.
 3. **Releases to check** [2] — which releases the app is verified on. The emulator boots only some:
-   firmware from iOS 3.0 through 6.1.3 (Shade's README), and not every device and release pair in
+   firmware from iOS 3.0 through 6.1.3 (the emulator's README), and not every device and release pair in
    that range has been booted; iOS 7 is declared but has never been booted;
    iOS 8 and 9 cannot be emulated. A release outside that range is verified on a real device or not
    at all — say so in the question.
@@ -68,11 +68,11 @@ something the stack cannot do, say what fails and where, and ask again.
    built for armv7 only). Before the user picks Swift, give them the choices of skill `swift` §1: at
    this pin `xmake deb` refuses the runtime a Swift app carries.
 7. **Interface** [6] — UIKit in code, or SwiftUI (Swift only). There are no nibs or storyboards: the
-   interface is built in code. Before recommending SwiftUI, check whether the pinned Charon provides
-   Eidolon as a package (`charon@eidolon`, skill `swiftui` §1); if it does not, say so and recommend
+   interface is built in code. Before recommending SwiftUI, check whether the pinned toolchain provides
+   SwiftUI as a package (`revenant@swiftui-uikit`, skill `swiftui` §1); if it does not, say so and recommend
    UIKit.
 8. **Combine** [6] — only with Swift and its whole runtime; recommend it only when the app's data flow
-   needs it, and say first what Styx lacks (skill `combine` §3).
+   needs it, and say first what Combine lacks (skill `combine` §3).
 9. **Frameworks and APIs** [1, 2] — list what the purpose needs (for example networking, storage,
    location, camera, maps). For each API introduced after the lowest release, look up whether the
    backports carry it (skill `backports`); the question is then "backport, or the older API?".

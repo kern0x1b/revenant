@@ -11,9 +11,9 @@ the table; the matrix of which is which is in `facts/Security/SecKey.md`, and th
 are in `registry/Security/ios10keys.json`.
 
 **This file defines no public `SecKey*` symbol.** `Security/SecKeyElliptic10.m` exports five
-`Charon`-prefixed names - `CharonSecurityKeyIsPortEC`, `CharonSecKeyECCarries`,
-`CharonSecKeyECSign`, `CharonSecKeyECVerify`, `CharonSecKeyECExchange` - and one shared error
-builder, `CharonSecKeyFail`, which `internal_symbol()` keeps out of the library's API. The
+`revenant`-prefixed names - `RevenantSecurityKeyIsPortEC`, `RevenantSecKeyECCarries`,
+`RevenantSecKeyECSign`, `RevenantSecKeyECVerify`, `RevenantSecKeyECExchange` - and one shared error
+builder, `RevenantSecKeyFail`, which `internal_symbol()` keeps out of the library's API. The
 dependency runs one way, public to internal, so no band can leave this file out and find a call
 undefined: it exports nothing a release can already have, and the public file was in every band
 already. The other arrangement is the one that was refused - the four public names were defined in
@@ -32,26 +32,26 @@ iOS 6.1.3 has no curve to sign with. This is the other half of that decision.
 iOS 6.1.3's CommonCrypto has no elliptic curve at all: the armv7 shared cache of that release exports
 no `kCCAlgorithm*` symbol, no `CCEccKey` and no `kCCKeySizeEC256` (measured, `coordination/corpus` and
 the cache itself), and `SecKeyCreateSignature` is iOS 8. So the curve arithmetic is taken rather than
-written: `charon@micro-ecc` is Kenneth MacKay's micro-ecc, BSD-2, pinned at
+written: `revenant@micro-ecc` is Kenneth MacKay's micro-ecc, BSD-2, pinned at
 `541b3a78026420a3e369c4c9281c396b5e531113`, built for the port's architecture as a static archive with
 every symbol hidden. The JOSE around it — SHA-256, the minimal DER a JOSE verifier reads, the low-s
-half, the `0x04` tag Apple's own Security writes — is `CharonCKWebAuth.c` in that package, and the
+half, the `0x04` tag Apple's own Security writes — is `RevenantCKWebAuth.c` in that package, and the
 ECDH is now beside it.
 
 Three entry points were added to that wrapper for this file, and they are the whole of the difference
 between signing a message and signing a digest:
 
-- `CharonCKDigestSignES256` and `CharonCKDigestVerifyES256` sign and verify a **digest the caller
+- `RevenantCKDigestSignES256` and `RevenantCKDigestVerifyES256` sign and verify a **digest the caller
   already took**. The wrapper's existing pair hashes the message first, and Security's
   `…ECDSASignatureDigestX962SHA256` says *Digest*: the 32 bytes the caller hashed are the message, and
   hashing them again would sign a different message than the one asked for. The message-level pair is
   now these two with a SHA-256 in front, so the DER reading and the low-s step exist once.
-- `CharonCKSharedSecretES256` is the ECDH: `uECC_shared_secret` between a 32 byte private key and a
+- `RevenantCKSharedSecretES256` is the ECDH: `uECC_shared_secret` between a 32 byte private key and a
   65 byte uncompressed public point, which micro-ecc has and the wrapper had no use for.
 
 The package's recipe also builds that wrapper now (`packages/m/micro-ecc/xmake.lua`). It did not:
 `on_install` compiled `uECC.c` alone and installed only micro-ecc's own three headers, so
-`CharonCKWebAuth.h` was in the package's source and not in its `include/`, and nothing that included it
+`RevenantCKWebAuth.h` was in the package's source and not in its `include/`, and nothing that included it
 could compile. That was a gap in the package, not in its users, and it is fixed at the source.
 
 ## The signing is the release's own
@@ -80,9 +80,9 @@ code above handles either answer, so nothing waits on it to be correct, only to 
 
 ## The keys this package makes are the only ones the curve is for
 
-`charon@micro-ecc` is reached for a key **this package created and holds the scalar of** — the
+`revenant@micro-ecc` is reached for a key **this package created and holds the scalar of** — the
 `SecKeyCreateWithData` and the elliptic arm of `SecKeyCreateRandomKey` that are the next piece of work,
-and which mark their keys with a `CharonSecKeyScalar` attribute the two functions here look for. For
+and which mark their keys with a `RevenantSecKeyScalar` attribute the two functions here look for. For
 every key of the release's keychain the curve is not used: the release signs and verifies, and the
 exchange below is not available at all.
 
@@ -139,7 +139,7 @@ uncompressed public point, the 97 byte private blob, and the two candidate windo
 of which derives the key's own published point.
 
 **The port's own curve is measured too, and how it got there is part of this file.** The three
-`CharonCK*` calls of `SecKeyElliptic10.m` are behind the marker `kCharonSecKeyScalar`, which only
+`RevenantCK*` calls of `SecKeyElliptic10.m` are behind the marker `kRevenantSecKeyScalar`, which only
 `SecKeyCreateWithData` would put on a key, and until this was measured **nothing in the repository
 executed them at all**: the one call the differential made passed a key of the host's, so every run
 took the release's `SecKeyRawSign` path, and a mutant that returned half the DER from the curve's own
@@ -183,7 +183,7 @@ scan is not in the tree, and `Security/SecKeyElliptic.md` no longer depends on a
 anything in particular.
 
 **One thing this cost to find**, and it is the kind the differential exists for: the wrapper's
-`CharonCKSignES256` hashed the message and passed `sizeof digest` to `uECC_sign`. When the digest-level
+`RevenantCKSignES256` hashed the message and passed `sizeof digest` to `uECC_sign`. When the digest-level
 entry point was factored out, `digest` became a pointer parameter and `sizeof` became eight — so
 micro-ecc was asked to sign an eight byte hash. The port's own verification accepted those signatures
 (the same wrong length went in and came out), and only the host's `SecKeyVerifySignature` refused

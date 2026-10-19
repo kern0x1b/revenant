@@ -7,7 +7,7 @@ declared by CoreBluetooth of iOS 7.0 on. It lives in `libCoreBluetoothBackports.
 ## What the release has
 
 - The 6.1.3 shared cache (armv7) has no `kCBAdvDataIsConnectable` string: `grep -a -c kCBAdvDataIsConnectable
-  ~/.charon/dyld/6.1.3/dyld_shared_cache_armv7` answers 0.
+  ~/.revenant/dyld/6.1.3/dyld_shared_cache_armv7` answers 0.
 - Its CoreBluetooth image exports no symbol with `IsConnectable` in its name:
   `xmake l tools/image-exports.lua 6.1.3 armv7 "CoreBluetooth.framework/CoreBluetooth" "IsConnectable"` answers
   `0 matching` of 92 exports.

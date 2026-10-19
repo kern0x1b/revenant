@@ -8,7 +8,7 @@ framework's own `@attached` attributes; what is missing is the plugin that expan
 plugin is Apple's, on Apple's releases, and is not here.
 
 **Measured: Apple's plugin is not reachable on this machine.** The toolchain the packages build
-against (`charon@swift`, 6.4) ships two host plugins and no more:
+against (`revenant@swift`, 6.4) ships two host plugins and no more:
 
 ```
 $ ls …/swift/6.4.0/f1d0e4…/lib/swift/host/plugins/
@@ -44,7 +44,7 @@ example is in `.agent-work/` beside the plugin.
 
 **The loader is in place.** `415a119e "Let a port expand a macro plugin its dependencies ship"` is
 cherry-picked here (`-x`, so both series carry the same commit): `rules/swift/xmake.lua:182` adds each
-dependency's `CHARON_SWIFT_PLUGINS` folders as `-plugin-path`, so a package that builds a plugin can
+dependency's `REVENANT_SWIFT_PLUGINS` folders as `-plugin-path`, so a package that builds a plugin can
 be found by a port that uses it. What remains is the plugin itself, for the host, built with
 swift-syntax (Apache-2.0), and the 19 rows move when it exists and not before.
 

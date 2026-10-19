@@ -1,6 +1,6 @@
 ---
 name: backports-gate
-description: Run the apple-backports gate on a charon checkout or worktree and read its verdict — the light guard, the full package gate (all libraries, check_registry, imports), the release-split check and the host-test liveness sweep. Use before sending a backports patch, when merging one, or whenever asked "is this tree green".
+description: Run the apple-backports gate on a toolchain checkout or worktree and read its verdict — the light guard, the full package gate (all libraries, check_registry, imports), the release-split check and the host-test liveness sweep. Use before sending a backports patch, when merging one, or whenever asked "is this tree green".
 ---
 
 # Gating apple-backports
@@ -18,13 +18,13 @@ Five `tests/addon` suites. Each prints `<name>: OK (0 failures)` or one `<name> 
 per failure.
 
 - Pass the checkout as the argument; without one it tests the shared checkout
-  `$HOME/Git/projects/ios/charon`, not the worktree you are in.
+  `$HOME/Git/projects/ios/revenant`, not the worktree you are in.
 
 ## 2. Full gate (minutes to tens of minutes)
 
 An `implemented` **protocol** row also has a header behind it, and a gate is the first thing that
 looks. `modules/apple/backports.lua` writes one source per release a library's protocol rows arrived
-in, naming each row with `@protocol(<name>)` and importing `Charon<Folder>Protocols.h`; a row that
+in, naming each row with `@protocol(<name>)` and importing `Revenant<Folder>Protocols.h`; a row that
 header does not declare is a source that does not compile, and nothing before the gate reads that
 header. So before the gate, after a round that adds or changes a protocol row:
 
@@ -41,7 +41,7 @@ To *declare* a protocol the 16.4 SDK does not have, regenerate the library's hea
 editing it — `xmake l tools/gen.lua protocols` over the 26.2 and 16.4 SDK sysroots, with the wanted
 list read from the registry. It forward-declares a protocol a header of the library's own folder
 declares and imports that header, so the eight trait protocols of UIKit come from
-`CharonTraits17.h`; the command and the row list are in the commit that regenerated them
+`RevenantTraits17.h`; the command and the row list are in the commit that regenerated them
 (`7a073c987`).
 
 Every edit for the round is done and committed first; then, from the checkout being gated:
@@ -84,7 +84,7 @@ Traps:
 - The tree is frozen while the gate runs: `sources()` globs once at the start, so a file added or
   edited mid-run gives a false red or a false green. Edits wait for the next run.
 - Argument three is the checkout. Always pass it; never gate by a remembered path.
-- A port or test project that requires `charon@apple-backports` with only some of its configs never
+- A port or test project that requires `revenant@apple-backports` with only some of its configs never
   runs `check_registry`: `modules/apple/backports.lua` runs it only when every library in
   `LIBRARIES` was built. Such a green build says nothing about the registry; only this gate does.
 
@@ -106,7 +106,7 @@ object file.
 
 - A category has no `nm`-visible symbols, so a clean result says nothing about category files:
   check those by selector-string search against the release caches
-  (`$HOME/.charon/dyld/<release>/dyld_shared_cache_armv7`), with a negative control that the
+  (`$HOME/.revenant/dyld/<release>/dyld_shared_cache_armv7`), with a negative control that the
   search finds a selector known to be there.
 
 ## 4. Host tests (liveness)
@@ -119,7 +119,7 @@ A sweep: it reports whether each `host/*/run.sh` got past building itself, not w
 pass. A test that stops linking dies silently under `set -eu`; after reviving one, run it in full
 and read it for regressions before calling it healthy.
 
-`charon_check(passed, name, detail)` takes `const char *name` and prints it with `%s`, so a name
+`revenant_check(passed, name, detail)` takes `const char *name` and prints it with `%s`, so a name
 is a C string. An `@"…"` there is read as a pointer: the check still passes or fails as it should,
 the run still exits with the failure count, and the line that would tell a reader *which* check
 failed prints an address - `FAIL P'^A: it adopts none` - which is worse than no line, because a

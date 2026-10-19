@@ -1,15 +1,15 @@
 ---
 name: xmake-packages
-description: Reference for the dependencies of an old-iOS app built with Charon and xmake 3.1.1 — how the tag pair splits into the addon and the package repository, requiring charon@ packages under an alias with configs, which packages the repository carries at the pin, inspecting what the project resolves with xmake require --info and xmake where, the lock files and moving to a new tag with xmake require --upgrade, a C library Charon does not carry through a project recipe that calls Charon's CMake or sources bridge (and the revision config that gives a changed recipe a new install path), and what decides an install path in the shared store. Use when adding, inspecting or upgrading a dependency, writing a recipe for a third-party library, or when a package fails to install or resolves differently than expected.
+description: Reference for the dependencies of an old-iOS app built with the toolchain and xmake 3.1.1 — how the tag pair splits into the addon and the package repository, requiring revenant@ packages under an alias with configs, which packages the repository carries at the pin, inspecting what the project resolves with xmake require --info and xmake where, the lock files and moving to a new tag with xmake require --upgrade, a C library the toolchain does not carry through a project recipe that calls Revenant's CMake or sources bridge (and the revision config that gives a changed recipe a new install path), and what decides an install path in the shared store. Use when adding, inspecting or upgrading a dependency, writing a recipe for a third-party library, or when a package fails to install or resolves differently than expected.
 ---
 
-Derived from the `xmake-packages` and `xmake-addons` skills of xmake-io/xmake-skills at `ef67caa` (Apache-2.0), rewritten and modified for Charon.
+Derived from the `xmake-packages` and `xmake-addons` skills of xmake-io/xmake-skills at `ef67caa` (Apache-2.0), rewritten and modified for the toolchain.
 
-# Packages and the Charon pin
+# Packages and the toolchain pin
 
-Two things come from Charon's repository at one release: the **addon** (`v<X>`: toolchain, rules,
-checks, commands), installed once per machine under `~/.xmake/addons/charon/<version>/`, and the
-**package repository** (`charon-repo-<X>`: the `charon@…` recipes), cloned into the project's
+Two things come from Revenant's repository at one release: the **addon** (`v<X>`: toolchain, rules,
+checks, commands), installed once per machine under `~/.xmake/addons/revenant/<version>/`, and the
+**package repository** (`revenant-repo-<X>`: the `revenant@…` recipes), cloned into the project's
 `.xmake/`. Packages are built once per distinct set of inputs into the shared store
 `~/.xmake/packages` and reused by every project. Read `PROJECT.md` first: the language and the
 backports it lists decide which packages the app needs.
@@ -18,25 +18,25 @@ The pin itself (finding `<X>`, the two lines, checking the addon in use, the loc
 version) is the skill `install`'s (steps 3–6 and its first trap) and the skill `build`'s ("The
 addon in use is not the one pinned"). The first-build cost is the skill `install`'s (step 6).
 
-## 1. Require a Charon package
+## 1. Require a toolchain package
 
 ```
-add_requires("charon@<package>", {alias = "<package>", configs = {…}})
+add_requires("revenant@<package>", {alias = "<package>", configs = {…}})
 ```
 
 and on the target `add_packages("<package>")`. Always give the alias: the target, values such as
-`charon.libraries`, and Charon's own lookups name a package by it. For the backports the alias is
+`revenant.libraries`, and Revenant's own lookups name a package by it. For the backports the alias is
 exactly `apple-backports`, and their configs are the skill `backports`'s.
 
-At `charon-repo-0.8.10` the repository has 18 packages. What a project requires itself, by
+At `revenant-repo-0.8.10` the repository has 18 packages. What a project requires itself, by
 purpose: `apple-backports` (newer API), `apple-compat` (functions the release lacks, linked
 hidden into the image), `libcxx` (the C++ runtime an app bundles), `openssl` (TLS and crypto,
-also built for the device), `swift-runtime` and `swift-embedded` (Swift), `styx` (Combine, skill `combine`). The
-rest come with Charon's includes or as their dependencies: `llvm`, `ld64`, `ldid`, `libplist`,
+also built for the device), `swift-runtime` and `swift-embedded` (Swift), `Combine` (Combine, skill `combine`). The
+rest come with Revenant's includes or as their dependencies: `llvm`, `ld64`, `ldid`, `libplist`,
 `iphoneos-sdk`, `firmware-tools` (the toolchain), `swift`, `swift-bootstrap` (the Swift compiler),
-`shade`, `swiftshader`, `emulator-guest` (the emulator). There is no SwiftUI package at
+`emulator`, `swiftshader`, `emulator-guest` (the emulator). There is no SwiftUI package at
 this pin: say so to the user rather than looking for one (skill `swiftui`). List them in the project's clone:
-`ls .xmake/macosx/arm64/repositories/charon/packages/*/`.
+`ls .xmake/macosx/arm64/repositories/revenant/packages/*/`.
 
 ## 2. Inspect what the project resolves
 
@@ -77,32 +77,32 @@ xmake f -c -p iphoneos -a armv7 -y > .logs/configure.log 2>&1
 `--upgrade` with no package named resolves the project's requires past the lock, pulls the
 repository, and writes the lock again. Then run the checks of the skill `install` (step 6). A lock
 left from the older tag stops the toolchain with `the iphoneos-sdk package has no <path>:
-xmake-requires.lock pins a Charon package repository older than this addon; delete the lock, or
+xmake-requires.lock pins a toolchain package repository older than this addon; delete the lock, or
 run xmake require --upgrade, after moving add_addons to a new tag`. A new tag may install new
 builds of the compiler when its recipe changed; that is expected.
 
-## 4. A library Charon does not carry
+## 4. A library the toolchain does not carry
 
 xmake's own recipes build their CMake projects through `package.tools.cmake`, which does not pass
-a custom compiler for `iphoneos`; Charon's `apple-ios` toolchain is not theirs. Write a recipe for
+a custom compiler for `iphoneos`; Revenant's `apple-ios` toolchain is not theirs. Write a recipe for
 the library in the project's `xmake.lua` (a `package("<name>")` block) whose install script calls
-Charon's bridge:
+Revenant's bridge:
 
 - a CMake project, one call inside `on_install("iphoneos", function (package) … end)`:
-  `import("@addon.charon.apple.cmake").install(package, {"-D<OPTION>=OFF"})`. It writes a CMake
+  `import("@addon.revenant.apple.cmake").install(package, {"-D<OPTION>=OFF"})`. It writes a CMake
   toolchain file from the `apple-ios` toolchain (the `llvm` package's clang, `-target`,
   `-isysroot`, ld64, the SDK) and configures, builds and installs with Ninja. A third argument
-  takes `cflags`, `cxxflags`, `ldflags`, `deps`, `targets`, `prune`, `licenses` and more (Charon's
+  takes `cflags`, `cxxflags`, `ldflags`, `deps`, `targets`, `prune`, `licenses` and more (Revenant's
   README, the paragraph on the CMake bridge). The bridge passes `-DBUILD_SHARED_LIBS=OFF`, but a
   project may install a shared library anyway (zlib 1.3.1 installs `libz.a` and `libz.1.dylib`);
   the program then links the `.dylib` and the build refuses it: `(loads @rpath/libz.1.dylib, which
   neither the device nor this build provides)`. Keep the static library:
   `install(package, {…}, {prune = {"lib/*.dylib"}})`;
-- a plain list of sources: `import("@addon.charon.apple.sources").static(package, {files = {…}})`
+- a plain list of sources: `import("@addon.revenant.apple.sources").static(package, {files = {…}})`
   compiles them into `lib<name>.a` with the toolchain's flags;
 - a script that runs make or autoconf itself: pass
-  `import("@addon.charon.apple.envs").build(package, …)` as its envs and end with
-  `import("@addon.charon.apple.install").finish(package, {…})`.
+  `import("@addon.revenant.apple.envs").build(package, …)` as its envs and end with
+  `import("@addon.revenant.apple.install").finish(package, {…})`.
 
 The recipe names its source with `add_urls` and `add_versions("<version>", "<sha256>")`; take
 the digest from the project's release page, or compute it from an archive you downloaded and
@@ -123,23 +123,23 @@ build counts the library's members among the archive members that `record iOS <r
 ## 5. The shared store
 
 A changed input is a new install path beside the old one: nothing is rebuilt in place, and nothing
-in the store is ever forced or deleted (the rules for every step, skill `psychopomp`). A cached
+in the store is ever forced or deleted (the rules for every step, skill `agent-skills`). A cached
 resolution does not see a change in the package repository or in a require's configs:
 `xmake f -c` with every choice given (skill `xmake-basics`, step 3) resolves again.
 
 ## Traps
 
 - A package from xmake's own repository required for the device (`add_requires("zlib")`) → a
-  project recipe through Charon's bridge (§4). Reason: xmake's recipe does not build with Charon's
+  project recipe through Revenant's bridge (§4). Reason: xmake's recipe does not build with Revenant's
   toolchain; the configure log shows `error: toolchain(apple-ios) needs the SDK and llvm packages
-  and apple_minimum; includes("@addon/charon/apple-ios") provides them` and `=> install zlib
+  and apple_minimum; includes("@addon/revenant/apple-ios") provides them` and `=> install zlib
   <version> .. failed`.
-- Naming `charon@<package>` in `add_packages`, `charon.libraries` or `xmake where` → the alias.
+- Naming `revenant@<package>` in `add_packages`, `revenant.libraries` or `xmake where` → the alias.
   Reason: the project knows the package by the alias its require gave it.
 - `xmake require --info <package>` to see what the project uses → `xmake require -y --info` with
   no name. Reason: a named package is resolved alone, without the project's configs.
 - Editing a project recipe's script and expecting a rebuild → raise its `revision` config.
   Reason: the script is not part of the install path.
 - Moving one of the two tags, or pinning two different `<X>` → both, together. Reason: the
-  `charon-repo-<X>` tag is the one that lists `v<X>` (skill `install`, step 3), and a package
+  `revenant-repo-<X>` tag is the one that lists `v<X>` (skill `install`, step 3), and a package
   repository older than the addon is refused by its toolchain (§3).

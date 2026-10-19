@@ -1,6 +1,6 @@
 # What iOS 11.0 added that a 6.1.3 application can adopt, and what it cannot
 
-`UIKit/CharonIOS11.m` is the port's one object for the 11.0 API this band settled. Everything it
+`UIKit/RevenantIOS11.m` is the port's one object for the 11.0 API this band settled. Everything it
 exports belongs to 11.0 and to no other release, which is what `tools/release-split.lua` weighs: the
 file's only `nm -gU` symbols that survive the tool's exclusions are the class and metaclass of
 `UIPasteConfiguration` and of `UIAccessibilityLocationDescriptor`, and both classes first appear at
@@ -11,8 +11,8 @@ is why every one of them is named in a registry row of its own.
 
 `objc-inventory.lua` over both caches, class-scoped, in one run each:
 
-    CHARON_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua ~/.charon/dyld/6.1.3/dyld_shared_cache_armv7
-    CHARON_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua ~/.charon/dyld/4.3/dyld_shared_cache_armv7
+    REVENANT_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua ~/.revenant/dyld/6.1.3/dyld_shared_cache_armv7
+    REVENANT_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua ~/.revenant/dyld/4.3/dyld_shared_cache_armv7
 
 The 6.1.3 dump holds 12549 lines (11378 classes, 1171 protocols); the 4.3 dump holds 7751 (7187
 classes, 564 protocols). The control is in the same dumps and reads:
@@ -33,7 +33,7 @@ For the names that are a whole class or a protocol rather than a member,
 `tools/corpus/cache-census.lua` reads both ends and a third rung that does have the name, and prints its
 own control:
 
-    CHARON_ROOT=$PWD xmake l tools/corpus/cache-census.lua UISpringLoaded 6.1.3 4.3 16.0
+    REVENANT_ROOT=$PWD xmake l tools/corpus/cache-census.lua UISpringLoaded 6.1.3 4.3 16.0
       6.1.3  images 524, of which naming UISpringLoaded 0; classes 11378, of which UISpringLoaded* 0; protocols 1171, of which UISpringLoaded* 0
       4.3    images 354, of which naming UISpringLoaded 0; classes 7187, of which UISpringLoaded* 0;  protocols 564,  of which UISpringLoaded* 0
       16.0   classes 143137, of which UISpringLoaded* 3 (UISpringLoadedGestureRecognizer UISpringLoadedInteraction UISpringLoadedInteractionContextImpl)

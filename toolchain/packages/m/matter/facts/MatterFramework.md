@@ -1,7 +1,7 @@
 # The Matter framework, iOS 12 to 26, on iOS 6
 
 The 24 647 rows of the SDK 26.2 surface of the framework Matter are carried by building connectedhomeip's own Darwin
-framework for the port's release: `charon@matter` runs that project's GN build of `libCHIP.a` with the port's
+framework for the port's release: `revenant@matter` runs that project's GN build of `libCHIP.a` with the port's
 toolchain, then compiles the framework's hundred Objective-C++ sources over it and links `libMatterBackports.dylib`.
 Nothing here is re-typed; the classes are the Matter SDK's classes, and their behaviour is connectedhomeip's.
 
@@ -47,14 +47,14 @@ this measurement came from; the members could not be had at all until the framew
   instead of a whole package resolve.
 **The link succeeds** with `-Wl,-no_implicit_dylibs` (see the flag's reason below): `libMatterBackports.dylib`,
 45 110 492 bytes, `MH_MAGIC ARM V7`, 1506 exported `MTR*` classes, 24 777 exported symbols, 382 undefined, install
-name `/usr/lib/charon/org.charon.apple-backports/libMatterBackports.dylib`.
+name `/usr/lib/revenant/org.revenant.apple-backports/libMatterBackports.dylib`.
 
 - The four link experiments that found it, each one a link, over the 125 objects the build produces (the framework's 123 plus the two generated Apple spellings): **dropping** the two sources the framework's target shares
   with `libCHIP.a` (`DescriptorCluster.cpp`, `AttributePersistenceProviderInstance.cpp`) - asserts, so the duplicate
   hypothesis is out; `-Wl,-no_implicit_dylibs` - **links**; only `-lc++` without `-lc++abi` - asserts; `-lc++abi` first -
   asserts. So the miss is a symbol bound through a re-export that has no ordinal of its own, and libc++ re-exporting
   libc++abi is that re-export.
-- The old state, for the record: **the link failed in the linker, not in Matter**: charon's `ld64 956.6` aborts with
+- The old state, for the record: **the link failed in the linker, not in Matter**: Revenant's `ld64 956.6` aborts with
   `Assertion failed: (it != _dylibToOrdinal.end()), function dylibToOrdinal, file OutputFile.cpp, line 5214` while
   encoding the symbol table. Measured, in order:
 
@@ -64,7 +64,7 @@ name `/usr/lib/charon/org.charon.apple-backports/libMatterBackports.dylib`.
   | the 125 objects, or any one group of them (the 100 MTR, the 6 codegen data model, the 17 server layer, the 2 Apple spellings), or two groups | links |
   | the 125 objects **and** `libCHIP.a` **and** libc++ **and** the two backports | asserts |
 
-  It is not the C++ runtime's install name: the packaged libcxx (`/usr/lib/charon/org.charon.libcxx-550adb3c/…`,
+  It is not the C++ runtime's install name: the packaged libcxx (`/usr/lib/revenant/org.revenant.libcxx-550adb3c/…`,
   absolute install names, a Debian package) asserts, the `@rpath` one asserts, staged copies rewritten with
   `install_name_tool -id` to absolute paths assert, and `-L -l` and full paths and with and without `-rpath` all assert.
   It is not one object: **dropping any one of at least a dozen different objects makes it link** - the six codegen data
@@ -166,7 +166,7 @@ is two things, and both are measurable:
   sha1 of each file in the build tree against the tag: `MTRDeviceController_Concrete.mm`, `MTRBaseDevice.mm`,
   `MTRCommissioningOperation.mm`, `MTRDevice_XPC.mm`, `MTRDeviceController_XPC.mm` and
   `MTRDeviceControllerDataStore.mm` are all **identical**. The recipe compiles the hundred sources unmodified - the
-  only files it adds are `packages/m/matter/Charon/`, the Apple spellings - so every delegate call site upstream has, the
+  only files it adds are `packages/m/matter/Revenant/`, the Apple spellings - so every delegate call site upstream has, the
   port has, at the same line of the same file. The call sites, in the framework's own `.mm` files: 26 mentions of
   `MTRDeviceControllerDelegate`, 25 of `MTROperationalCredentialsDelegate`, 10 each of `MTRCommissioningDelegate`,
   `MTRDeviceControllerStorageDelegate` and `MTROTAProviderDelegate`, 4 of `MTRDeviceAttestationDelegate`, over 49
@@ -280,11 +280,11 @@ of the framework's own xcconfig, which I had not read yet.
   family of libsystem (iOS 12). A release below 12 has neither. Network's connection is `libNetworkBackports.dylib`
   (`apple-backports`, `facts/Network/NWConnection.md`): a real datagram socket, the path reported by the path monitor
   the Foundation library already carries, and viability that means the kernel has a route to the address and the
-  device's own reachability says the path is satisfied. The signposts are `charon@apple-compat`'s: the system's own
+  device's own reachability says the path is satisfied. The signposts are `revenant@apple-compat`'s: the system's own
   where a release has them, and here the header's answer for signposts that are turned off, with `os_signpost_enabled`
   false so the emit macros skip at their own test.
 - **The SDK's own libc++.** `usr/include/assert.h` reaches the SDK's libc++ of iOS 6, whose headers this compiler does
-  not understand. `-nostdinc++` with the port's `charon@libcxx` is the spelling.
+  not understand. `-nostdinc++` with the port's `revenant@libcxx` is the spelling.
 - **64-bit atomics on 32-bit ARM.** `ClockBase::mLastTimestamp` is taken and replaced with 64-bit `__atomic_*`
   operations, and clang gives `uint64_t` four bytes of alignment on `armv7-apple-ios` - measured:
   `sizeof(struct { char c; uint64_t v; })` is 12 there, 16 on arm64. A doubleword atomic on ARM has to be eight-byte
@@ -311,7 +311,7 @@ of the framework's own xcconfig, which I had not read yet.
   the package, so the reference is not null when the backport loads. Accepted by the coordinator as it stands; the
   BoringSSL reference (`third_party/boringssl/repo/src/crypto/rand_extra/ios.c:25`) is not changed by this package.
   `_os_unfair_lock_lock` and `_os_unfair_lock_unlock` are non-weak and bound to the packaged `libc++abi.1.dylib`
-  (`/usr/lib/charon/org.charon.libcxx-6b5ca29e/`, the packaged build of this release, `~/.xmake/packages/l/libcxx/23.1.1/6b5ca29e...`; the digest moved after 5be4d2bce2 and the v-matter7 install name e07f9ca7 is not the one this install links)`). The apple-compat archive (`libapple-compat.a`,
+  (`/usr/lib/revenant/org.revenant.libcxx-6b5ca29e/`, the packaged build of this release, `~/.xmake/packages/l/libcxx/23.1.1/6b5ca29e...`; the digest moved after 5be4d2bce2 and the v-matter7 install name e07f9ca7 is not the one this install links)`). The apple-compat archive (`libapple-compat.a`,
   in 18 of the 21 installs under `~/.xmake/packages/a/apple-compat/latest`, each read with `nm -gU`) exports only `_os_unfair_lock_assert_owner` and `_os_unfair_lock_assert_not_owner` in
   the `os_unfair_lock` family, so the archive defines neither lock nor unlock and the link carries no second definition
   of either. Measured on the installed dylib: `nm -gU` reports neither as a defined symbol.

@@ -74,7 +74,7 @@ is the control that a read which found nothing found nothing.
 ## +supportsSecureCoding answers YES, unconditionally
 
 ```
-$ sh tools/corpus/disasm.sh ~/.charon/dyld/16.0/dyld_shared_cache_arm64e ARKitCore 1af14f2b8 1af14f2c0
+$ sh tools/corpus/disasm.sh ~/.revenant/dyld/16.0/dyld_shared_cache_arm64e ARKitCore 1af14f2b8 1af14f2c0
 0x1af14f2b8:	 52800020     	mov	w0, #0x1                ; =1
 0x1af14f2bc:	 d65f03c0     	ret
 ```

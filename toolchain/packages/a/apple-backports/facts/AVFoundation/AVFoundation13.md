@@ -123,12 +123,12 @@ second reader over the same two band ends, for the pair this file implements:
 | --- | --- | --- |
 | `videoCompositionWithPropertiesOfAsset:prototypeInstruction:` | **0** | **0** |
 | `videoCompositionWithPropertiesOfAsset:` | 1 | 2 |
-| `charonProbeNoSuchSelectorAVF13` (control) | 0 | 0 |
+| `revenantProbeNoSuchSelectorAVF13` (control) | 0 | 0 |
 | `isRunning` (control) | 12 | - |
 | `isEnabled` (control) | 40 | - |
 
 ```
-$ strings -a ~/.charon/dyld/6.1.3/dyld_shared_cache_armv7 | grep -cxF SELECTOR
+$ strings -a ~/.revenant/dyld/6.1.3/dyld_shared_cache_armv7 | grep -cxF SELECTOR
 ```
 
 The two non-zero controls are what makes the zeros evidence: the same run that finds 0 for the row's
@@ -173,8 +173,8 @@ declares it, so forwarding to it is a private call. The layer's `-connections` a
 public singular form and is what `-initWithSession:` and `-setSession:` fill in.
 
 Both rows are categories, and both are inert from 13.0 up, which is what makes carrying them from 6.0
-safe: `packages/a/apple-backports/attach.c`'s `charon_collect` adds a category's method only when
-`charon_implements()` finds nothing, walking the class and its superclasses. At 6.1.3 and 12.0
+safe: `packages/a/apple-backports/attach.c`'s `revenant_collect` adds a category's method only when
+`revenant_implements()` finds nothing, walking the class and its superclasses. At 6.1.3 and 12.0
 nothing implements either selector, so the port's methods are installed; at 13.0 and above the
 release implements both and the port's are not installed at all.
 
@@ -249,7 +249,7 @@ Each reason in the registry names the count and the members. Grouped by what is 
 ```
 $ # the removed class-scoped row read, arguments: --inventory 6.1.3 12.0 16.0 -- rows13.tsv
 $ xmake l tools/cache-index/first-rung.lua --self-test
-$ strings -a ~/.charon/dyld/6.1.3/dyld_shared_cache_armv7 | grep -cxF SELECTOR
+$ strings -a ~/.revenant/dyld/6.1.3/dyld_shared_cache_armv7 | grep -cxF SELECTOR
 ```
 
 The first-rung index's own self-test answers 8/8 here, with `_NSFileSize` at 3.0 as its positive

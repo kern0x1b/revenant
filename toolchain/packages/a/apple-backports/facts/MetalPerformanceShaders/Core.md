@@ -13,7 +13,7 @@ the two answers element by element.
 ## What the device is
 
 MPS asks a question of a device: can this one run an MPS kernel. `MPSSupportsMTLDevice` answers it, and
-on this port every `MTLDevice` that exists is charon's own OpenGL ES 2.0 bridge
+on this port every `MTLDevice` that exists is Revenant's own OpenGL ES 2.0 bridge
 (`facts/Metal/RenderPath.md`), over which every kernel in this library runs, so the answer is yes for
 any device and no for none. `MPSGetPreferredDevice` walks devices in the release and returns the first
 that matches the `MPSDeviceOptions` given; this port has one device and no removable or low-power

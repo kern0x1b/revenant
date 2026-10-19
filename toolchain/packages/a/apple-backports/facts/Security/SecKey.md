@@ -103,7 +103,7 @@ A refusal on the first four is NULL or `false` **with no `CFError` set**, becaus
 documentation names no domain or code for it, and the port does not manufacture one a caller would
 handle as though the SDK had promised it. **The exchange is the exception and says so**: it answers
 `errSecParam`, which is the release's own code for a parameter it will not accept and the only one its
-documentation leaves, and it is built in one place - `CharonSecKeyFail` - which the curve's refusals
+documentation leaves, and it is built in one place - `RevenantSecKeyFail` - which the curve's refusals
 use as well.
 
 ### The EC key type, and what an earlier version of this file said about it
@@ -136,7 +136,7 @@ answered for a key of the release's keychain:
 | key | sign | verify | exchange | says |
 | --- | --- | --- | --- | --- |
 | the release's own keychain, EC or RSA | `SecKeyRawSign` with the padding above | `SecKeyRawVerify` with it | refused, `errSecParam` | the table above |
-| the port's own kind: the marker `CharonSecKeyScalar` beside a 32 byte `kSecValueData` | the curve, over `charon@micro-ecc` | the curve | the curve | sign, verify and exchange |
+| the port's own kind: the marker `RevenantSecKeyScalar` beside a 32 byte `kSecValueData` | the curve, over `revenant@micro-ecc` | the curve | the curve | sign, verify and exchange |
 | a class the release takes nothing from - `kSecAttrKeyTypeAES` is `ios(NA)` | refused | refused | refused | false for everything |
 
 The public symbol for each of the four is in `SecurityFunctions10_0_1.m`, **once**, and it dispatches on
@@ -150,7 +150,7 @@ The four functions were each *implemented twice* until that merge, and the regis
 the rows were in two different registry files, and the check asks whether a row has code, not whether
 two files claim the same API. `registry/Security/ios10keys.json` holds one row per API now, and
 `facts/Security/SecKeyElliptic.md` is the other half - the curve, its measurement, and the three
-`Charon*` names the dispatch calls.
+`Revenant*` names the dispatch calls.
 
 The matrix was four kinds of key by four functions, and every cell had a red of its own when it was measured:
 sixteen cells, fourteen of them by a mutation in `tests/backports/host/seckeycurve/mutate-cells.py` (a driver

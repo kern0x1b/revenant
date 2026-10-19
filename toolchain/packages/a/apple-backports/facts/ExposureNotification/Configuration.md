@@ -21,10 +21,10 @@ a caller sets a weight, and they are a known gap, not a finding. A caller that s
 sees them.
 
 Which values Apple recommends is in the iOS 16.0 arm64e cache, and it has not been read out of it yet. The
-image extracts cleanly with charon's own reader --
+image extracts cleanly with Revenant's own reader --
 
 ```
-$ CHARON_ROOT=$PWD xmake l extract-image.lua ~/.charon/dyld/16.0/dyld_shared_cache_arm64e ExposureNotification out
+$ REVENANT_ROOT=$PWD xmake l extract-image.lua ~/.revenant/dyld/16.0/dyld_shared_cache_arm64e ExposureNotification out
 /System/Library/Frameworks/ExposureNotification.framework/ExposureNotification: 209290691 bytes, 0 rebased pointers, 1684 symbols
 ```
 

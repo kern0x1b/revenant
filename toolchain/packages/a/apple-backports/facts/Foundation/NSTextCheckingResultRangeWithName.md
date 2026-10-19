@@ -3,7 +3,7 @@
 Introduced in iOS 11.0 on iOS: `-rangeWithName:` answers the range a named capture
 group matched, given the group's name.
 
-Source: the SDK 16.4 headers; the armv7 caches under `$HOME/.charon/dyld/<release>/`
+Source: the SDK 16.4 headers; the armv7 caches under `$HOME/.revenant/dyld/<release>/`
 for the ICU data version and the `uregex_*` exports; `tests/backports/host/rangewithname`
 against the host's own method.
 

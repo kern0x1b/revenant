@@ -26,5 +26,5 @@ they are not 26.2 API.
 There is no device measurement here: `run-emu.sh` and `snapshots.sh` both need the emulator, which is
 `emulate-launch`'s `xmake emulate` and not on this machine. What is measured is the SDK's own
 availability annotation, quoted above, and the port's own header for the 6.1.3 toolchain
-(`eidolon/bridge/fw/`, the interface of iOS 16.4), which likewise has no multi-range selection on
+(`SwiftUI/bridge/fw/`, the interface of iOS 16.4), which likewise has no multi-range selection on
 `UITextView`.

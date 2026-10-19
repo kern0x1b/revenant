@@ -90,8 +90,8 @@ answer is worse than no code, and a registry row that claims `implemented` needs
 ## What this family needs, which is a decision and not a measurement
 
 1. **A way to run the port's five classes beside the host's.** The tree's own answer for a class the port
-   defines and the host also has is the `Charon` prefix (`registry/Metal/ios80classes.json`'s
-   `CharonMetalBuffer` and its siblings, `CharonIntentsUIHostedViewController`), which needs a decision about
+   defines and the host also has is the `revenant` prefix (`registry/Metal/ios80classes.json`'s
+   `RevenantMetalBuffer` and its siblings, `RevenantIntentsUIHostedViewController`), which needs a decision about
    whether a renamed class is acceptable for an SDK-named class on a release that has none.
 2. **Or the comparison moves off macOS.** The port's bands are the ones with no such classes, so there is no
    host there; the device route (`xmake emulate`, 6.1.3) checks the port's answers but has no oracle, which

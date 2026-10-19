@@ -82,7 +82,7 @@ MLCompute includes.
 `packages/g/ggml/xmake.lua:88`, in `on_test` - and everything before it had succeeded: the three units
 compiled, `libtool` made the archive, and the log showed every copy. `os.vcp` copies a file *as* its
 destination unless the destination names a directory, and xmake spells "this is a directory" as a
-trailing slash - which is why `Box2D` and `charon` in the neighbouring recipes end theirs in `.. "/"`.
+trailing slash - which is why `Box2D` and `revenant` in the neighbouring recipes end theirs in `.. "/"`.
 Without it the five headers became one file called `ggml`, and the test could not find
 `include/ggml/ggml.h`. With the slash, and an `os.mkdir` for the include and licences directories, the
 install says `ok` and the recipe's own test passes.
@@ -92,13 +92,13 @@ wrappers that `ggml.c` only declares - `ggml_sigmoid`, `ggml_new_f32`, `ggml_set
 compute - and with only the library's three the archive links with undefined symbols the first time
 anything calls one.
 
-**The recipe is landed and wired**: `add_deps("charon@ggml 0.25.3")` and its `archives` entry in
+**The recipe is landed and wired**: `add_deps("revenant@ggml 0.25.3")` and its `archives` entry in
 `packages/a/apple-backports/xmake.lua`, and `archives = {"ggml"}` on MLCompute's entry in
 `modules/apple/backports.lua`. Both gates build it and link it, in both bands.
 
 ## What is not done
 
-**The first mapping is written and compiles, and is not in the tree.** `CharonMLCGraph.mm` maps the
+**The first mapping is written and compiles, and is not in the tree.** `RevenantMLCGraph.mm` maps the
 twenty-one activations onto ggml's operators - the ten ggml has an operator for directly, the other
 eleven through `ggml_map_custom1` with the measured formula of `Engine.md` in the callback - and it
 compiles clean for `armv7-apple-ios6.1.3`. It is held in `.agent-work/` rather than committed because
@@ -118,11 +118,11 @@ operators are ggml's.
 
 ## A note on the machine
 
-Building the package needed a scratch project, and the first attempt of it resolved the *first* `charon`
-version the addon recipe names rather than the newest, which installed `charon v0.1.0` and moved the
-machine's active addon - the lock hazard `charon AGENTS.md` and `coordination/crutches.md` both name.
+Building the package needed a scratch project, and the first attempt of it resolved the *first* `revenant`
+version the addon recipe names rather than the newest, which installed `revenant v0.1.0` and moved the
+machine's active addon - the lock hazard `revenant AGENTS.md` and `coordination/crutches.md` both name.
 It has been put back: the record for `v0.1.0` is out of `~/.xmake/addons/addons.conf`, the directory is
-gone, `active` is `v0.8.12` and the gate resolves `charon v0.8.13` again, which is what it resolved before.
+gone, `active` is `v0.8.12` and the gate resolves `revenant v0.8.13` again, which is what it resolved before.
 The lesson is in the recipe's own build: a scratch project must take the *highest* `add_versions` from
 the checkout's addon recipe, exactly as `coordination/build-gate.lua` does, and not the first.
 
@@ -151,7 +151,7 @@ resolve the `std::__1` symbols is what the 4.3 gate of this stack decides.
 
 Update: the recipe answers `clock_gettime` itself. libSystem exports it from iOS 10, and ggml.c calls it
 without a check for its two time counters, so a link against the 6.1.3 band left it a weak import that is
-NULL there (the gate warned of it). The recipe renames the call to `charon_ggml_clock_gettime`, which the
+NULL there (the gate warned of it). The recipe renames the call to `revenant_ggml_clock_gettime`, which the
 runtime shim defines with hidden visibility: the monotonic clock is the Mach absolute time in nanoseconds,
 the wall clock is `gettimeofday`, and any other clock id is `EINVAL`. Checked on the host against the
 system's own uptime and wall clocks, and against an unsupported clock id.

@@ -44,7 +44,7 @@ xz stream header, an empty block-less stream, and its index and footer).
   match); a cut inside a sequence answers 0. The layer walks the sequences itself (`decode_lz4_raw`).
 - ZLIB: NOT settled. The host answers the decoded prefix for some cuts and 0 for others (for example random 4095 bytes
   answer the prefix at every cut, words 4095 answer 0 at every cut but the end). The layer answers 0 at every cut that
-  is not the end. This is a known difference: see the crutch entry `charon: ZLIB truncated streams`, and the
+  is not the end. This is a known difference: see the crutch entry `revenant: ZLIB truncated streams`, and the
   differential reports it as KNOWN-DIFF by name.
   One measured attempt at the rule (seed 1): answer the bytes decoded so far on any Z_BUF_ERROR, as an eager decoder
   would. It is worse: 10234 truncation failures (the host answers 0 inside a dynamic block, so an eager answer is wrong

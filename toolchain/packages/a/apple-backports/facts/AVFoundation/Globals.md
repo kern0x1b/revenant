@@ -25,7 +25,7 @@ measurement says the 16.0 cache exports it. That is the whole reason for the rul
 ## The oracles, and a correction
 
 **The host's own AVFoundation, on this machine.** `tests/backports/host/avf-globals/` is a differential:
-`run.sh` compiles the port's five objects with each constant's *definition* renamed to a `charon_host_`
+`run.sh` compiles the port's five objects with each constant's *definition* renamed to a `revenant_host_`
 spelling and links them beside `probe.m`, so the bare name is Apple's own symbol and the prefixed name is
 the port's own definition, and one process prints both. 116 of 116 agree.
 
@@ -34,7 +34,7 @@ $ sh tests/backports/host/avf-globals/run.sh
 the port's own sources declare 116 constants
 ok  control AVMediaTypeVideo = STR vide
 ok  control AVMediaTypeDepthData = STR dpth
-ok  control AVMediaTypeCharonProbeNoSuchConstant = LACKS
+ok  control AVMediaTypeRevenantProbeNoSuchConstant = LACKS
 ok  control AVPlayer = HAS 0x1f0c10830
 ok  116 constants declared, 116 names read, 116 rows emitted
 the join compared 116 rows that agree and 0 that differ
@@ -78,19 +78,19 @@ slid pointer, the pointer names a `__CFString`, and the string's own words give 
 count. It uses the tree's own cache reader (`modules/apple/dyld.lua`).
 
 ```
-CHARON_ROOT=$PWD xmake l tools/corpus/cache-value.lua \
-    ~/.charon/dyld/18.0/dyld_shared_cache_arm64e .agent-work/avf/symbols-pointer.tsv > .agent-work/avf/values-18.tsv
-CHARON_ROOT=$PWD xmake l tools/corpus/cache-value.lua \
-    ~/.charon/dyld/16.0/dyld_shared_cache_arm64e .agent-work/avf/symbols-pointer.tsv > .agent-work/avf/values-16.tsv
-CHARON_ROOT=$PWD xmake l tools/corpus/cache-value.lua \
-    ~/.charon/dyld/12.0/dyld_shared_cache_arm64  .agent-work/avf/symbols-pointer.tsv > .agent-work/avf/values-12.tsv
+REVENANT_ROOT=$PWD xmake l tools/corpus/cache-value.lua \
+    ~/.revenant/dyld/18.0/dyld_shared_cache_arm64e .agent-work/avf/symbols-pointer.tsv > .agent-work/avf/values-18.tsv
+REVENANT_ROOT=$PWD xmake l tools/corpus/cache-value.lua \
+    ~/.revenant/dyld/16.0/dyld_shared_cache_arm64e .agent-work/avf/symbols-pointer.tsv > .agent-work/avf/values-16.tsv
+REVENANT_ROOT=$PWD xmake l tools/corpus/cache-value.lua \
+    ~/.revenant/dyld/12.0/dyld_shared_cache_arm64  .agent-work/avf/symbols-pointer.tsv > .agent-work/avf/values-12.tsv
 ```
 
 Its own controls, on each of the three caches:
 
 ```
 # control AVMediaTypeVideo	STRING	vide	4 bytes	isa __NSCFConstantString
-# control AVMediaTypeCharonProbeNoSuchConstant	ABSENT	-
+# control AVMediaTypeRevenantProbeNoSuchConstant	ABSENT	-
 ```
 
 The ladder ends at 18.0, so this oracle reaches every constant up to and including 18.0 and **nothing**
@@ -125,7 +125,7 @@ every value here is read and none is typed.
 ## What the ladder measures, and the run that measured it
 
 ```
-CHARON_ROOT=$PWD xmake l tools/symbol-first-release.lua .agent-work/avf/first-names.txt > .agent-work/avf/first-release.tsv
+REVENANT_ROOT=$PWD xmake l tools/symbol-first-release.lua .agent-work/avf/first-names.txt > .agent-work/avf/first-release.tsv
 ladder: 53 rungs, 3.0 (armv7) .. 18.0 (arm64e)
 owner filter: on, the .tbd libraries of .../iPhoneOS16.4.sdk
 ```

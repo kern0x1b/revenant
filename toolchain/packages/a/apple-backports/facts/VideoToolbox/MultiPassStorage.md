@@ -1,14 +1,14 @@
 # VTMultiPassStorage: a real file, and the two answers the host corrected
 
 `VTMultiPassStorage9_0.m` carries the three functions SDK 26.2 declares and the 6.1.3 release exports
-nothing of. From `tools/corpus/dump-cache.lua` over `$HOME/.charon/dyld/6.1.3/dyld_shared_cache_armv7`,
+nothing of. From `tools/corpus/dump-cache.lua` over `$HOME/.revenant/dyld/6.1.3/dyld_shared_cache_armv7`,
 2026-10-03: zero hits for `_VTMultiPassStorageCreate`, `_VTMultiPassStorageClose`,
 `_VTMultiPassStorageGetTypeID`.
 
 ## The CF type is the tree's mechanism, reused
 
 The tree already carries a CF type the 16.4 SDK does not, and does it the same way twice -
-`AVFoundation/CMTaggedBufferGroup17.m` and `Graphics/CVMetalTexture80.m` bridge a `Charon`-prefixed NSObject
+`AVFoundation/CMTaggedBufferGroup17.m` and `Graphics/CVMetalTexture80.m` bridge a `revenant`-prefixed NSObject
 class to an opaque CF ref and answer `GetTypeID` with `(CFTypeID)objc_getClass(...)`. So does this. The class
 is **not** called `VTMultiPassStorage`: a class with Apple's name collides with the host's own class in any
 differential compiled against the host's SDK, and this library has to compile in both places.
@@ -62,7 +62,7 @@ A path whose parent directory does not exist gives **`-17913`** on the host. An 
 answered `kVTAllocationFailedErr` (-10803) there and said it was guessing; the coordinator's answer is that a
 literal is native when it is the measured value with its source named next to it, and answering a different
 code where the oracle says otherwise is a divergence. So the port answers `-17913`, as
-`kCharonVTMultiPassStorageDirectoryMissing` in `VTMultiPassStorage9_0.m`, with the measurement in the comment
+`kRevenantVTMultiPassStorageDirectoryMissing` in `VTMultiPassStorage9_0.m`, with the measurement in the comment
 above the constant.
 
 **The framework that owns -17913 could not be identified, and is recorded as not identified.**
@@ -88,7 +88,7 @@ $ nm -gU .../VTMPS.o
 _T VTMultiPassStorageClose
 _T VTMultiPassStorageCreate
 _T VTMultiPassStorageGetTypeID
-_S _OBJC_CLASS_$_CharonVTMultiPassStorage
+_S _OBJC_CLASS_$_RevenantVTMultiPassStorage
 ```
 
 and the host readings above come from `.agent-work/v-audio/probe-mps.m`, which asks Apple's own

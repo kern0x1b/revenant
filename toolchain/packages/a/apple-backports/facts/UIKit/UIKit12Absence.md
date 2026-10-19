@@ -28,26 +28,26 @@ own control in every run, which is the point: a census printing 0 is ambiguous, 
 nothing anywhere is reported `CONTROL FAILED` rather than as an absence.
 
 ```
-CHARON_ROOT=$PWD xmake l tools/corpus/cache-census.lua UI 6.1.3 4.3 11.0 12.0
+REVENANT_ROOT=$PWD xmake l tools/corpus/cache-census.lua UI 6.1.3 4.3 11.0 12.0
 ```
 
 ```
-4.3       ~/.charon/dyld/4.3/dyld_shared_cache_armv7
+4.3       ~/.revenant/dyld/4.3/dyld_shared_cache_armv7
          images 354, of which naming UI 15
          classes 7187, of which UI* 597
          protocols 564, of which UI* 64
 control: 661 name(s) beginning UI found in this run, so a zero on another rung is the release's and not the reader's
-6.1.3     ~/.charon/dyld/6.1.3/dyld_shared_cache_armv7
+6.1.3     ~/.revenant/dyld/6.1.3/dyld_shared_cache_armv7
          images 524, of which naming UI 25
          classes 11378, of which UI* 705
          protocols 1171, of which UI* 91
 control: 796 name(s) beginning UI found in this run, so a zero on another rung is the release's and not the reader's
-11.0      ~/.charon/dyld/11.0/dyld_shared_cache_arm64
+11.0      ~/.revenant/dyld/11.0/dyld_shared_cache_arm64
          images 1258, of which naming UI 117
          classes 52768, of which UI* 1665
          protocols 8954, of which UI* 374
 control: 2039 name(s) beginning UI found in this run, so a zero on another rung is the release's and not the reader's
-12.0      ~/.charon/dyld/12.0/dyld_shared_cache_arm64
+12.0      ~/.revenant/dyld/12.0/dyld_shared_cache_arm64
          images 1368, of which naming UI 138
          classes 63192, of which UI* 1741
          protocols 11426, of which UI* 389
@@ -74,8 +74,8 @@ releases' and the reader's, which is what a control is for.
 ### Class-scoped selectors over the two armv7 band ends
 
 ```
-CHARON_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua ~/.charon/dyld/6.1.3/dyld_shared_cache_armv7
-CHARON_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua ~/.charon/dyld/4.3/dyld_shared_cache_armv7
+REVENANT_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua ~/.revenant/dyld/6.1.3/dyld_shared_cache_armv7
+REVENANT_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua ~/.revenant/dyld/4.3/dyld_shared_cache_armv7
 ```
 
 One TSV line per class: `class <name> <superclass> <image> <instance selectors> <class selectors>
@@ -167,7 +167,7 @@ so. What the property would promise is a colour range, so the question is what c
 release has:
 
 ```
-CHARON_ROOT=$PWD xmake l tools/corpus/dump-cache.lua ~/.charon/dyld/6.1.3/dyld_shared_cache_armv7 \
+REVENANT_ROOT=$PWD xmake l tools/corpus/dump-cache.lua ~/.revenant/dyld/6.1.3/dyld_shared_cache_armv7 \
   | awk -F'\t' '$2=="CoreGraphics"' | grep -o 'kCGColorSpace[A-Za-z]*' | sort -u
 ```
 

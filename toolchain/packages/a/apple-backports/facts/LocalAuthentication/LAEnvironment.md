@@ -7,7 +7,7 @@ sensors, a paired watch or Mac companion, the passcode — with the state of eac
 which of them are available to that domain, with hashes that identify the state so an application can
 tell that it changed.
 
-The port's build SDK is `charon@iphoneos-sdk` 16.4, which predates every class of this file, so the
+The port's build SDK is `revenant@iphoneos-sdk` 16.4, which predates every class of this file, so the
 declarations the headers of the 26.2 SDK give are written in the backport's own source
 (`LAEnvironment18.m`, `LADomainState18.m`). `LABiometryType` is the one piece the 16.4 SDK does
 declare, in `LAContext.h`, and is used from there.

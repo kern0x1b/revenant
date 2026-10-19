@@ -1,12 +1,12 @@
-# charon@activitykit
+# revenant@activitykit
 
 The ActivityKit framework of iOS 16.1, as one Swift module a port writes `import ActivityKit` for,
-built against the `charon@swift-runtime` a port carries.
+built against the `revenant@swift-runtime` a port carries.
 
     target("my-port")
-        add_requires("charon@swift-runtime")
-        add_requires("charon@appintents")
-        add_requires("charon@activitykit")
+        add_requires("revenant@swift-runtime")
+        add_requires("revenant@appintents")
+        add_requires("revenant@activitykit")
         add_packages("swift-runtime", "appintents", "activitykit")
 
 ## What the module is
@@ -22,7 +22,7 @@ A Live Activity is a registration the system's own daemon (`chronod`) owns; it m
 draws the activity on the Lock Screen and in the Dynamic Island. iOS 6.1.3 runs no such daemon, has no
 Live Activity surface and grants no entitlement for one, so the module gives the framework's own answer
 for a device that does not support Live Activities, and gives it by asking:
-`CharonActivitySupport.shared.areActivitiesEnabled` is `false` with no reader installed, and a caller on a
+`RevenantActivitySupport.shared.areActivitiesEnabled` is `false` with no reader installed, and a caller on a
 release that does run the daemon installs the system's own answer with
 `install(areActivitiesEnabled:frequentPushesEnabled:)`. From that one answer everything else follows the
 framework's own way: `request` throws `ActivityAuthorizationError.unsupported`, `activities` is empty,
@@ -37,7 +37,7 @@ sound, the dismissal policy, and the errors' domain, codes and sentences. `facts
 
 `AlertConfiguration`'s `title` and `body` are `Foundation.LocalizedStringResource`. Where the runtime's
 Foundation has the type, the module uses the platform's; where it does not - it is the swift-5.4.3
-overlay, which predates it - the `charon@appintents` package carries it and this one takes it from
+overlay, which predates it - the `revenant@appintents` package carries it and this one takes it from
 there. The recipe measures which with a probe and prints it at every install.
 
 ## Licence
@@ -59,15 +59,15 @@ To build one of these Swift packages without a port, give `xmake` a project of i
 the gate's `resolve()` shapes one (`coordination/build-gate.lua:44-48`):
 
     set_project("gate-tipkit")
-    add_repositories("charon <path to a checkout>")
-    add_addons("charon v0.8.13")             -- the newest version the checkout's recipe names
+    add_repositories("revenant <path to a checkout>")
+    add_addons("revenant v0.8.13")             -- the newest version the checkout's recipe names
     set_config("apple_minimum", "6.1.3")
-    includes("@addon/charon/apple-ios")
+    includes("@addon/revenant/apple-ios")
     set_defaultplat("iphoneos")
     set_defaultarchs("iphoneos|armv7")
-    add_requires("charon@swift-runtime", {alias = "swift-runtime"})
-    add_requires("charon@appintents", {alias = "appintents"})
-    add_requires("charon@tipkit", {alias = "tipkit"})
+    add_requires("revenant@swift-runtime", {alias = "swift-runtime"})
+    add_requires("revenant@appintents", {alias = "appintents"})
+    add_requires("revenant@tipkit", {alias = "tipkit"})
 
 A **fresh directory name per attempt** matters: xmake keeps a repository search index under
 `~/.xmake/cache/quick_search`, and a directory name it has seen before is answered from that index

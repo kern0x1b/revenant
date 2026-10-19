@@ -84,15 +84,15 @@ thing that would be worse. An encoder that was given no heap is not checked at a
 common case and costs nothing.
 
 **The check itself, and what it caught.** The first version of this reached every bind path with
-`-charonCheckHeapOf:what:` and every `useHeap` row with `-charonUseHeaps:count:`, declared both in
-`CharonMetal.h` and implemented neither: nothing links an Objective-C method by name, so the compiler
+`-revenantCheckHeapOf:what:` and every `useHeap` row with `-revenantUseHeaps:count:`, declared both in
+`RevenantMetal.h` and implemented neither: nothing links an Objective-C method by name, so the compiler
 took the calls, the gate saw no missing symbol, the registry carries no private selector, and the
 first vertex or fragment bind on 4.3 or 6.1.3 raised `doesNotRecognizeSelector:` — every draw through
 the port. It was found by review, not by any check. `tests/backports/host/metalblit/check-private-selectors.py`
-is the check that was missing: it matches the `charon…` declarations of the folder's header against the
+is the check that was missing: it matches the `revenant…` declarations of the folder's header against the
 definitions in the folder, by name, and it runs first in that test's `run.sh`, before anything is
 built. Run on the tree as it stood, it named the two unimplemented methods and one dead declaration
-(`-charonForgetNotification:`, left over from the event handle, which nothing called and which is
+(`-revenantForgetNotification:`, left over from the event handle, which nothing called and which is
 gone).
 
 `stages` says which stages of a pipeline may read the heaps. This port has one stage set, so the mask

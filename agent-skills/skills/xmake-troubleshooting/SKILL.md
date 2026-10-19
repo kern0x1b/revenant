@@ -1,15 +1,15 @@
 ---
 name: xmake-troubleshooting
-description: Diagnose xmake 3.1.1 itself when building an old-iOS app with Charon misbehaves — decide which layer stopped (a package install, the addon, the toolchain's architecture check, Charon's checks, the run), read a failed package's install.txt, find which process holds the project or package lock when a command waits in silence, trace a hanging command with XMAKE_PROFILE=stuck, recognise the addon not being installed or not the pinned one, and collect what a report to Charon needs — fixing the cause (xmake f with every choice, the right rule, the right flags) instead of forcing, deleting the store or disabling a check. Use when xmake does something you cannot explain; for a refusal by Charon's own checks the skill build comes first.
+description: Diagnose xmake 3.1.1 itself when building an old-iOS app with the toolchain misbehaves — decide which layer stopped (a package install, the addon, the toolchain's architecture check, Revenant's checks, the run), read a failed package's install.txt, find which process holds the project or package lock when a command waits in silence, trace a hanging command with XMAKE_PROFILE=stuck, recognise the addon not being installed or not the pinned one, and collect what a report to the toolchain needs — fixing the cause (xmake f with every choice, the right rule, the right flags) instead of forcing, deleting the store or disabling a check. Use when xmake does something you cannot explain; for a refusal by Revenant's own checks the skill build comes first.
 ---
 
-Derived from the `xmake-troubleshooting` skill of xmake-io/xmake-skills at `ef67caa` (Apache-2.0), rewritten and modified for Charon.
+Derived from the `xmake-troubleshooting` skill of xmake-io/xmake-skills at `ef67caa` (Apache-2.0), rewritten and modified for the toolchain.
 
 # When xmake misbehaves
 
 Work from the cheapest look to the most invasive, and fix the cause where it is. Never a fix:
 forcing a package, deleting from the package store, a private store, or silencing or waiving a
-Charon check to get a green build (the rules for every step, skill `psychopomp`). Read `PROJECT.md`
+toolchain check to get a green build (the rules for every step, skill `agent-skills`). Read `PROJECT.md`
 first, and log every command to a file under `.logs/` so the evidence stays.
 
 ## 1. See what it is doing
@@ -20,8 +20,8 @@ XMAKE_COLORTERM=nocolor xmake -y -vD > .logs/build-vD.log 2>&1    # plus a Lua t
 xmake f -vD -p iphoneos -a armv7 -y > .logs/configure-vD.log 2>&1
 ```
 
-- The traceback names the file that raised: a path under `~/.xmake/addons/charon/<version>/` is
-  Charon (the version in it is the addon actually in use); a path under xmake's own install is
+- The traceback names the file that raised: a path under `~/.xmake/addons/revenant/<version>/` is
+  The toolchain (the version in it is the addon actually in use); a path under xmake's own install is
   xmake.
 - `xmake show` prints `plat`, `arch` and `mode` in force; `xmake show -t <Name>` prints the target's
   rules, files, compiler and linker with their flags.
@@ -35,9 +35,9 @@ xmake f -vD -p iphoneos -a armv7 -y > .logs/configure-vD.log 2>&1
 | Where it stops | What it is | Next |
 | --- | --- | --- |
 | `xmake f` with `install … failed` | a package build | its `install.txt`; skill `xmake-packages` |
-| `rule(@addon/charon/…) not found!` or `includes(@addon/charon/…) not found!` | the addon is not installed | §4 |
+| `rule(@addon/revenant/…) not found!` or `includes(@addon/revenant/…) not found!` | the addon is not installed | §4 |
 | `apple_minimum … is older than …` / `… is newer than …` | architecture and release disagree | skill `xmake-toolchains` |
-| `target(<Name>) builds for apple-ios …`, `imports:`, `… is not what the platform runs: …`, `a link input of <Name> was not built for this target: …` | Charon's checks | skill `build` |
+| `target(<Name>) builds for apple-ios …`, `imports:`, `… is not what the platform runs: …`, `a link input of <Name> was not built for this target: …` | Revenant's checks | skill `build` |
 | the program dies on the device or in the emulator | the run | skills `emulate`, `device`; `Bad system call: 12` is the skill `build`'s |
 | a build for another architecture or mode than asked, a removed flag still there | stale configuration | skill `xmake-basics`, step 3 |
 
@@ -76,9 +76,9 @@ lsof .xmake/macosx/arm64/project.lock
 
 ## 4. The addon is missing or not the pinned one
 
-The rules, the toolchain and the checks come from `~/.xmake/addons/charon/<version>/`. A project
+The rules, the toolchain and the checks come from `~/.xmake/addons/revenant/<version>/`. A project
 whose addon lock is missing or does not match installs the addon when it loads and says so:
-`note: this project needs the addons(charon v<X>), installing them ..`. When a rule or include is
+`note: this project needs the addons(the toolchain v<X>), installing them ..`. When a rule or include is
 still `not found!`, that install did not happen: read the configure log for its error (a network
 failure, a tag that does not exist) and run `xmake f -y` again once it is fixed. Do not install
 the addon by hand with `xmake addon`: the project installs the version it pins.
@@ -87,9 +87,9 @@ When the lock or `xmake addon --list` names another version than the pin: the sk
 addon in use is not the one pinned") and the first trap of the skill `install`. Stop and tell the
 user; do not edit the lock.
 
-## 5. Reporting a problem to Charon
+## 5. Reporting a problem to the toolchain
 
-When the cause is in Charon or xmake and not in the project, collect: `xmake --version`, the tag
+When the cause is in the toolchain or xmake and not in the project, collect: `xmake --version`, the tag
 pair from `xmake.lua`, both lock files, the smallest `xmake.lua` that shows it, and the `-vD` log.
 Tell the user where the problem is and what you collected; do not work around it in the project.
 
@@ -102,9 +102,9 @@ Tell the user where the problem is and what you collected; do not work around it
   project lock's wait message is printed only with `-D`.
 - Starting a second `xmake` in the same project to "see if it is still going" → `pgrep`. Reason:
   it waits on the first one's lock and adds nothing.
-- Waiving a check (`charon.waive.<check>`) or dropping `-fobjc-arc` to get past a refusal → fix
+- Waiving a check (`revenant.waive.<check>`) or dropping `-fobjc-arc` to get past a refusal → fix
   what the check names (skill `build`). Reason: the check reports what fails on the device.
-- `xmake addon --install charon` to fix `not found!` → let the project install its pin (§4).
+- `xmake addon --install revenant` to fix `not found!` → let the project install its pin (§4).
   Reason: an install makes the version it installs the machine's active one, which other
   projects' locks are then written from (skill `install`, first trap).
 - Reading only `install … failed` → read `install.txt` (or run with `-D`). Reason: the first lines

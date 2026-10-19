@@ -120,7 +120,7 @@ What a query's handlers are called on is the port's own business, and it is the 
 
 ## The store
 
-`CharonHKStore` is a SQLite database under Application Support, reached through the device's own
+`RevenantHKStore` is a SQLite database under Application Support, reached through the device's own
 `/usr/lib/libsqlite3.dylib`. All twenty-six of the SQLite entry points it calls are exported by the
 armv7 shared cache of both 4.3 and 6.1.3 - `sqlite3_open`, `sqlite3_open_v2`, `sqlite3_close`,
 `sqlite3_exec`, `sqlite3_prepare_v2`, `sqlite3_step`, `sqlite3_finalize`, `sqlite3_reset`,
@@ -338,15 +338,15 @@ package is built for, one class and one export table at a time:
 
 So a band of 10.0.1 to 10.3.4 that linked the class implementation would have held two classes of one
 name in every process, and the runtime keeps the one it registered first - the release's. The name goes
-through `charon_alias.h`, which is what `modules/apple/backports.lua`'s own `check_categories` asks for
+through `revenant_alias.h`, which is what `modules/apple/backports.lua`'s own `check_categories` asks for
 when it reads this reading ("the release carries HKCDADocument in HealthKit without exporting it: alias
-it through charon_alias.h"), and what `MDLMeshBufferZoneDefault`, `NSTextList` and `NSTextTab` already
-are for the same one. The twelve members are a category on Charon's own name, which ld64 merges into
+it through revenant_alias.h"), and what `MDLMeshBufferZoneDefault`, `NSTextList` and `NSTextTab` already
+are for the same one. The twelve members are a category on Revenant's own name, which ld64 merges into
 the proxy, and the document's five values are an associated object - a category cannot add an instance
 variable and neither can the class behind an alias (`attach.c` lays the proxy out from the release's
 class and takes that write back when the two instance sizes differ), the shape `CarPlay`'s `CPListItem`
 row and ModelIO's mesh buffer zone already use. The reader of that state is a C function and not a
-method, so that no selector of Charon's own lands on the release's class on a band where the release has
+method, so that no selector of Revenant's own lands on the release's class on a band where the release has
 one.
 
 What each band answers:
@@ -356,7 +356,7 @@ What each band answers:
   library's objects: `_OBJC_CLASS_$_HKCDADocument` and its metaclass first appear at 11.0.)
 - **On 10.0.1 to 10.3.4** the release's class answers `-documentData`, `-title`, `-patientName`,
   `-authorName` and `-custodianName`, and the category is attached only where the class does not answer
-  the selector: the five-argument `-charon_initWithDocumentData:` and this file's `-initWithCoder:` and
+  the selector: the five-argument `-revenant_initWithDocumentData:` and this file's `-initWithCoder:` and
   `-encodeWithCoder:` are the port's own there (HealthKit's are the `-omittedContentFlags:` spellings),
   while `-copyWithZone:`, `-isEqual:`, `-hash` and `-description` are NSObject's or the release's and the
   category's copies of them are not attached. Nothing in such a band makes a document of ours, and that
@@ -369,7 +369,7 @@ What each band answers:
 **Not measured**: nothing here was run on a device. A document Apple's own sample hands out on 10.x and
 a document of ours below 10.0.1 are different objects by construction, and what a program that holds
 both does with `-isEqual:` is a question about that program. `NSClassFromString` answers nil for the
-name on a release that has no class of it, which is what `charon_alias.h` records for every alias it
+name on a release that has no class of it, which is what `revenant_alias.h` records for every alias it
 makes; before this change the port's own class answered there.
 
 **The seven clinical type identifiers of 12.0 were `absent` because a run was going to write them, and
@@ -387,7 +387,7 @@ them, which is what it did while the constants did not exist.
 
 The host differential holds the twenty-one to the host's own symbols rather than to strings written
 beside them: `run.sh` renames them, because the host's HealthKit exports the same twenty-one names and
-one process cannot link both under one name, and `CharonHKConstants12()` reads each value out of the
+one process cannot link both under one name, and `RevenantHKConstants12()` reads each value out of the
 port's object and out of the host's and compares the two. Each of the seven clinical identifiers is then
 used as the identifier of a clinical type on both sides, because a value that is right and a value the
 store can find are two different things. Two mutants of the two shapes are run through it and neither
@@ -612,7 +612,7 @@ for it; the three constants whose own typedef is of 18.0 or 26.0 (`HKScoredAsses
 
 Since the archive's root is decoded by the unarchiver (`16b1a771b`), the class of an object read out of the
 store comes from the archive's own class name, not from the kind the table resolves. The kind still picks
-**whose** `+charon_objectFromArchive:type:store:` runs - so a row whose kind names no class cannot be read
+**whose** `+revenant_objectFromArchive:type:store:` runs - so a row whose kind names no class cannot be read
 at all - but it no longer decides **which** class the object comes back as. A mutant that changes a
 stored kind therefore tests nothing here: the cumulative sample's kind was mutated from 5 to 1 and the
 round trip did not notice. The mutants for the cumulative classes are on the fact each class adds - the
@@ -727,6 +727,6 @@ declares no `-init` of its own on the eight classes, and that the eight rows sta
 SDK header marks it `NS_UNAVAILABLE`. Measured at run time on the macOS host, `[[X alloc] init]` and `[X new]` both
 raise `NSInvalidArgumentException` with the reason `The -init method is not available on X`, and the port's class
 answers the same (`tests/backports/host/init-inherited/host.sh`; the output is in `facts/HealthKit/HealthKit8Absent.md`
-§4). The port closes the eight with `CHARON_HEALTHKIT_UNCREATABLE_INIT`. The host is macOS, so the iOS release's own
+§4). The port closes the eight with `REVENANT_HEALTHKIT_UNCREATABLE_INIT`. The host is macOS, so the iOS release's own
 answer is not measured here; the 6.1.3 gate is the release's answer and this band does not run it. `HKDeletedObject`
 has no `-init` of its own on either side and answers an object, as before.

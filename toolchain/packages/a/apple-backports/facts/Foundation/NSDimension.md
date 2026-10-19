@@ -23,7 +23,7 @@ inherits that.
 ## The specifier
 
 `_reserved` holds the private specifier, a number identifying the unit to the
-unit formatter. Charon implements it under its own name because a unit archived
+unit formatter. The toolchain implements it under its own name because a unit archived
 by the real Foundation carries it, and an archive that loses it is not the same
 archive. The value per unit is in each dimension's own facts file.
 

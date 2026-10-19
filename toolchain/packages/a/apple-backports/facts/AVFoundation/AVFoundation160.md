@@ -12,11 +12,11 @@ rather than of a member - `fileSystemRepresentation` reads 3.0 from another clas
 name, and `init` reads 3.0, which is NSObject's.
 
 ```
-CHARON_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua ~/.charon/dyld/6.1.3/dyld_shared_cache_armv7 \
+REVENANT_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua ~/.revenant/dyld/6.1.3/dyld_shared_cache_armv7 \
     > .agent-work/runs/wav/inv-6.1.3.tsv                      # 12549 lines
-CHARON_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua ~/.charon/dyld/4.3/dyld_shared_cache_armv7 \
+REVENANT_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua ~/.revenant/dyld/4.3/dyld_shared_cache_armv7 \
     > .agent-work/runs/wav/inv-4.3.tsv                         #  7751 lines
-CHARON_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua ~/.charon/dyld/7.0/dyld_shared_cache_armv7 \
+REVENANT_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua ~/.revenant/dyld/7.0/dyld_shared_cache_armv7 \
     > .agent-work/runs/wav/inv-7.0.tsv                          # 16492 lines
 # the removed class-scoped row read, arguments: \
     $HOME/Git/projects/ios/coordination/corpus/queue/SLICE-AVFoundation-absent_AVFoundation-16.tsv \

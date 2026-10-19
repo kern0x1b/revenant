@@ -1,7 +1,7 @@
 # SCNView over OpenGL ES 2.0
 
 SceneKit does not exist on iOS 6. `SCNView` here is a `CAEAGLLayer` view that draws the scene with this library's
-own OpenGL ES 2.0 renderer (`SceneKit/CharonSCNRenderer.m`). Every rule below was measured against macOS SceneKit
+own OpenGL ES 2.0 renderer (`SceneKit/RevenantSCNRenderer.m`). Every rule below was measured against macOS SceneKit
 (Metal, `SCNRenderer.snapshot` read back byte by byte in sRGB), not taken from the documentation. The programs that
 measured it are in `tests/backports/host/scenekit`: `run.sh` (the matrix functions, node conventions and view
 defaults the device test holds the port to), `frames.sh` (a device's snapshots against SceneKit's frames of the same
@@ -221,7 +221,7 @@ Telegram's star and coin components (release-12.9.2) call `addAnimation:forKey:`
   and animations, and has no children; `-clone` is the same with every child cloned. This port's copy had copied the
   children until this was measured.
 
-This port evaluates them the same way (`SceneKit/CharonSCNAnimation.m`) for the key paths measured: `eulerAngles`,
+This port evaluates them the same way (`SceneKit/RevenantSCNAnimation.m`) for the key paths measured: `eulerAngles`,
 `scale` and `opacity` on a node, `contentsTransform` on a material property; `position` is evaluated the same way and no series has recorded it. Another key path, or an
 animation class other than a basic, spring or group animation (a `CAKeyframeAnimation` on a node, for one), is said
 once in the log and not evaluated.
@@ -325,9 +325,9 @@ frames (see "The frame tolerance").
   `glTexImage2D`, so what an image larger than the limit gives is not known; a mesh with an index above 65535 is drawn with
   `GL_UNSIGNED_INT` indices and no check of `GL_OES_element_index_uint` (present on the iPad 2, `scenekit-lighting` prints
   it), so what a device without it does is not known either.
-- **Animation timing and values left unmeasured** (the log says the timing members once, `CharonSCNAnimation.m`): a pause
+- **Animation timing and values left unmeasured** (the log says the timing members once, `RevenantSCNAnimation.m`): a pause
   before the animation's first frame stores the media time minus a begin of 0; an additive animation of a matrix adds
-  the components one by one (`CharonSCNAdd`), which no series has compared with SceneKit; what happens to the value when a
+  the components one by one (`RevenantSCNAdd`), which no series has compared with SceneKit; what happens to the value when a
   finished animation's removal meets another animation on the same key path is not measured. `position` is evaluated as
   the other four key paths are and no series has recorded it: it is not held to macOS's.
 - **The smallest roughnesses**: below roughness 0.05 macOS SceneKit leaves the GGX formula. `cases ladder` (metalness 1, a
@@ -345,9 +345,9 @@ frames (see "The frame tolerance").
 
 ## Measured on a device
 
-- Shade (`xmake emulate`, iPhone2,1 6.0) has no OpenGL ES 2.0, measured 2026-09-23: its log says
-  `[gles] renderer="Shade GLES 1.1 Vulkan (SwiftShader Device (LLVM 10.0.0))"` and
-  `-[EAGLContext initWithAPI:kEAGLRenderingAPIOpenGLES2]` answers nil in a daemon there — a gap for shade to close.
+- The emulator (`xmake emulate`, iPhone2,1 6.0) has no OpenGL ES 2.0, measured 2026-09-23: its log says
+  `[gles] renderer="Revenant GLES 1.1 Vulkan (SwiftShader Device (LLVM 10.0.0))"` and
+  `-[EAGLContext initWithAPI:kEAGLRenderingAPIOpenGLES2]` answers nil in a daemon there — a gap for the emulator to close.
 
 So the view is checked on hardware, iOS 6.1.3:
 

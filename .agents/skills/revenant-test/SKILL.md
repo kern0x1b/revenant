@@ -1,18 +1,18 @@
 ---
 name: revenant-test
-description: Verify the Safari substitution and the Settings pane — run the declared `charon test` tiers, confirm the port's engine is active on device, launch apps, drive the UI with revtouch, capture screenshots, and check SpringBoard health. Use after deploying or when checking a change on the iPhone 4S.
+description: Verify the Safari substitution and the Settings pane — run the declared `revenant test` tiers, confirm the port's engine is active on device, launch apps, drive the UI with revtouch, capture screenshots, and check SpringBoard health. Use after deploying or when checking a change on the iPhone 4S.
 ---
 
 # Testing on device
 
-All commands go through `charon device <run|copy|fetch> ...` with
+All commands go through `revenant device <run|copy|fetch> ...` with
 `device.env` set, after claiming the device with `xmake device` — see
 `.claude/skills/device-ssh-access` and `.claude/skills/deploy`.
 
 ## The declared tiers
 
-`charon test` runs every tier `charon.toml` declares under `[tests.*]`;
-`charon test --tier NAME` runs one:
+`revenant test` runs every tier `revenant.toml` declares under `[tests.*]`;
+`revenant test --tier NAME` runs one:
 
 | Tier | Needs | Runs |
 | --- | --- | --- |
@@ -43,12 +43,12 @@ commits that removed 32-bit branches:
 
 The stock engine reports `AppleWebKit/536`; the port reports `AppleWebKit/605`.
 
-- Open a page in Safari (`charon device run 12 "uiopen https://…"`) and read the user
+- Open a page in Safari (`revenant device run 12 "uiopen https://…"`) and read the user
   agent — e.g. load a service that echoes it.
 - Or read the on-device engine log:
-  `charon device run 12 "cat /tmp/rev-safari-stderr.log"` — the port prints
+  `revenant device run 12 "cat /tmp/rev-safari-stderr.log"` — the port prints
   `[tweak] ctor pass`, `WebKitInitialize`, `[jit] reservation … succeeded`.
-- Or check what re-exec'd: `charon device run 12 "cat /tmp/rev-safari-tweak.log"` — only
+- Or check what re-exec'd: `revenant device run 12 "cat /tmp/rev-safari-tweak.log"` — only
   apps enabled in `InjectedApps` (Safari by default) should appear.
 - To start the engine log afresh, truncate it (`: > /tmp/rev-safari-stderr.log`);
   never `rm` it while Safari runs. The loader `freopen`s stderr onto that file,
@@ -63,8 +63,8 @@ the port renders them correctly.
 `/usr/bin/shot` writes `/tmp/screenshot.png` (it ignores any path argument):
 
 ```sh
-charon device run 20 'sleep 8; /usr/bin/shot >/dev/null 2>&1'
-charon device fetch /tmp/screenshot.png ./shot.png   # scp it back, then view it
+revenant device run 20 'sleep 8; /usr/bin/shot >/dev/null 2>&1'
+revenant device fetch /tmp/screenshot.png ./shot.png   # scp it back, then view it
 ```
 
 Give heavy sites 15–30 s to finish; re-shoot if content is still loading.
@@ -72,7 +72,7 @@ Give heavy sites 15–30 s to finish; re-shoot if content is still loading.
 ## SpringBoard / UI health
 
 ```sh
-charon device run 12 'launchctl list | grep com.apple.SpringBoard'   # present == running
+revenant device run 12 'launchctl list | grep com.apple.SpringBoard'   # present == running
 ```
 
 `killall -0 SpringBoard` (exit 0 == running) works too. The device has no `ps`,
@@ -91,10 +91,10 @@ tag (CoreAnimation, CoreGraphics/ImageIO, JavaScriptCore, malloc, ...). The
 
 ```sh
 conan install --requires=revenant-device-tools/1.0.0@revenant/stable --lockfile="" \
-  -pr:h build/system/charon/profile -pr:b default --build=missing \
+  -pr:h build/system/revenant/profile -pr:b default --build=missing \
   --deployer=direct_deploy --deployer-folder=dist --output-folder=dist/conan
-charon device copy dist/direct_deploy/revenant-device-tools/bin/revmem /usr/bin/revmem
-charon device run 40 "/usr/bin/revmem <mobilesafari-pid>"       # pid from launchctl list
+revenant device copy dist/direct_deploy/revenant-device-tools/bin/revmem /usr/bin/revmem
+revenant device run 40 "/usr/bin/revmem <mobilesafari-pid>"       # pid from launchctl list
 ```
 
 Use it before any memory change to confirm which owner actually holds the dirty
@@ -124,9 +124,9 @@ pages — measured, the heavy pages are malloc/JS-heap bound, not pixel buffers.
 320x480 screen unless `REVTOUCH_W` / `REVTOUCH_H` say otherwise:
 
 ```sh
-charon device copy dist/direct_deploy/revenant-device-tools/bin/revtouch /usr/bin/revtouch
-charon device run 10 "revtouch tap 160 240"
-charon device run 10 "revtouch swipe 160 400 160 100"   # X Y X2 Y2
+revenant device copy dist/direct_deploy/revenant-device-tools/bin/revtouch /usr/bin/revtouch
+revenant device run 10 "revtouch tap 160 240"
+revenant device run 10 "revtouch swipe 160 400 160 100"   # X Y X2 Y2
 ```
 
 Verbs: `tap`, `down`, `move`, `up` take `X Y`; `swipe` takes `X Y X2 Y2`. Take a
@@ -134,6 +134,6 @@ screenshot first: launching an app does not make it frontmost.
 
 ## The Settings pane
 
-Reload without a respring: `charon device run 15 "killall Preferences; sleep 1; uiopen prefs:root=RevWebKit"`, then screenshot. The pane cannot be scrolled remotely —
+Reload without a respring: `revenant device run 15 "killall Preferences; sleep 1; uiopen prefs:root=RevWebKit"`, then screenshot. The pane cannot be scrolled remotely —
 ask a person at the device to scroll for the lower rows, or move a row to the top
 temporarily to inspect it.

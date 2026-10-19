@@ -130,9 +130,9 @@ rather than taking an `id`.
 ## Reproducing the substrate measurement
 
 ```
-CHARON_ROOT="$PWD" xmake l tools/corpus/objc-inventory.lua ~/.charon/dyld/6.1.3/dyld_shared_cache_armv7 > inv.tsv
-CHARON_ROOT="$PWD" xmake l tools/corpus/objc-inventory.lua ~/.charon/dyld/4.3/dyld_shared_cache_armv7   > inv43.tsv
-CHARON_ROOT="$PWD" xmake l tools/corpus/cache-census.lua AV 6.1.3 4.3
+REVENANT_ROOT="$PWD" xmake l tools/corpus/objc-inventory.lua ~/.revenant/dyld/6.1.3/dyld_shared_cache_armv7 > inv.tsv
+REVENANT_ROOT="$PWD" xmake l tools/corpus/objc-inventory.lua ~/.revenant/dyld/4.3/dyld_shared_cache_armv7   > inv43.tsv
+REVENANT_ROOT="$PWD" xmake l tools/corpus/cache-census.lua AV 6.1.3 4.3
 xmake l tools/cache-index/first-rung.lua 'tracksWithMediaType:' 'unusedTrackID' 'segmentForTrackTime:'
 ```
 

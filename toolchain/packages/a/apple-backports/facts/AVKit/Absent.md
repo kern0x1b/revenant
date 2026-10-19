@@ -19,9 +19,9 @@ and the ladder only for presence.
 ## The index, and how a reader re-reads it
 
 ```
-$ zcat ~/.charon/cache-index/6.1.3.names.gz | head -1
-# charon-cache-index 2 format=2 order=byte release=6.1.3 arch=armv7 \
-  source=$HOME/.charon/dyld/6.1.3/dyld_shared_cache_armv7 \
+$ zcat ~/.revenant/cache-index/6.1.3.names.gz | head -1
+# revenant-cache-index 2 format=2 order=byte release=6.1.3 arch=armv7 \
+  source=$HOME/.revenant/dyld/6.1.3/dyld_shared_cache_armv7 \
   mtime=1362840566000000000 size=244881694 names=568965
 ```
 
@@ -42,7 +42,7 @@ AVRoutePickerView	11.0
 ```
 $ python3 - <<'EOF'
 import gzip
-n=set(); f=gzip.open('$HOME/.charon/cache-index/6.1.3.names.gz','rb'); f.readline()
+n=set(); f=gzip.open('$HOME/.revenant/cache-index/6.1.3.names.gz','rb'); f.readline()
 for l in f: n.add(l.rstrip(b'\n').decode('utf-8','replace'))
 for x in ['AVInterstitialTimeRange','AVRoutePickerView','AVPictureInPictureController',
           'AVPlayerViewController','AVKitErrorDomain','_AVKitErrorDomain','AVKit']:
@@ -100,12 +100,12 @@ times in this corpus, where `PHLivePhotoShouldRenderAtPlaybackTime` is
 name.
 
 ```
-$ xmake lua tools/cache-extract.lua modules ~/.charon/dyld/9.0/dyld_shared_cache_armv7 AVKit .agent-work/avkit9/AVKit
+$ xmake lua tools/cache-extract.lua modules ~/.revenant/dyld/9.0/dyld_shared_cache_armv7 AVKit .agent-work/avkit9/AVKit
 extracted AVKit: 4 segments, 1677 symbols, 51187479 bytes
 $ file .agent-work/avkit9/AVKit
 .agent-work/avkit9/AVKit: Mach-O dynamically linked shared library arm_v7
 $ printf 'AVKitErrorDomain\tp\tp\ts\n' > .agent-work/runs/avkit9-symbols.tsv
-$ CHARON_ROOT=$PWD xmake l tools/corpus/cache-value.lua ~/.charon/dyld/9.0/dyld_shared_cache_armv7 .agent-work/runs/avkit9-symbols.tsv
+$ REVENANT_ROOT=$PWD xmake l tools/corpus/cache-value.lua ~/.revenant/dyld/9.0/dyld_shared_cache_armv7 .agent-work/runs/avkit9-symbols.tsv
 ```
 
 Three details a reader needs, because each one is a way to get a wrong answer:

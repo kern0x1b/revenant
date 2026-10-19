@@ -12,13 +12,13 @@ documentation and not code.
 
 **Rule: each system colour takes the values of the newest release of the ladder it was measured on (now 18.0).**
 
-The values are in `charon_rows` of `UIKit/UIColorDynamic.m`, light, dark, light with high contrast, dark with high contrast, dark
+The values are in `revenant_rows` of `UIKit/UIColorDynamic.m`, light, dark, light with high contrast, dark with high contrast, dark
 elevated and dark elevated with high contrast; a variant the release does not give is the base one. The nine colours of iOS 7-9
 (`UIColor+SystemColors.m`, `UIColor+SystemPurpleColor.m`) are rows of the same table since this rule, and dynamic like the others.
 
 How 18.0 was read (tools and logs in `.agent-work/plan-and-analysis/b1314-flips/` of the band's checkout):
 
-- **Built by code** in UIKitCore of the ladder's 18.0 cache (`~/.charon/dyld/18.0`): each getter's once-block, or the builder it
+- **Built by code** in UIKitCore of the ladder's 18.0 cache (`~/.revenant/dyld/18.0`): each getter's once-block, or the builder it
   calls, makes one colour per combination of traits with `colorWithRed:green:blue:alpha:` or `colorWithWhite:alpha:`, from doubles in
   UIKitCore's constants. Disassembled and read by `imp.lua`, `once.py`, `readmany.lua` and `colors2.py` (output `imp18/literal-fresh.txt`);
   the trait call's arguments give the variant (style 0 or 2, contrast 0 or 1, level 0 or 1 for elevated).

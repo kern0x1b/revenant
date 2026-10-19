@@ -73,7 +73,7 @@ Three rows in this family are not answered by code, each for a measured reason:
   `grep -c accommodatePresentedItemEvictionWithCompletionHandler NSFilePresenter.h` is 0.
   **What settles its platform, and it settles it against the old sentence.** The 26.2 SDK
   `tools/intents/generate.sh` calls `SDK_262` (the coordinator's unpacked copy under
-  `charon/.agent-work/sdk-26.2`) reads, at `NSFilePresenter.h:74`:
+  `toolchain/.agent-work/sdk-26.2`) reads, at `NSFilePresenter.h:74`:
 
       - (void)accommodatePresentedItemEvictionWithCompletionHandler:(void (NS_SWIFT_SENDABLE ^)(NSError * _Nullable errorOrNil))completionHandler API_AVAILABLE(macos(14.4), ios(17.4)) API_UNAVAILABLE(watchos, tvos);
 
@@ -148,7 +148,7 @@ so a run that searched nothing cannot be mistaken for a run that found nothing.
 The release side is measured too, and it is the half that decides the status word: neither
 `NSUserActivity` nor `NSUserActivityDelegate` is in the 4.3 or the 6.1.3 rung's own name index - 0 of
 the 317,453 names at 4.3 and 0 of the 568,965 at 6.1.3, with `UIView`, `NSObject` and `setObject:forKey:`
-present in both as the control. That is `~/.charon/cache-index/<release>.names.gz` - the index
+present in both as the control. That is `~/.revenant/cache-index/<release>.names.gz` - the index
 `tools/cache-index/build.lua` writes, read here by `tools/cache-index/first-rung.lua`'s own `_names_of()`
 over the bytes it holds.
 

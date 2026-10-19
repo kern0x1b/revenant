@@ -34,7 +34,7 @@ by ivar name off whichever class the process has), `userInfo`/`setUserInfoObject
 deliberately not here: `NSProgress+AddChild9.m` and `+Additions.m` carry those, the same category for every band,
 so the class does not duplicate a selector two files would both define, and the categories' own `+load` guard
 (`if ([NSProgress instancesRespondToSelector:@selector(addChild:withPendingUnitCount:)]) return;`, read at
-`+load` time, before `attach.c`'s constructor attaches this package's own categories - charon/AGENTS.md, Traps)
+`+load` time, before `attach.c`'s constructor attaches this package's own categories - toolchain/AGENTS.md, Traps)
 tells the release's-own-support case from this one the same way it always has.
 
 Cancelling and pausing cascade to an implicit child in both orders without a live link from child back to

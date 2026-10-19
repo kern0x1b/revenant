@@ -88,15 +88,15 @@ has them, and the warnings are the honest cost of that at this release. The alte
 **The token is minted, and measured end to end.** `MusicDeveloperToken.mint` takes what Apple hands
 an application — a `.p8`, which is a PEM — reads the 32 private-scalar bytes out of the DER its body
 decodes to, signs the base64url of the header and of the payload joined by a dot, and returns the
-three base64url parts. The curve is `charon@micro-ecc` through a shim that calls exactly what
-`CharonCKWebAuth.c` calls, so there is one implementation of the curve in the port, and the answer is
+three base64url parts. The curve is `revenant@micro-ecc` through a shim that calls exactly what
+`RevenantCKWebAuth.c` calls, so there is one implementation of the curve in the port, and the answer is
 the raw `r || s` a JOSE verifier reads, converted from the DER micro-ecc produces with that package's
 own reader.
 
 The base64 is the module's own in both directions, because `Data.base64EncodedString(options:)` and its
 inverse are marked iOS 7 by this release's Swift Foundation overlay: the port's headers lower the Objective-C
 headers, where the backports put their marks, and not the Swift overlay's own. So the table is
-`CharonBase64URL`, with a decoder beside the encoder it inverts.
+`RevenantBase64URL`, with a decoder beside the encoder it inverts.
 
 `tests/backports/host/musickit/run.sh` is the end-to-end check: it mints a token from a key OpenSSL
 made and asks OpenSSL to verify the signature over the first two parts joined by a dot, which is what a

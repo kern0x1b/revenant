@@ -7,7 +7,7 @@ the tree except the sources listed under *Vendored in the tree*. Each package co
 its upstream license file under `licenses/` when it installs.
 
 The point of this file is that a reader can tell, without building anything,
-exactly what a port built with Charon links against, what builds it, and under
+exactly what a port built with the toolchain links against, what builds it, and under
 what terms. Versions and licenses here are taken from the package recipes.
 
 ## Libraries a port links
@@ -19,10 +19,10 @@ carried into the program that ships to the device.
 | --- | --- | --- | --- |
 | libc++, libc++abi | 23.1.1 | Apache-2.0 WITH LLVM-exception | `packages/l/libcxx` |
 | The Swift runtime and standard library, with the system-framework overlays | 6.4.0 | Apache-2.0 WITH Swift-exception | `packages/s/swift-runtime` |
-| Styx — a `Combine` module for platforms without Apple's framework: OpenCombine, below, with our patches | 2026.10.19 | MIT (the upstream MIT copyright is installed with the package) | `packages/s/styx` |
-| Eidolon — a `SwiftUI` module on the UIKit of iOS 6 | 2026.09.23 | MIT | `packages/e/eidolon`, from [`kern0x1b/eidolon`](https://github.com/kern0x1b/eidolon) |
-| [OpenCombine](https://github.com/OpenCombine/OpenCombine) — a `Combine` module for platforms without Apple's framework | `1c6f02c7ed8140c0ba7a783aaddb6e0685a0037b` (its `0.14.0` is `8576f0d579b27020beccbccc3ea6844f3ddfc2c2`) | MIT, Copyright (c) 2019 Sergej Jaskiewicz; the licence is installed with the package under `licenses/LICENSE` | `packages/s/styx` |
-| Styx's patches to OpenCombine: its three modules compiled as one named `Combine`, the adaptations iOS 6 needs, and what Apple declares and OpenCombine lacks | 2026.10.19, `packages/s/styx/patches` | MIT, under OpenCombine's copyright; no new licence is claimed over Sergej Jaskiewicz's work | `packages/s/styx` |
+| Combine — a `Combine` module for platforms without Apple's framework: OpenCombine, below, with our patches | 2026.10.19 | MIT (the upstream MIT copyright is installed with the package) | `packages/c/combine` |
+| SwiftUI — a `SwiftUI` module on the UIKit of iOS 6 | 2026.09.23 | MIT | `packages/s/swiftui-uikit`, from [`kern0x1b/revenant`](https://github.com/kern0x1b/revenant/tree/main/frameworks/SwiftUI) |
+| [OpenCombine](https://github.com/OpenCombine/OpenCombine) — a `Combine` module for platforms without Apple's framework | `1c6f02c7ed8140c0ba7a783aaddb6e0685a0037b` (its `0.14.0` is `8576f0d579b27020beccbccc3ea6844f3ddfc2c2`) | MIT, Copyright (c) 2019 Sergej Jaskiewicz; the licence is installed with the package under `licenses/LICENSE` | `packages/c/combine` |
+| Combine's patches to OpenCombine: its three modules compiled as one named `Combine`, the adaptations iOS 6 needs, and what Apple declares and OpenCombine lacks | 2026.10.19, `packages/c/combine/patches` | MIT, under OpenCombine's copyright; no new licence is claimed over Sergej Jaskiewicz's work | `packages/c/combine` |
 | [lzfse](https://github.com/lzfse/lzfse) — the LZFSE and LZVN codec behind `COMPRESSION_LZFSE` in the Compression backport, unmodified, built with its symbols hidden | `88e2d2788b4021d0b2eb9fe2d97352ae9190f128` (tag `lzfse-1.0`) | BSD-3-Clause; the licence is installed with the package under `licenses/LICENSE` | `packages/l/lzfse` |
 | [zlib](https://github.com/madler/zlib) — the raw deflate codec behind `COMPRESSION_ZLIB` in the Compression backport, unmodified, built as `libzcodec.a` so the system `libz` is not linked | `v1.3.2` (`da607da739fa6047df13e66a2af6b8bec7c2a498`) | Zlib; the licence is installed with the package under `licenses/LICENSE` | `packages/z/zlib` |
 | [LZ4](https://github.com/lz4/lz4) — the block codec behind `COMPRESSION_LZ4_RAW` and the blocks of `COMPRESSION_LZ4` in the Compression backport, `lib/` only, unmodified, built with its symbols hidden | `v1.9.2` (`fdf2ef5809ca875c454510610764d9125ef2ebbd`) | BSD-2-Clause; the licence is installed with the package under `licenses/LICENSE` | `packages/l/lz4` |
@@ -50,10 +50,10 @@ into the port binary that ships to a device.
 
 | Component | Version | License | Package |
 | --- | --- | --- | --- |
-| Shade — Charon's ARM/iOS userland emulator | 2026.10.15+1 | MPL-2.0 (notices in its `NOTICE`) | `packages/s/shade`, from [`kern0x1b/shade`](https://github.com/kern0x1b/shade) |
+| The emulator — Revenant's ARM/iOS userland emulator | 2026.10.15+1 | MPL-2.0 (notices in its `NOTICE`) | `packages/e/emulator`, from [`kern0x1b/revenant`](https://github.com/kern0x1b/revenant/tree/main/emulator) |
 | SwiftShader | 2026.09.16 | Apache-2.0 | `packages/s/swiftshader` |
-| libplist | 2.7.0 | LGPL-2.1-or-later | `packages/l/libplist` — read/write plist for the ldid signer and the Shade emulator |
-| OpenSSL | 4.0.2 | Apache-2.0 | `packages/o/openssl` — used by the ldid signer and the Shade emulator |
+| libplist | 2.7.0 | LGPL-2.1-or-later | `packages/l/libplist` — read/write plist for the ldid signer and the emulator |
+| OpenSSL | 4.0.2 | Apache-2.0 | `packages/o/openssl` — used by the ldid signer and the emulator |
 
 ## Vendored in the tree
 
@@ -68,5 +68,5 @@ it, and nothing from it is linked into a port (`packages/c/createml/proto/README
 ## First-party
 
 `packages/a/apple-compat`, `packages/a/apple-backports`, `packages/e/emulator-guest`
-and `packages/f/firmware-tools`, and the recipes under `recipes/`, are Charon's
+and `packages/f/firmware-tools`, and the recipes under `recipes/`, are Revenant's
 own (MIT); they are not third-party and are not listed here.

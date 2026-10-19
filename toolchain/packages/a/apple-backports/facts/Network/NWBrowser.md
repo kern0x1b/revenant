@@ -62,7 +62,7 @@ the ladder with `tools/cache-extract.lua`, which is dyld.lua's own `extract()`, 
 disassembly is read:
 
 ```
-xmake lua tools/cache-extract.lua modules $HOME/.charon/dyld/<release>/dyld_shared_cache_<arch> \
+xmake lua tools/cache-extract.lua modules $HOME/.revenant/dyld/<release>/dyld_shared_cache_<arch> \
   libsystem_dnssd.dylib <out.dylib>
 objdump --macho --disassemble <out.dylib>            # then read the symbol
 ```
@@ -127,7 +127,7 @@ the same second, answers `nw_endpoint_get_port` with `0`: `tests/backports/host/
 and a Bonjour service endpoint is named by its instance, its type and its domain. The port the service
 publishes belongs to the service, and a program reads it by connecting and letting the resolve a
 connection makes answer it. The port the browse's own resolve brings is therefore not put on the
-endpoint, and `charon_browser_resolved` does not keep it.
+endpoint, and `revenant_browser_resolved` does not keep it.
 
 ## The interfaces of a result
 

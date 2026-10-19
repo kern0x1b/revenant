@@ -52,12 +52,12 @@ and nothing else. Of the content:
   body, the badge number, the sound - `UILocalNotificationDefaultSoundName` for
   the default one - and the launch image.
 - `userInfo` reaches it too, merged with the archived request under the key
-  `org.charon.apple-backports.UNNotificationRequest`, so an application that
+  `org.revenant.apple-backports.UNNotificationRequest`, so an application that
   also reads the notification through `UIApplication` sees its own keys.
 - `title` and `subtitle` are **kept and not shown**. They stay with the request -
   archived, handed back by the pending requests and to the delegate - and the
   one place that would hand the title to the release is behind a single switch,
-  `CharonReleaseShowsTitles`, off for iOS 6, whose local notifications have no
+  `RevenantReleaseShowsTitles`, off for iOS 6, whose local notifications have no
   title (it arrived in iOS 8.2). The first request that carries either says so
   in the log. Folding the title into the body would change the text the user
   reads, and nothing in any release does that, so it is not done.

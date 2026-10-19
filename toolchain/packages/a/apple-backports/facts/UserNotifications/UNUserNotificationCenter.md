@@ -59,7 +59,7 @@ a port may not lean on them.
 |---|---|
 | `+currentNotificationCenter` | one center for the process. |
 | `delegate` | weak. Setting it hooks `-application:didReceiveLocalNotification:` of the application delegate's class, once; a notification scheduled through the center goes to the center's delegate, any other to the application delegate as before. |
-| `-requestAuthorizationWithOptions:completionHandler:` | local notifications need no permission on iOS 6 and the release never asks, so the answer is granted. Badge, sound and alert are recorded under `org.charon.apple-backports.UIUserNotificationTypes`, the key the iOS 8 `UIUserNotificationSettings` of this package records its types under - the bits are the same - so the two APIs agree. |
+| `-requestAuthorizationWithOptions:completionHandler:` | local notifications need no permission on iOS 6 and the release never asks, so the answer is granted. Badge, sound and alert are recorded under `org.revenant.apple-backports.UIUserNotificationTypes`, the key the iOS 8 `UIUserNotificationSettings` of this package records its types under - the bits are the same - so the two APIs agree. |
 | `-getNotificationSettingsWithCompletionHandler:` | not determined until authorization was asked for; after it, authorized, and each of badge, sound and alert enabled if it was asked for and disabled if not, the notification centre and the lock screen following the alert, the alert style a banner, CarPlay not supported. **These are what the application asked for, not what the user set**: iOS 6 tells an application nothing of its notification settings - they live in BulletinBoard, which answers no application here (see below). |
 | `-addNotificationRequest:withCompletionHandler:` | the request becomes a `UILocalNotification`, any pending one of the same identifier is cancelled, and it is scheduled; one with no trigger is presented at once. A request with no content is refused with `UNErrorDomain` 1401. |
 | `-getPendingNotificationRequestsWithCompletionHandler:` | the release's scheduled notifications that carry a request, the requests read back from them whole. |
@@ -89,7 +89,7 @@ The Catalyst build of that harness is not the product's build. Mac Catalyst does
 unavailable), so the harness compiles copies of the port's sources, made in its build directory, in which the location-trigger check is written
 `NSClassFromString(@"UNLocationNotificationTrigger")`: the same answer where the class exists. The port's `UNLocationNotificationTrigger10.m` is
 not compiled, since it does not build on Mac Catalyst either; in its place the harness compiles `tests/backports/host/notification-settings/app/region-monitor-stub.m`,
-a stand-in `CharonRegionMonitor` that answers as an empty monitor. The settings never reach it: the centre reaches the monitor only for a location
+a stand-in `RevenantRegionMonitor` that answers as an empty monitor. The settings never reach it: the centre reaches the monitor only for a location
 request or for the pending list, and this check asks for neither. The product source keeps the class literal.
 
 The seven members the later releases add are answered with these values. An authorized bundle keeps the same values for them: their authorized
@@ -218,7 +218,7 @@ reading: the dump of 7187 classes in the armv7 cache of iPhone OS 4.3, the low b
 end.
 
 ```
-$ python3 -c "import json; c=json.load(open('$HOME/.charon/dyld/4.3/classes_armv7.json'))['classes']; \
+$ python3 -c "import json; c=json.load(open('$HOME/.revenant/dyld/4.3/classes_armv7.json'))['classes']; \
     print('\n'.join(sorted(m for m in c['UIApplication']['instance'] \
         if any(k in m.lower() for k in ('notification','remote','badge')))))"
 applicationIconBadgeNumber
@@ -245,14 +245,14 @@ the class it is looking in. The three delivered-notification selectors themselve
 absent from every release before they existed - `first-rung.lua
 getDeliveredNotificationsWithCompletionHandler: removeAllDeliveredNotifications
 removeDeliveredNotificationsWithIdentifiers:` answers `10.0.1` for each - and
-`$HOME/.charon/dyld/6.1.3/selectors_armv7.txt` holds 113981 selectors and none of them
+`$HOME/.revenant/dyld/6.1.3/selectors_armv7.txt` holds 113981 selectors and none of them
 is one of those three (0 matches for each, `rg -c -x`).
 
 For the attachment, the same dump carries the concrete class a `UILocalNotification` is
 actually one:
 
 ```
-$ python3 -c "import json; c=json.load(open('$HOME/.charon/dyld/4.3/classes_armv7.json'))['classes']; \
+$ python3 -c "import json; c=json.load(open('$HOME/.revenant/dyld/4.3/classes_armv7.json'))['classes']; \
     print(len(c['UIConcreteLocalNotification']['instance'])); \
     print(', '.join(c['UIConcreteLocalNotification']['instance']))"
 47
@@ -278,7 +278,7 @@ notification**: the alert is `alertBody`, `alertAction`, `alertLaunchImage` and
 slider, the audio interrupt and the system-alert flags SpringBoard refuses to an
 unentitled application. `alertLaunchImage` is a **launch** image - the picture the
 application's own icon is replaced with while it starts - not a picture in the
-notification, and setting it is what this port's own `-charon_local_notification` does
+notification, and setting it is what this port's own `-revenant_local_notification` does
 with `content.launchImageName`.
 
 So both absences rest on a reading a reader can repeat, and `UNNotificationAttachment`

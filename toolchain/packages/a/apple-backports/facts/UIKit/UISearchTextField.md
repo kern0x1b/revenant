@@ -45,28 +45,28 @@ the port is a queue entry; `absent` is a claim about the release. This is the re
 ### The commands, from the root of the repository
 
 ```
-CHARON_ROOT=$PWD xmake l tools/corpus/cache-census.lua UISearchTextField 6.1.3 4.3 16.0
-CHARON_ROOT=$PWD xmake l tools/corpus/cache-census.lua UITextPasteItem   6.1.3 4.3 11.0
-CHARON_ROOT=$PWD xmake l tools/corpus/cache-census.lua NSItemProvider    6.1.3 4.3 8.0
+REVENANT_ROOT=$PWD xmake l tools/corpus/cache-census.lua UISearchTextField 6.1.3 4.3 16.0
+REVENANT_ROOT=$PWD xmake l tools/corpus/cache-census.lua UITextPasteItem   6.1.3 4.3 11.0
+REVENANT_ROOT=$PWD xmake l tools/corpus/cache-census.lua NSItemProvider    6.1.3 4.3 8.0
 printf '%s\n' UISearchTextField UISearchToken UISearchTextFieldPasteItem UITextPasteItem NSItemProvider \
              searchTextField:itemProviderForCopyingToken: setSearchTokenResult: zzNonexistentNameForControl \
   | xmake l tools/cache-index/first-rung.lua
 for r in 6.1.3 4.3; do
   for s in searchTextField:itemProviderForCopyingToken: setSearchTokenResult: zzNonexistentSelectorForControl:
-  do printf '%s %-48s %s\n' "$r" "$s" "$(strings -a ~/.charon/dyld/$r/dyld_shared_cache_armv7 | grep -cxF "$s")"; done
+  do printf '%s %-48s %s\n' "$r" "$s" "$(strings -a ~/.revenant/dyld/$r/dyld_shared_cache_armv7 | grep -cxF "$s")"; done
 done
 ```
 
 ### The output
 
 ```
-6.1.3     ~/.charon/dyld/6.1.3/dyld_shared_cache_armv7
+6.1.3     ~/.revenant/dyld/6.1.3/dyld_shared_cache_armv7
          classes 11378, of which UISearchTextField* 0
          protocols 1171, of which UISearchTextField* 0
-4.3       ~/.charon/dyld/4.3/dyld_shared_cache_armv7
+4.3       ~/.revenant/dyld/4.3/dyld_shared_cache_armv7
          classes 7187, of which UISearchTextField* 0
          protocols 564, of which UISearchTextField* 0
-16.0      ~/.charon/dyld/16.0/dyld_shared_cache_arm64e
+16.0      ~/.revenant/dyld/16.0/dyld_shared_cache_arm64e
          classes 143137, of which UISearchTextField* 2 (UISearchTextField UISearchTextFieldAccessibility)
          protocols 25549, of which UISearchTextField* 1 (UISearchTextFieldPasteItem)
 control: 3 name(s) beginning UISearchTextField found in this run, so a zero on another rung is the release's and not the reader's

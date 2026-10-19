@@ -27,7 +27,7 @@ A unit that ICU has no measure unit for carries none, and is built with
 
 ## Differences from iOS 10
 
-Charon takes the corrected numbers: a measurement asked for in stones is asked
+The toolchain takes the corrected numbers: a measurement asked for in stones is asked
 for in stones, not in the defect Apple itself withdrew.
 
 - `milliseconds` is in no iOS 10 cache at all, although the SDK marks it `ios(10.0)`; Apple annotated it after the fact. Its source is the host alone.

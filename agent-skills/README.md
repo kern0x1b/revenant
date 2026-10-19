@@ -1,4 +1,4 @@
-# Psychopomp
+# agent-skills
 
 A set of skills for coding agents that build **modern apps for old iOS** (5, 6, 7 and later) and old
 devices: the iPhone 3GS, 4 and 4S, the iPad 1 and 2, the iPod touch. You make an empty
@@ -9,12 +9,12 @@ device or your Cydia repository.
 
 It stands on four open projects:
 
-- [Charon](https://github.com/kern0x1b/charon): the [xmake](https://xmake.io) addon, the toolchain
+- [toolchain](https://github.com/kern0x1b/revenant/tree/main/toolchain): the [xmake](https://xmake.io) addon, the toolchain
   (clang, ld64, ldid, no Xcode), the backports of newer iOS APIs, and a Swift runtime for iOS 6;
-- [Styx](https://github.com/kern0x1b/styx): Combine;
-- [Eidolon](https://github.com/kern0x1b/eidolon): SwiftUI on the UIKit of iOS 6 (not yet packaged
-  by Charon at the pinned 0.8.10);
-- [Shade](https://github.com/kern0x1b/shade): the emulator that boots a real iOS firmware's userland.
+- [Combine](https://github.com/kern0x1b/revenant/tree/main/frameworks/Combine): Combine;
+- [SwiftUI](https://github.com/kern0x1b/revenant/tree/main/frameworks/SwiftUI): SwiftUI on the UIKit of iOS 6 (not yet packaged
+  by the toolchain at the pinned 0.8.10);
+- [emulator](https://github.com/kern0x1b/revenant/tree/main/emulator): the emulator that boots a real iOS firmware's userland.
 
 > **Status: early.** The route, the interview, the build path from installing the tools to the
 > `.deb`, delivery to a device or a Cydia repository, self-review, Objective-C, Swift and Combine
@@ -38,10 +38,10 @@ The skills are in `skills/<name>/SKILL.md`, in the [Agent Skills](https://agents
 
 | Agent | Install | Verified |
 | --- | --- | --- |
-| Claude Code | `claude plugin marketplace add kern0x1b/hades`, then `claude plugin install psychopomp@hades` | not yet |
-| Codex | `codex plugin marketplace add kern0x1b/hades`, then `codex plugin add psychopomp@hades` | per its documentation, not tried |
-| opencode | `npx skills add https://github.com/kern0x1b/hades/tree/main/psychopomp/skills -a opencode` | not yet |
-| Others | `npx skills add https://github.com/kern0x1b/hades/tree/main/psychopomp/skills -a <agent>` | not yet |
+| Claude Code | `claude plugin marketplace add kern0x1b/revenant`, then `claude plugin install agent-skills@revenant` | not yet |
+| Codex | `codex plugin marketplace add kern0x1b/revenant`, then `codex plugin add agent-skills@revenant` | per its documentation, not tried |
+| opencode | `npx skills add https://github.com/kern0x1b/revenant/tree/main/agent-skills/skills -a opencode` | not yet |
+| Others | `npx skills add https://github.com/kern0x1b/revenant/tree/main/agent-skills/skills -a <agent>` | not yet |
 
 ## Use
 

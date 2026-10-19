@@ -2,10 +2,10 @@
 
 `-setCategory:mode:options:error:` (iOS 10.0) is a category on `AVAudioSession`, not a new class:
 the release already has the class (`AVAudioSession` predates iOS 6, and this port already uses it
-in `CallKit/CharonCallAudio.m`), and it already has both real calls this method folds together -
+in `CallKit/RevenantCallAudio.m`), and it already has both real calls this method folds together -
 `-setCategory:withOptions:error:` (iOS 6.0) and `-setMode:error:` (iOS 5.0) - measured, not
 assumed, three independent ways: the real SDK header, `objc.inventory` against the real armv7
-`iOS 6.1.3` shared cache (`.charon/dyld/6.1.3/dyld_shared_cache_armv7`), and `respondsToSelector:`
+`iOS 6.1.3` shared cache (`.revenant/dyld/6.1.3/dyld_shared_cache_armv7`), and `respondsToSelector:`
 on a live `[AVAudioSession sharedInstance]` on the guest. All three agree: `-setCategory:error:`,
 `-setCategory:withOptions:error:`, `-setMode:error:`, `-category`, `-categoryOptions` and `-mode`
 are all there; `-setCategory:mode:options:error:` is not.
@@ -14,7 +14,7 @@ are all there; `-setCategory:mode:options:error:` is not.
 
 The two real calls exist, but what a caller passes through them does not travel unchanged - this
 is the coordinator's warning about "accepted and silently ignored" made concrete. Measured on a
-real iPad 2, iOS 6.1.3 (`org.charon.session-probe`, not a class this port carries - a throwaway
+real iPad 2, iOS 6.1.3 (`org.revenant.session-probe`, not a class this port carries - a throwaway
 device probe that only ever reads `categoryOptions`/`mode` back, never records or touches an audio
 sample), against `AVAudioSessionCategoryPlayAndRecord`:
 

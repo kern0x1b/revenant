@@ -6,28 +6,28 @@ beside the sources, and the shared parts in `scripts/` (`env.lua`, `corpus.lua`,
 
 ## Running
 
-From the hades root, after `./xmakew f -y` and `./xmakew build xlate xlgen`:
+From the revenant root, after `./xmakew f -y` and `./xmakew build xlate xlgen`:
 
 ```sh
-./xmakew test 'katabasis_corpus/*'
-./xmakew build katabasis_cxxinit katabasis_refrepro katabasis_devtime
+./xmakew test 'recompiler_corpus/*'
+./xmakew build recompiler_cxxinit recompiler_refrepro recompiler_devtime
 ```
 
-`katabasis_corpus` runs the host part of every check: jumptable, tsdscan, tsdguard, int128, ordinal, weakimport and
-classpair. Their output goes to the target's build folder (`build/.gens/katabasis_corpus/.../tests/<name>`). The three
+`recompiler_corpus` runs the host part of every check: jumptable, tsdscan, tsdguard, int128, ordinal, weakimport and
+classpair. Their output goes to the target's build folder (`build/.gens/recompiler_corpus/.../tests/<name>`). The three
 build targets each leave an `.app` or an executable in their own target folder.
 
 A check that also has a device part is run by hand, with the output folder as its argument:
 
 ```sh
-./xmakew l katabasis/corpus/weakimport/check.lua <out>
-./xmakew l katabasis/corpus/classpair/check.lua <out>
-./xmakew l katabasis/corpus/swiftconformance/check.lua <out>
+./xmakew l recompiler/corpus/weakimport/check.lua <out>
+./xmakew l recompiler/corpus/classpair/check.lua <out>
+./xmakew l recompiler/corpus/swiftconformance/check.lua <out>
 ```
 
-These need a claimed device (the workspace skill `device-session`): `CHARON_DEVICE_HOLDER` and `CHARON_DEVICE`
-exported and the claim held. They reach the device through charon's `device` module. Without an argument, output goes
-to `build/katabasis/corpus/<name>`.
+These need a claimed device (the workspace skill `device-session`): `REVENANT_DEVICE_HOLDER` and `REVENANT_DEVICE`
+exported and the claim held. They reach the device through Revenant's `device` module. Without an argument, output goes
+to `build/recompiler/corpus/<name>`.
 
 ## What each check proves
 
@@ -150,7 +150,7 @@ README's "Classes the Swift runtime lays out" has the design.
    - iOS 6's libobjc has none of `objc_readClassPair`, `_objc_realizeClassFromSwift` and
      `objc_setHook_lazyClassNamer`, so the program cannot be built for iOS 6 natively. The macOS run is the oracle.
 
-The arm64 input is linked with charon's `ld64`. The linker of Xcode 15 and later drops `__objc_clsrolist`, which Swift
+The arm64 input is linked with Revenant's `ld64`. The linker of Xcode 15 and later drops `__objc_clsrolist`, which Swift
 binaries carry.
 
 ### swiftconformance (device only)
@@ -165,12 +165,12 @@ which is what the bridge does. At run time, `x is Hashable` prints `hashable` or
 The check translates the fixture twice. The normal build must print `hashable`; the control, built with
 `-DXL_TEST_NO_DYLD_IMAGE_BRIDGE=1`, must print `not-hashable`.
 
-The fixture is compiled with charon's from-source Swift toolchain (`charon@swift`), not Xcode's Command Line Tools:
+The fixture is compiled with Revenant's from-source Swift toolchain (`revenant@swift`), not Xcode's Command Line Tools:
 
 - The CLT `swiftc` cannot cross-compile for `arm64-apple-ios`. It fails with "Cannot read legacy layout file ...
   layouts-arm64.yaml", because CLT ships `lib/swift/macosx/` only.
 - That file is not Apple-internal. It is in the open-source Swift tree at
-  `stdlib/toolchain/legacy_layouts/iphoneos/layouts-arm64.yaml`, and an install of `charon@swift` that kept its source
+  `stdlib/toolchain/legacy_layouts/iphoneos/layouts-arm64.yaml`, and an install of `revenant@swift` that kept its source
   cache carries it.
   - The check looks for such an install by what it contains.
   - It never takes the first match, because several hashed installs of one version can exist.
@@ -196,13 +196,13 @@ compiled out. The control must crash with exit 139, and the normal build must no
 
 These build targets each translate an app to an `.app`, for a device or the emulator.
 
-- `katabasis_cxxinit` covers C++ static initialisers in an Objective-C++ app.
-- `katabasis_refrepro` is built with ARC, like OneBusAway, so ivar stores compile to `objc_storeStrong`. That is the
+- `recompiler_cxxinit` covers C++ static initialisers in an Objective-C++ app.
+- `recompiler_refrepro` is built with ARC, like OneBusAway, so ivar stores compile to `objc_storeStrong`. That is the
   release-of-old-ivar site that faulted.
 
 ## perf: devtime
 
-`katabasis_devtime` builds the on-device wall-clock benchmark, which compares translated and native code. It is a
+`recompiler_devtime` builds the on-device wall-clock benchmark, which compares translated and native code. It is a
 normal armv7 iOS command-line executable that links libSystem and libm.
 
 1. The arm64 kernels are lifted to armv7.

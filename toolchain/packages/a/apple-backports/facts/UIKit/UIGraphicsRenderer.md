@@ -34,7 +34,7 @@ Source: UIKit of the armv7s cache of iOS 10.3.4.
 4. `-pushContext:`, the drawing block, `-popContext:`, then the completion block.
 5. the CGContext is released and `YES` returned.
 
-## What Charon does not carry
+## What the toolchain does not carry
 
 UIKit keeps a pool of CGContexts to hand out again: `+initialize` opens a
 dispatch queue named `com.apple.UIKit.UIGraphicsRenderer.reuseCacheAccess` and a

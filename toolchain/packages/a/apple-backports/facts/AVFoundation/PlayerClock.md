@@ -25,7 +25,7 @@ checked here and neither is the answer.
 
 ## Measured on the band ends, class-scoped
 
-`xmake l tools/corpus/objc-inventory.lua ~/.charon/dyld/6.1.3/dyld_shared_cache_armv7`, then the
+`xmake l tools/corpus/objc-inventory.lua ~/.revenant/dyld/6.1.3/dyld_shared_cache_armv7`, then the
 selector looked up on `AVPlayer` itself (140 instance selectors declared there):
 
 | accessor | 6.1.3 | 4.3 |

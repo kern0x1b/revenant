@@ -5,9 +5,9 @@ From iOS 13.0 a view controller that a program linked with SDK 13.0 or later mak
 phone and a pad is the page sheet: a controller presented without a style of its own is a sheet, not a
 full-screen presentation. A program linked with an older SDK keeps full screen.
 
-**This touches every ported application.** Charon links against the iPhoneOS 16.4 SDK, and clang writes
+**This touches every ported application.** The toolchain links against the iPhoneOS 16.4 SDK, and clang writes
 that into the load command (`LC_VERSION_MIN_IPHONEOS` version 6.0, sdk 16.4, read from the apple-backports
-libraries themselves). So every port built by charon is linked on or after 13.0, and every presentation
+libraries themselves). So every port built by the toolchain is linked on or after 13.0, and every presentation
 it makes without setting a style - `presentViewController:animated:completion:` of a plain controller, a
 navigation controller, a picker - now shows as a sheet on the phone (`UISheetPresentationController.md`)
 and as the release's page sheet on the iPad, where it used to cover the screen. A port that wants full

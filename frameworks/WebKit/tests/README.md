@@ -1,13 +1,13 @@
 # Tests
 
-Run before every deploy: `charon test`
+Run before every deploy: `revenant test`
 
-    charon test --tier host       ICU data checks on this Mac, seconds once ICU is built
-    charon test --tier batteries  JavaScript batteries under jsc on the iPhone
-    charon test                   every tier the declaration names
+    revenant test --tier host       ICU data checks on this Mac, seconds once ICU is built
+    revenant test --tier batteries  JavaScript batteries under jsc on the iPhone
+    revenant test                   every tier the declaration names
 
-Charon installs what a tier declares it needs and hands it over, so the tiers
-are run through it. The one direct call is the batteries against a tree Charon
+The toolchain installs what a tier declares it needs and hands it over, so the tiers
+are run through it. The one direct call is the batteries against a tree the toolchain
 does not manage: `ENGINE_BUILD=/path/to/build tests/run-tests.py`.
 
 ## host
@@ -15,7 +15,7 @@ does not manage: `ENGINE_BUILD=/path/to/build tests/run-tests.py`.
 `icu-sanity` opens the resource bundles, the time zone enumeration and every
 character encoding the engine hands to ICU, against the same trimmed data the
 phone ships. The `host` tier declares the `icu` package it needs in
-`charon.toml`; Charon writes the recipe that asks for the version `conan.lock`
+`revenant.toml`; the toolchain writes the recipe that asks for the version `conan.lock`
 pins, builds it for this Mac with the recipe's own data filter, and tells the
 tier where it landed, so the first run builds ICU once and every later run
 reuses it.
@@ -41,7 +41,7 @@ The same fault takes two seconds to find here.
 ## device
 
 `tests/js/*.js` run under `jsc` on the phone with the freshly built engine.
-The engine comes from `ENGINE_BUILD`, or from the engine build Charon names:
+The engine comes from `ENGINE_BUILD`, or from the engine build the toolchain names:
 the one tree directly under `build/` that is configured and has its frameworks
 laid out under `stage/`. The port keeps no rule of its own for this. The runner
 compares `jsc`, the C++ runtime and each framework with the phone's copy by

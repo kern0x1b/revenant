@@ -1,12 +1,12 @@
-# charon@tipkit
+# revenant@tipkit
 
 The TipKit framework of iOS 17, as one Swift module a port writes `import TipKit` for, built against
-the `charon@swift-runtime` a port carries.
+the `revenant@swift-runtime` a port carries.
 
     target("my-port")
-        add_requires("charon@swift-runtime")
-        add_requires("charon@appintents")
-        add_requires("charon@tipkit")
+        add_requires("revenant@swift-runtime")
+        add_requires("revenant@appintents")
+        add_requires("revenant@tipkit")
         add_packages("swift-runtime", "appintents", "tipkit")
 
 ## What the module is
@@ -63,15 +63,15 @@ To build one of these Swift packages without a port, give `xmake` a project of i
 the gate's `resolve()` shapes one (`coordination/build-gate.lua:44-48`):
 
     set_project("gate-tipkit")
-    add_repositories("charon <path to a checkout>")
-    add_addons("charon v0.8.13")             -- the newest version the checkout's recipe names
+    add_repositories("revenant <path to a checkout>")
+    add_addons("revenant v0.8.13")             -- the newest version the checkout's recipe names
     set_config("apple_minimum", "6.1.3")
-    includes("@addon/charon/apple-ios")
+    includes("@addon/revenant/apple-ios")
     set_defaultplat("iphoneos")
     set_defaultarchs("iphoneos|armv7")
-    add_requires("charon@swift-runtime", {alias = "swift-runtime"})
-    add_requires("charon@appintents", {alias = "appintents"})
-    add_requires("charon@tipkit", {alias = "tipkit"})
+    add_requires("revenant@swift-runtime", {alias = "swift-runtime"})
+    add_requires("revenant@appintents", {alias = "appintents"})
+    add_requires("revenant@tipkit", {alias = "tipkit"})
 
 A **fresh directory name per attempt** matters: xmake keeps a repository search index under
 `~/.xmake/cache/quick_search`, and a directory name it has seen before is answered from that index

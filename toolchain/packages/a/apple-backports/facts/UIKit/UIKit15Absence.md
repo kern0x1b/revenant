@@ -22,7 +22,7 @@ and last release". A band point is a release some object's API arrived in (`band
 `backports.lua:2565`), and `band_ranges` (`:2518`) rounds it to the nearest pair of *catalog*
 releases: the first catalog release at or after the point, and the last before the next point.
 
-The catalog (`~/.charon/firmware/catalog.json`, read by `firmware.versions`, `:201`) holds **no
+The catalog (`~/.revenant/firmware/catalog.json`, read by `firmware.versions`, `:201`) holds **no
 armv7 or armv7s firmware between 12.0 and 15.0**:
 
 ```
@@ -59,9 +59,9 @@ is the class's presence; a method row is the owner class's instance/class select
 property row is the getter **or** the setter.
 
 ```
-CHARON_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua ~/.charon/dyld/6.1.3/dyld_shared_cache_armv7 > inv-6.1.3.tsv
-CHARON_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua ~/.charon/dyld/4.3/dyld_shared_cache_armv7   > inv-4.3.tsv
-CHARON_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua ~/.charon/dyld/12.0/dyld_shared_cache_arm64  > inv-12.0.tsv
+REVENANT_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua ~/.revenant/dyld/6.1.3/dyld_shared_cache_armv7 > inv-6.1.3.tsv
+REVENANT_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua ~/.revenant/dyld/4.3/dyld_shared_cache_armv7   > inv-4.3.tsv
+REVENANT_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua ~/.revenant/dyld/12.0/dyld_shared_cache_arm64  > inv-12.0.tsv
 ```
 
 One TSV line per class: `class <name> <superclass> <image> <instance selectors> <class selectors>
@@ -274,7 +274,7 @@ and the split is measurable, not a judgement call:
 - The 14.0 rows on the same port-owned classes that were implemented
   (`UICollectionViewCell.configurationUpdateHandler` and its two siblings) are the precedent every
   one of the eight above followed, down to the mechanism: a category that calls a C seam
-  (`UICollectionViewCell+Configuration.m` → `CharonConfigurationHost.m`), so the effect is a
+  (`UICollectionViewCell+Configuration.m` → `RevenantConfigurationHost.m`), so the effect is a
   configuration update that actually happens.
 
 The landing state for the release is now **12 `implemented`, 4 `inert`, 89 `absent`**, and every
@@ -296,7 +296,7 @@ one of the 105 rows names a measurement rather than the SDK's declaration.
 | `UITableView+PrefetchingEnabled15.m` | 1 (`implemented`) | `UITableViewPrefetchingEnabled15.md` |
 
 What they have in common is that each one reused something the tree already had rather than
-adding a mechanism: the cells' `charon_host_update_handler` seam for the button, the diffable data
+adding a mechanism: the cells' `revenant_host_update_handler` seam for the button, the diffable data
 sources' own reload for the reconfigure pass, the collection view's prefetch gate for the table's,
 and the 13.0 layout manager's associated-object storage for the paragraph style's. None of the four
 defines a C function, which is what keeps each of them safe in a band that does not keep its

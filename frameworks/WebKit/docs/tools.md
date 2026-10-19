@@ -8,8 +8,8 @@ verdict rather than a log.
 They are documented here rather than in their own source, because the source of
 a probe should be the experiment and nothing else.
 
-The phone itself is reached through Charon's device module, which reads this
-port's `device.env`: `charon device run SECONDS COMMAND`, `copy LOCAL REMOTE`,
+The phone itself is reached through Revenant's device module, which reads this
+port's `device.env`: `revenant device run SECONDS COMMAND`, `copy LOCAL REMOTE`,
 `fetch REMOTE LOCAL`, and `tests/device/harness.py` for the test pages. It
 revives the `iproxy` tunnel before every command, because a dead tunnel answers
 "connection refused", which reads in a log exactly like a browser that crashed.
@@ -28,7 +28,7 @@ each with the entitlements it needs:
 
 ```sh
 conan install --requires=revenant-device-tools/1.0.0@revenant/stable --lockfile="" \
-  -pr:h build/system/charon/profile -pr:b default --build=missing \
+  -pr:h build/system/revenant/profile -pr:b default --build=missing \
   --deployer=direct_deploy --deployer-folder=dist --output-folder=dist/conan
-charon device copy dist/direct_deploy/revenant-device-tools/bin/revmem /usr/bin/revmem
+revenant device copy dist/direct_deploy/revenant-device-tools/bin/revmem /usr/bin/revmem
 ```

@@ -1,6 +1,6 @@
 ---
 name: cydia-repo
-description: Publish the app in the user's own Cydia repository (a source) — the directory layout, the Cydia fields of the control file, dpkg-scanpackages -m, Packages with .gz and .bz2, Release with its checksums, the depiction page and icons, the dependency packages (org.charon.apple-backports, the shared Swift runtime) published beside the app because no public repository carries them, a local check, static hosting and adding the source on a device. Use after the skill package when PROJECT.md says the app is published through a Cydia repository, when releasing a new version into it, or when the user asks how others can install the app from Cydia.
+description: Publish the app in the user's own Cydia repository (a source) — the directory layout, the Cydia fields of the control file, dpkg-scanpackages -m, Packages with .gz and .bz2, Release with its checksums, the depiction page and icons, the dependency packages (org.revenant.apple-backports, the shared Swift runtime) published beside the app because no public repository carries them, a local check, static hosting and adding the source on a device. Use after the skill package when PROJECT.md says the app is published through a Cydia repository, when releasing a new version into it, or when the user asks how others can install the app from Cydia.
 ---
 
 # The user's own Cydia repository
@@ -28,7 +28,7 @@ Depiction: <base URL>depictions/<package>.html
 Icon: <base URL>icons/<package>.png
 ```
 
-Never `Version:` or `Installed-Size:` — Charon writes both and refuses a control file that has them.
+Never `Version:` or `Installed-Size:` — the toolchain writes both and refuses a control file that has them.
 Then write the package again, the app's alone:
 
 ```
@@ -57,14 +57,14 @@ git repository, when the host serves one). Record the path in `PROJECT.md`.
 ## 3. The packages, dependencies included
 
 Copy into `debs/` **every** `.deb` that step 1's log names for this version: the app's, and each
-dependency package — `org.charon.apple-backports_<version>_iphoneos-arm.deb` when the app uses the
-backports, the `org.charon.swift-runtime-…` and `org.charon.libcxx-…` packages when a Swift app
+dependency package — `org.revenant.apple-backports_<version>_iphoneos-arm.deb` when the app uses the
+backports, the `org.revenant.swift-runtime-…` and `org.revenant.libcxx-…` packages when a Swift app
 shares the runtime. The app's `Depends:` names them (`>=` for the backports, `=` for a shared
-runtime), and no public repository publishes Charon's packages: if this one does not carry them,
+runtime), and no public repository publishes Revenant's packages: if this one does not carry them,
 Cydia cannot install the app.
 
 ```
-cp build/<app package>_<app version>_iphoneos-arm.deb build/org.charon.apple-backports_<backports version>_iphoneos-arm.deb <repo>/debs/
+cp build/<app package>_<app version>_iphoneos-arm.deb build/org.revenant.apple-backports_<backports version>_iphoneos-arm.deb <repo>/debs/
 ```
 
 Copy by the names the log printed, never `build/*.deb`: the build directory also holds older
@@ -95,7 +95,7 @@ grep -h '^Depends:' Packages | cut -d' ' -f2- | tr ',' '\n' | sed 's/^ *//; s/ .
 
 The last command lists the dependencies that no package in the index provides. Only names the
 device itself provides may remain — `firmware` (Cydia's package for the iOS release). Any
-`org.charon.…` name there is a missing `.deb`: go back to step 3. For a `=` dependency, check that the
+`org.revenant.…` name there is a missing `.deb`: go back to step 3. For a `=` dependency, check that the
 exact version is in the index (`grep -A1 '^Package: <name>$' Packages`).
 
 ## 5. Release
@@ -190,16 +190,16 @@ the source.
 ## Traps
 
 - `dpkg-scanpackages` without `-m` → older versions vanish from the index while their files stay.
-- Only the app's `.deb` published → Cydia cannot satisfy `org.charon.apple-backports` (or the shared
+- Only the app's `.deb` published → Cydia cannot satisfy `org.revenant.apple-backports` (or the shared
   runtime); publish every dependency `.deb` the build wrote.
 - `cp build/*.deb` → publishes old versions and the probes; copy by name.
 - `dpkg-scanpackages` run inside `debs/` → `Filename:` paths lack `debs/` and every download fails; run
   it from the root with `debs` as the argument.
 - `Packages` or `Release` edited by hand → the checksums no longer match; regenerate both, always in
   the order index, then `Release`.
-- `Version:` in the control file → Charon refuses it; the version comes from `set_version`.
+- `Version:` in the control file → the toolchain refuses it; the version comes from `set_version`.
 - A depiction or icon named after something other than the control file's URL → a missing page or a
   blank icon in Cydia.
 - A `.deb` repacked with the host's `dpkg-deb -b` → it compresses its members with xz by default
-  (Charon writes gzip, which every dpkg reads); never repack a package Charon wrote.
+  (the toolchain writes gzip, which every dpkg reads); never repack a package the toolchain wrote.
 - Apple's artwork as an icon → never; the user's own or one you draw.

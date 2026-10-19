@@ -19,8 +19,8 @@ symbol to find while a `VarDecl` or a non-inline `FunctionDecl` does. So the fam
 Every value was read out of a real artifact. None was chosen, and none was typed by hand:
 `UIKitExportedConstants.m` is generated from the table the two reads below produce.
 
-- **A real dyld shared cache**, with `tools/corpus/cache-value.lua`, over `~/.charon/dyld/7.0` and
-  `~/.charon/dyld/11.0`, image `/System/Library/Frameworks/UIKit.framework/UIKit`.
+- **A real dyld shared cache**, with `tools/corpus/cache-value.lua`, over `~/.revenant/dyld/7.0` and
+  `~/.revenant/dyld/11.0`, image `/System/Library/Frameworks/UIKit.framework/UIKit`.
 - **The host's own UIKit** under Mac Catalyst, read through `dlsym` and dereferenced, because these
   are data symbols and not functions.
 

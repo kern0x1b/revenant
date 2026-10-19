@@ -29,14 +29,14 @@ Voice Control or dictation context on the release to read them, so the first one
 `UIAccessibilityCustomAction` on this release: the constructors and properties are real, and VoiceOver lists none of the actions.
 The handler forms `-initWithName:actionHandler:` (iOS 13) and `-initWithName:image:actionHandler:` and
 `-initWithName:image:target:selector:` (iOS 14) are made and keep their handler and image, with `actionHandler` and `image` as
-properties, read back as they were set. An action is performed by `-charonPerform`: a handler is called once with the action and
+properties, read back as they were set. An action is performed by `-revenantPerform`: a handler is called once with the action and
 answers what it answers; a target gets its selector once, with the action as the one argument; an action with neither performs
 nothing. The `customaction` group of `tests/backports/host/uikit2` checks each of the three, and compares the constructors and
 the properties with the host's answers on the same arguments.
 
 The release never performs one, and that is the release's own behaviour, not a gap of the port. On 6.1.3, VoiceOver has no
 custom-actions UI: no rotor or menu of the release lists an element's custom actions, so the system has nothing to perform one
-with. `-charonPerform` is therefore invoked by the port's own callers and by the `customaction` group, never by VoiceOver, and the
+with. `-revenantPerform` is therefore invoked by the port's own callers and by the `customaction` group, never by VoiceOver, and the
 rows say so in their effect.
 
 The measurement, from `tools/corpus/objc-inventory.lua` over the 6.1.3 cache (the inventory of every class, 12549 lines): the
@@ -49,7 +49,7 @@ selectors that name a custom action or an accessibility perform are
 and every one of them is carried by NSObject alone. No class of the release overrides one: a class that performed a custom
 action on the element would declare its selector, and none does. The bodies of the NSObject entries are not read here
 (the inventory gives selectors, not addresses), so the claim rests on the owners and on the absence of a custom-action UI, not on
-disassembly of the defaults. The port's `-charonPerform` is the only code that performs a custom action on this release.
+disassembly of the defaults. The port's `-revenantPerform` is the only code that performs a custom action on this release.
 
 The two iOS 14 forms that take an ATTRIBUTED name **and** an image are made too, in
 `UIKit/UIAccessibilityCustomAction+AttributedNameImage14.m`, and the iOS 11 form `initWithAttributedName:target:selector:` is
@@ -59,8 +59,8 @@ port's own `image` property.
 
 The release carries none of this. `objc.inventory` over both band ends, read with
 
-    CHARON_ROOT=<checkout> xmake l tools/corpus/objc-inventory.lua ~/.charon/dyld/6.1.3/dyld_shared_cache_armv7
-    CHARON_ROOT=<checkout> xmake l tools/corpus/objc-inventory.lua ~/.charon/dyld/4.3/dyld_shared_cache_armv7
+    REVENANT_ROOT=<checkout> xmake l tools/corpus/objc-inventory.lua ~/.revenant/dyld/6.1.3/dyld_shared_cache_armv7
+    REVENANT_ROOT=<checkout> xmake l tools/corpus/objc-inventory.lua ~/.revenant/dyld/4.3/dyld_shared_cache_armv7
 
 finds `UIAccessibilityCustomAction` as neither a class nor a protocol in either cache - the same run read 11378 classes and 1171
 protocols on 6.1.3 and 7187 and 564 on 4.3, which is the control: the reader saw the whole of both caches, so a zero is the

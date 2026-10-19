@@ -46,10 +46,10 @@ window draws with OpenGL ES is not in a layer's bitmap, so an application that b
 picture. The blur is the port's, made by a box filter, and not the render server's Gaussian filter, so its edges and its saturation differ from the system's.
 Vibrancy is not carried: the views in the content view of a vibrancy effect are drawn as they are.
 
-Every frame is not within reach on the iPad 2 (6.1.3, 768 x 1024, scale 1; the port's `CharonBackdrop`, `CharonBlur` and `CharonSheetShadow` compiled into a probe, one
+Every frame is not within reach on the iPad 2 (6.1.3, 768 x 1024, scale 1; the port's `RevenantBackdrop`, `RevenantBlur` and `RevenantSheetShadow` compiled into a probe, one
 refresh called from a display link at 60 Hz over a scroll view of 100 labels that moved by 7 points a frame, 149 frames each; the probe, `cost.m`, its `build.sh` and its log, `ipad2.log`, were kept in
-`charon/.agent-work/handoffs/2026-09-26-b1314-sheet-17/` and were deleted on 2026-10-05 with no copy left anywhere; the review that checked
-these numbers against that log line by line, with the values it read, is the workspace's `coordination/reviews/2026-09-26-charon-66d0f393.md`,
+`toolchain/.agent-work/handoffs/2026-09-26-b1314-sheet-17/` and were deleted on 2026-10-05 with no copy left anywhere; the review that checked
+these numbers against that log line by line, with the values it read, is the workspace's `coordination/reviews/2026-09-26-revenant-66d0f393.md`,
 finding B). The window's `renderInContext:` alone, with nothing done to the pixels, took 21 ms (mean; p95 22 ms) for the shadow's 620 x 740
 region and 31 to 33 ms for one of 768 x 920 or more, so the display link ran at 46, 32 and 30 frames a second before any filter ran. It does not shrink below the cost of
 the window itself: a 90 x 36 region at the blur's quarter scale still took 14 ms, 146 x 86 took 24 ms and the whole screen (192 x 256) 63 ms, which is more than the read
@@ -60,7 +60,7 @@ place of a reduced context; and even then a read above 16.7 ms alone keeps 60 fr
 The shadow's shading is not part of this: since the client shades off the main thread (`UISheetPresentationController.md`) the display link kept 60, 55 and 55 frames a second
 with a shadow refresh running (the read, 3 ms a frame on average, 25.5 to 37.6 ms at p95, is what is left on the main thread).
 
-**The blur's box filter is no longer on the main thread either.** `UIVisualEffectView` shades a reading on a serial queue of its own, `org.charon.visualeffect.shade`, and the
+**The blur's box filter is no longer on the main thread either.** `UIVisualEffectView` shades a reading on a serial queue of its own, `org.revenant.visualeffect.emulator`, and the
 main thread only puts the picture on the layer, which is the shadow's arrangement applied to the thing the shadow was measured against. The read stays where it was: the display
 link is on the main run loop and CoreAnimation is not thread-safe for a layer read, so `renderInContext:` is still what holds the main thread, at 21 to 33 ms as above. The
 shading was the rest of it, and at 768 x 1024 the rest was everything: a whole refresh measured 172 ms and the shading is what the 172 ms was made of.
@@ -69,13 +69,13 @@ What that is worth, and what is NOT measured: the main thread's share of a refre
 iPad 2 keeps with a blur running are not measured** -- the device would not answer an SSH connection while this was written (the tunnel listens on 2232 and the phone resets the
 key exchange), so the 5.8 frames a second above is still the figure for the shading on the main thread, and no new device figure is claimed. What is measured here instead:
 
-- `charon_blur_pixels` over a whole screen measured on this machine, through `tests/backports/host/blurcost`: 0.71 ms at 320 x 100, 3.46 ms at 540 x 300, and 36.6 to 37.1 ms at
+- `revenant_blur_pixels` over a whole screen measured on this machine, through `tests/backports/host/blurcost`: 0.71 ms at 320 x 100, 3.46 ms at 540 x 300, and 36.6 to 37.1 ms at
   768 x 1024 at a load average of 17.7, against 97.90 ms best and 174.75 ms mean at the same size measured an hour earlier under a load of 13 to 23. The host's own number is
   therefore a poor oracle for the device's -- it moves by a factor of 2.6 with the load -- and it is recorded as a range, not as a figure.
-- The reason the shading may leave the thread at all, which is a property and not a hope: compiled on its own, `CharonBlur.m`'s only undefined symbols are `_malloc` and
+- The reason the shading may leave the thread at all, which is a property and not a hope: compiled on its own, `RevenantBlur.m`'s only undefined symbols are `_malloc` and
   `_free`. It touches no UIKit, no CoreGraphics, no Foundation, so it is arithmetic over a buffer its caller owns. `tests/backports/host/blurcost` enforces that with `nm -u` and
   fails the run if a later change gives it a call into a framework, because then this reasoning would no longer hold.
-- **What that check does NOT cover:** it reads `CharonBlur.m` alone. The five CoreGraphics calls the shading block makes around it -- `CGColorSpaceCreateDeviceRGB`,
+- **What that check does NOT cover:** it reads `RevenantBlur.m` alone. The five CoreGraphics calls the shading block makes around it -- `CGColorSpaceCreateDeviceRGB`,
   `CGDataProviderCreateWithData`, `CGImageCreate`, `CGImageCreateWithImageInRect` and their releases -- are off the main thread on a second and separate argument, that an
   immutable `CGImage` may be created on any thread, and no check in this series enforces it. They are CoreGraphics, not UIKit, and the shadow already builds its own image
   the same way (`UISheetPresentationController.md`); if that is ever in doubt the check would have to be widened, and today it is not.

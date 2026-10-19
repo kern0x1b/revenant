@@ -1,6 +1,6 @@
 ---
 name: checks
-description: Prove that the app's code does what it should on the chosen iOS release by running small programs of your own — probes (a command-line program, no UIKit) in the emulator and on the device, and test stands (a second small app) on the user's device — each built through Charon with -fobjc-arc, printing ok/FAIL lines with printf and fflush, with a negative control that shows the check can fail. Use after the skill build, beside the skill emulate, whenever an API newer than the lowest release, a backport, a guard with respondsToSelector: or #available, threading or persistence needs evidence, or when the user asks to test, verify or check the app.
+description: Prove that the app's code does what it should on the chosen iOS release by running small programs of your own — probes (a command-line program, no UIKit) in the emulator and on the device, and test stands (a second small app) on the user's device — each built through the toolchain with -fobjc-arc, printing ok/FAIL lines with printf and fflush, with a negative control that shows the check can fail. Use after the skill build, beside the skill emulate, whenever an API newer than the lowest release, a backport, a guard with respondsToSelector: or #available, threading or persistence needs evidence, or when the user asks to test, verify or check the app.
 ---
 
 # Probes and test stands
@@ -10,13 +10,13 @@ iOS 6. A check does: a small program that exercises one piece of the app's code 
 release, prints one line per expectation, and exits with the number of failures. There are two
 shapes:
 
-- a **probe** — a command-line program (Charon's `daemon` rule), no `UIApplicationMain`. It runs in
+- a **probe** — a command-line program (Revenant's `daemon` rule), no `UIApplicationMain`. It runs in
   the emulator (`xmake emulate run`) and on the device (`xmake device run`). Use it for everything
   that does not need a running application: Foundation, data, parsing, networking code, backports
   of non-UI APIs, the availability guards.
-- a **test stand** — a second, small application (Charon's `app` rule) for what needs a running
+- a **test stand** — a second, small application (Revenant's `app` rule) for what needs a running
   `UIApplication`: views, controllers, layout, gestures, text. A UIKit object made outside an
-  application can trap. With Charon 0.8.10 the emulator cannot launch an app through SpringBoard
+  application can trap. With revenant 0.8.10 the emulator cannot launch an app through SpringBoard
   (its `run` starts the executable directly, and it never reaches
   `application:didFinishLaunchingWithOptions:`), so a test stand runs on the user's device only
   (skill `device`); without a device, say that the UI is unchecked.
@@ -44,7 +44,7 @@ copied from what the code printed on its first run proves nothing.
 
 In the project's `xmake.lua`, one target per probe, beside the app's target:
 
-- `add_rules("@addon/charon/daemon")` — it installs to `/usr/libexec/<target name>`. Never build a
+- `add_rules("@addon/revenant/daemon")` — it installs to `/usr/libexec/<target name>`. Never build a
   probe with the host's `cc` or `clang`: the binary is for macOS and dies on the device with
   `Bad system call: 12`.
 - `add_mflags("-fobjc-arc")` **and** `add_ldflags("-fobjc-arc")` (`add_mxflags` too for `.mm`). On the link the flag makes clang
@@ -52,7 +52,7 @@ In the project's `xmake.lua`, one target per probe, beside the app's target:
   collection subscripting methods below iOS 6.
 - The same `add_packages(...)` as the app, so it links the backports the app does.
 - Its own control file, so it is a package of its own and never ends up in the app's `.deb`:
-  `set_values("charon.control", "packaging/<probe>-control")`, holding only `Package:` (e.g. the
+  `set_values("revenant.control", "packaging/<probe>-control")`, holding only `Package:` (e.g. the
   app's package name plus `.probe`), `Architecture: iphoneos-arm`, `Maintainer:` and
   `Description:`. No `Version:` — the build writes it from `set_version`.
 
@@ -129,7 +129,7 @@ the control is the lowest release itself: the guarded API must be seen absent th
 
 ## 6. The test stand
 
-A second app target in the same project: `add_rules("@addon/charon/app")`, its own bundle identifier
+A second app target in the same project: `add_rules("@addon/revenant/app")`, its own bundle identifier
 (the app's plus `.stand`), its own control file, `-fobjc-arc` on compile and link, the app's own
 sources for the part under test. It builds its screens, drives them through the app's code, and
 reports like a probe.
@@ -165,7 +165,7 @@ does not boot) is written down as unchecked, with the reason.
 ## Traps
 
 - A probe compiled with the host's compiler → `Bad system call: 12` on the device; build it with
-  Charon's `daemon` rule.
+  Revenant's `daemon` rule.
 - `-fobjc-arc` on the compile only → below iOS 5 the build's import check refuses the ARC entry
   points (`should carry it from arclite`); from 6.0 the build is green without it and the flag's
   absence goes unseen — put it on the link anyway, the lowest release can move.
@@ -180,7 +180,7 @@ does not boot) is written down as unchecked, with the reason.
   from documentation, a newer system or the real server.
 - `skip` counted as `ok` → where the emulator does not answer (audio has no server there; location
   and motion are unchecked), the check needs the device.
-- A UIKit check in the emulator → the app never reaches `didFinishLaunching` there with Charon
+- A UIKit check in the emulator → the app never reaches `didFinishLaunching` there with revenant
   0.8.10; run it as a test stand on the device, or record it as unchecked.
-- `xmake check` taken for this → it runs the host-side scripts a project declares with Charon's
+- `xmake check` taken for this → it runs the host-side scripts a project declares with Revenant's
   `check` rule (lint, pre-commit), not programs on iOS.

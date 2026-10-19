@@ -87,7 +87,7 @@ Each of these names is a class `origin/main` already implements, in
 | --- | --- | --- |
 | MPSCNNNeuron10.m | MPSCNNNeuron and its five subclasses | MPSCNNElements10.m |
 | MPSCNNSoftMax10.m | MPSCNNSoftMax, MPSCNNLogSoftMax | MPSCNNElements10.m |
-| MPSTemporaryImage10.m | MPSTemporaryImage, and the allocator beside it | MPSImageElements10.m, CharonMPSTemporaryImage.m |
+| MPSTemporaryImage10.m | MPSTemporaryImage, and the allocator beside it | MPSImageElements10.m, RevenantMPSTemporaryImage.m |
 | MPSCNNNormalization10.m | MPSCNNSpatialNormalization, MPSCNNLocalContrastNormalization, MPSCNNCrossChannelNormalization | MPSCNNElements10.m |
 | MPSImagePyramid10.m | MPSImageLaplacian (and only that one of its six classes) | MPSImageElements10.m |
 
@@ -97,7 +97,7 @@ MPSImageLaplacianPyramid, MPSImageLaplacianPyramidSubtract, MPSImageLaplacianPyr
 `absent` on `main` and are still owed, but that file cannot be landed as it stands because its sixth
 class, `MPSImageLaplacian`, is one `main` already has, in a different and separately measured
 implementation (`MPSImageElements10.m`, which convolves through the
-`MPSUnaryImageKernel(CharonMPSConvolutionSeam)` category rather than by building an
+`MPSUnaryImageKernel(RevenantMPSConvolutionSeam)` category rather than by building an
 `MPSImageConvolution` per encode). Splitting those five classes out of that file into an object of
 their own is the work that is left, and it is not done here.
 
@@ -107,7 +107,7 @@ their own is the work that is left, and it is not done here.
 missing data source, and placement is *not* it**" which says, in the present tense, "The walk is
 available; the weights are not" and reads as though the class is not carried. That page is the
 record of the band that wrote it and is **not** edited here - it is another band's page, and editing
-it from this landing is the shared-file mistake `charon/AGENTS.md` warns about. The two reconcile,
+it from this landing is the shared-file mistake `toolchain/AGENTS.md` warns about. The two reconcile,
 and the registry is the live state:
 
 - what `Elements10.md` says is still true of the **11.0** initializer.

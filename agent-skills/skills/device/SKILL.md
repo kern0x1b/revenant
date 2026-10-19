@@ -5,7 +5,7 @@ description: Put the app on the user's own jailbroken iPhone, iPad or iPod touch
 
 # The app on the user's device
 
-Charon's `xmake device` reaches one jailbroken device over SSH: it installs the project's packages,
+Revenant's `xmake device` reaches one jailbroken device over SSH: it installs the project's packages,
 removes them, runs a shell command as root, reads the system log over USB, and says where the device
 is. It has **no launch, no tap, no screenshot and no file copy**: those are done as this skill says,
 over SSH or by the user's own hand. Everything here touches a device that holds the user's life:
@@ -38,10 +38,10 @@ Do not touch the device before the user says it is connected and you may.
 
 How to know it worked: the user's `ssh` reaches a `#` prompt with the new password.
 
-## 2. Tell Charon which device: `device.env`
+## 2. Tell the toolchain which device: `device.env`
 
 `xmake device` reads `device.env` in the project root (`device.NAME.env` with `-d NAME` or
-`CHARON_DEVICE=NAME` for a second device). Lines are `KEY=VALUE`; `export`, quotes and `#` comments
+`REVENANT_DEVICE=NAME` for a second device). Lines are `KEY=VALUE`; `export`, quotes and `#` comments
 are allowed. A key missing from the file is taken from the environment.
 
 | Key | Meaning | Default |
@@ -54,7 +54,7 @@ are allowed. A key missing from the file is taken from the environment.
 - **USB (recommended):** `brew install libimobiledevice` (it brings `iproxy`), plug the device in,
   run `xmake device list` — each attached device's UDID, model, release and tunnel. Write
   `DEVICE_UDID=<that UDID>` and leave host and port at their defaults. When nothing listens on the
-  port, Charon starts `iproxy 2222 22 -u <UDID>` itself (without `DEVICE_UDID` only when exactly one
+  port, the toolchain starts `iproxy 2222 22 -u <UDID>` itself (without `DEVICE_UDID` only when exactly one
   device is attached).
 - **Wi-Fi:** `DEVICE_HOST=<the address in Settings → Wi-Fi → the network's details>` and
   `DEVICE_PORT=22`.
@@ -83,7 +83,7 @@ xmake device -y install
 ```
 
 It builds, writes every package the project declares (the app's, its dependencies — the
-`org.charon.apple-backports` and shared Swift runtime packages `xmake deb` carries — and any probe
+`org.revenant.apple-backports` and shared Swift runtime packages `xmake deb` carries — and any probe
 or test stand with a control file of its own), refuses when `/Applications/<Name>.app` on the device
 belongs to another bundle identifier, copies each `.deb` to `/tmp` on the device, runs `dpkg -i`, and
 then `su mobile -c uicache` so SpringBoard shows the icon.
@@ -104,7 +104,7 @@ SpringBoard lose the app until a reboot.
 
 ## 4. Launch
 
-**Charon has no launch action today** (`xmake device` takes only install, uninstall, log, run, where,
+**the toolchain has no launch action today** (`xmake device` takes only install, uninstall, log, run, where,
 list, claim and release), and iOS has no public way to open an app from a shell. The launch is the
 native one: **the user taps the icon.** It is their device, and SpringBoard's own launch is the one
 the app will always get. Tell the user what to look for and what to do on each screen, and ask what
@@ -156,7 +156,7 @@ xmake device uninstall <package>                 # dpkg -r, then the shared runt
 xmake device --keep uninstall <package>          # dpkg -r of the named packages only
 ```
 
-It never removes `org.charon.apple-backports`: other programs built with Charon use it.
+It never removes `org.revenant.apple-backports`: other programs built with the toolchain use it.
 
 ## 8. root and mobile
 

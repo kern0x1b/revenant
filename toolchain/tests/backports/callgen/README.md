@@ -42,7 +42,7 @@ against the header cannot be missing: the header is what declares it.
 The same generated file in both, so the two digests are the same measurement of the same
 registry and `xmake l tests/backports/callgen/compare.lua <host.log> <port.log> [--strict]` puts
 them side by side. `FRAMEWORK=<name>` picks another registry folder for the host run, `BUILD` and
-`OUT` name its folder and digest (default: a fresh folder under `$HOME/.cache/hades/<task>/`).
+`OUT` name its folder and digest (default: a fresh folder under `$HOME/.revenant/cache/<task>/`).
 
 A Mac Catalyst run cannot be the oracle for Intents: the Command Line Tools'
 `MacOSX.sdk/System/iOSSupport` carries `IntentsUI` and **not** `Intents` (measured 2026-09-27), so
@@ -68,12 +68,12 @@ For another framework, only the `--registry` and the framework's umbrella change
 ## The two smaller checks
 
 * `xmake l tests/backports/callgen/ownership-test.lua` - the copy's ownership decision in
-  `packages/c/charon-coding/files/CharonCoding.m`, against properties declared the way the SDK's
+  `packages/r/revenant-coding/files/RevenantCoding.m`, against properties declared the way the SDK's
   headers declare them; the negative control for the guard that matches a property to its ivar.
 * `xmake l tests/backports/callgen/collection-test.lua [factory.m]` - the five
   `+successesWithResolved…:` factories on the host's own Intents, then the port's generated factory
   and a mutant of it (`collection-mutant.lua`, one element fewer). The port's factory is the
   generated Intents object that holds them (`tools/intents/objects.lua` writes them into the run
   folder). Its port half does not run on a Mac: the port's object is compiled for armv7 and the
-  macOS runner asks for `CharonPortMediaItemResolutionResult`, a class no build defines, so it stops
+  macOS runner asks for `RevenantPortMediaItemResolutionResult`, a class no build defines, so it stops
   at "is not in this build". The port's table is `tests/backports/emulate/calls`'s collection run.

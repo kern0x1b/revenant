@@ -36,7 +36,7 @@ keeps one release's library and another's from reading each other's bytes.
 
 ## The arithmetic
 
-The header states it in full, and the port does what it states, in `CharonYpCbCr.h`, which is shared by
+The header states it in full, and the port does what it states, in `RevenantYpCbCr.h`, which is shared by
 all thirty. On the way out of a Y'CbCr buffer the luma and the chroma each go into the sum whole, the three
 per-channel sums follow, and each rounds once to the destination's own full scale and clamps to 0 and to
 that scale. On the way back the luma and chroma of a colour are the header's three dot products, the chroma
@@ -47,8 +47,8 @@ has, which is what the header's pseudo-code does when it adds up what is there.
 Three things the header's text does not say, each measured rather than assumed, and each of which a single
 value would have hidden:
 
-- **The luma and chroma of a shared sample are averaged before the scale, not after.** CharonYpCbCr.h keeps
-  the raw dot products in `charon_ypcbcr_chroma_of` for exactly this: summing answers that already carry the
+- **The luma and chroma of a shared sample are averaged before the scale, not after.** RevenantYpCbCr.h keeps
+  the raw dot products in `revenant_ypcbcr_chroma_of` for exactly this: summing answers that already carry the
   scale and the bias applies both a second time. Measured, on a 16-bit source, a Cb of 34331 where the system
   answers 34555.
 - **The Y'CbCr input is not clamped to the pixel range.** With the video range clamped to [16,235] for luma
@@ -85,7 +85,7 @@ Six bugs came out of getting there, each found by a probe rather than by a readi
   unit of a row for the whole row, and its three per-unit arrays at the column rather than the column
   modulo six, which walks off the end of all three from the seventh column on.
 - **A shared sample's chroma is the mean of the block's raw dot products** (see above), and
-  `charon_v210_join` was handed a `uint32_t` array through a `float *` cast, so every chroma of a Q12
+  `revenant_v210_join` was handed a `uint32_t` array through a `float *` cast, so every chroma of a Q12
   source was a float's bit pattern read as an integer.
 
 The one tolerance that is not one, and what it is. A sixteen-bit shape stores the chroma multiplied by
@@ -196,7 +196,7 @@ ones, not a line of code: there is no code from libyuv in this package.
 `ios8ypcbcr-shapes.json` - the 4:2:2, 4:2:0, 4:4:4, v410, v210 and sixteen-bit conversions in both
 directions, which the file carries and which the differential holds to the system over 8 947 checks. The ten
 Y'CbCr symbols, the four matrices and the two generators of `ios8ypcbcr.json`, and the seven rows of
-`ios7.json` and `ios7pixels.json`, were already in `charon` on this base and are **not** part of this
+`ios7.json` and `ios7pixels.json`, were already in `revenant` on this base and are **not** part of this
 delivery: main's Accelerate band put them there. The delivery's whole Accelerate count is therefore 28 here
 plus the 5 of `ios7-15-rotate90.json`, which is **33 rows** — not the 51 I have been reporting, which
 counted main's eighteen as well.

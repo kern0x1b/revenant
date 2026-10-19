@@ -15,7 +15,7 @@ There are two questions per row and they have different answers, which is why on
 
 `band_plan` (`backports.lua:2578`) makes a band point of every release an object's API arrived in, and
 checks the band against the first and last **held** release inside it. This slice's points are 17.0, 17.4
-and 17.5; the held ladder (`~/.charon/dyld`) is dense to 12.0 and then jumps 12.0 → 16.0 → 18.0, so:
+and 17.5; the held ladder (`~/.revenant/dyld`) is dense to 12.0 and then jumps 12.0 → 16.0 → 18.0, so:
 
 | band point | first | last | why |
 |---|---|---|---|
@@ -35,7 +35,7 @@ The rule that makes a bare name useless: **a selector's rung says nothing about 
 "does *this class* carry *this selector*", which is `carried_by_release` reading `apple.objc`'s inventory.
 
 ```
-CHARON_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua ~/.charon/dyld/<release>/dyld_shared_cache_<arch> \
+REVENANT_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua ~/.revenant/dyld/<release>/dyld_shared_cache_<arch> \
     > .agent-work/runs/sl-uikit17/inv-<release>.tsv
 ```
 
@@ -133,7 +133,7 @@ uses (`-Os -g0 -Wall -Wno-unguarded-availability-new -Werror=objc-missing-proper
 Category methods are `t` (local text) in this project, not `T` — measured against
 `NSObject+AccessibilityAttributedStrings.m`, an object already in the tree: its four `_UIAccessibility…`
 constants are `S` and its six methods are `t`. That is by design (`-fvisibility=hidden` is applied only to
-C, and a category is attached through `__charon_catlist`, renamed at link), and `carried_api` at
+C, and a category is attached through `__revenant_catlist`, renamed at link), and `carried_api` at
 `backports.lua:1407` counts members added in a category to a class the release already carries. So a
 category on `NSObject` — which 6.1.3 and 4.3 both carry — is the right shape here, and it is a category
 rather than a new class precisely because `NSObject` is the release's own.
@@ -252,7 +252,7 @@ Nothing else in either file is from the other release.
 
 The 22 `addSymbolEffect:` / `removeSymbolEffect…` rows and the two `setSymbolImage:withContentTransition:`
 families (24 rows in all) look implementable — the host carries all of them, and the port already has
-real symbol infrastructure (`CharonSymbols.h`, `charon_symbol_bitmap`, `UIImage+Symbols.m`). They are
+real symbol infrastructure (`RevenantSymbols.h`, `revenant_symbol_bitmap`, `UIImage+Symbols.m`). They are
 blocked anyway, and the blocker is measured rather than assumed:
 
 - Every one of those methods takes an **`NSSymbolEffect *`**, and `NSSymbolEffect` is declared in
@@ -348,8 +348,8 @@ velocity reads back `(0,0)`. So it goes to the 13.0 initialiser untouched, unsca
 batches' readers of the same cache for 26 minutes at 0% CPU. Two things were already on disk, so the
 6.1.3 answers below come from those and are labelled for what they are:
 
-- `~/.charon/dyld/6.1.3/selectors_armv7.txt` — 113981 distinct selectors of that release, pre-extracted.
-- `~/.charon/dyld/4.3/classes_armv7.json` — the 4.3 class-scoped inventory, used below to
+- `~/.revenant/dyld/6.1.3/selectors_armv7.txt` — 113981 distinct selectors of that release, pre-extracted.
+- `~/.revenant/dyld/4.3/classes_armv7.json` — the 4.3 class-scoped inventory, used below to
   class-scope the six names 6.1.3 answers somewhere.
 
 **The control, in the same file: 8 of 8.** `setFrame:`, `reloadData`, `tintColor`, `title`,
@@ -411,7 +411,7 @@ Two of those decided the code:
 ### What the location does NOT get, stated plainly
 
 This release's haptics are the Taptic Engine's one motor, driven by the port's own
-`charon_feedback_play(intensity, milliseconds, count)` → `AudioServicesPlaySystemSoundWithVibration`.
+`revenant_feedback_play(intensity, milliseconds, count)` → `AudioServicesPlaySystemSoundWithVibration`.
 **That call takes an intensity and a duration and nothing else.** There is no position parameter, and
 no public mechanism on iOS 6.1.3 to say "vibrate harder on the left of the screen".
 
@@ -432,8 +432,8 @@ replaces the weaker M7 for everything it could not reach. Run over the **110 row
 still `absent`** — the 49 this batch moved to `implemented` are not in the question any more:
 
 ```
-CHARON_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua ~/.charon/dyld/4.3/dyld_shared_cache_armv7   > inv-4.3.tsv
-CHARON_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua ~/.charon/dyld/6.1.3/dyld_shared_cache_armv7 > inv-6.1.3.tsv
+REVENANT_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua ~/.revenant/dyld/4.3/dyld_shared_cache_armv7   > inv-4.3.tsv
+REVENANT_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua ~/.revenant/dyld/6.1.3/dyld_shared_cache_armv7 > inv-6.1.3.tsv
 ```
 
 | band end | classes read | rows checkable | **rows carried** | control |
@@ -580,7 +580,7 @@ carries none of this slice's 107 remaining names.
 The **16.0 arm64e** read started at 15:35 and had not returned. That cache is split into ~45 parts and is
 the slowest of the four. So the honest statement for it today is **not yet measured**, and no row in this
 file rests on it. Everything above is reproducible from the three commands in M1 and M9 with the
-`CHARON_ROOT` prefix each one prints.
+`REVENANT_ROOT` prefix each one prints.
 
 ## M13. The 16.0 arm64e band end, and TWO ROWS THE SDK MIS-DATES
 
@@ -654,7 +654,7 @@ Four things in there decided the implementation rather than confirming it:
   configuration set to the locale it already holds is the receiver, which is the same comparison with nil on
   both sides.
 - **The applying route takes the locale.** `fresh applying locale one -> locale=(...), same? 0`: the base
-  class's own `charon_isUnspecified` / `charon_applyFieldsOfConfiguration:` hooks are the seam, and the port
+  class's own `revenant_isUnspecified` / `revenant_applyFieldsOfConfiguration:` hooks are the seam, and the port
   uses them rather than reimplementing `-configurationByApplyingConfiguration:`.
 - **The host's hash is per object, not per value.** Two equal configurations hashed differently (M14b in the
   table above the file's own record of it). That breaks `NSSet` and `NSDictionary`, so the port keeps the
@@ -668,7 +668,7 @@ clang says so — `no visible @interface for 'NSObject' declares the selector 'c
 `category is implementing a method which will also be implemented by its primary class`. So a category that
 overrode `-copyWithZone:` would answer NSObject's copy and **lose the traits**, which is worse than not
 carrying the locale at all. A subclass's `[super ...]` reaches the class it extends, so the five chaining
-methods live in `CharonLocaleConfiguration` — Charon-prefixed, so `internal_symbol` keeps it out of the
+methods live in `RevenantLocaleConfiguration` — Revenant-prefixed, so `internal_symbol` keeps it out of the
 exports and `carried_api` keeps its members out of the registry check — while the accessor pair and the two
 constructors, whose registry rows name `UIImageConfiguration` itself, are the category. The storage is one
 associated object, because a category cannot add an ivar to a class this port already defines wholesale.

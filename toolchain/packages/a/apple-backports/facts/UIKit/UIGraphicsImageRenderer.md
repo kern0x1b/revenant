@@ -62,5 +62,5 @@ answer an **empty object rather than nil**:
 
 This is worth stating plainly because the documentation reads as though nil were
 possible: an application that guards with `if (image)` walks straight on and
-fails later, on its own code, with an image of no size. Charon answers the same
+fails later, on its own code, with an image of no size. The toolchain answers the same
 empty objects.

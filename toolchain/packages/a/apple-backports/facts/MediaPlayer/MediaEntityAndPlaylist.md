@@ -15,7 +15,7 @@ the contract, and there is nothing in it to invent.
 ## What the release has, measured
 
 Read with the deleted mach32 reader from the armv7 shared cache of 6.1.3
-(`~/.charon/dyld/6.1.3/dyld_shared_cache_armv7`, MediaPlayer image at `0x31fe3000`). The reader's own
+(`~/.revenant/dyld/6.1.3/dyld_shared_cache_armv7`, MediaPlayer image at `0x31fe3000`). The reader's own
 controls are the deleted mach32 test - class count, `valueForProperty:` found in `MPMediaEntity`'s
 **own** list, a nonsense selector absent - 0 failures.
 
@@ -35,7 +35,7 @@ nothing in the release clobbers the port's.
 
 The reading that does **not** decide a member is the per-cache selector list. `objectForKeyedSubscript:`
 occurs exactly once in the whole 6.1.3 selector universe
-(`~/.charon/dyld/6.1.3/selectors_armv7.txt`, 113981 **distinct names** - it is a list of names, not a
+(`~/.revenant/dyld/6.1.3/selectors_armv7.txt`, 113981 **distinct names** - it is a list of names, not a
 count per class: `dealloc` is on one line, not 433) because a collection class declares it, not
 `MPMediaEntity`. That is the trap `MPMediaItem.md:105` records for `albumTrackNumber`, which
 `MPAVItem` and `MPMediaQueryNowPlayingItem` declare in the same image. Every one of these four is decided

@@ -15,7 +15,7 @@ the run prints this machine's own home; the run prints the absolute cache it rea
 thing in it a repository may not carry. Sections 1 to 3 are read by
 
 ```
-CHARON_ROOT="$PWD" xmake l packages/a/apple-backports/facts/HealthKit/rows-code-map.lua 8.0 6.1.3 4.3 9.0 18.0
+REVENANT_ROOT="$PWD" xmake l packages/a/apple-backports/facts/HealthKit/rows-code-map.lua 8.0 6.1.3 4.3 9.0 18.0
 ```
 
 through `modules/apple/objc.lua`'s `code_map()`, which gives every method a rung declares as
@@ -29,7 +29,7 @@ hypothetical: a first differential built on `inventory()` answered `no` for all 
 control, and the last line of each rung says what it was:
 
 ```
-== 8.0  armv7  $HOME/.charon/dyld/8.0/dyld_shared_cache_armv7
+== 8.0  armv7  $HOME/.revenant/dyld/8.0/dyld_shared_cache_armv7
    812 images, 380422 methods
    +HKQuery                predicateForStatesOfMindWithValence:operatorType:  own-methods-of-owner=54     NOT DECLARED BY THIS CLASS
    +HKQuery                predicateForStatesOfMindWithKind:               own-methods-of-owner=54     NOT DECLARED BY THIS CLASS
@@ -67,7 +67,7 @@ release before the next band point. Neither carries any of these sixteen names, 
 framework at all:
 
 ```
-== 6.1.3  armv7  $HOME/.charon/dyld/6.1.3/dyld_shared_cache_armv7
+== 6.1.3  armv7  $HOME/.revenant/dyld/6.1.3/dyld_shared_cache_armv7
    524 images, 206216 methods
    ... all sixteen: NOT DECLARED BY THIS CLASS, own-methods-of-owner=0
    anywhere <each of the eight selectors>  no class in this rung
@@ -100,7 +100,7 @@ HKStateOfMind	18.0
 declares them there:
 
 ```
-== 18.0  arm64e  $HOME/.charon/dyld/18.0/dyld_shared_cache_arm64e
+== 18.0  arm64e  $HOME/.revenant/dyld/18.0/dyld_shared_cache_arm64e
    3692 images, 2896455 methods
    +HKQuery                predicateForStatesOfMindWithValence:operatorType:  own-methods-of-owner=155    own in /System/Library/Frameworks/HealthKit.framework/HealthKit
    +HKQuery                predicateForStatesOfMindWithKind:               own-methods-of-owner=155    own in /System/Library/Frameworks/HealthKit.framework/HealthKit
@@ -153,10 +153,10 @@ startWorkoutSession:	9.0,9.0.2,9.1,9.2,9.2.1,9.3,9.3.5,9.3.6,10.0.1,10.1.1,10.2,
 
 ```
 $ printf '%s\n' predicateForObjectsFromWorkout: predicateForSamplesWithStartDate:endDate:options: \
-      zzNoSuchCharonSelectorControl: | xmake l tools/cache-index/first-rung.lua
+      zzNoSuchRevenantSelectorControl: | xmake l tools/cache-index/first-rung.lua
 predicateForObjectsFromWorkout:	8.0
 predicateForSamplesWithStartDate:endDate:options:	8.0
-zzNoSuchCharonSelectorControl:	NONE
+zzNoSuchRevenantSelectorControl:	NONE
 ```
 
 Two HealthKit class methods of 8.0 read 8.0 and a nonsense name reads `NONE`, so the index sees
@@ -166,7 +166,7 @@ So the absence is **not** "the image has no such string". `rows-code-map.lua` sa
 which rung:
 
 ```
-== 9.0  armv7  $HOME/.charon/dyld/9.0/dyld_shared_cache_armv7
+== 9.0  armv7  $HOME/.revenant/dyld/9.0/dyld_shared_cache_armv7
    905 images, 515998 methods
    -HKHealthStore          startWorkoutSession:                            own-methods-of-owner=155    own in /System/Library/Frameworks/HealthKit.framework/HealthKit
    -HKHealthStore          endWorkoutSession:                              own-methods-of-owner=155    own in /System/Library/Frameworks/HealthKit.framework/HealthKit
@@ -176,7 +176,7 @@ which rung:
    anywhere pauseWorkoutSession:                            no class in this rung
    control: every owner class this rung holds declares methods of its own
 
-== 18.0  arm64e  $HOME/.charon/dyld/18.0/dyld_shared_cache_arm64e
+== 18.0  arm64e  $HOME/.revenant/dyld/18.0/dyld_shared_cache_arm64e
    -HKHealthStore          pauseWorkoutSession:                            own-methods-of-owner=283    own in /System/Library/Frameworks/HealthKit.framework/HealthKit
    -HKHealthStore          resumeWorkoutSession:                           own-methods-of-owner=283    own in /System/Library/Frameworks/HealthKit.framework/HealthKit
    anywhere endWorkoutSession:                              -CMWorkoutManager endWorkoutSession: [own], -HKHealthStore endWorkoutSession: [own]
@@ -206,7 +206,7 @@ carries says nothing about what a caller gets. This section measures that.
 
 ### The measurement
 
-`tests/backports/host/init-inherited/host.sh` builds the port's HealthKit classes under `CharonHost<Name>`,
+`tests/backports/host/init-inherited/host.sh` builds the port's HealthKit classes under `RevenantHost<Name>`,
 links them beside the system's HealthKit in one process, and asks each class two questions, the way a caller
 asks them: `[[cls alloc] init]` and `[cls new]`. The probe is `tests/backports/host/init-inherited/probe.m`.
 Its output on the macOS host, built against the Command Line Tools' macOS 27.0 SDK:
@@ -240,8 +240,8 @@ SAME HKQuantityType init host=raises NSInvalidArgumentException (The -init metho
 SAME HKQuantityType new host=raises NSInvalidArgumentException (The -init method is not available on HKQuantityType) port=raises NSInvalidArgumentException (The -init method is not available on HKQuantityType)
 SAME HKDeletedObject init host=ok HKDeletedObject port=ok HKDeletedObject
 SAME HKDeletedObject new host=ok HKDeletedObject port=ok HKDeletedObject
-SAME CharonHostHKStatistics copy made=yes copied=yes
-SAME CharonHostHKStatisticsCollection copy made=yes copied=yes
+SAME RevenantHostHKStatistics copy made=yes copied=yes
+SAME RevenantHostHKStatisticsCollection copy made=yes copied=yes
 failures=0
 ```
 
@@ -254,16 +254,16 @@ because it inherits NSObject's `-init` and not a class's own.
 
 ### What the port does
 
-- Each of the eight `@implementation` blocks carries `CHARON_HEALTHKIT_UNCREATABLE_INIT`, the macro
-  `HealthKit/CharonHKStore.h` defines for the port's other uncreatable classes. It raises the host's exception
+- Each of the eight `@implementation` blocks carries `REVENANT_HEALTHKIT_UNCREATABLE_INIT`, the macro
+  `HealthKit/RevenantHKStore.h` defines for the port's other uncreatable classes. It raises the host's exception
   with the host's reason.
 - No part of the port builds one of these classes, or a subclass of them, through `-init`. The internal
-  constructors call `[super init]` only where the superclass is NSObject: `HKObject`'s `charon_initWithUUID:`,
-  `HKObjectType`'s `charon_initWithIdentifier:`, and the `initWithCoder:` methods. Subclasses of `HKObject`
-  and `HKObjectType` reach their superclass through `charon_init...` constructors and never through `-init`.
+  constructors call `[super init]` only where the superclass is NSObject: `HKObject`'s `revenant_initWithUUID:`,
+  `HKObjectType`'s `revenant_initWithIdentifier:`, and the `initWithCoder:` methods. Subclasses of `HKObject`
+  and `HKObjectType` reach their superclass through `revenant_init...` constructors and never through `-init`.
 - `HKStatistics` and `HKStatisticsCollection` had four call sites that built through `[[X alloc] init]`: the
   two factories and the two `-copyWithZone:` methods. Those were the only internal calls that reached the
-  raise. They now call a bare `charon_init`, which is `[super init]` with NSObject as the superclass. The probe
+  raise. They now call a bare `revenant_init`, which is `[super init]` with NSObject as the superclass. The probe
   builds and copies both (`copy made=yes copied=yes`).
 - `tests/backports/host/init-inherited/check.lua` holds the source to this: the macro is in each of the eight
   blocks, and no `alloc] init]` or `new]` in `HealthKit/*.m` names one of the eight or a subclass of them.

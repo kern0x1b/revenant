@@ -7,7 +7,7 @@ seventeen frame-processor classes, which SDK 26.2 marks `API_AVAILABLE(ios(26.0)
 the 6.1.3 cache ladder does not export at any release.
 
 The measurement behind that, repeated rather than assumed: `objc-inventory.lua` and `dump-cache.lua`
-over `$HOME/.charon/dyld/6.1.3/dyld_shared_cache_armv7` find no `VTFrameProcessor` class and no
+over `$HOME/.revenant/dyld/6.1.3/dyld_shared_cache_armv7` find no `VTFrameProcessor` class and no
 `VTFrameProcessor*` symbol, and `tools/corpus/cache-index` gives the same zero on 4.3. The port's own
 `VTFrameProcessor.m` says so at the head of the file, with the same commands.
 
@@ -242,7 +242,7 @@ was wrong and it cost a 6.1.3 gate failure. `check_registry` (modules/apple/back
 row whose owner is no class **only** through the owner's protocol row, so with the eleven property rows
 `implemented` and no protocol rows, the gate read all eleven as "listed as implemented, but nothing of that
 name is built" (gate land-w2, 2026-10-03). Both protocols now carry an `implemented` row of `kind:
-protocol`, and `CharonVideoToolboxProtocols.h` is the header the generated protocol source imports.
+protocol`, and `RevenantVideoToolboxProtocols.h` is the header the generated protocol source imports.
 
 The lesson is the one this family has now produced twice: I read the tool's source, concluded a row was not
 needed, wrote the conclusion into the facts page, and the tool disagreed. What I should have done was run the

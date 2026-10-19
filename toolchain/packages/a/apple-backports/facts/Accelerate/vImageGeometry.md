@@ -66,7 +66,7 @@ reproduce that from the header and has to be told the convention by a further me
 
 No geometry function is implemented. What exists is this page, `probe-map.m`, and the infrastructure the
 family will share: the layout table and the per-pixel reference implementations in
-`tests/backports/host/ypcbcr8` are the pattern to follow for a family differential, and `CharonYpCbCr.h` is
+`tests/backports/host/ypcbcr8` are the pattern to follow for a family differential, and `RevenantYpCbCr.h` is
 the pattern for a shared arithmetic header across several object files of one family.
 
 ## The two convention probes, run: what they showed
@@ -786,13 +786,13 @@ its bottom-edge cells differ from the system's by exactly the overshoot, and its
 right - which is the shape the coordinator described: differences only in the bottom-edge cells at a non-zero
 slope, and a bug anywhere else.
 
-The port's `CharonShearRun` needs one change: when a tap's **row** is outside the picture, clamp it to the
+The port's `RevenantShearRun` needs one change: when a tap's **row** is outside the picture, clamp it to the
 edge row and keep its weight; when its **column** is outside, drop it as now. That is a two-line difference
 in the tap loop and it is the whole of the remaining work on this family.
 
 ## The two-rule change is in, and the failures are NOT the bottom edge
 
-`CharonShearRun`'s tap loop now drops a tap whose **column** is outside and clamps a tap whose **row** is
+`RevenantShearRun`'s tap loop now drops a tap whose **column** is outside and clamps a tap whose **row** is
 outside, with its weight intact. The shear differential over 212 cases:
 
     212 checks, 101 failures, the widest sample difference 3.96584 of a 0..1 channel
@@ -852,7 +852,7 @@ find. The 36 registry entries stay **out**.
 ## ASan on the identity: silent, and the identity is off by one ROW
 
 An AddressSanitizer and UndefinedBehaviorSanitizer build of the **horizontal** identity case alone -
-`CharonShearRun(..., CharonPlanarF, /*horizontal*/ YES, 0.0, 0.0, 0, 0, backColor, kvImageBackgroundColorFill)`
+`RevenantShearRun(..., RevenantPlanarF, /*horizontal*/ YES, 0.0, 0.0, 0, 0, backColor, kvImageBackgroundColorFill)`
 over a 9x5 `PlanarF` buffer, `clang -g -O0 -fsanitize=address,undefined -fno-omit-frame-pointer`
 (`.agent-work/runs/asan/ident.m`) - is **silent on both**, and answers:
 
@@ -870,7 +870,7 @@ and the identity's own defect is a **one-row off-by-one in the row mapping**, vi
 instrument: `row = cross0 + cross + slope * k` reads one row further down than `out = dest->data +
 cross * dest->rowBytes` writes.
 
-The coordinator's ASan trace - `CharonShear.h:225`, `row` clamped to `srcCross - 1` where `srcCross` is the
+The coordinator's ASan trace - `RevenantShear.h:225`, `row` clamped to `srcCross - 1` where `srcCross` is the
 *width* for the vertical shear and so used as a row index - is the **vertical** one and remains real. The two
 axes are separate defects and the horizontal one is a mapping, not a memory error.
 
@@ -909,7 +909,7 @@ So the port's position is wrong by the half pixel, and the irregular differences
 not even a constant step of 1/scale once the kernel is taken into account. What the next run has to pin is
 the *exact* position per destination pixel - solvable from this grid, since the source values are their own
 indices and the answer is a weighted mean of the columns the kernel covers - and then the extent the filter
-carries at a scale other than one, which the table in `CharonResampling.h` fixes as
+carries at a scale other than one, which the table in `RevenantResampling.h` fixes as
 `ceil(lobes / min(1, scale))` on the strength of the *extent* measurement and has never been checked
 against a resample.
 
@@ -1140,7 +1140,7 @@ stands, and it is a smaller question than the one this turn started with.
 
 searched: **stb_image_resize** (MIT/Apache-2.0) for the Lanczos3 filter, and **nothing reused**.
 `stbir__lanczos` is `sinc(x) * sinc(x / 3)` with the weights normalised per phase, which is what
-`CharonResampling.h` computes and what the host's own weights match to five decimal places — the phase-0.5
+`RevenantResampling.h` computes and what the host's own weights match to five decimal places — the phase-0.5
 set `+0.02446, -0.13587, +0.61141, +0.61141, -0.13587, +0.02446` is that kernel's, and the extent rule
 `ceil(lobes / min(1, scale))` is the support stb uses. It is not reusable here: stb_image_resize is integer
 throughout, has **no alpha channel**, no planar or interleaved-chroma layouts, and **no edging mode at all** —
@@ -1162,7 +1162,7 @@ half-pixel sign.
 
 The instrument that settled this is the delta sweep: a source with exactly one row (vertical) or one column
 (horizontal) carrying 1.0 and a backColor of 0, so a destination sample's value IS the weight the kernel gave
-that row, and a search over `CharonResampleWeights`' own output reads the mapped position off the kernel to
+that row, and a search over `RevenantResampleWeights`' own output reads the mapped position off the kernel to
 four decimals. The residual of that search is at rounding size in every case below, so the position is read
 off the kernel rather than inferred from the destination's index.
 
@@ -1272,17 +1272,17 @@ phases per pixel at a scale of one and not at a continuous one.
 **The table IS the port's kernel.** Fitting every stored row of every scale and both lobe counts against
 `sinc(x) * sinc(x / lobes)` at those arguments gives a widest **absolute** residual of **2.89e-08** - the float a
 weight is stored in - and after each row is divided by its own sum the widest **relative** difference from the
-same kernel in double is **9.8e-08**. So `CharonResampleWeights` computes what the release's filter holds.
+same kernel in double is **9.8e-08**. So `RevenantResampleWeights` computes what the release's filter holds.
 
 **The "1.2e-06 relative" above could not have seen this.** It was measured by reading weights out through the
 shear at phases in steps of an eighth, and an eighth is 16 of the release's 64 phases: the sweep landed on the
-grid every time. `CharonResampling.h` does not quantise the phase, and neither does `differential.m`, and the
+grid every time. `RevenantResampling.h` does not quantise the phase, and neither does `differential.m`, and the
 differential's own sweep never leaves the grid either - its six translates and four slopes make every mapped
 position a multiple of a **quarter** at a scale of one, of a half at two and 0.5, and a quarter at 0.25, which
 are all multiples of `1/(64 * min(1, scale))` in every case. **Truncating the mapped position to the release's
 grid changes the port's output on no case of the sweep at all**, which is measured, not argued.
 
-**The release rounds; the port truncates.** `CharonChannelPut` casts, which truncates toward zero. At a
+**The release rounds; the port truncates.** `RevenantChannelPut` casts, which truncates toward zero. At a
 translate of zero - where the kernel is the single tap at `L(0) = 1` and the sum is therefore an exact integer
 - the host's own stored value is that integer, byte for byte, on **180 of 180** samples, and it is reproduced by
 a round to nearest on 180 of 180 and by a truncation on 29 of 180. So the release rounds to nearest.
@@ -1371,7 +1371,7 @@ rule - and the deviation from `trunc` reaches 1.6 of 16384, which is 150 times t
 float table stores the same weights in. So the release's integer path evaluates the kernel **less accurately
 than its float path**, and that evaluation is the one thing left.
 
-**What this changes in the port, and it is landed.** `CharonChannelPut` cast, which truncates toward zero;
+**What this changes in the port, and it is landed.** `RevenantChannelPut` cast, which truncates toward zero;
 `tests/backports/host/shear/differential.m`'s own loops did the same. Both now round half up, and the packed
 ten-bit field is masked *after* the round. `port and the host differ` goes **5743 -> 5260** over the sweep.
 **The 109 samples a previous pass could not attribute are this and nothing else**: on `ARGB16S` the backColor is
@@ -1382,7 +1382,7 @@ eleven the same cast the other way, and rounding takes the count **109 -> 0**.
 
 **The differential's blind spot is closed.** Its sweep's six translates and four slopes made every mapped
 position a multiple of the release's grid, so it could not see the phase quantisation: planting the grid into
-`CharonResampleWeights` left both per-kind counts exactly where they were. A seventh translate of **1/128**
+`RevenantResampleWeights` left both per-kind counts exactly where they were. A seventh translate of **1/128**
 puts every mapped position off the grid at every scale, and the same plant now moves the harness's own loops
 from 180 to 1328 cases. **The release does quantise the phase, and the differential can now see it.** The sweep
 is 9900 checks and 10572 failures, both PLANT controls red, and `SAN=1` the same count.
@@ -1395,7 +1395,7 @@ are not three**, which `vImageNewResamplingFilter(scale, kvImageHighQualityResam
 rows at a scale of one), and check whether the deviation from the normalised five-lobe kernel has the same
 magnitude and the same sign pattern - a fixed-point `sinc` would, a normalising correction would not.
 
-## The filter's constructors ARE on 6.1.3, and `CharonResampling.h` is built on the opposite (2026-10-03)
+## The filter's constructors ARE on 6.1.3, and `RevenantResampling.h` is built on the opposite (2026-10-03)
 
 Counted off `coordination/corpus/caches/*.tsv` on an exact tab-separated match, one row per framework that
 carries the symbol:
@@ -1412,7 +1412,7 @@ carries the symbol:
 
 So **the sixteen-bit shears and `vImageGetResamplingFilterExtent` arrive at 7.0 and the filter's four
 functions are there from 6.0**, which is the asymmetry that matters here - and it is the opposite of what
-`CharonResampling.h` records. That file's own comment reads: "the Accelerate band measured that the armv7
+`RevenantResampling.h` records. That file's own comment reads: "the Accelerate band measured that the armv7
 caches carry **none** of vImage's C API below 7.0.1, so whatever the header's `API_AVAILABLE(ios(5.0))` says,
 there is no `vImageNewResamplingFilter` and no `vImageNewResamplingFilterForFunctionUsingBuffer` on 4.3 or
 6.1.3 to fill a caller's buffer. So the port writes the filter itself, into a buffer the caller allocated from
@@ -1423,7 +1423,7 @@ no 4.3 index.)
 **Two consequences. The first is the port's; the second is the coordinator's ruling of 2026-10-03, recorded here
 because this page is the durable record and it is about to land.**
 
-1. `CharonResampleFilterOf` refuses every buffer whose tag is not the port's own and `CharonShearReady` answers
+1. `RevenantResampleFilterOf` refuses every buffer whose tag is not the port's own and `RevenantShearReady` answers
    `kvImageInvalidParameter` for the NULL it returns. **A caller on a real device builds its filter with the
    system's `vImageNewResamplingFilter`, so the port's shears refuse every call that carries a genuine filter.**
    That is a defect on the 7.0+ band the thirty-six rows are for, and it is independent of the weight question.
@@ -1456,7 +1456,7 @@ the release's own addresses - `_vImageNewResamplingFilter` at 0x30418ef9, `_vIma
 at 0x3041905d, `_vImageGetResamplingFilterSize` at 0x30419299, and the static header writer both of the first
 two call at **0x304192c0**:
 
-    CHARON_ROOT=$PWD sh tools/corpus/disasm.sh ~/.charon/dyld/6.1.3/dyld_shared_cache_armv7 \
+    REVENANT_ROOT=$PWD sh tools/corpus/disasm.sh ~/.revenant/dyld/6.1.3/dyld_shared_cache_armv7 \
         /Frameworks/vImage 3041905d 30419299 armv7
 
 `_vImageNewResamplingFilter(scale, flags)` builds a descriptor on its own stack, allocates, and calls
@@ -1522,7 +1522,7 @@ the release's own instructions:** the row is not a fixed-point evaluation of a f
 is the bits of one libm's single-precision `sinf`. There is no rule.
 
 The port therefore reads the row out of the caller's filter - a private layout, a `crutches.md` entry carrying
-the measurement above - and `CharonResampleFilterOf` refuses anything whose header does not match it:
+the measurement above - and `RevenantResampleFilterOf` refuses anything whose header does not match it:
 `numTaps` positive, the row width a whole number of int16, the phase count a power of two of at most 64, and
 every row of the Q14 table summing to exactly 16384.
 
@@ -1688,11 +1688,11 @@ own export-trie reader (`tools/corpus/cache-value.lua`'s export walk (`modules/a
 `_vImageHorizontalShear_ARGB8888` = `0x303d2865` on the 6.1.3 armv7 cache, which are the addresses the section
 above used - so the reader and the disassembler agree before either is trusted on a release neither has read):
 
-    CHARON_ROOT=$PWD sh tools/corpus/disasm.sh ~/.charon/dyld/7.0/dyld_shared_cache_armv7 \
+    REVENANT_ROOT=$PWD sh tools/corpus/disasm.sh ~/.revenant/dyld/7.0/dyld_shared_cache_armv7 \
         /Frameworks/vImage 2c4e4c19 2c4e4d10 armv7      # the 7.0 armv7 writer, found from _vImageGetResamplingFilterSize
-    CHARON_ROOT=$PWD sh tools/corpus/disasm.sh ~/.charon/dyld/7.0/dyld_shared_cache_arm64 \
+    REVENANT_ROOT=$PWD sh tools/corpus/disasm.sh ~/.revenant/dyld/7.0/dyld_shared_cache_arm64 \
         /Frameworks/vImage 1804add2c 1804ade10 arm64e    # the 7.0 arm64 writer
-    CHARON_ROOT=$PWD sh tools/corpus/disasm.sh ~/.charon/dyld/12.0/dyld_shared_cache_arm64 \
+    REVENANT_ROOT=$PWD sh tools/corpus/disasm.sh ~/.revenant/dyld/12.0/dyld_shared_cache_arm64 \
         /Frameworks/vImage 182712118 1827122c0 arm64e   # 12.0's writer, inlined into _vImageGetResamplingFilterSize
 
 **The fields are the same on every release read, and every one of them is computed the same way:**
@@ -1928,7 +1928,7 @@ spellings say:
 `d4ed12b1c` took back the arm64 "overwrite". It is re-read here from the bytes rather than taken on trust, on
 the release where the earlier reading went wrong:
 
-    CHARON_ROOT=$PWD sh tools/corpus/disasm.sh ~/.charon/dyld/7.0/dyld_shared_cache_arm64 \
+    REVENANT_ROOT=$PWD sh tools/corpus/disasm.sh ~/.revenant/dyld/7.0/dyld_shared_cache_arm64 \
         /Frameworks/vImage 1804addc0 1804ade00 arm64e
     0x1804addc0   stp  x10, x9,  [x0, #16]    bytes 16 and 24: floatStride, int16Stride
     0x1804addcc   stp  x11, x8,  [x0, #32]    bytes 32 and 40: phases, exponent
@@ -1992,12 +1992,12 @@ Over every phase of every shape the 6.1.3 guest dumped (`checkrows.py`, section 
 **The armv7 header's fields do NOT start at word one, and every field from `numTaps` on was being read one
 four-byte word early.** The reader took field `k` at byte `k * slot` with a four-byte slot on armv7. The first
 field is the DOUBLE `1.0/scale` and it is two slots wide, so field 1 landed at byte 4 - inside the
-reciprocal - and the release puts `numTaps` at byte **8**, which is slot **2**. `CharonResampling.h` now
+reciprocal - and the release puts `numTaps` at byte **8**, which is slot **2**. `RevenantResampling.h` now
 takes field `k` at `8 + slot*(k-1)`, which on arm64 is the address `8*k` it always was.
 
 This is invisible on a Mac, where every filter is an arm64 one, and it is why 11916 host checks and a
 nineteen-shape header check never saw it. **The 6.1.3 guest saw it in one run**: the probe
-(`tests/backports/device/shearprobe/`) handed `CharonResampleFilterOf` the object `vImageNewResamplingFilter`
+(`tests/backports/device/shearprobe/`) handed `RevenantResampleFilterOf` the object `vImageNewResamplingFilter`
 had just allocated and the reader refused, printing `word 1 taps 1072693248` - which is `0x3FF00000`, the low
 word of the double `1.0` - and `word 7 table 0xc50`, which is byte 28, the offset. The release's own forty
 bytes:
@@ -2186,7 +2186,7 @@ release's conversion FLOORS, and the port must floor too.
   hundred-millionth and the port's is `1/2`; `32 - 21 = 11`. The offset is a CONSTANT because both sides step
   by the same `4/3` - which is why four bands of fitting never found it.
 * **It does NOT close the family.** The engine, the 36 rows, the band files and the registry are untouched by
-  this section: the change to `CharonResampling.h` and `CharonShear.h` that this reading implies is the next
+  this section: the change to `RevenantResampling.h` and `RevenantShear.h` that this reading implies is the next
   unit of work, and it is measured against the guest rather than here.
 
 ## The two open terms closed: `Y` is `numTaps`, and the Q32 conversion TRUNCATES (2026-10-04, v-tail-a17)
@@ -2387,7 +2387,7 @@ number here is from the run made after the last change to the engine:
 * The **horizontal**'s slope term IS the release's and is in the reading above:
   `(row + 1 - dest->height) * recip * shearSlope` at `0x3040f668`..`0x3040f690`. The guest run carries slope 0
   throughout (P15), so this term is read and unmeasured.
-* The **vertical**'s slope term is NOT the release's and is named as such in `CharonShear.h`. The 6.1.3
+* The **vertical**'s slope term is NOT the release's and is named as such in `RevenantShear.h`. The 6.1.3
   vertical worker reads its `shearSlope` and BRANCHES on it at `0x30413d38`: at zero it falls into the path
   this engine implements, which has no cross term at all, and at anything else it jumps to `0x304151e4`,
   which spills its state and CALLS rather than forming a start. That path is not read, so the term carried

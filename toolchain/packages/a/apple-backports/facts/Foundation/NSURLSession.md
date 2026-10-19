@@ -103,7 +103,7 @@ by that record and not by a header it read.
   over the package returns nothing, and the port drives the release's own `NSURLConnection`, whose
   callback is the one that carries a response.
 - `needNewBodyStreamFromOffset:completionHandler:` is the system running out of a body it must resend.
-  The port keeps the body it was handed - `CharonTaskBody` in `Foundation/NSURLSession.m:28` is the
+  The port keeps the body it was handed - `RevenantTaskBody` in `Foundation/NSURLSession.m:28` is the
   enum for exactly those three (data, file, stream) - so it is never asked for one.
 
 **`absent`, and not `ignored`.** `ignored` is this registry's word for an API the *release* carries and
@@ -113,7 +113,7 @@ held rung carrying `NSURLSession` or `NSURLSessionTaskDelegate` at **7.0**, abov
 `minimum` of 6.0 reaches, and the two rungs' own name indexes carry neither name nor any of these three
 selectors - 0 of the 317,453 names at 4.3 and 0 of the 568,965 at 6.1.3, with `UIView`, `NSObject` and
 `setObject:forKey:` present in both as the control. That is
-`~/.charon/cache-index/<release>.names.gz`, the index `tools/cache-index/build.lua` writes, read here by
+`~/.revenant/cache-index/<release>.names.gz`, the index `tools/cache-index/build.lua` writes, read here by
 `tools/cache-index/first-rung.lua`'s own `_names_of()` over the bytes it holds. `Foundation17ReleaseAbsences.md` closed the same
 gap for 4.3 and 6.0 by class census, and found no class named `URLSession` in either.
 

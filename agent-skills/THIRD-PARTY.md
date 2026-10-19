@@ -1,15 +1,15 @@
 # Third-party material
 
-Psychopomp is MIT-licensed (`LICENSE`). The parts below are derived from other projects and stay
+agent-skills is MIT-licensed (`LICENSE`). The parts below are derived from other projects and stay
 under their licenses as well; the full texts are in `LICENSES/`.
 
 ## xmake-io/xmake-skills
 
 - Source: <https://github.com/xmake-io/xmake-skills>, commit `ef67caa`.
 - License: Apache License 2.0 (`LICENSES/Apache-2.0.txt`).
-- Used in: the `xmake-*` skills under `skills/`. Each is rewritten for the Charon toolchain and
+- Used in: the `xmake-*` skills under `skills/`. Each is rewritten for the toolchain and
   modified: content that does not apply to apps for old iOS is removed, advice that conflicts with
-  Charon is replaced, and new material is added. Each file says at its top which upstream skills it
+  The toolchain is replaced, and new material is added. Each file says at its top which upstream skills it
   derives from.
 
 | Skill here | Upstream skills |

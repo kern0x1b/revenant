@@ -175,7 +175,7 @@ by side over the same key.  That is what the red control plants against.
 M3's blocker is gone and the two classes are carried. `UIContentUnavailableConfiguration` and
 `UIContentUnavailableView` are in `packages/a/apple-backports/UIKit/UIContentUnavailableConfiguration.m`,
 declared in `UIContentUnavailableConfiguration.h`, transcribed from
-`charon/.agent-work/sdk-26.2/iPhoneOS26.2.sdk/System/Library/Frameworks/UIKit.framework/Headers`, whose
+`toolchain/.agent-work/sdk-26.2/iPhoneOS26.2.sdk/System/Library/Frameworks/UIKit.framework/Headers`, whose
 `UIContentUnavailableConfiguration.h` and `UIContentUnavailableView.h` are byte for byte the Mac Catalyst
 ones this was measured on (compared with `diff` after stripping the comments and the availability
 macros: identical). The host is the Mac Catalyst UIKit, **build 26A428, iOS 27.0** - the newest side
@@ -210,8 +210,8 @@ colour, `lineBreakMode` 4 (`NSLineBreakByTruncatingTail`) with 0 lines, `numberO
 `buttonToSecondaryButtonPadding` **15**, `imageProperties.tintColor` a secondary label colour,
 `button`/`secondaryButton` a `UIButtonConfiguration` of base style `plain` with no title, and
 `background` a `UIBackgroundConfiguration` whose own description reads `Base Style = Custom` - which is
-what `+[UIBackgroundConfiguration clearConfiguration]` builds (CharonBackgrounds16.m's
-`CharonBackgroundStyleCustom`).
+what `+[UIBackgroundConfiguration clearConfiguration]` builds (RevenantBackgrounds16.m's
+`RevenantBackgroundStyleCustom`).
 
 The three strings are byte for byte: `Loading` + `e2 80 a6` (U+2026 HORIZONTAL ELLIPSIS, not three dots),
 `No Results`, and `Check the spelling or try a new search.`. The port spells the first one
@@ -222,7 +222,7 @@ The three **point sizes** (48, 32, 48) are read out of the host's own `preferred
 descriptions (`pointSize=48`, `pointSize=32`), and the port builds the same configurations with
 `+[UIImageSymbolConfiguration configurationWithPointSize:]`, which is carried (13.0,
 `UIImageSymbolConfiguration.m`) and which its own symbol table draws from - 333 glyphs in
-`CharonSymbolGlyphs.h`, of which `magnifyingglass` is one. So the search configuration's image is the
+`RevenantSymbolGlyphs.h`, of which `magnifyingglass` is one. So the search configuration's image is the
 port's own drawing of the symbol the host draws, at the point size the host names; it is not the host's
 bitmap, and the row says so.
 
@@ -363,7 +363,7 @@ each side produces a content taller than zero, and nothing about the host's fram
 ### The red control, extended to this half of the group
 
 `tests/backports/host/uikit2/red-control.sh` now plants twice: M1's line count in the text bag, and a
-`textToSecondaryTextPadding` of 33 against the measured 3 in this file's `initCharonWithKind:`. Run:
+`textToSecondaryTextPadding` of 33 against the measured 3 in this file's `initRevenantWithKind:`. Run:
 
     $ sh tests/backports/host/uikit2/red-control.sh
     == the unplanted group, which must be green
@@ -388,18 +388,18 @@ Two things the control had to be fixed for, both because the group grew a file t
 old scratch copy did not have:
 
   `UIKIT2_SOURCES` overrides where the group reads its sources, and the control pointed it at a flat
-  scratch directory of `UIKit/*.m` and `UIKit/*.h`. This file imports `CharonLists.h`, which imports
-  `CharonMenus.h`, which spells `#import "../CharonSayOnce.h"` - and `..` out of the scratch directory is
-  nothing, so every file that transitively includes `CharonMenus.h` stopped compiling. The control
+  scratch directory of `UIKit/*.m` and `UIKit/*.h`. This file imports `RevenantLists.h`, which imports
+  `RevenantMenus.h`, which spells `#import "../RevenantSayOnce.h"` - and `..` out of the scratch directory is
+  nothing, so every file that transitively includes `RevenantMenus.h` stopped compiling. The control
   reported "the planted run produced no result line", which is the wrong answer to the wrong question: a
   control that cannot build the group it controls says nothing about whether the comparison responds. The
   package's own headers are now copied **beside** the scratch directory, which is what `../` resolves to.
 
-  `charon_pixel_ceil`, `charon_pixel_round` and `charon_screen_scale` were functions in `CharonLists.m`,
+  `revenant_pixel_ceil`, `revenant_pixel_round` and `revenant_screen_scale` were functions in `RevenantLists.m`,
   and this file is a class file that calls them - the exact shape AGENTS.md's "A C function shared between
   backport files" describes: the link works in the dylib and fails in a group that compiles the caller
   with its own sources, which is what `run.sh`'s `group` dispatcher does. They are now `static inline` in
-  `CharonLists.h`, bodies unchanged, so every translation unit has its own copy and there is no
+  `RevenantLists.h`, bodies unchanged, so every translation unit has its own copy and there is no
   cross-file C symbol to miss. `UIListContentView.m`, `UICellAccessory.m` and `UICollectionViewListCell.m`
   called all three and are unaffected.
 

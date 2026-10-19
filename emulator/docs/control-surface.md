@@ -1,12 +1,12 @@
-# Shade: what a test harness can drive
+# The emulator: what a test harness can drive
 
-Everything here comes from reading the source of `shade/` (with the lab patches) and from runs in
-`runs.noindex/`. Paths are relative to `shade/`.
+Everything here comes from reading the source of `emulator/` (with the lab patches) and from runs in
+`runs.noindex/`. Paths are relative to `emulator/`.
 
 ## Launch
 
     env TMPDIR=<lab>/tmp.noindex VK_ICD_FILENAMES=<lab>/deps/build-swiftshader/Darwin/vk_swiftshader_icd.json \
-      shade/build/shade boot --rootfs <run>/rootfs --device iPhone3,1 --host-cache <cache> \
+      emulator/build/emulator boot --rootfs <run>/rootfs --device iPhone3,1 --host-cache <cache> \
         --display headless --gles-backend software --control-stdin --frame-output <run>/frame.png
 
 * `--device`: iPhone1,1 iPhone1,2 iPhone2,1 iPhone3,1 iPhone4,1 iPod1,1 iPod2,1 iPod4,1 (lab patch)
@@ -14,14 +14,14 @@ Everything here comes from reading the source of `shade/` (with the lab patches)
 * The release comes from `System/Library/CoreServices/SystemVersion.plist`; `9A*`, `9B*` map to
   darwin11, every `10*` build to darwin13 (`src/device_state/darwin_kernel_configuration.cpp`).
   An unknown build refuses to boot.
-* The guest writes straight into `--rootfs`; there is no overlay. Shade also creates
-  `dirname(rootfs)/runtime/shm/` and `dirname(rootfs)/.shade-device-state/` (key store). So every
+* The guest writes straight into `--rootfs`; there is no overlay. The emulator also creates
+  `dirname(rootfs)/runtime/shm/` and `dirname(rootfs)/.emulator-device-state/` (key store). So every
   run gets its own directory holding an APFS clone (`cp -c -R`) and nothing else.
 * `--activation activated` (default) rewrites `private/var/root/Library/Lockdown/data_ark.plist`
   and hooks liblockdown's activation queries; it does not touch Setup Assistant.
 * `--network host` (default) gives guest sockets real host sockets; parallel guests share the host
   port space. `--network isolated` refuses inet sockets.
-* `shade boot` exits 0 on `quit`, when pid 1 exits, when `--ticks` run out; 1 on an internal error
+* `emulator boot` exits 0 on `quit`, when pid 1 exits, when `--ticks` run out; 1 on an internal error
   (failed snapshot write, gdb disconnect, scheduler stall). The guest's exit code is never the
   process exit code: parse `[process] exit pid=N status=S [signal=G]`.
 
@@ -38,7 +38,7 @@ Coordinates are UI points, portrait, origin top-left: 320x480 on iPhone/iPod, 76
 | `touch down/move/up/cancel X Y` | `touch queued` |
 | `home` (`wake`), `lock [hold-ms]`, `unlock` (home + slide gesture of the profile) | `home requested`, `gesture=unlock scheduled events=14` |
 | `button home/lock/volume-up/volume-down down/up`, `hold BUTTON MS`, `volume-up`, `volume-down`, `ringer ring/silent` | `button event queued` ... |
-| `snapshot PATH` (.png/.bmp/else PPM) | `snapshot=PATH frame=N` (a failed write kills shade) |
+| `snapshot PATH` (.png/.bmp/else PPM) | `snapshot=PATH frame=N` (a failed write kills the emulator) |
 | `snapshot-sequence PREFIX INTERVAL-MS COUNT` | one line per PPM |
 | `settle` | `[transition] settle id=N`, then `[transition] internal-stable id=N` once the display content has not changed for 60 display periods of guest time, counted from the frame on screen (its `input-complete-ns` is the settle's start). Without `--ticks` the guest clock follows the host's whether or not the guest ran, so the window counts only the guest time the guest had: a catch-up (`host-syncs=`) counts the later of what the guest executed since the previous one and, when it had nothing runnable, the time it waited up to its earliest timer or VSync deadline, both from the previous catch-up (the guest clock stands still while it executes); the rest, time it was owed and did not get, is left out (`starved-display-periods=`), and `stable-display-periods=` is what was counted. Like an input, it replaces the transition being watched |
 | `status` | `status frame= submitted-frame= processes= threads= runnable= active-process= display-power=on/off` |
@@ -48,7 +48,7 @@ Coordinates are UI points, portrait, origin top-left: 320x480 on iPhone/iPod, 76
 | `quit` | `quit requested` |
 
 `ps`/`status` are the screenshot-free way to ask "is SpringBoard alive, did the app exit".
-Shade itself also dumps `threads` of any process that dies on a signal.
+The emulator itself also dumps `threads` of any process that dies on a signal.
 
 ## Other inputs and outputs
 
@@ -65,7 +65,7 @@ Shade itself also dumps `threads` of any process that dies on a signal.
 
 ## Guest output
 
-* A guest fd 1/2 that nobody redirected, and `/dev/console`, are copied raw into the shade log.
+* A guest fd 1/2 that nobody redirected, and `/dev/console`, are copied raw into the emulator log.
   launchd sends daemons' stdout to `/dev/null` unless the job has `StandardOutPath`.
 * There is no host-side syslog: the guest's own syslogd/ASL write into the rootfs. The launchd
   vproc log appears as `[launchd-log] pid=1 ... message=...`.
@@ -82,9 +82,9 @@ Shade itself also dumps `threads` of any process that dies on a signal.
 | backboardd/SpringBoard owns the display | `[display] scanout-owner pid=N` |
 | data migration (iOS 6 first boot) | frames with small `visible-pixels` (logo + progress bar) |
 | Setup Assistant (when not skipped) | spawn of `/Applications/Setup.app/Setup` |
-| SpringBoard UI finished launching | `did-finish-launching pid=N SpringBoard` in `/private/var/charon/events.log` (charon-inject.dylib) |
+| SpringBoard UI finished launching | `did-finish-launching pid=N SpringBoard` in `/private/var/revenant/events.log` (revenant-inject.dylib) |
 | app launched / alive / crashed | `app-did-finish-launching`, `app-alive` in events.log; `[process] exit ... signal=`; `ps NAME` |
-| test finished | `/private/var/charon/verdict.json` (charon-runner), `[process] exit pid=<runner>` |
+| test finished | `/private/var/revenant/verdict.json` (revenant-runner), `[process] exit pid=<runner>` |
 
 ## Host cache and speed
 
@@ -93,6 +93,6 @@ Shade itself also dumps `threads` of any process that dies on a signal.
   CPU model + ABI; flock-guarded; reusable across clones), `vulkan-pipeline-cache.bin`.
   Temporary file names in that directory are not unique per process, so parallel runs must not
   share one cache directory.
-* `$TMPDIR/shade-shared-cache-<uid>/`: content-addressed copies of mapped guest files, designed to
+* `$TMPDIR/emulator-shared-cache-<uid>/`: content-addressed copies of mapped guest files, designed to
   be shared by all runs.
 * Guest trees must live in `*.noindex` folders: Spotlight indexing clones took ~2.5 host cores.

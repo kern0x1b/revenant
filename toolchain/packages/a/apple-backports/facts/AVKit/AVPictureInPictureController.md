@@ -22,7 +22,7 @@ window-compositing surface exists anywhere in this tree for a third-party dylib 
 real system feature floats a window SpringBoard itself owns and composites above every running
 app. This is the same wall `CoreSpotlightBackports`' own search bundle hit trying to reach the
 system search UI (`-appendResults:` blocks on connection state an out-of-process bundle cannot
-reach) - a genuine, measured stop, not a guess. `CallKitBackports`' `CharonCallScreen` answers the
+reach) - a genuine, measured stop, not a guess. `CallKitBackports`' `RevenantCallScreen` answers the
 same kind of wall for its own call screen by shipping only the application's half of a two-process
 design (Darwin notifications plus a shared file) and naming the other half - a SpringBoard-side
 tweak - as something this tree does not currently build. No such companion exists for
@@ -109,7 +109,7 @@ value, so the value was read out of Apple's own data rather than copied off the 
 
 ```
 $ printf 'AVKitErrorDomain\tp\tp\ts\n' > .agent-work/runs/avkit9-symbols.tsv
-$ CHARON_ROOT=$PWD xmake l tools/corpus/cache-value.lua ~/.charon/dyld/9.0/dyld_shared_cache_armv7 .agent-work/runs/avkit9-symbols.tsv
+$ REVENANT_ROOT=$PWD xmake l tools/corpus/cache-value.lua ~/.revenant/dyld/9.0/dyld_shared_cache_armv7 .agent-work/runs/avkit9-symbols.tsv
 ```
 
 against the armv7 shared cache of 9.0, which answers the text `AVKitErrorDomain`. The

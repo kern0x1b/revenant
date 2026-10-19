@@ -5,11 +5,11 @@
 Registry: `registry/AVFoundation/capabilities18.json`, fifteen rows, one per row the
 `coordination/corpus/ledger-2026-10-03/AVFoundation.tsv` snapshot reads `missing` for these three classes at
 18.0 (`$4=="18.0" && $6=="missing"`; the status is column six, `needs` is seven). Header:
-`CharonAVCaptureDeviceCapabilities18.h`, transcribed from the SDK 26.2 because SDK 16.4 declares none of it.
+`RevenantAVCaptureDeviceCapabilities18.h`, transcribed from the SDK 26.2 because SDK 16.4 declares none of it.
 
 ## Open source checked
 
-The coordinator's scout table (`charon/.agent-work/runs/oss-scout/oss-candidates.tsv`) was read; its
+The coordinator's scout table (`toolchain/.agent-work/runs/oss-scout/oss-candidates.tsv`) was read; its
 `framework_breakdown` column names AVFoundation once, in the `apple/swift-corelibs-foundation` row
 (`Foundation=20;UIKit=4;SensorKit=3;AVFoundation=1`), and that one line is the table's only AVFoundation
 mention - the reading `facts/AVFoundation/AVFoundationNotificationKeys.md` already recorded and corrected.

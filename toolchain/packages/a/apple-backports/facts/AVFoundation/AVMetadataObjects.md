@@ -2,8 +2,8 @@
 
 Seventeen corpus rows, the rest of the metadata family after the constant families in
 [MetadataKeySpaces.md](MetadataKeySpaces.md) and [CoordinatedPlaybackReasons.md](CoordinatedPlaybackReasons.md).
-Eleven classes and six members on three of them, carried with a Charon-prefixed designated initializer
-each, in the form `CharonHomeKitConstruction.h` uses: `objc_method_family(init)` puts a port-owned
+Eleven classes and six members on three of them, carried with a Revenant-prefixed designated initializer
+each, in the form `RevenantHomeKitConstruction.h` uses: `objc_method_family(init)` puts a port-owned
 selector in the `init` family, because clang decides the family from the attribute and not the spelling.
 
 ## The measurement that changed the design of one of them
@@ -90,7 +90,7 @@ falls into one of three classes:
   difference in **Apple's** build.
 - **`~` port-only** - a row about the port's own construction, which Apple has no factory for, so
   there is nothing to compare it to. These are held against the **unmutated baseline**, and that is
-  where a mutation of a `charon_` initializer shows up. A run prints 24 `~CONSTRUCTED` rows and 9
+  where a mutation of a `revenant_` initializer shows up. A run prints 24 `~CONSTRUCTED` rows and 9
   `~DIAG` rows.
 - **answers less** - the host answers it and the port does not. Always a failure. It is 0.
 
@@ -114,7 +114,7 @@ and all five passed it. Two reasons, both measured and both fixed:
 
 ## Three bugs the mutants and the rows found
 
-- **`-charon_initWithItems:timeRange:` is an initializer, and the row called it twice on one object.**
+- **`-revenant_initWithItems:timeRange:` is an initializer, and the row called it twice on one object.**
   The second call re-initialised the receiver, so "does a group equal a different group" compared an
   object with itself, answered `YES`, and the `copyeq` mutant had nothing to break. The diagnosis is
   kept as rows: `~DIAG made items` and `~DIAG other items` read `array(2)` and `array(1)`, and

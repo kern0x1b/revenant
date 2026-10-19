@@ -22,7 +22,7 @@ which are the ledger's three rows *exactly*, and the rows are still in
 own name can still read `missing`, and this is the smallest reproducer in the four modules: three
 rows, one type, no spelling difference. The likely cause is that the two are keyed on something the
 dump does not carry for a type whose members are typed with another module's (`LocalizedStringResource`
-from `charon@appintents`), which is worth the ledger band checking before anything else in the
+from `revenant@appintents`), which is worth the ledger band checking before anything else in the
 naming list.
 
 **So there is no ActivityKit declaration to write.** What the port's own source has to answer for,

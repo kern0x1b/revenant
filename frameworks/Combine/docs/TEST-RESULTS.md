@@ -1,6 +1,6 @@
 # Test results and known limitations
 
-Styx is validated on armv7, iOS 6.1.3, built against the Charon Swift runtime
+Combine is validated on armv7, iOS 6.1.3, built against the toolchain Swift runtime
 (Swift 6.4) with **availability checking on** for the module. Two suites run:
 the project's own `import Combine` probe, and OpenCombine's own test suite.
 
@@ -17,7 +17,7 @@ Folding the three upstream modules into a single `Combine` module changed none o
 these numbers: the merge preserves the whole public surface and the runtime
 behavior. The five that do not pass are all pre-existing and are **documented
 limits, not silent failures** — each is a property of armv7/iOS 6 or of a newer
-Swift, not of Styx's patches:
+Swift, not of Combine's patches:
 
 - **`DispatchQueueSchedulerTests.testStrideFromDispatchTimeInterval`** and
   **`testStrideFromNumericValue`** — crash. `DispatchQueue.SchedulerTimeType.Stride.magnitude`

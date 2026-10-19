@@ -11,7 +11,7 @@ Six functions SDK 26.2 declares, none of which any release this port builds expo
 | `VTCopySupportedPropertyDictionaryForEncoder` | 11.0 | absent | absent | - | - |
 | `VTRegisterSupplementalVideoDecoderIfAvailable` | 26.2 | absent | absent | - | - |
 
-Measured with `tools/corpus/dump-cache.lua` over `~/.charon/dyld/4.3/dyld_shared_cache_armv7` (read-only)
+Measured with `tools/corpus/dump-cache.lua` over `~/.revenant/dyld/4.3/dyld_shared_cache_armv7` (read-only)
 and over v-audio's 6.1.3 armv7 dump, and over `coordination/corpus/caches/{6.0,7.0.1,10.3.4,12.0,16.0,18.0}.tsv`.
 
 ## A NEGATIVE RESULT THAT DECIDES THE FIRST ROW
@@ -157,7 +157,7 @@ Two further numbers from that run, both of which settle something else:
   key is a NULL POINTER there. `dump-cache.lua` finds no `_kVTCompressionPropertyKey_EncoderID` in the 4.3
   or the 6.1.3 cache, and the probe's own build says the same thing in the gate's words - "weakly imports 1
   symbol the armv7 release it is checked against does not export, each of which is NULL there and must be
-  called only behind a check for it" - which is why the image needed `charon.waive.weak-imports` and a
+  called only behind a check for it" - which is why the image needed `revenant.waive.weak-imports` and a
   reason. The probe prints `EncoderIDkey=NULL` and takes the other branch. So an encoder ID, which is an
   iOS 11 idea, does not exist on this port's floor at all.
 - **`VTCompressionSessionCreate` answers `-12902` for a NULL encoder specification** at 6.1.3, measured for

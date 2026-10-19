@@ -1,14 +1,14 @@
 # What the port gives SwiftData, measured
 
 Every line here is the output of a command run on 2026-09-28 in
-`charon/.agent-work/worktrees/api-swiftdata`, against the packages as they are in the shared
+`toolchain/.agent-work/worktrees/api-swiftdata`, against the packages as they are in the shared
 store. The probe that reads them is `.agent-work/probe/` in the same worktree.
 
-The toolchain, resolved once: `charon@swift 6.4.0` at
+The toolchain, resolved once: `revenant@swift 6.4.0` at
 `~/.xmake/packages/s/swift/6.4.0/f1d0e4f9eebe477396350986a88081e5` (`Apple Swift version 6.4
-(swift-6.4-RELEASE)`), and `charon@swift-runtime 6.4.0` at
+(swift-6.4-RELEASE)`), and `revenant@swift-runtime 6.4.0` at
 `~/.xmake/packages/s/swift-runtime/6.4.0/29dd4454302f478db10876dc0bffa673`
-(`configs.backports = true`, `CHARON_SWIFT_RUNTIME_BACKPORTS = "coredata"`).
+(`configs.backports = true`, `REVENANT_SWIFT_RUNTIME_BACKPORTS = "coredata"`).
 
 ## Macro plugins can be built on this toolchain
 
@@ -34,8 +34,8 @@ and `packages/s/swift-runtime/xmake.lua:149` hands the directory to a port as
 **So `@Model`, `@Attribute`, `@Relationship`, `@Transient`, `@Unique`, `@Index` and `@ModelActor`
 can be implemented, not stubbed.** What is missing is one line: `rules/swift/xmake.lua` reads the
 plugin path from the swift-runtime package alone (line 182), while it already collects every
-dependency's `CHARON_SWIFT_MODULES` (lines 170-176). A `SwiftDataMacros` plugin therefore needs
-the same loop for a `CHARON_SWIFT_PLUGINS` the package exports. Without it a port cannot load a
+dependency's `REVENANT_SWIFT_MODULES` (lines 170-176). A `SwiftDataMacros` plugin therefore needs
+the same loop for a `REVENANT_SWIFT_PLUGINS` the package exports. Without it a port cannot load a
 plugin of ours, and installing the plugin into the compiler's own directory would be a write
 outside our package, where two builds of it would fight over one file name.
 
@@ -56,7 +56,7 @@ They are not ours to add. The corpus assigns both to `swift-foundation`
 (`coordination/corpus/sdk-26.2-surface.tsv`, `via = swift-foundation`, `owner-registry =
 swift-foundation`, `registry = swiftlang/swift-foundation:Sources/FoundationEssentials/Predicate/
 Predicate.swift` and `.../FoundationInternationalization/String/SortDescriptor.swift`), and
-`packages/s/swift-foundation` - the charon package that builds them, work in progress in
+`packages/s/swift-foundation` - the toolchain package that builds them, work in progress in
 `.agent-work/worktrees/api-foundation-swift` - is not in the shared store.
 
 Eight rows depend on those two types and are therefore not in this delivery:
@@ -82,7 +82,7 @@ all callable from Swift at that release: `NSPersistentStoreDescription`,
 `NSManagedObjectID.uriRepresentation`, `NSManagedObjectID.isTemporaryID`, `undoManager`.
 
 Three that the registry does **not** carry, read out of the port's headers (the CoreData framework's headers
-in the runtime's port overlay, `CHARON_SWIFT_PORT_HEADERS`):
+in the runtime's port overlay, `REVENANT_SWIFT_PORT_HEADERS`):
 
 | name | mark still in the port's header | registry |
 | --- | --- | --- |
@@ -146,7 +146,7 @@ hand reads unlowered headers and reports the backports' API as unavailable - whi
 happened here first, and the fix is to read the SDK out of the overlay:
 
 ```
-SDK=$(python3 -c 'import json,sys; o=json.load(open(sys.argv[1])); print(next(r["name"] for r in o["roots"] if r["name"].endswith("CoreData.framework/Headers"))[:-len("/System/Library/Frameworks/CoreData.framework/Headers")])' "$CHARON_SWIFT_PORT_HEADERS")
+SDK=$(python3 -c 'import json,sys; o=json.load(open(sys.argv[1])); print(next(r["name"] for r in o["roots"] if r["name"].endswith("CoreData.framework/Headers"))[:-len("/System/Library/Frameworks/CoreData.framework/Headers")])' "$REVENANT_SWIFT_PORT_HEADERS")
 ```
 
 A package's own build resolves the SDK from the toolchain, so a store whose SDK differs from the

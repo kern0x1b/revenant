@@ -11,7 +11,7 @@ Symptom (iPhone4,1 10B329 only): SpringBoard up, no fatal, but crash reports
 iPhone4,1 6.0 and iPhone3,1 6.1.3 were healthy. The recipe's package and the lab build behaved
 the same, so it was not the JIT.
 
-How it was found (all in mediaserverd, lab build `shade/build-diag`):
+How it was found (all in mediaserverd, lab build `emulator/build-diag`):
 
 - `threads mediaserverd` through the control pipe, with the thread ids and r0-r3 the dump now
   prints: the main thread waited in `psynch_mutexwait` on a CoreMedia mutex owned by thread 4;
@@ -37,14 +37,14 @@ IORegistryEntryCreateCFProperties): input stream 100, output stream 200, 8 kHz s
 current, 16/20/24-bit at nine rates, I/O buffer 3072, latencies 12/13, safety offsets 48, selectors
 300 (data source), 301 (destination, with its property selectors) and 302 (clock). The catalog model
 gained per-device latencies/safety offsets and a control's property selectors; other devices keep
-what they published. Lab: shade `lab/shared-image` e32dd8a. Charon: branch `shade-613`,
+what they published. Lab: the emulator `lab/shared-image` e32dd8a. The toolchain: branch `emulator-613`,
 `voice-device.patch`.
 
 Result, iPhone4,1 6.1.3, 600 s: mediaserverd starts once, no crash reports (package without the fix:
 three starts, five RPC timeouts). iPhone4,1 6.0 unchanged.
 
 The real device has six IOAudio2 devices (AppleBasebandAudio, Voice, Baseband Voice,
-HighlandParkAudioDevice, AppleEmbeddedAudioDevice, AppleUSBMike). Since shade `lab/shared-image`
+HighlandParkAudioDevice, AppleEmbeddedAudioDevice, AppleUSBMike). Since the emulator `lab/shared-image`
 a97ce3a and 48e4e2e the iPhone 4S profile publishes all six as the dump shows them (the codec
 as CS42L63 with streams 100/200 and its 25 controls 300-373; Baseband with 766-frame latencies
 and its seven formats; no transport type on built-in devices; clock domain 'I2Sm'). Other models
@@ -74,10 +74,10 @@ folder is never enumerated. Stock launchd does not read `/Library/LaunchDaemons`
 Fix: `/etc/launchd.conf` is still read by launchctl at boot on 6.1.3, and its `bsexec` subcommand
 starts a program without a job plist:
 
-    bsexec .. /usr/local/libexec/charon-runner SECONDS PROGRAM [ARGS...]
+    bsexec .. /usr/local/libexec/revenant-runner SECONDS PROGRAM [ARGS...]
 
-The runner starts at about 4 s and writes its verdict. Charon's `modules/emulator.lua` installs its
-runner as `System/Library/LaunchDaemons/org.charon.emulator.runner.plist` and so has the same
+The runner starts at about 4 s and writes its verdict. Revenant's `modules/emulator.lua` installs its
+runner as `System/Library/LaunchDaemons/org.revenant.emulator.runner.plist` and so has the same
 problem on 6.1.x; the change there waits for launchd.conf to be checked on 5.x/4.x/3.x.
 
 ## Tools this added

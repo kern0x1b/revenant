@@ -93,7 +93,7 @@ every permission set     0
 hasAccessToAllHosts 0  hasAccessToAllURLs 0  hasAccessToPrivateData 0  optionalAllHosts 0
 webViewConfiguration     nil
 openTabs 0   openWindows 0   focusedWindow nil
-inspectionName           "Charon probe — Extension Background Page"
+inspectionName           "Revenant probe — Extension Background Page"
 ```
 
 Three of those are worth stating separately, because they are not what the names suggest:
@@ -124,7 +124,7 @@ because there is no declaration to find. An enumerator is a compile-time integer
 symbol, nothing defines it, and `nm -g` over this library's objects cannot show it.
 
 This port therefore carries the seven values the way the release does: as the `NS_ENUM` in
-`CharonWebExtension.h:203`, where a caller writing `WKWebExtensionContextPermissionStatusGrantedExplicitly`
+`RevenantWebExtension.h:203`, where a caller writing `WKWebExtensionContextPermissionStatusGrantedExplicitly`
 gets the value. That is why they have no row. Seven rows once said `status: implemented` for them,
 which the 6.1.3 gate rightly refused -- `implemented` is a promise that something of that name is
 built, and an enumerator is the one name in this library that cannot be. The corpus agrees: no other
@@ -157,7 +157,7 @@ spells an error enum `NS_ERROR_ENUM(domain, Name)` rather than `NS_ENUM(Type, Na
 declaration with `} NS_SWIFT_NAME(...) API_AVAILABLE(...);`. The red control is an enum with the right
 name and one value wrong by construction; it must read MISMATCH, or every "agrees" below is worthless.
 
-Measured, at `CharonWebExtension.h:203` against `WKWebExtensionContext.h:85`:
+Measured, at `RevenantWebExtension.h:203` against `WKWebExtensionContext.h:85`:
 
 | case | SDK 26.2 | port, before | port, now |
 | --- | ---: | ---: | ---: |

@@ -17,7 +17,7 @@ name.
 Regenerate and check:
 
     xmake l tools/gen.lua gen --framework <Framework>          # writes .gen/<Framework>/<Object>.m
-    CHARON_ROOT=$PWD xmake l tools/corpus/cfconst-check.lua    # reads the caches named in the table
+    REVENANT_ROOT=$PWD xmake l tools/corpus/cfconst-check.lua    # reads the caches named in the table
 
 The prose below is each object's own header comment, as the object carried it before the table existed. Where it names
 the reader, that is `tools/corpus/cache-value.lua`, the reader the check runs, and the release is the cache the row's
@@ -186,7 +186,7 @@ The 110 exported constants iOS 8 added, with the values HealthKit itself gave th
 
 Every value below was read out of the armv7 shared cache of iOS 8.0, not assumed: each constant is followed through
 its export in the HealthKit image of that cache to the __cfstring that export points at, so what is written here is
-the string that release held (~/.charon/dyld/8.0/dyld_shared_cache_armv7, HealthKit.framework). The reader is
+the string that release held (~/.revenant/dyld/8.0/dyld_shared_cache_armv7, HealthKit.framework). The reader is
 tools/corpus/cache-value.lua, run on the cache. A name
 iOS 8.0 exported that the SDK headers do not declare is Apple's private and is not here; a name
 the SDK declares that iOS 8.0 did not have came later and is carried in the group of its own
@@ -247,7 +247,7 @@ tagged, so a 32-bit reading of that one does not give the strings. The reader is
 the cache, with the symbols in a file of their own (a name, a width, a pointer flag and a string flag per line):
 
   printf 'HKDocumentTypeIdentifierCDA\tp\tp\ts\n' > .agent-work/runs/hk100-symbols.tsv
-  CHARON_ROOT=$PWD xmake l tools/corpus/cache-value.lua ~/.charon/dyld/10.0.1/dyld_shared_cache_arm64 \
+  REVENANT_ROOT=$PWD xmake l tools/corpus/cache-value.lua ~/.revenant/dyld/10.0.1/dyld_shared_cache_arm64 \
       .agent-work/runs/hk100-symbols.tsv
 
 Twelve of the twenty hold a string that is not their own name, which is the reason the values are

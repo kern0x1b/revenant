@@ -12,7 +12,7 @@ template in this library does.
 ## What Apple's object answers with no head unit, and what the port has to answer identically
 
 From `tests/backports/host/carplay/run.sh`, which builds `headunit-probe.m` against Apple's CarPlay on
-this Mac and the port's own sources under `charonHost_` names, prints `label<TAB>answer` from each and
+this Mac and the port's own sources under `revenantHost_` names, prints `label<TAB>answer` from each and
 **diffs the labels both carry**. The run is green at `checks=33 failures=0` for Apple's side,
 `checks=20 failures=0` for the port's, `compared 15 answers, all identical`, and both mutants are red
 — the host's five-state limit read as six, and the port's own limit read as six. A green run that
@@ -40,10 +40,10 @@ rows say what the framework does, not what the prose suggests.
 ## What the port draws, and where
 
 `CarPlay/CarPlayVoiceControl12.m`, one object for the 12.0 rows, with the tree's own conventions: the
-template's view controller is asked for through `charon_viewControllerForInterfaceController:`, the
+template's view controller is asked for through `revenant_viewControllerForInterfaceController:`, the
 same hook `CarPlayTemplatesView12.m` and `CarPlayTemplatesMore12.m` use, and every helper is
-`Charon`-prefixed so `internal_symbol()` keeps all of it out of the library's exports — the gate
-counts 20 exported names for this object and none of them is a `Charon` one.
+`revenant`-prefixed so `internal_symbol()` keeps all of it out of the library's exports — the gate
+counts 20 exported names for this object and none of them is a `revenant` one.
 
 - **the state's image**, at its own shape inside the template's width, animated while the state is
   active. The cycle is UIKit's own rule for a multi-frame image (its `UIImageView.animationDuration`
@@ -99,7 +99,7 @@ $ xcrun clang -target armv7-apple-ios6.1.3 -isysroot <iOS16.4 SDK> -fobjc-arc -O
 $ otool -oV CarPlayVoiceControl12.o | grep name        # every method the class defines
     initWithIdentifier:titleVariants:image:repeats:
     encodeWithCoder:   initWithCoder:   identifier   titleVariants   image   repeats
-    .cxx_destruct      (ivars)          supportsSecureCoding   charon_imageLimitedToPoints:
+    .cxx_destruct      (ivars)          supportsSecureCoding   revenant_imageLimitedToPoints:
 ```
 
 One selector, one registry row, and the only names on the class without a row are `encodeWithCoder:`,

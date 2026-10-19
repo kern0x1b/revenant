@@ -1,6 +1,6 @@
 ---
-name: psychopomp
-description: The route for building a modern app for old iOS (iOS 5, 6, 7 and later; iPhone 3GS, 4, 4S, iPad, iPod touch; armv7) from an empty directory to a .deb for a jailbroken device or a Cydia repository, in Objective-C or Swift, SwiftUI and Combine included, with the Charon toolchain and the Shade emulator. Use at the start of any such request, to find which skill handles the current step, or when resuming a project that has a PROJECT.md.
+name: agent-skills
+description: The route for building a modern app for old iOS (iOS 5, 6, 7 and later; iPhone 3GS, 4, 4S, iPad, iPod touch; armv7) from an empty directory to a .deb for a jailbroken device or a Cydia repository, in Objective-C or Swift, SwiftUI and Combine included, with the toolchain and the emulator. Use at the start of any such request, to find which skill handles the current step, or when resuming a project that has a PROJECT.md.
 ---
 
 # From an empty directory to a .deb
@@ -12,7 +12,7 @@ first step without evidence.
 | Step | Skill | Ends with |
 | --- | --- | --- |
 | 1. Interview | `init` | `PROJECT.md` with every decision, confirmed by the user |
-| 2. Host | `install` | the tools and the Charon addon answer their checks |
+| 2. Host | `install` | the tools and the revenant addon answer their checks |
 | 3. Apple's files | `firmware` | the release's libraries and, for the emulator, its root filesystem on the user's machine |
 | 4. Project | `project` | `xmake.lua`, `Info.plist`, resources, configured for the chosen release and architectures |
 | 5. Code | `objc` or `swift` (with `combine`, `swiftui`), and `backports` for API newer than the release | the app's sources, written for the chosen releases |
@@ -31,16 +31,16 @@ When a step needs to understand or change the build itself, the `xmake-*` skills
   fragments strung together, or any file of this plugin into the user's project. Every file in the
   project is written for this app.
 - **Nothing of Apple's goes into the project.** No firmware, no dyld cache, no SDK header or
-  framework copied in, no Apple artwork. The build reads them from where Charon keeps them on the
+  framework copied in, no Apple artwork. The build reads them from where the toolchain keeps them on the
   user's machine.
 - **Native, or say it cannot be done.** Every change is the way the system and the stack intend
-  it: public API or a Charon backport, never a private trick, a stub, a disabled check or a copied
+  it: public API or a toolchain backport, never a private trick, a stub, a disabled check or a copied
   file standing in for a build step. Before a step's evidence goes into `## Progress`, follow the
   skill `self-review`; what cannot be done natively goes to the user and under `## Limits`.
 - **Evidence, not belief.** A step is done when its check has run and its output says so. Record
   the command and the line that proves it in `## Progress`. A build that "should" pass has not
   passed; an emulator run that did not happen is not described.
-- **Say what the stack cannot do.** If Charon, the emulator, the backports or Eidolon (skill
+- **Say what the stack cannot do.** If the toolchain, the emulator, the backports or SwiftUI (skill
   `swiftui`) lack something the app needs, stop at that point and tell the user what is missing and where. Do not fake an API,
   stub a check, or switch the target release or device without asking.
 - **Long commands are normal.** The first build compiles the toolchain's compiler and, for Swift, the
@@ -57,5 +57,5 @@ When a step needs to understand or change the build itself, the `xmake-*` skills
 ## When the user asks for something else
 
 - An app for a current iOS release, the simulator or the App Store: this route does not apply; say so.
-- A tweak or a daemon instead of an app: the same route, with Charon's `tweak` or `daemon` rule in
+- A tweak or a daemon instead of an app: the same route, with Revenant's `tweak` or `daemon` rule in
   place of `app` (skill `xmake-rules`); the interview still comes first.

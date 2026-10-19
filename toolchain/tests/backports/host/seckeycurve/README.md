@@ -14,7 +14,7 @@ so it is not a build and the machine's load does not apply.
 | key kind | sign and verify | exchange | what the port reads to tell them apart |
 | --- | --- | --- | --- |
 | a key of the **release's** keychain | `SecKeyRawSign` / `SecKeyRawVerify` with the padding the package's own map chooses | refused, `errSecParam` | the release's keychain, through `SecItemCopyMatching` |
-| a key of the **port's own kind** | the curve, `charon@micro-ecc`, in `SecKeyElliptic10.m` | the curve | the marker `CharonSecKeyScalar` beside a 32-byte `kSecValueData` |
+| a key of the **port's own kind** | the curve, `revenant@micro-ecc`, in `SecKeyElliptic10.m` | the curve | the marker `RevenantSecKeyScalar` beside a 32-byte `kSecValueData` |
 | a class the release takes nothing from | refused | refused | `!rsa && !ec` |
 
 `run.sh` therefore compiles **both** files with the same `-D` renames and links both, which is what the
@@ -46,7 +46,7 @@ The sixteen cells - four kinds of key by sign, verify, exchange and `IsAlgorithm
 runs it after the differential on every run, and a mutation that survives fails the run. Fourteen are held
 there. Two - signing and verifying with a key of a class the release takes nothing from - cannot be: the host's
 own primitive refuses a 128-bit AES key exactly as the port does, so nothing observable moves. They are held by the pure table,
-`CharonSecurityCarries(operation, algorithm, false, false)`, which is the Security band's own case,
+`RevenantSecurityCarries(operation, algorithm, false, false)`, which is the Security band's own case,
 `tests/backports/host/security/supported.m`, which the driver names rather than counting them green.
 
 One cell is worth naming because it changed: the **release-EC sign** cell's mutant is the *buffer

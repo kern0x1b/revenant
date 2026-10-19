@@ -1,6 +1,6 @@
 # The body's joints: what ARKit names, and where the names were read
 
-Everything on this page was read out of one file, `~/.charon/dyld/16.0/dyld_shared_cache_arm64e`
+Everything on this page was read out of one file, `~/.revenant/dyld/16.0/dyld_shared_cache_arm64e`
 (the arm64e shared cache of iOS 16.0), with the project's own readers: `modules/apple/dyld.lua`
 through `open_cache` for the address space, `tools/corpus/cache-value.lua` for an exported constant's
 value, and `tools/corpus/skeleton-table.lua` (new, in this repository) for the tables inside

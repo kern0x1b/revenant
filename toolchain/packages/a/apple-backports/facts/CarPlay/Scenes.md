@@ -42,14 +42,14 @@ pages), and these three are the gate itself.
 "First held rung carrying it" is `xmake l tools/cache-index/first-rung.lua CPTemplateApplicationScene
 CPTemplateApplicationDashboardScene CPTemplateApplicationInstrumentClusterScene`, which answers 16.0
 for all three. That is **presence, not the release that introduced the name**: the held ladder has no
-13.x or 14.x or 15.x rung — it goes 12.0 then 16.0 (`ls ~/.charon/cache-index/*.names.gz`) — so a
+13.x or 14.x or 15.x rung — it goes 12.0 then 16.0 (`ls ~/.revenant/cache-index/*.names.gz`) — so a
 class the SDK marks 13.0 first appears in the index at 16.0. The `introduced` field of every row here
 is the SDK 26.2 availability, and it is right: `coordination/corpus/sdk-26.2-surface.tsv` reads
 13.0, 13.4 and 15.4 for the three classes, and the registry says the same.
 
 ## What the release says, read out of the 16.0 arm64e cache
 
-`tools/corpus/objc-inventory.lua` over `~/.charon/dyld/16.0/dyld_shared_cache_arm64e` (the cache is
+`tools/corpus/objc-inventory.lua` over `~/.revenant/dyld/16.0/dyld_shared_cache_arm64e` (the cache is
 split: a 384 KB header and the bodies in `.01`, `.03`, … — the reader takes the base path), for the
 three classes:
 

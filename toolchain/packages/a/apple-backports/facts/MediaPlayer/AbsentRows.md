@@ -13,12 +13,12 @@ tenth is a class that arrived in iOS 8, where a category would compile, link, an
 ## Every measurement here is the same two reads
 
 Read with the deleted mach32 reader from the armv7 shared cache of 6.1.3
-(`~/.charon/dyld/6.1.3/dyld_shared_cache_armv7`, MediaPlayer image at `0x31fe3000`); the reader's own
+(`~/.revenant/dyld/6.1.3/dyld_shared_cache_armv7`, MediaPlayer image at `0x31fe3000`); the reader's own
 controls are the deleted mach32 test, 0 failures.
 
 - **236 classes** in `__objc_classlist`, **41** in `__objc_catlist`. All 41 categories were read **with the
   class each one extends**, resolved through the category's own class pointer rather than by its name.
-- The whole-cache selector list `~/.charon/dyld/6.1.3/selectors_armv7.txt` is **113981 distinct names** -
+- The whole-cache selector list `~/.revenant/dyld/6.1.3/selectors_armv7.txt` is **113981 distinct names** -
   a list of names, not a count per class (`dealloc` is on one line, not 433). A count of 0 there is
   necessary and not sufficient; a count of 1 says some class somewhere declares it. Where a row below turns
   on absence, the per-class read above is the evidence.

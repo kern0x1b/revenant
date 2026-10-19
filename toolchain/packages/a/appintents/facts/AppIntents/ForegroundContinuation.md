@@ -5,7 +5,7 @@ ledger carries two rows, and this module has an **empty** `extension ForegroundC
 (`Remaining.swift:230`), so both are undeclared — and the check says so rather than the facts
 asserting it: the shape check over the framework's declarations.
 
-**What the framework declares**, quoted from the machine's `charon@iphoneos-sdk` 26.2 install:
+**What the framework declares**, quoted from the machine's `revenant@iphoneos-sdk` 26.2 install:
 
 | row | the framework's declaration |
 | --- | --- |
@@ -49,7 +49,7 @@ parameter and a return type the interface fixes to the *caller's* `Result`**:
   continuation and hands back the value the caller asked for. The port would have to carry that
   generic parameter, and to decide what it does *with* the answer — which is a system's job (does the
   run carry on, does it come back to the foreground), and there is no system here. The port's
-  `CharonForeground.Continuation` is a value with `mayContinue`, which is the port's own answer to
+  `RevenantForeground.Continuation` is a value with `mayContinue`, which is the port's own answer to
   "may it carry on", and wiring it to a generic `ResultValue` is a design decision, not a copy of a
   signature.
 * `needsToContinueInForegroundError` has a **second overload** in the same interface taking

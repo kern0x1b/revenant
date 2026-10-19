@@ -7,7 +7,7 @@ Identifier behind it, one row each.
 
 The `UTI:` line of the constant's own doc comment in
 `System/Library/Frameworks/UniformTypeIdentifiers.framework/Headers/UTCoreTypes.h` of the SDK the API
-comes from -- `charon/.agent-work/sdk-26.2/iPhoneOS26.2.sdk` -- transcribed, one row per constant.
+comes from -- `toolchain/.agent-work/sdk-26.2/iPhoneOS26.2.sdk` -- transcribed, one row per constant.
 Nothing here is recalled and nothing is inferred from the identifier's own shape. Two independent SDK
 drops agree with that reading on all 129 of them: MacOSX26.5.sdk and MacOSX27.sdk carry the same 140
 constants with the same 140 identifiers, and the port's own 16.4 SDK carries the 119 of them that

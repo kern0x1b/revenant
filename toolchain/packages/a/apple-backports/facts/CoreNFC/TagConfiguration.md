@@ -24,7 +24,7 @@ papered over by a stub session that pretends to poll.
 
 Unlike the NDEF classes, the tag-command configuration classes are **not**
 `API_UNAVAILABLE(macOS)`, so the same three classes exist on the host and are a real oracle. The
-differential builds the port's own source with its class names prefixed (`-DNFCTagCommandConfiguration=CharonHost…`),
+differential builds the port's own source with its class names prefixed (`-DNFCTagCommandConfiguration=RevenantHost…`),
 so the port's classes and the host's coexist in one process, and asks both the same questions in the
 same order.
 
@@ -114,26 +114,26 @@ ok beginSession is absent from a reader session
 ok invalidateSession is absent from a reader session
 ok NFCISO15693ReaderSession is absent from the port
 ok a custom command configuration cannot send a command
-ok the port's class carries the CharonHost prefix
+ok the port's class carries the RevenantHost prefix
 ```
 
 The reasons and the census that certifies them are in
 [facts/CoreNFC/NFCReaderSession.md](NFCReaderSession.md), which carries the command and its control:
 
 ```
-CHARON_ROOT="$PWD" xmake l tools/corpus/cache-census.lua NFC
+REVENANT_ROOT="$PWD" xmake l tools/corpus/cache-census.lua NFC
 ```
 
 ```
-6.1.3     $HOME/.charon/dyld/6.1.3/dyld_shared_cache_armv7
+6.1.3     $HOME/.revenant/dyld/6.1.3/dyld_shared_cache_armv7
           images 524, of which naming NFC 0
           classes 11378, of which NFC* 0
           protocols 1171, of which NFC* 0
-4.3       $HOME/.charon/dyld/4.3/dyld_shared_cache_armv7
+4.3       $HOME/.revenant/dyld/4.3/dyld_shared_cache_armv7
           images 354, of which naming NFC 0
           classes 7187, of which NFC* 0
           protocols 564, of which NFC* 0
-11.0      $HOME/.charon/dyld/11.0/dyld_shared_cache_arm64
+11.0      $HOME/.revenant/dyld/11.0/dyld_shared_cache_arm64
           images 1258, of which naming NFC 1
           classes 52768, of which NFC* 34 (... NFCISO15693CustomCommandConfiguration
                   NFCISO15693ReadMultipleBlocksConfiguration NFCISO15693ReaderSession
@@ -180,7 +180,7 @@ links this object into a binary and `NSClassFromString` hands back the very clas
 registered, under the port's own name.
 
 ```
-ok CharonHostNFCTagCommandConfiguration is carried under its own name
-ok the port's class carries the CharonHost prefix
+ok RevenantHostNFCTagCommandConfiguration is carried under its own name
+ok the port's class carries the RevenantHost prefix
 ok the port's class and the host's class of the same API are two classes
 ```

@@ -16,7 +16,7 @@ The prepared per-release class census, read with `python3`:
 
 ```
 for r in 4.3 4.3.5 6.0 7.0:
-    ~/.charon/dyld/$r/classes_armv7.json  ->  7187, 7208, 11284, 14765 classes
+    ~/.revenant/dyld/$r/classes_armv7.json  ->  7187, 7208, 11284, 14765 classes
 ```
 
 **Control:** each of those four counts is what a single run read, and each run matched a
@@ -33,7 +33,7 @@ public `attributedStringWithFormat:` on the release, in either direction:
 
 ```
 python3 -c 'import json,os
-c=json.load(open(os.path.expanduser("~/.charon/dyld/6.0/classes_armv7.json")))["classes"]["NSAttributedString"]
+c=json.load(open(os.path.expanduser("~/.revenant/dyld/6.0/classes_armv7.json")))["classes"]["NSAttributedString"]
 print(sorted((c.get("class") or {}).keys()))'
 ```
 
@@ -43,7 +43,7 @@ this rung have anything that computes a plural category?
 
 ```
 python3 -c 'import json,os
-c=json.load(open(os.path.expanduser("~/.charon/dyld/6.0/classes_armv7.json")))["classes"]
+c=json.load(open(os.path.expanduser("~/.revenant/dyld/6.0/classes_armv7.json")))["classes"]
 h=[(("-" if s=="instance" else "+")+n,k) for n,e in c.items() for s in ("instance","class") for k in (e.get(s) or {}) if any(p in k for p in ("plural","Plural","CLDR","ICU","icu"))]
 print(len(c), h)'
   11284 [('-PKIngestibleCard','pluralTemplateDescription'),
@@ -65,7 +65,7 @@ handle the directives that happen to be easy.
 ```
 python3 -c 'import json,os
 for r in ("4.3","6.0"):
-    c=json.load(open(os.path.expanduser("~/.charon/dyld/"+r+"/classes_armv7.json")))["classes"]
+    c=json.load(open(os.path.expanduser("~/.revenant/dyld/"+r+"/classes_armv7.json")))["classes"]
     print(r, len(c), [n for n in c if "URLSession" in n])'
   4.3  7187 []
   6.0 11284 []
@@ -98,7 +98,7 @@ The prepared censuses above are 4.3, 4.3.5, 6.0 and 7.0. The band the 6.1.3 gate
 also read directly, through `modules/apple/objc.lua`'s `inventory` — the rungs' own reader:
 
 ```
-xmake l .agent-work/probe/inv.lua ~/.charon/dyld/6.1.3/dyld_shared_cache_armv7 \
+xmake l .agent-work/probe/inv.lua ~/.revenant/dyld/6.1.3/dyld_shared_cache_armv7 \
     NSFilePresenter NSAttributedString
   control: 11378 classes, 188523 instance selectors, 15334 class selectors read in this run
   class NSFilePresenter    ABSENT

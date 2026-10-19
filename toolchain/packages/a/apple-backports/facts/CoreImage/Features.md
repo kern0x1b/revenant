@@ -60,7 +60,7 @@ the constants (that export is not measured here; see the open items). The run:
     ciqr-detector: CIDetectorTypeText -> nil
 
 So the release answers nil for the three types, and an application that asks for one gets no detector at all. No exception is raised for any of the three. The face answer is the release's own and is not changed by the port. This
-is one run of one probe on the emulator (Shade), not a device run.
+is one run of one probe on the emulator, not a device run.
 
 ## The four known differences (pinned, not compared)
 

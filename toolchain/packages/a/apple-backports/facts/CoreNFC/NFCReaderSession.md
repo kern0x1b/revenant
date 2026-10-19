@@ -16,7 +16,7 @@ said CoreNFC is in no shared cache this package holds. It is.
 **The command.** From the repository root, with no xmake project and no gate:
 
 ```
-CHARON_ROOT="$PWD" xmake l tools/corpus/cache-census.lua NFC
+REVENANT_ROOT="$PWD" xmake l tools/corpus/cache-census.lua NFC
 ```
 
 `tools/corpus/cache-census.lua` reads each named release's cache with
@@ -28,15 +28,15 @@ package deploys on and the first rung that carries CoreNFC. The two long lines
 are cut here at their class and protocol names:
 
 ```
-6.1.3     $HOME/.charon/dyld/6.1.3/dyld_shared_cache_armv7
+6.1.3     $HOME/.revenant/dyld/6.1.3/dyld_shared_cache_armv7
          images 524, of which naming NFC 0
          classes 11378, of which NFC* 0
          protocols 1171, of which NFC* 0
-4.3       $HOME/.charon/dyld/4.3/dyld_shared_cache_armv7
+4.3       $HOME/.revenant/dyld/4.3/dyld_shared_cache_armv7
          images 354, of which naming NFC 0
          classes 7187, of which NFC* 0
          protocols 564, of which NFC* 0
-11.0      $HOME/.charon/dyld/11.0/dyld_shared_cache_arm64
+11.0      $HOME/.revenant/dyld/11.0/dyld_shared_cache_arm64
          images 1258, of which naming NFC 1
          classes 52768, of which NFC* 34 (NFCError NFCHardwareManager ... NFCurrency)
          protocols 8954, of which NFC* 11 (NFCHardwareManagerCallbacks ... NFContactlessUICCSessionInterface)
@@ -64,7 +64,7 @@ agrees. `tools/corpus/cache-census.lua --selectors` asks through the other one -
 different part of the image:
 
 ```
-CHARON_ROOT="$PWD" xmake l tools/corpus/cache-census.lua --selectors \
+REVENANT_ROOT="$PWD" xmake l tools/corpus/cache-census.lua --selectors \
   -readingAvailable -beginSession -invalidateSession -isReady -alertMessage \
   -sessionQueue -initWithDelegate:queue:invalidateAfterFirstRead: -ndefMessagePayload
 ```
@@ -73,12 +73,12 @@ Its output, in full, each release preceded by its selector count and four
 controls - three every release registers and one none does:
 
 ```
-== 4.3  $HOME/.charon/dyld/4.3/dyld_shared_cache_armv7
+== 4.3  $HOME/.revenant/dyld/4.3/dyld_shared_cache_armv7
    selectors the cache registers: 70062
    control  -isEqual:                     known
    control  -description                  known
    control  -initWithFrame:               known
-   control  -charonNoSuchSelectorAnywhere:  unknown, as it must be
+   control  -revenantNoSuchSelectorAnywhere:  unknown, as it must be
    ask      -readingAvailable             absent
    ask      -beginSession                 absent
    ask      -invalidateSession            known
@@ -87,12 +87,12 @@ controls - three every release registers and one none does:
    ask      -sessionQueue                 absent
    ask      -initWithDelegate:queue:invalidateAfterFirstRead:  absent
    ask      -ndefMessagePayload           absent
-== 6.1.3  $HOME/.charon/dyld/6.1.3/dyld_shared_cache_armv7
+== 6.1.3  $HOME/.revenant/dyld/6.1.3/dyld_shared_cache_armv7
    selectors the cache registers: 113981
    control  -isEqual:                     known
    control  -description                  known
    control  -initWithFrame:               known
-   control  -charonNoSuchSelectorAnywhere:  unknown, as it must be
+   control  -revenantNoSuchSelectorAnywhere:  unknown, as it must be
    ask      -readingAvailable             absent
    ask      -beginSession                 absent
    ask      -invalidateSession            absent
@@ -101,12 +101,12 @@ controls - three every release registers and one none does:
    ask      -sessionQueue                 absent
    ask      -initWithDelegate:queue:invalidateAfterFirstRead:  absent
    ask      -ndefMessagePayload           absent
-== 11.0  $HOME/.charon/dyld/11.0/dyld_shared_cache_arm64
+== 11.0  $HOME/.revenant/dyld/11.0/dyld_shared_cache_arm64
    selectors the cache registers: 487244
    control  -isEqual:                     known
    control  -description                  known
    control  -initWithFrame:               known
-   control  -charonNoSuchSelectorAnywhere:  unknown, as it must be
+   control  -revenantNoSuchSelectorAnywhere:  unknown, as it must be
    ask      -readingAvailable             known
    ask      -beginSession                 known
    ask      -invalidateSession            known
@@ -159,8 +159,8 @@ appear as protocols in 16.0's arm64e cache. `NFCReaderSession` is the name of a
 class *and* of a protocol in 11.0 and 16.0. Read with
 
 ```
-CHARON_ROOT="$PWD" xmake l tools/corpus/objc-inventory.lua \
-    "$HOME/.charon/dyld/11.0/dyld_shared_cache_arm64" \
+REVENANT_ROOT="$PWD" xmake l tools/corpus/objc-inventory.lua \
+    "$HOME/.revenant/dyld/11.0/dyld_shared_cache_arm64" \
   | grep -E '^(class|protocol)[[:space:]]+(NFCReaderSession|NFCNDEFReaderSession|NFCReaderSessionDelegate|NFCNDEFReaderSessionDelegate)[[:space:]]'
 ```
 
@@ -202,7 +202,7 @@ diffs the answers; the host is held to `expected.txt`.
   calls back. The port's block holds the session for the same reason.
 - `NFCErrorDomain` is `NFCError`, and `NFCISO15693TagResponseErrorKey` is the string `ISO15693TagResponseErrorCode`.
 - The two delegate protocols, `NFCReaderSessionDelegate` and `NFCNDEFReaderSessionDelegate`, are declared by the header
-  the generator writes (`CharonCoreNFCProtocols.h`) from the SDK 16.4 bodies in `spec/CoreNFC/protocols.tsv`, through the
+  the generator writes (`RevenantCoreNFCProtocols.h`) from the SDK 16.4 bodies in `spec/CoreNFC/protocols.tsv`, through the
   CoreNFC rows of `spec/protocol-headers.tsv`. Their required and optional selectors are the host's
   (`tests/backports/host/nfc-protocols`, which diffs the two lists).
 

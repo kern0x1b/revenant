@@ -9,13 +9,13 @@ the substance of this page rather than a detail in it.
 
 The port has carried `configurationUpdateHandler` on `UICollectionViewCell`, `UITableViewCell` and
 `UITableViewHeaderFooterView` since 15.0 landed — `UIConfigurationUpdateHandler15.m`, three
-categories that call `charon_host_update_handler` and `charon_host_set_update_handler` from
-`CharonConfigurationHost.m`. Those two functions take a **`UIView`**. They are not cell-specific;
+categories that call `revenant_host_update_handler` and `revenant_host_set_update_handler` from
+`RevenantConfigurationHost.m`. Those two functions take a **`UIView`**. They are not cell-specific;
 they are view-specific, and a button is a view. Calling them from a button category is reuse, and
 it is why this file defines **no C function of its own**: a C function defined in a file that
 exports API is left out of the bands that already export that API, and the call is then
 `Undefined symbols` in exactly those bands (`AGENTS.md`, "A C function shared between backport
-files"). `charon_request_update` is the third seam, and it is the same one.
+files"). `revenant_request_update` is the third seam, and it is the same one.
 
 So the delivered work is the button's own half: the configuration value kept per button, the
 update path, and the primary-action constructor. The value itself is not new — the port's
@@ -25,7 +25,7 @@ holds its constructors and twenty-five properties against the host's.
 ## What the release has, measured
 
 `6.1.3`'s own Objective-C metadata, read with the tree's reader
-(`xmake l tools/corpus/objc-inventory.lua ~/.charon/dyld/6.1.3/dyld_shared_cache_armv7`):
+(`xmake l tools/corpus/objc-inventory.lua ~/.revenant/dyld/6.1.3/dyld_shared_cache_armv7`):
 
 - `UIButton` carries **no selector mentioning `configuration` at all**;
 - `UIButtonConfiguration` is **not a class the release declares**.
@@ -103,7 +103,7 @@ for the reconfigure pass records the same lesson about Apple's headers being the
 
 Also checked, without a compiler being enough: every selector the file calls exists in the port or
 the SDK (`+buttonWithType:primaryAction:` in `UIButton+Actions14.m`, `-addAction:forControlEvents:`
-on `UIControl`, the three seams in `CharonConfigurationHost.m`); no other file in the tree defines
+on `UIControl`, the three seams in `RevenantConfigurationHost.m`); no other file in the tree defines
 any of the eight selectors it defines, so nothing is shadowed; and the storage pattern is the one
 `UIConfigurationUpdateHandler15.m` and `NSLayoutManager+Text13.m` already use.
 

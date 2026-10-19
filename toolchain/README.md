@@ -1,4 +1,4 @@
-# Charon
+# The toolchain
 
 Legacy Apple platforms for [xmake](https://xmake.io): armv6 from iPhone OS 2.0
 to 4.2.1, armv7 from iPhone OS 3.0, armv7s from iOS 6 and arm64 from iOS 7, built
@@ -6,7 +6,7 @@ by clang 23 from the `llvm` package with no Xcode. An `apple_minimum` outside th
 releases its architecture runs is refused, naming the architectures that do run
 it: a port that asks for 2.0 on armv7 is told to build armv6, never handed a 3.0
 binary that says it is one.
-A port is an ordinary `xmake.lua` in each module; Charon adds what xmake does not
+A port is an ordinary `xmake.lua` in each module; the toolchain adds what xmake does not
 know about these platforms, and nothing else:
 
 - an **addon** - the `apple-ios` toolchain, the `tweak` rule, the checks every
@@ -15,7 +15,7 @@ know about these platforms, and nothing else:
   against the device's own dyld shared cache), strip and `ldid` signing,
   reproducible Debian packages (`xmake deb`) and the phone (`xmake device`);
 - a **package repository** - the SDK, ld64 from cctools-port, ldid and
-  libplist, and the libraries ports share, each under `charon@name`.
+  libplist, and the libraries ports share, each under `revenant@name`.
 
 ## A port
 
@@ -23,56 +23,56 @@ know about these platforms, and nothing else:
     set_version("1.0.2")
     set_policy("package.requires_lock", true)
 
-    add_repositories("charon https://github.com/kern0x1b/charon.git main")
-    add_addons("charon v0.8.4")
+    add_repositories("revenant https://github.com/kern0x1b/revenant.git main")
+    add_addons("revenant v0.8.4")
     set_config("apple_minimum", "6.0")
-    includes("@addon/charon/apple-ios")
+    includes("@addon/revenant/apple-ios")
 
     set_defaultplat("iphoneos")
     set_defaultarchs("iphoneos|armv7")
 
     target("kindlesyncfix")
-        add_rules("@addon/charon/tweak")
+        add_rules("@addon/revenant/tweak")
         add_files("kindlesyncfix.m")
         add_frameworks("Foundation")
         set_values("tweak.filter", "packaging/kindlesyncfix.plist")
-        set_values("charon.control", "packaging/control")
+        set_values("revenant.control", "packaging/control")
 
 The rules, and the values each reads:
 
-    @addon/charon/tweak    a MobileSubstrate dylib; tweak.filter, charon.install,
-                           charon.libraries (packages whose shared libraries it
-                           loads, carried in /usr/lib/charon/<Package>)
-    @addon/charon/daemon   an executable in /usr/libexec (charon.install), with
+    @addon/revenant/tweak    a MobileSubstrate dylib; tweak.filter, revenant.install,
+                           revenant.libraries (packages whose shared libraries it
+                           loads, carried in /usr/lib/revenant/<Package>)
+    @addon/revenant/daemon   an executable in /usr/libexec (revenant.install), with
                            its LaunchDaemons plist through add_installfiles, and
-                           charon.libraries as a tweak
-    @addon/charon/app      Name.app with app.plist-file, app.plist ("KEY=VALUE",
+                           revenant.libraries as a tweak
+    @addon/revenant/app      Name.app with app.plist-file, app.plist ("KEY=VALUE",
                            over the file), app.resources (folders copied flat into
                            the bundle), app.frameworks (packages whose shared
                            libraries go to Frameworks under their install names,
                            and shared-library targets the app add_deps(), all
                            loaded through @executable_path), app.url-scheme
-    @addon/charon/library  a shared library an application bundles: checked
+    @addon/revenant/library  a shared library an application bundles: checked
                            where it links, stripped, signed and import-checked
                            with the bundle
-    @addon/charon/swift    added next to one of the above, compiles the target's
+    @addon/revenant/swift    added next to one of the above, compiles the target's
                            .swift files as one module, of the whole language when
-                           the project requires charon@swift-runtime (and
-                           charon@libcxx), which the port carries, or of Embedded
-                           Swift when it requires charon@swift-embedded, and
+                           the project requires revenant@swift-runtime (and
+                           revenant@libcxx), which the port carries, or of Embedded
+                           Swift when it requires revenant@swift-embedded, and
                            refuses both or neither; swift.module (the module
                            name, default the target's), swift.flags
 
-and, on any of them, charon.entitlements (signed with ldid and read back),
-charon.strip (default -x), charon.control, charon.maintainer-scripts,
-charon.licenses (into /usr/share/doc/<Package>/) and
-charon.waive.<check> "reason". Every object a target links and every member of
+and, on any of them, revenant.entitlements (signed with ldid and read back),
+revenant.strip (default -x), revenant.control, revenant.maintainer-scripts,
+revenant.licenses (into /usr/share/doc/<Package>/) and
+revenant.waive.<check> "reason". Every object a target links and every member of
 its packages' static archives has to record the port's minimum release; a
-package that cannot is waived with charon.waive.input-minimum.<package>. Info.plist keys the file and app.plist leave
+package that cannot is waived with revenant.waive.input-minimum.<package>. Info.plist keys the file and app.plist leave
 out are derived: the bundle and executable name, the project version, and
 MinimumOSVersion. The files a tweak, daemon or app target names with
 add_installfiles go into its package at the path given, under the package root.
-The rules strip after their checks, with charon.strip, because the Thumb
+The rules strip after their checks, with revenant.strip, because the Thumb
 interworking check reads the names of the functions a binary's code pointers
 point at: where a release mode (mode.release, mode.releasedbg, mode.minsizerel)
 would strip a target that sets no strip of its own at the link, the target is
@@ -94,7 +94,7 @@ Then:
     xmake device --holder=NAME [--minutes=30] claim|release
                                hold a device so every other holder's command on it
                                is refused until the release or the expiry;
-                               CHARON_DEVICE_HOLDER names the holder for a shell
+                               REVENANT_DEVICE_HOLDER names the holder for a shell
     xmake emulate install      the same packages into the image of an emulated device
     xmake emulate [-s 60] [--scale 10] run COMMAND
                                start COMMAND in it and report pass, fail, crash,
@@ -121,7 +121,7 @@ architecture from the ordinary build and configures and builds each other one in
 its own folder under the build directory - each slice for the release its architecture first runs where `apple_minimum` is older and another slice keeps it (arm64 at 7.0 beside armv7 at 6.0; the port is told once, and an architecture built alone at a release it never ran is still refused; the configured architecture is the one to build for the oldest release) - merges the bundles with lipo - every
 other file has to be the same in every slice, so pin MinimumOSVersion in the
 plist - and signs and checks the merged binaries. A slice with no shared cache
-under ~/.charon/dyld is said to be unchecked. The reader understands every
+under ~/.revenant/dyld is said to be unchecked. The reader understands every
 shared cache format from iOS 3.1 to today - 32-bit and arm64/arm64e, single
 files and the split caches of iOS 15 on, whose subcache files it opens by the
 suffixes the main header lists - deciding which header fields exist from the
@@ -133,8 +133,8 @@ symbol the device exports only from another library is refused. A weak import
 the checked release does not export is reported as a warning naming the binary
 and the first twelve symbols, because it is NULL on the device and only a check
 for it makes the call safe - and refused when the image is released, that is
-under `xmake deb`, in Charon's own guest programs, or with CHARON_RELEASE set,
-unless the target waives it with `charon.waive.weak-imports` and says why every
+under `xmake deb`, in Revenant's own guest programs, or with REVENANT_RELEASE set,
+unless the target waives it with `revenant.waive.weak-imports` and says why every
 call is guarded; for the symbols the compiler emits by itself -
 the ARC entry points, the block runtime, emulated TLS and the wide atomics,
 listed beside `ARRIVED` in `modules/apple/compat.lua` - it is refused instead,
@@ -151,13 +151,13 @@ classes it imports, and of the protocols it records count as implemented; a
 protocol no class adopts is not recorded, and its optional methods are
 reported. The release's selectors are cached as `selectors_<arch>.txt` beside its
 cache; methods a runtime component adds at run time (arclite's subscripting)
-are declared by that component in a `__DATA,__charon_addsel` section and
+are declared by that component in a `__DATA,__revenant_addsel` section and
 count as implemented.
 
 A check is a target:
 
     target("lint-strings")
-        add_rules("@addon/charon/check")
+        add_rules("@addon/revenant/check")
         set_values("check.script", "scripts/lint-strings.sh")
         add_values("check.files", "src/**.m", "src/**.h")
         set_values("check.pass-files", true)
@@ -172,7 +172,7 @@ target name.
 
 `xmake compile-commands [-o FILE] [TARGETS]` writes compile_commands.json for
 the named targets only, e.g. the iOS ones without the host tests.
-A target sets `charon.version` when its package is versioned apart from the
+A target sets `revenant.version` when its package is versioned apart from the
 project.
 
 Below iOS 7 an executable starts through Apple's `crt1.3.1.o` (or `crt1.o` below
@@ -203,7 +203,7 @@ laid out as an Xcode developer folder
 (`Developer.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/`),
 so clang's driver finds the toolchain's `libarclite_iphoneos.a` beside it,
 which it force-loads into anything linked with `-fobjc-arc` below iOS 9 and
-Xcode stopped shipping in 14.3. Charon's own arclite defines the ARC entry
+Xcode stopped shipping in 14.3. Revenant's own arclite defines the ARC entry
 points hidden in each image: each tail-calls the system's implementation when
 the running iOS has one (5.0 on), so the autoreleased-return handshake keeps
 working, and otherwise sends retain, release and autorelease; below iOS 5 it
@@ -227,12 +227,12 @@ and `_Block_object_dispose` tail-call the system's runtime when the running
 release has one and implement the clang block ABI themselves on 3.0 and 3.1. The rules
 refuse a binary whose recorded minimum is not the port's.
 
-`includes("@addon/charon/apple-ios")` requires the SDK, ld64 and ldid at the
+`includes("@addon/revenant/apple-ios")` requires the SDK, ld64 and ldid at the
 versions it pins, and hands every other package the `apple-ios` toolchain named
 with those versions and `apple_minimum`, so a change of any of them rebuilds
 what was built with it. The SDK is 16.4; a project whose source needs a newer
 one sets `apple_sdk` before the include (`set_config("apple_sdk", "26.2")`), and
-the package carries the versions it lists. A library comes from here as `charon@name`. The rules
+the package carries the versions it lists. A library comes from here as `revenant@name`. The rules
 bind the same toolchain to their targets. Commit `xmake-requires.lock` and
 `xmake-addons.lock`. The addon is pinned by its tag: a new release is a new
 tag in `add_addons` (and a fresh `xmake-requires.lock`, since the addon and the
@@ -241,7 +241,7 @@ branch or a range is avoided - xmake resolves those against its own clone of
 this repository, which it does not pull again once it has one. The import check reads
 the system libraries of the earliest release of each slice's architecture that
 is not older than the port's minimum - iOS 6.0 for an armv7 6.0 port, 7.0 for
-its arm64 slice - from `~/.charon/dyld/<release>/` (under `$CHARON_HOME` if
+its arm64 slice - from `~/.revenant/dyld/<release>/` (under `$REVENANT_HOME` if
 set): `dyld_shared_cache_<arch>` and its subcaches, or `libraries_<arch>/`
 for a release before 3.1, which has no cache. When they are not held, the
 check offers to fetch them (`-y` accepts) and `xmake firmware [--arch=ARCH]
@@ -249,7 +249,7 @@ fetch RELEASE` does it by hand; `xmake firmware list` shows what is held. `xmake
 --device=IDENTIFIER rootfs RELEASE` unpacks the whole root filesystem of that
 device's earliest firmware not older than the release (with the SystemOS
 cryptex under `System/Cryptexes/OS` from iOS 16) into
-`~/.charon/firmware/rootfs/<device>/<version>_<build>/`, the input an emulator
+`~/.revenant/firmware/rootfs/<device>/<version>_<build>/`, the input an emulator
 boots. `xmake firmware [--arch=ARCH] classes RELEASE` writes the release's
 Objective-C inventory - every class with its superclass, image, instance and
 class methods and protocols, categories merged in - as JSON beside its cache,
@@ -265,46 +265,46 @@ which cached images do not carry themselves. A cache copied
 from a running device, whose pages hold pointers the device slid, is refused
 with the command that fetches the release's cache from the firmware. The
 release and its firmware come from a catalog of api.ipsw.me and
-theapplewiki's firmware tables, kept in `~/.charon/firmware/catalog.json` and
+theapplewiki's firmware tables, kept in `~/.revenant/firmware/catalog.json` and
 refreshed when a minimum is newer than anything it lists. Only the system image
 is downloaded, by byte ranges of the IPSW on Apple's servers; the FileVault
 images of iOS 2 to 9 are decrypted with the key theapplewiki publishes, the
 Apple Encrypted Archives of iOS 18 on with the key Apple's wkms server hands
 out, and the image is mounted to copy the cache (from the SystemOS cryptex on
 iOS 16 on) or the libraries. A check that would have to be skipped is waived by name
-with the reason, e.g. `set_values("charon.waive.pagezero", "why")`.
+with the reason, e.g. `set_values("revenant.waive.pagezero", "why")`.
 
 `xmake emulate` runs the port on an emulated device instead of a phone, on a
-macOS arm64 host. `includes("@addon/charon/emulate")` after the `apple-ios`
-include requires `charon@shade` - Shade, Charon's own emulator (MPL-2.0;
+macOS arm64 host. `includes("@addon/revenant/emulate")` after the `apple-ios`
+include requires `revenant@emulator` - the emulator, Revenant's own emulator (MPL-2.0;
 provenance and required attribution in its NOTICE), which boots a firmware's
 own userland over an emulated XNU on macOS arm64 hosts; it is pinned by
 commit, with the fixes it has not taken yet as patches under
-`packages/s/shade/patches/` - with
-`charon@swiftshader`, the CPU Vulkan driver its OpenGL ES is drawn through, and
-`charon@emulator-guest`, `charon-runner` and `charon-sblaunch` built by the
+`packages/e/emulator/patches/` - with
+`revenant@swiftshader`, the CPU Vulkan driver its OpenGL ES is drawn through, and
+`revenant@emulator-guest`, `revenant-runner` and `revenant-sblaunch` built by the
 `daemon` rule for the port's architecture and minimum. The device is `-d`, or the first device of
-the catalog of the configured architecture that Shade has a profile for and
+the catalog of the configured architecture that emulator has a profile for and
 that runs `-r` (default `apple_minimum`); its earliest release not older than
 that is the one emulated. A device without a profile, or a release whose
-Darwin Shade does not emulate, is refused with the reason, never replaced by
+Darwin the emulator does not emulate, is refused with the reason, never replaced by
 another. The first run of a device and build unpacks its root filesystem as
 `xmake firmware rootfs` does, marks Setup Assistant done - in the mobile user's
 `com.apple.purplebuddy` preferences, which iOS 6.0 reads, and in lockdownd's
 `com.apple.purplebuddy` domain, which 6.1 reads instead - and boots it once
-past the first-boot data migration into a golden image under `~/.charon/emulator/golden.noindex/`, keyed
+past the first-boot data migration into a golden image under `~/.revenant/emulator/golden.noindex/`, keyed
 by device, build and the emulator package; `install` clones it (an APFS clone
 per port and device) and unpacks the data member of each package `xmake deb`
 writes into the clone, through the image's own symbolic links, and runs each
 package's maintainer scripts against the clone the way dpkg runs them against a
 root, with `DPKG_ROOT` naming it: that is how a package whose libraries depend
-on the release - `charon@apple-backports` - links the ones built for the image's
+on the release - `revenant@apple-backports` - links the ones built for the image's
 own iOS, and a script that refuses the image stops the install and says why. `run` clones
 that image again, puts a LaunchDaemon into `/System/Library/LaunchDaemons` of the image (the only folder
-iOS 6's launchd reads) that starts `charon-runner`, which starts COMMAND, once launchd has
+iOS 6's launchd reads) that starts `revenant-runner`, which starts COMMAND, once launchd has
 registered the Mach services the firmware's LaunchDaemons declare (the verdict's `daemons` says
 how many and how long that took), with a deadline of `-s` seconds and writes its exit status, signal and output into
-`/private/var/charon`; the boot is quit once that verdict is there, and killed
+`/private/var/revenant`; the boot is quit once that verdict is there, and killed
 when `-t` seconds pass. The verdict, the guest's results, the emulator log and
 the last frame stay in the image's `run` folder, and the clone the run booted
 is removed unless `-k` keeps it. A golden image of an older emulator package is
@@ -313,7 +313,7 @@ emulator saw and the last frame, and a boot that never ran the command names
 where it stopped: the emulator, a process that keeps crashing, SpringBoard or
 the data migration.
 
-`run` starts a program as a child of `charon-runner`, outside SpringBoard, so a
+`run` starts a program as a child of `revenant-runner`, outside SpringBoard, so a
 UIKit application started that way never reaches
 `application:didFinishLaunchingWithOptions:`. `launch BUNDLE-ID` starts one through
 SpringBoard, so it does reach it, but not the way a tap on its icon does: the
@@ -326,25 +326,25 @@ or change is not checked. For each application bundle a package puts under
 (`com.apple.mobile.installation.plist`, which `uicache` rewrites on a device),
 and MobileInstallation builds it again from `/Applications` at boot, as on a
 firmware's first boot, so SpringBoard lists the application. `launch` installs,
-and has the runner start `charon-sblaunch`, which waits up to `-s` guest seconds
+and has the runner start `revenant-sblaunch`, which waits up to `-s` guest seconds
 for SpringBoard to take the launch through `SBSLaunchApplicationForDebugging`
 and make the application frontmost, with the application's standard output and
-error in `/private/var/charon/app.stdout` and `app.stderr` (unbuffered, and
+error in `/private/var/revenant/app.stdout` and `app.stderr` (unbuffered, and
 `NSLog` to standard error too). While SpringBoard refuses because the screen is
-locked, `launch` unlocks it over Shade's control channel. Then it has Shade
+locked, `launch` unlocks it over the emulator's control channel. Then it has the emulator
 `settle` and, once the screen has not changed for 60 display periods of guest
 time, writes a snapshot, `app-0.png`, into the run folder; then it takes each
 step given after the bundle identifier - `tap X Y`, `drag X1 Y1 X2 Y2` in points,
 `home` - settles and takes a snapshot after each, and quits. One step is the
-driver's own and is not sent to Shade: `until-exit` holds the guest until the
+driver's own and is not sent to the emulator: `until-exit` holds the guest until the
 application has ended, so a port whose application produces its result over time
 is given the time to produce it, then settles and takes one more frame; the
 verdict says in `held` whether the application's own end (`exited`) or the run's
 budget (`deadline`) came first. The budget is `-s` again: the guest seconds the
 application may run from the moment it is frontmost, counted by the host's clock at
 the time scale. The runner's verdict file does not end the hold; it is written when
-`charon-sblaunch` returns, at launch. It prints the application's output, the snapshots and the run folder, which
-is where a program that wrote into `/var/charon` left them, and fails naming
+`revenant-sblaunch` returns, at launch. It prints the application's output, the snapshots and the run folder, which
+is where a program that wrote into `/var/revenant` left them, and fails naming
 SpringBoard's refusal, the signal or status the application ended with, or that
 its process never started; `log` prints the output again and `shot` the last
 frame. The guest has no network unless `-n` or a target's
@@ -364,7 +364,7 @@ machine must still make progress. Builds can take a slot of their own:
     xmake queue -c 3 -- xmake f -y      a different number of them
 
 The slot is taken by the outermost `xmake` only: the command it runs carries
-`CHARON_BUILD_SLOT`, and a build that starts another build inside it runs in
+`REVENANT_BUILD_SLOT`, and a build that starts another build inside it runs in
 the slot already held, so a nested build never waits for its own parent. This
 is a queue for the builds that ask for it, not a limit on the machine: a
 `xmake build` started beside it does not see the slots and does not wait.
@@ -421,21 +421,21 @@ the number of failures, needing no UIKit and no SpringBoard - runs on an
 emulated device like this, against a working copy of this repository:
 
     -- xmake.lua of the test port
-    add_repositories("charon /path/to/charon")   -- the copy with your changes
-    add_addons("charon latest")
+    add_repositories("revenant /path/to/revenant")   -- the copy with your changes
+    add_addons("revenant latest")
     set_config("apple_minimum", "6.0")
-    add_requires("charon@apple-backports", {alias = "apple-backports"})
-    includes("@addon/charon/apple-ios")
-    includes("@addon/charon/emulate")
+    add_requires("revenant@apple-backports", {alias = "apple-backports"})
+    includes("@addon/revenant/apple-ios")
+    includes("@addon/revenant/emulate")
 
     target("backports-test")
         set_kind("binary")
-        add_rules("@addon/charon/daemon")
+        add_rules("@addon/revenant/daemon")
         add_files("test.m")
         add_packages("apple-backports")
         add_frameworks("Foundation")
-        set_values("charon.version", "1.0")
-        set_values("charon.control", "packaging/control")
+        set_values("revenant.version", "1.0")
+        set_values("revenant.control", "packaging/control")
 
     xmake f -p iphoneos -a armv7 -y
     xmake emulate -d iPhone3,1 -r 6.0 install
@@ -453,7 +453,7 @@ it was doing:
       #1  lr     0x0000bf7d  crasher`_main + 0x34
       #2  return 0x36e20b20  libdyld.dylib + 0x1b20
 
-Charon speaks the debugger's protocol itself, because no debugger on an arm64
+The toolchain speaks the debugger's protocol itself, because no debugger on an arm64
 host talks to an armv7 guest. The frames are the chain the frame pointer holds,
 and they are named by what the guest itself says it has loaded - dyld's own
 list of images, which carries the shared cache's libraries as well as the
@@ -462,7 +462,7 @@ whole reading, registers and images included, is left beside the log as
 `debug.json`.
 
 A port that carries the backports into a tweak or an application names them in
-`charon.libraries` the way the target knows them - `apple-backports`, the alias
+`revenant.libraries` the way the target knows them - `apple-backports`, the alias
 the require carries - and not the repository they came from. The install of the
 package is what a port links against, and the resolution a project has already
 made is cached, so a change to the backports' sources or to their build module
@@ -470,7 +470,7 @@ is a different package that `xmake f -c` installs, where `xmake f` alone leaves
 the port linking against the install it had.
 
 `install` puts both packages into the image - the port's and the
-`charon@apple-backports` one `xmake deb` writes beside it - and runs their
+`revenant@apple-backports` one `xmake deb` writes beside it - and runs their
 maintainer scripts, so the libraries of the image's own release are linked.
 `run` starts the program with the deadline of `-s`, and its exit status is the
 verdict: `pass`, `fail(exit N)`, `timeout`, `crash(signal N)` or
@@ -483,7 +483,7 @@ the package's installed dependencies as find roots) and configures, builds and
 installs with Ninja:
 
     on_install("iphoneos", function (package)
-        import("@addon.charon.apple.cmake").install(package, {"-DBUILD_TESTING=OFF"})
+        import("@addon.revenant.apple.cmake").install(package, {"-DBUILD_TESTING=OFF"})
     end)
 
 xmake's own `package.tools.cmake` does not pass a custom compiler for iphoneos.
@@ -499,11 +499,11 @@ spelling the runtime out; `prune` removes installed paths such as `lib/cmake` or
 `lib/*.la`, and `licenses` copies the named files into the package's licenses.
 
 A library without a build system of its own, a list of sources, is compiled by
-`import("@addon.charon.apple.sources").static(package, {files = {...},
+`import("@addon.revenant.apple.sources").static(package, {files = {...},
 includedirs, defines, cflags, cxxflags, mflags, mxxflags, deps, headers,
 headers_prefix, licenses, prune, name})` into lib<name>.a with the toolchain's
 flags, the language taken from each file's extension. A script that runs make
-or autoconf itself ends with `import("@addon.charon.apple.install").finish(package,
+or autoconf itself ends with `import("@addon.revenant.apple.install").finish(package,
 {prune = ..., licenses = ...})`.
 Every package the port requires gets `-O3` with the toolchain, as a release
 build of a Makefile or autotools project expects. An install script runs in the
@@ -511,11 +511,11 @@ extracted source, so its current directory is the source root.
 The bridge runs CMake with IPHONEOS_DEPLOYMENT_TARGET, which reaches tools that
 take no flags, such as an assembler a configure script calls. A script that
 runs make or autoconf itself passes
-`import("@addon.charon.apple.envs").build(package, import("package.tools.autoconf").buildenvs(package))`
+`import("@addon.revenant.apple.envs").build(package, import("package.tools.autoconf").buildenvs(package))`
 as its envs; a host step of a two-stage build (a generator built for macOS)
 runs with the process environment, which does not carry it.
-`charon@libcxx` is libc++ 23 as the shared pair an application bundles, linked
-with `charon@apple-compat`, the hidden shims for what the minimum release lacks.
+`revenant@libcxx` is libc++ 23 as the shared pair an application bundles, linked
+with `revenant@apple-compat`, the hidden shims for what the minimum release lacks.
 It is checked against the devices' own libraries from iPhone OS 2.2.1 to iOS
 6.1.3. Below iOS 4.2, whose dyld cannot re-export single symbols, libc++ does
 not re-export libc++abi and a client links both, as the package's links say;
@@ -535,7 +535,7 @@ pthread key through `__emutls_get_address`, with C++ destructors registered by
 lets it accept thread-local variables for a Darwin release under emulated TLS
 and call `__cxa_thread_atexit` instead of dyld's `_tlv_atexit`, which iOS 6
 does not have and iOS 7 and 8 leave empty on armv7. Both entry points are
-exported by the libc++abi of `charon@libcxx`, one copy for the whole process: a
+exported by the libc++abi of `revenant@libcxx`, one copy for the whole process: a
 copy in each image numbers variables on its own, and two images then read each
 other's storage. The compiler's `libclang_rt.ios.a`, built by the same package,
 leaves emutls out, so an image that does not link the runtime fails to link
@@ -545,7 +545,7 @@ An atomic the processor cannot update in one instruction, such as a
 `__atomic_store`, `__atomic_exchange` and `__atomic_compare_exchange` calls,
 which libSystem has from iOS 7.0 and which clang otherwise refuses to emit for an
 older release. The `llvm` package's clang emits them for every iOS release, and
-below 7.0 the libc++abi of `charon@libcxx` exports compiler-rt's implementation,
+below 7.0 the libc++abi of `revenant@libcxx` exports compiler-rt's implementation,
 re-exported by libc++, one copy for the whole process: it picks the lock for a
 memory location from a table, and two images with tables of their own would
 guard the same memory with different locks. The builtins leave it out as well,
@@ -554,12 +554,12 @@ Swift compiles as Embedded Swift, the subset without a runtime library of its
 own: classes, structures, protocols and generics, closures, `any` existentials,
 `throws`, arrays, dictionaries and strings, with no Objective-C interoperability,
 reflection (`Mirror`), `Codable` or `async`. A port requires
-`add_requires("charon@swift-embedded", {alias = "swift-embedded"})` and adds the
-`@addon/charon/swift` rule to its target; C calls Swift through `@_cdecl`
+`add_requires("revenant@swift-embedded", {alias = "swift-embedded"})` and adds the
+`@addon/revenant/swift` rule to its target; C calls Swift through `@_cdecl`
 functions, and a `main.swift` is the program's entry point. The result loads
 nothing but libSystem, with `posix_memalign`, `arc4random_buf` and `putchar` the
 calls of note; swift_test holds armv7 and armv7s at 6.0 and arm64 at 7.0 to the
-devices' libraries, and older releases are not checked yet. `charon@swift` is the compiler of the
+devices' libraries, and older releases are not checked yet. `revenant@swift` is the compiler of the
 release, built from the sources of its own tag - swift, swiftlang's LLVM, cmark,
 swift-syntax, the string-processing library and the driver with its four
 packages, each pinned to the commit its tag named - with two changes an iOS
@@ -568,14 +568,14 @@ the runtime ships with the program, so the features of this Swift release are
 available at any deployment target, while the SDK's own availability is checked
 as before, and the flag is written into a module interface so that whoever
 compiles it reads the same. The driver stops refusing a deployment target below
-iOS 7, which it had as its own minimum. `charon@swift-bootstrap` is the swift.org
+iOS 7, which it had as its own minimum. `revenant@swift-bootstrap` is the swift.org
 release toolchain, pinned by its digest and cut to the driver, the frontend,
 their host libraries, the package manager and clang's headers; it compiles the
 Swift sources of the compiler, because building a Swift compiler takes a Swift
-compiler to begin with. Only `charon@swift` is what a port uses: a compiled Swift
+compiler to begin with. Only `revenant@swift` is what a port uses: a compiled Swift
 module loads only in the compiler that wrote it, and the Command Line Tools'
 swiftc moves with macOS. The sources of the release are installed beside the
-compiler, for the packages that build a module or a runtime from them. `charon@swift-embedded` builds the `Swift`
+compiler, for the packages that build a module or a runtime from them. `revenant@swift-embedded` builds the `Swift`
 module for the port's architecture and oldest release from those sources, the
 way the Swift build does for its own Embedded targets, and the Unicode tables it
 calls as a static library, and names its compiler in `SWIFT_EXEC`. The rule has
@@ -583,7 +583,7 @@ swiftc write LLVM bitcode and the `llvm` package's clang make the object: the
 LLVM inside Swift 6.4 loads the stack guard of armv7 code through an absolute
 address, and an executable with such text relocations loses PIE.
 
-`charon@swift-runtime` is the Swift runtime itself, built for the port's
+`revenant@swift-runtime` is the Swift runtime itself, built for the port's
 architecture and oldest release from those sources: the standard library, its
 Objective-C interoperation and reflection, concurrency, the C library's Swift
 overlay, Synchronization, Observation and the regular expression libraries. What
@@ -601,7 +601,7 @@ pair by symbol instead of importing `os/lock.h`, whose declaration carries iOS
 reason the frontend takes the flag.
 
 No Python runs in that build. The `.gyb` templates the runtime, its overlays,
-Embedded Swift's module and Styx are generated from are expanded by
+Embedded Swift's module and Combine are generated from are expanded by
 `modules/gyb`, a port of Swift's `utils/gyb.py` to Lua: the template language
 itself, and an interpreter for the Python its code blocks and the helper modules
 beside `gyb.py` (`SwiftIntTypes.py`, `SwiftFloatingPointTypes.py`,
@@ -662,12 +662,12 @@ an arm64 consumer expecting `libswiftFoundation` from this package finds none an
 the SDK's; armv7 installs every overlay. Measured through the recipe: arm64 and armv7
 install with it, armv7 without it.
 
-A Swift library is a package the same way: it requires `charon@swift-runtime`,
+A Swift library is a package the same way: it requires `revenant@swift-runtime`,
 compiles its modules with the runtime's compiler and flags, installs them as
 static libraries with their `.swiftmodule`s, and names the folders a port's
-Swift finds them in with `package:setenv("CHARON_SWIFT_MODULES", ...)`; the
-swift rule adds those folders to the compile. `charon@styx` is the first:
-OpenCombine at a pinned commit with the patches in `packages/s/styx/patches`, a
+Swift finds them in with `package:setenv("REVENANT_SWIFT_MODULES", ...)`; the
+swift rule adds those folders to the compile. `revenant@combine` is the first:
+OpenCombine at a pinned commit with the patches in `packages/c/combine/patches`, a
 single module named `Combine` — the core, the Dispatch scheduler and the
 Foundation integration compiled together — with its C++ helper and that helper's
 module map, so a port writes `import Combine`. The scheduler takes `DispatchTime`
@@ -677,25 +677,25 @@ publisher is declared from iOS 7, and a run loop timer's tolerance is read and
 set only behind `#available`, so the module builds and runs on iOS 6 with
 availability checking on. With `sources = true` the recipe installs the patched
 tree laid out as that module and compiles nothing, for a project that builds it
-itself. A port takes it with `add_requires("charon@styx", {alias =
+itself. A port takes it with `add_requires("revenant@combine", {alias =
 "combine"})` and `add_packages("combine")` beside the runtime and libcxx.
 
-`charon@eidolon` is the second: Eidolon, the SwiftUI API written anew on the
+`revenant@swiftui-uikit` is the second: SwiftUI, the SwiftUI API written anew on the
 UIKit of iOS 6, as one module named `SwiftUI` - every symbol an application
 takes from SwiftUI is mangled with that name - compiled against the runtime and
-against `charon@styx` built against the same runtime, which it takes with the
+against `revenant@combine` built against the same runtime, which it takes with the
 same `shared`, `backports` and `backports_uikit` configs. Availability checking
 stays on, so what a later release adds stays behind `#available`. A port writes
-`import SwiftUI` and an `@main` `App`, with `add_requires("charon@eidolon",
+`import SwiftUI` and an `@main` `App`, with `add_requires("revenant@swiftui-uikit",
 {alias = "swiftui"})` and `add_packages("swiftui")` beside the runtime and
-libcxx; the package names Styx's module folders too, since SwiftUI re-exports
-Combine. A SwiftUI port takes the `backports` variant of all three: Styx's own
+libcxx; the package names Combine's module folders too, since SwiftUI re-exports
+Combine. A SwiftUI port takes the `backports` variant of all three: Combine's own
 weak import, `_CFRunLoopTimerSetTolerance`, is answered by
-`charon@apple-backports`, which the port then carries (`coredata = true`, and
-`add_packages` plus `set_values("charon.libraries", ...)` for it), as
-`eidolon/rtpkg/xmake.lua` does. The runtime's own weak imports are checked against
+`revenant@apple-backports`, which the port then carries (`coredata = true`, and
+`add_packages` plus `set_values("revenant.libraries", ...)` for it), as
+`SwiftUI/rtpkg/xmake.lua` does. The runtime's own weak imports are checked against
 `modules/apple/runtime_guards.lua`. That a SwiftUI port passes `xmake deb`
-with no `charon.waive.weak-imports` has not been run end to end yet: it needs the
+with no `revenant.waive.weak-imports` has not been run end to end yet: it needs the
 rebuilt runtime.
 
 The runtime carries the Swift overlays of the system's own frameworks, which
@@ -705,13 +705,13 @@ from swift-5.2.5 - each from the last release that has it - built by today's
 compiler with patches where today's SDK or an older release differs. API an
 overlay reaches from a later release keeps the availability the SDK gives it,
 so a port for 6.0 asks with `#available`. With the `backports` config, what
-`charon@apple-backports` implements of later releases is available from the
+`revenant@apple-backports` implements of later releases is available from the
 port's release instead: the port's headers (`tools/gen/cmd_headers.lua`, with the
 rule of `tools/gen/target_availability.lua`) copy the SDK headers with the release
 of every implemented API lowered - found from clang's AST, never lower than an
 entry's own minimum, never for what the registry calls absent, inert or ignored,
 checked both ways - and a VFS overlay lays the copies over the SDK for the overlays
-that link the backports and for the port's own Swift (`CHARON_SWIFT_PORT_HEADERS`,
+that link the backports and for the port's own Swift (`REVENANT_SWIFT_PORT_HEADERS`,
 which the swift rule hands the compiler). Beside the classes and members the
 registry names, the port's headers lower a type only the headers declare - an
 enumeration, a set of options - when every API of the SDK that uses it and is above
@@ -722,7 +722,7 @@ lower the protocol for every type that adopts it. The overlays of Foundation and
 CoreData link libFoundationBackports and libCoreDataBackports by path; the
 `backports_uikit` config, for an application, links UIKit's overlay to
 libUIKitBackports too. A port that takes that runtime requires
-`charon@apple-backports` itself with the configs the runtime links (`coredata`,
+`revenant@apple-backports` itself with the configs the runtime links (`coredata`,
 and `uikit` with `backports_uikit`), and the rule says which is missing: a lowered
 call finds its implementation only where that library is loaded, and a message to
 a library that is not there is an unrecognized selector at run time, not a link
@@ -739,7 +739,7 @@ nothing on its own, because a shim's header brings its system header with it
 (`unlinkat.h` brings `<unistd.h>`, and with it `sync`). A target names the
 calls it renames with `add_values("apple.compat", "clock_gettime")`; a package
 script takes the flags from
-`import("@addon.charon.apple.compat").force_includes(package:dep("apple-compat"), {"clock_gettime"})`.
+`import("@addon.revenant.apple.compat").force_includes(package:dep("apple-compat"), {"clock_gettime"})`.
 
 What the Swift runtime calls and an old release lacks is there as well:
 `memset_s` and `objc_allocWithZone` (iOS 7), `voucher_copy`, `voucher_adopt`, `os_release` and
@@ -770,13 +770,13 @@ image. The waiters of an `os_unfair_lock` and the unlock that wakes them meet in
 one table, so a lock two images take - a `Mutex` from the Synchronization
 library is inlined into every image that locks it - has to reach one copy of
 these calls. libc++abi carries that copy, as it carries emulated TLS and the
-atomic library calls, and libc++ re-exports it; `charon@libcxx` refuses a
+atomic library calls, and libc++ re-exports it; `revenant@libcxx` refuses a
 runtime that does not export them below the release they arrived in, or that
 exports them at or above it, where the system's own must be used. The word an
 `os_unfair_lock` holds is this copy's own format: the owner's Mach thread port
 name with the low bit set, which a waiter clears. libplatform writes the name as
 it is, because XNU's names are odd; the bit is set here so that the lock also
-works where a name is even, which is what Shade gives a thread it starts. A
+works where a name is even, which is what the emulator gives a thread it starts. A
 release below iOS 10 has no os_unfair_lock of its own, so nothing else reads
 that word; from iOS 10 on the system's implementation is called instead. Two
 packages that each carry their own runtime do not share these locks, the same
@@ -784,8 +784,8 @@ boundary their libc++ copies have.
 
 A tweak or a daemon has no bundle, so what it loads from a package - libc++ and
 libc++abi, which also carry emulated TLS - goes to
-`/usr/lib/charon/<Package>/`, named by the Package field of its
-`charon.control`, and the images are pointed there when they are checked and
+`/usr/lib/revenant/<Package>/`, named by the Package field of its
+`revenant.control`, and the images are pointed there when they are checked and
 installed; only the libraries an image actually loads are carried, so a C tweak
 takes libc++abi alone. Each package carries its own copy rather than all
 packages sharing one, because a runtime is built for a minimum release:
@@ -800,13 +800,13 @@ dyld's coalescing of weak definitions. A failed allocation in a tweak therefore
 throws the `std::bad_alloc` its own `catch` names, and SpringBoard's code keeps
 the system libstdc++'s `operator new`. Before this, dyld bound the first inserted
 image's uses to libstdc++, whose allocation failure is thrown by iOS 5 and 6's
-libc++abi as a `GNUCC++` exception with GNU typeinfo, which Charon's libc++abi
+libc++abi as a `GNUCC++` exception with GNU typeinfo, which Revenant's libc++abi
 can only catch as `catch (...)`. An image that replaces `operator new` reaches
 its own allocations and the template code inlined into it, but not allocations
 made inside libc++'s dylib; ld no longer marks such a replacement as overriding,
 so it does not take over the host process's allocations either.
 
-`charon@apple-backports` brings Objective-C API later releases added -
+`revenant@apple-backports` brings Objective-C API later releases added -
 NSURLSession, NSURLComponents, UIAlertController, UIStackView, the layout
 anchors, the traits of a view, base64 data, the quality of service of an
 operation, the measurements and units of iOS 10, its date intervals, its image
@@ -819,11 +819,11 @@ iOS 6 gets it, by starting the updates the request stands for, and with the
 10 over the release's own Core Data, and with the `avfoundation` config
 `libAVFoundationBackports.dylib`, the discovery of cameras and microphones of iOS
 10 over the release's own capture devices; all named
-`/usr/lib/charon/org.charon.apple-backports/`. Unlike a runtime a package
+`/usr/lib/revenant/org.revenant.apple-backports/`. Unlike a runtime a package
 carries, these are one per process: two copies of a class would be two classes.
 `xmake deb` of a port that uses the package writes
-`org.charon.apple-backports_<release>+<digest>_iphoneos-arm.deb` beside the
-port's own package, named by the latest Charon release the addon recipe lists
+`org.revenant.apple-backports_<release>+<digest>_iphoneos-arm.deb` beside the
+port's own package, named by the latest the toolchain release the addon recipe lists
 and the first eight hex digits of the digest of the backports' sources, their
 build module and that recipe, and the port's control file gains a Depends on
 that version; `xmake device install` installs it first. The package holds the
@@ -853,7 +853,7 @@ than iOS 4.2 gets the file left out and nothing re-exported in its place, which
 is what dyld there can do: ld64 refuses `-reexported_symbols_list` for such a
 target, and the release's own symbol is what the port binds anyway. Methods a later release added
 to an existing class are categories, which the link moves from `__objc_catlist`
-to `__DATA,__charon_catlist`, where the runtime does not attach them: the
+to `__DATA,__revenant_catlist`, where the runtime does not attach them: the
 library's initializer adds each method, property and protocol only to a class
 that does not respond to it. It reads method lists rather than calling
 `class_getInstanceMethod`, which on iOS 6 runs `+initialize` while UIKit is
@@ -905,10 +905,10 @@ the entries that still owe facts are counted, not refused.
 
 xmake's package hash covers a package's version, configs and toolchain, but
 neither its script nor the builds of its dependencies; the script is not in reach
-of anything that runs before the hash is taken, so it cannot be digested for it. The toolchain Charon gives
+of anything that runs before the hash is taken, so it cannot be digested for it. The toolchain that Revenant gives
 packages carries a digest of the files that decide their compiler and linker
 flags, so a release that changes those flags rebuilds every package once, for
-every architecture. Charon's libraries set
+every architecture. Revenant's libraries set
 `package.strict_compatibility`, so what depends on them is rebuilt when they
 change; a port should set `package.librarydeps.strict_compatibility` in its
 project for its own packages, and give a package defined in its `xmake.lua` a
@@ -959,66 +959,66 @@ below; it goes away once they have.
 
     config/settings_user.yml   iOS 6.0 and 6.1, which Conan does not ship
     config/extensions/hooks/   refuses a build missing what its platform requires, and maps machine paths away
-    config/extensions/charon/  Charon: the entry point, what it generates, and the phone transport
-    config/extensions/charon/platforms/  apple-ios: what a port that builds for iOS is built with
+    config/extensions/revenant/  the toolchain: the entry point, what it generates, and the phone transport
+    config/extensions/revenant/platforms/  apple-ios: what a port that builds for iOS is built with
     recipes/ld64/              the linker, built from cctools-port
     recipes/ldid/              the signing tool the device accepts
     recipes/libplist/          the property-list library ldid reads entitlements with
     recipes/iphoneos-sdk/      the SDK, fetched and verified on the machine that uses it
     recipes/libcxx/            the C++ runtime an old iOS does not ship
     recipes/dyld-imports-check/  the check that every import exists in a device's dyld cache
-    recipes/charon-base/       what every port's recipe extends, whatever its platform
-    recipes/charon-apple/      the Apple half: Mach-O invariants, bundles, signing, the .deb writer
+    recipes/revenant-base/       what every port's recipe extends, whatever its platform
+    recipes/revenant-apple/      the Apple half: Mach-O invariants, bundles, signing, the .deb writer
 
 ## A new machine
 
     brew install conan cmake ninja ccache llvm
     xcode-select --install
 
-    git clone https://github.com/kern0x1b/charon.git
-    conan config install charon/config
+    git clone https://github.com/kern0x1b/revenant.git
+    conan config install toolchain/config
 
     export LLVM_PREFIX="$(brew --prefix llvm)"
 
-Charon is the entry point, the way Gradle is. Inside a port, run it once by its
+The toolchain is the entry point, the way Gradle is. Inside a port, run it once by its
 full path:
 
-    "$(conan config home)/extensions/charon/charon" setup <path to this repo>
+    "$(conan config home)/extensions/revenant/revenant" setup <path to this repo>
 
 That installs this configuration, registers this repository's recipes and the
-port's own ahead of the general remotes, and links `charon` into the first
-writable folder on PATH, so every later call is just `charon`. A new port starts from a template, which builds, packages and passes
+port's own ahead of the general remotes, and links `revenant` into the first
+writable folder on PATH, so every later call is just `revenant`. A new port starts from a template, which builds, packages and passes
 `check:imports` as written:
 
-    charon new tweak|daemon|app NAME [--identifier com.example.name]
+    revenant new tweak|daemon|app NAME [--identifier com.example.name]
 
-`CHARON_MAINTAINER` fills the control file's maintainer. The verbs are the same
+`REVENANT_MAINTAINER` fills the control file's maintainer. The verbs are the same
 in every port:
 
-    charon build [--variant NAME]   everything the declaration names
-    charon lock                     pin every variant's graph to what the indexes serve now
-    charon task NAME [NAME...]      declared tasks, run the way the pipeline runs them
-    charon test [--tier NAME]       the declared test tiers
-    charon package                  the .deb, copied to build/<variant>/
-    charon install                  package and dpkg -i the .deb on the phone, refusing to
+    revenant build [--variant NAME]   everything the declaration names
+    revenant lock                     pin every variant's graph to what the indexes serve now
+    revenant task NAME [NAME...]      declared tasks, run the way the pipeline runs them
+    revenant test [--tier NAME]       the declared test tiers
+    revenant package                  the .deb, copied to build/<variant>/
+    revenant install                  package and dpkg -i the .deb on the phone, refusing to
                                     install an app over one with another bundle identifier
-    charon deploy, charon run       install on the phone, launch the application
-    charon device log [SECONDS] [TEXT]  the phone's log over USB, filtered
-    charon generate                 write the recipe, profile and CMake without building
-    charon integrate, clean, provenance, device run|copy|fetch
+    revenant deploy, revenant run       install on the phone, launch the application
+    revenant device log [SECONDS] [TEXT]  the phone's log over USB, filtered
+    revenant generate                 write the recipe, profile and CMake without building
+    revenant integrate, clean, provenance, device run|copy|fetch
 
 The phone is named in the port's `device.env` (`DEVICE_HOST`, `DEVICE_PORT`,
 `DEVICE_UDID`, `DEVICE_PASSWORD`). A port with more than one keeps
 `device.NAME.env` beside it and picks one with `--device NAME`, or with
-`CHARON_DEVICE=NAME` for a whole shell.
+`REVENANT_DEVICE=NAME` for a whole shell.
 
-`conan config install` copies rather than links, so after changing Charon here
-run `charon setup` again; `charon provenance` says which copy is answering.
+`conan config install` copies rather than links, so after changing the toolchain here
+run `revenant setup` again; `revenant provenance` says which copy is answering.
 
 A port with one pipeline needs no `[variants]`: each name under `[pipeline]` is
 a variant with no options of its own. A port carries no conanfile.py, no profile,
 no CMake and no Makefile. It carries
-`charon.toml`, and Charon writes the rest into `build/<variant>/charon/`:
+`revenant.toml`, and the toolchain writes the rest into `build/<variant>/revenant/`:
 
     [port]
     name = "revenant-webkit"
@@ -1071,13 +1071,13 @@ A task is a table with exactly one of `script`, `shell` or `python`, and its
 `args` may name anything the build knows: `{port}`, `{build}`, `{stage}`,
 `{pkg:NAME}`, `{include:NAME}`, `{lib:NAME:LIBRARY}`, `{bin:TOOL}`,
 `{target:NAME}`. Every task runs from `{port}`, the folder holding
-`charon.toml`; the generated recipe finds it from the `build/<variant>/charon`
-folder it lives in, so it carries no checkout path, and `user.charon:port`
-names another. A task runs in `[pipeline]` as `task:NAME`, before the build under `charon integrate`
-when `[integrate] before-build` names it, or on its own with `charon task NAME`.
+`revenant.toml`; the generated recipe finds it from the `build/<variant>/revenant`
+folder it lives in, so it carries no checkout path, and `user.revenant:port`
+names another. A task runs in `[pipeline]` as `task:NAME`, before the build under `revenant integrate`
+when `[integrate] before-build` names it, or on its own with `revenant task NAME`.
 
 A target's `sources` may be patterns - `src/**/*.m` - with `exclude`, expanded
-when Charon writes the project; a pattern that matches nothing is refused. An
+when the toolchain writes the project; a pattern that matches nothing is refused. An
 application is linked by `build:application` and signed by `sign:application`,
 and the steps between them get `{application}` and `{executable}`, so a Mach-O
 fix-up runs on the linked, unsigned binary. `strip = "-S -x"` strips the
@@ -1094,7 +1094,7 @@ is not rewritten by any of this - that path is the application's own. A
 pipeline that builds an application and never signs it is refused, unless
 another variant merges it.
 
-Anything Charon writes can be replaced. `cmake = "<dir>"` on a target uses that
+Anything the toolchain writes can be replaced. `cmake = "<dir>"` on a target uses that
 project instead of a generated one; `[engine] user-toolchain` and
 `project-include` name hand-written cmake files; `[use] profile` and
 `[use] recipe` name a profile or a recipe of the port's own; `script =` keeps a
@@ -1102,11 +1102,11 @@ large task in a file. The declaration alone is the default and none of these is
 required.
 
 `[conf]` holds what dependency builds read from the profile. A sentence names a
-value the port needs but does not set, and `charon setup` warns while it is
+value the port needs but does not set, and `revenant setup` warns while it is
 empty; a table sets it, with the reason beside it:
 `"user.x:headers" = { value = "{port}/include", why = "..." }`. A set value is
 written into the generated profile, so a dependency Conan builds from source
-under `charon build` sees it too, and `{port}` is resolved by the profile from
+under `revenant build` sees it too, and `{port}` is resolved by the profile from
 where it lies rather than written as a checkout path. `[variants.NAME.conf]`
 replaces the keys it names for that slice. A value may not name a package
 placeholder, because a profile is read before the graph that could answer it;
@@ -1147,23 +1147,23 @@ depends on, or an empty reason is refused.
 Recipes reach a build only through a local recipe index, which trims each
 `conandata.yml` to the version it exports. A top-level table with no key for
 that version is dropped there, so a recipe reading it works from its folder and
-fails for every consumer; `charon build` and `charon setup` refuse such an index
-before anything runs. `charon setup` also names each `conandata.yml` whose text
+fails for every consumer; `revenant build` and `revenant setup` refuse such an index
+before anything runs. `revenant setup` also names each `conandata.yml` whose text
 the trim rewrites: `conan create` in that folder gives a different revision from
 the one consumers resolve, so a package built that way is not the one they use.
 
 `[platform]` names what the port builds for, and nothing else says it. A
-platform is a file of facts - `config/extensions/charon/platforms/apple-ios.toml`
+platform is a file of facts - `config/extensions/revenant/platforms/apple-ios.toml`
 is the first - giving the operating system, its SDK name, the architectures it
 builds with the oldest and newest release each supports, the tools every build
 for an architecture requires (the SDK package; ld64 for armv7), the compiler's
 runtime, the configuration and the deployment-target variable its tools read,
-and the distributions it knows. Charon writes the whole host profile from it,
+and the distributions it knows. The toolchain writes the whole host profile from it,
 refuses an architecture, a release or a distribution the platform does not
 have, and refuses `[target]` repeating `os`, `arch`, `os-version`, `sdk` or
 `system-name`. `[variants.NAME.platform]` changes the architecture or the
 release for one slice. A port's own `platforms/NAME.toml` is used before
-Charon's, so a platform can be written or corrected without changing Charon.
+Revenant's, so a platform can be written or corrected without changing the toolchain.
 `[target]` keeps what tunes the build: `cppstd`, `cpu`, `fpu`, `defines`.
 
 A platform also says where a framework lived before it became public:
@@ -1182,17 +1182,17 @@ reach only the port's own recipe, beside its `[tools]`, and a port naming the
 same tool picks its version. apple-ios names `dyld-imports-check` there, which
 the `check:imports` step runs over the stage and the application bundle against
 the device's shared cache: `user.apple-ios:dyld_shared_cache`, or else
-`<user.charon:home, ~/.charon>/dyld/dyld_shared_cache_<arch>`. Without a cache
+`<user.revenant:home, ~/.revenant>/dyld/dyld_shared_cache_<arch>`. Without a cache
 the step refuses rather than passing having looked at nothing. It is the check
 that proves a build loads: a table of calls that arrived late only knows what
 someone wrote into it.
 
-`charon where pkg:NAME` prints the folder of a package a variant's build links,
-and `charon where tool:NAME` one it runs, answered from the same lock and profile
+`revenant where pkg:NAME` prints the folder of a package a variant's build links,
+and `revenant where tool:NAME` one it runs, answered from the same lock and profile
 the build uses and never building anything; a script asks it instead of reading
 generated environment files.
 
-The rest Charon derives rather than being told: the host profile comes from
+The rest the toolchain derives rather than being told: the host profile comes from
 `[target]`, the engine build is the one direct child of `build/` that CMake
 configured and that has frameworks laid out, the frameworks to install are
 whatever the build staged, and a test tier gets the phone, the build tree or its
@@ -1225,22 +1225,22 @@ source by the `ld64` and `ldid` recipes. Theos itself is not needed.
 
 ## A port
 
-A port is `charon.toml`, its own `recipes/` for the libraries it builds, and its
-own `conan.lock`. `charon setup` registers the port's recipes as the remote
-`[port] index` names and this repository's as `charon`, and keeps both ahead of
+A port is `revenant.toml`, its own `recipes/` for the libraries it builds, and its
+own `conan.lock`. `revenant setup` registers the port's recipes as the remote
+`[port] index` names and this repository's as `revenant`, and keeps both ahead of
 ConanCenter. A port and this repository both carry recipes under names
 ConanCenter also publishes - icu, brotli, libxslt - and Conan asks the remotes
 in the order they are registered; `conan remote add` appends, so without that
 ConanCenter answers first and a build that has never seen these packages
 silently gets recipes that cannot cross-compile for this target.
 
-`charon profiles`, which `charon setup` also runs, writes a shared profile for
+`revenant profiles`, which `revenant setup` also runs, writes a shared profile for
 every architecture of every platform - `apple-ios-armv7` at iOS 6.0 and
 `apple-ios-armv8` at 7.0 - from the same platform files a port's profile is
 written from, for building a recipe with plain `conan create`. A port's own
 choices - the C++ standard, CPU tuning - are `[target]` keys.
 
-`@charon/stable` is for what this repository serves - the linker, the C++ runtime,
+`@revenant/stable` is for what this repository serves - the linker, the C++ runtime,
 the base class - and nothing else. A port's own libraries carry the port's name,
 `openssl/3.0.15@revenant/stable`, `openssl/3.0.15@itglegacy/stable`: two ports
 build the same library with different choices, and two recipes behind one
@@ -1263,7 +1263,7 @@ variable naming the checkout. Point `layout()` at the sources, build them where
 they are with `conan build`, then turn that build into a normal package with
 `conan export-pkg`: it runs `package()` against the local build folder and
 stores the result in the cache, resolvable by `requires()` and written into
-`charon-deps.env` like any other. The cache holds the recipe and the artifacts, not
+`revenant-deps.env` like any other. The cache holds the recipe and the artifacts, not
 the sources, so it cannot rebuild the package with `--build`; the repository is
 where that happens. If the package must be rebuildable from the cache,
 `exports_sources` copies the sources in on export instead.
@@ -1285,10 +1285,10 @@ say now - Conan otherwise reads a `conan.lock` it finds beside the conanfile as
 its input and keeps the revisions in it - and `--update` exports the recipes
 from the indexes again instead of taking the revision already in the cache.
 
-Every recipe carries a `test_package`, and `conan create` runs it. `charon-base`
+Every recipe carries a `test_package`, and `conan create` runs it. `revenant-base`
 provides the whole of it; a recipe adds three files:
 
-    test_package/conanfile.py      python_requires_extend = "charon-base.CharonTestPackage"
+    test_package/conanfile.py      python_requires_extend = "revenant-base.RevenantTestPackage"
     test_package/CMakeLists.txt    find_package(<name> CONFIG) and one executable
     test_package/test_package.c    a program that calls the library for real
 
@@ -1301,7 +1301,7 @@ what it says about itself instead.
 
 ## Handing packages on
 
-`charon publish INDEX OUT` archives the packages built from an index's recipes
+`revenant publish INDEX OUT` archives the packages built from an index's recipes
 with `conan cache save`, without sources, and writes beside the archive a table
 of each package's license, source and binaries. A recipe with `upload_policy =
 "skip"` is left out - the iOS SDK is Apple's to hand on, not ours - and a package
@@ -1313,30 +1313,30 @@ to the repository's releases named `packages-<date>`.
 ## Where the packages are
 
 `CMakeDeps` serves CMake. Everything else a port runs - a test harness, a shell
-script - needs the same answer, so `charon-base` writes it once:
-`build/conan/<arch>/charon-deps.env`, one line per package, taken from the dependency
+script - needs the same answer, so `revenant-base` writes it once:
+`build/conan/<arch>/revenant-deps.env`, one line per package, taken from the dependency
 graph rather than typed out.
 
-    CHARON_HOST_OPENSSL=/.../openssl/3.0.15/Release/armv7
-    CHARON_BUILD_LD64=/.../ld64/956.6/Release/armv8
+    REVENANT_HOST_OPENSSL=/.../openssl/3.0.15/Release/armv7
+    REVENANT_BUILD_LD64=/.../ld64/956.6/Release/armv8
 
-`CHARON_HOST_*` are the libraries built for the device, `CHARON_BUILD_*` the tools
+`REVENANT_HOST_*` are the libraries built for the device, `REVENANT_BUILD_*` the tools
 that run on this machine. The same file reads from a shell and from make:
 
-    . build/conan/armv7/charon-deps.env
-    include build/conan/armv8/charon-deps.env
+    . build/conan/armv7/revenant-deps.env
+    include build/conan/armv8/revenant-deps.env
 
 The folder is per architecture, so a port that ships both slices installs twice
 and each slice keeps its own paths - a `lipo -create` step reads one file for
-each. A port built from `charon.toml` writes it into its build tree instead,
-`build/<variant>/conan/charon-deps.env`, and a test tier that declares `packages`
+each. A port built from `revenant.toml` writes it into its build tree instead,
+`build/<variant>/conan/revenant-deps.env`, and a test tier that declares `packages`
 gets its own under `build/tier-packages/<tier>/`.
 
-A port that extends `charon-base.CharonPort` gets it without doing anything. A
+A port that extends `revenant-base.RevenantPort` gets it without doing anything. A
 conanfile that does not - a test harness built for the Mac - calls it directly:
 
     def generate(self):
-        self.python_requires["charon-base"].module.DependencyEnv(self).generate()
+        self.python_requires["revenant-base"].module.DependencyEnv(self).generate()
 
 Nothing downstream names a version, an architecture or a deploy layout, so a
 version bump in `conanfile.py` reaches every consumer. A path that cannot be
@@ -1390,9 +1390,9 @@ commit they build rather than the time they ran.
 ## Packaging
 
 Every port ships a .deb. A port declares `[package] control` and, if it has
-them, `maintainer-scripts`; `charon package` hands the staged tree - laid out
+them, `maintainer-scripts`; `revenant package` hands the staged tree - laid out
 as the device's filesystem, every binary signed with the `ldid` tool_requires -
-to `charon-apple.DebianPackage`. For the variant that builds `[application]`,
+to `revenant-apple.DebianPackage`. For the variant that builds `[application]`,
 the final bundle joins that tree where the port's distribution installs
 applications (`applications` under the platform's `[distributions.<name>]`,
 `/Applications` for a jailbroken iOS device). A port with several variants
@@ -1400,7 +1400,7 @@ names the one its package is written from with `[package] variant`; the others
 package their bundle or tree without a .deb. A recipe written by hand calls the same class:
 
     def package(self):
-        self.python_requires["charon-apple"].module.DebianPackage(
+        self.python_requires["revenant-apple"].module.DebianPackage(
             self, "packaging/control", self._stage, "packaging/DEBIAN"
         ).write(os.path.join(self.package_folder, "deb"))
 

@@ -12,7 +12,7 @@ Catalyst host in a windowed app: `tests/backports/host/replaykit-broadcast/` (ca
 | --- | --- |
 | `+loadBroadcastActivityViewControllerWithHandler:` | the handler is called once, before the call returns, on the main thread; the controller is an `RPBroadcastActivityViewController`; the error is nil |
 | `+loadBroadcastActivityViewControllerWithPreferredExtension:nil handler:` | the same |
-| `+loadBroadcastActivityViewControllerWithPreferredExtension:@"local.charon.nonexistent" handler:` | the same: a controller and a nil error. The header says the controller is nil when no extension matches; the host does not do that |
+| `+loadBroadcastActivityViewControllerWithPreferredExtension:@"local.revenant.nonexistent" handler:` | the same: a controller and a nil error. The header says the controller is nil when no extension matches; the host does not do that |
 | the controller's `view`, loaded | one plain `UIView` with no subviews: no label, no button, no alert |
 
 ## What the port answers

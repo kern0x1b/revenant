@@ -37,7 +37,7 @@ null, so a reader can tell "not measured" from "measured and was nothing".
 Apple's headers give these classes no initialiser, no setter and one representation method each, so
 there is nowhere to put a value and nothing to read one from. The port gives each of the sixteen
 NSObject roots one dictionary keyed by the property's own name, and each of the 142 properties is the
-macro that reads or writes it (`CharonMetricValue.h`). That is what makes the properties a line each
+macro that reads or writes it (`RevenantMetricValue.h`). That is what makes the properties a line each
 rather than 284 hand-written accessors, and - the part that matters - it makes the dictionary, the
 JSON and the archiver walk **one list per class**, the runtime's own property list, instead of a
 hand-written list that could drift from the header. A property the header does not declare cannot be
@@ -80,7 +80,7 @@ than as an instance of something the process does not have.
   store is empty until an application writes into it, so what a subscriber receives today is an empty
   array - and it receives it because the manager really read the store, not a fabricated payload.
 - `pastPayloads` and `pastDiagnosticPayloads` read a real directory under Application Support -
-  `org.charon.apple-backports.MetricKit` - newest first by the time stamp the file name carries, and a
+  `org.revenant.apple-backports.MetricKit` - newest first by the time stamp the file name carries, and a
   file that does not decode as the class asked for is left where it is and skipped. That is the same
   convention `CoreSpotlightBackports` keeps its index in, and the store is writable: the payloads are
   `NSSecureCoding` and the port decodes them, so a payload the port never produced can still be a
@@ -99,17 +99,17 @@ classes (`MXSignpostRecord`, `MXDiskSpaceUsageMetric`, `MXCrashDiagnosticObjecti
 five of its properties (`MXMetaData.lowPowerModeEnabled`, `isTestFlightApp`, `pid`, `bundleIdentifier`,
 `MXDiagnostic.signpostData`, `MXCrashDiagnostic.exceptionReason`, `MXMetricPayload.diskSpaceUsageMetrics`,
 `MXAnimationMetric.hitchTimeRatio`) are not in those headers at all. They are declared in
-`CharonMetricKit.h`, spelled as `SFCertificatePresentation.h` spells itself in `CharonSecurityUI.h`:
+`RevenantMetricKit.h`, spelled as `SFCertificatePresentation.h` spells itself in `RevenantSecurityUI.h`:
 the same superclass, the same selectors, the same property types, no ivars, and no availability
 annotations. The five gap properties are implemented in categories, because a property a category
 declares is implemented in a category.
 
-`CharonMetricKit.h` redeclares those three classes **for the lowered SDK this package builds against
+`RevenantMetricKit.h` redeclares those three classes **for the lowered SDK this package builds against
 and nothing else**: compiled against the real 26.2 headers it collides with them, exactly as
-`CharonSecurityUI.h` collides with `SecurityUI`'s own `SFCertificatePresentation`. The package only ever
+`RevenantSecurityUI.h` collides with `SecurityUI`'s own `SFCertificatePresentation`. The package only ever
 compiles against the lowered SDK, so nothing in a build sees it; a header a future SDK change would
 break is the price of carrying a class whose header the build's SDK has not got, and it is the price
-`CharonSecurityUI.h`, `CharonAVAudioBuffer.h` and `CharonCallKit.h` already pay.
+`RevenantSecurityUI.h`, `RevenantAVAudioBuffer.h` and `RevenantCallKit.h` already pay.
 
 ## Not measured, and the four warnings
 
@@ -151,15 +151,15 @@ of the same store.
 The first is what the system's MetricKit writes for a value nothing measured, and the port must answer
 it the same way. The second is the KVC walk: the eight properties the port declares and the 16.4 SDK it
 builds against does not, plus one ordinary property, each set through the port's own
-`-charon_setValue:forKey:` and read back through the accessor, with the class named by its **symbol** so
+`-revenant_setValue:forKey:` and read back through the accessor, with the class named by its **symbol** so
 that the port's class is the one under test and a class it does not carry is a build error.
 
 That round trip is the check the `hitchTimeRatio` mutation needed, and the reason is worth writing
-down. The port half compiles with `-DCHARON_HOST_DIFFERENTIAL=1`, because the host's MetricKit is
+down. The port half compiles with `-DREVENANT_HOST_DIFFERENTIAL=1`, because the host's MetricKit is
 *newer* than the SDK the port ships against and the rename header rewrites the class name inside Apple's
-own headers: Apple's `@interface MXSignpostRecord` becomes `@interface CharonMXSignpostRecord`, the same
+own headers: Apple's `@interface MXSignpostRecord` becomes `@interface RevenantMXSignpostRecord`, the same
 class the port declares. Building without the flag was measured and does not build —
-`duplicate interface definition for class 'CharonMXSignpostRecord'`, then six `property has a previous
+`duplicate interface definition for class 'RevenantMXSignpostRecord'`, then six `property has a previous
 declaration` — so it is not a configuration that can be asked for. With the flag, the port's `@dynamic`
 is compiled out, the property is declared by Apple's header, and the **compiler synthesises** a getter
 when the port's is missing. A synthesised getter still answers the selector, which is why
@@ -174,7 +174,7 @@ to compare against - the values here are the system's *output*, which is precise
 does not produce. What could be measured by hand - the property lists, the hierarchy, the SDK gap - is
 measured and written above.
 
-**Four warnings in `CharonMetricValue.m`** (`-Wincomplete-implementation` for the coding pair on two
+**Four warnings in `RevenantMetricValue.m`** (`-Wincomplete-implementation` for the coding pair on two
 roots, and `-Wobjc-property-implementation` for `+supportsSecureCoding` on one class) are open. The
 implementation is there and the file links; what is missing is that the category declarations and the
 implementations of the two roots' archiving trio live in different categories, which the compiler wants

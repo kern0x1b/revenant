@@ -22,9 +22,9 @@ settled in this tree before, and the row follows them rather than inventing a th
 ## What the release carries, measured
 
 ```
-CHARON_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua ~/.charon/dyld/6.1.3/dyld_shared_cache_armv7 > inv-6.1.3.tsv
-CHARON_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua ~/.charon/dyld/12.0/dyld_shared_cache_arm64  > inv-12.0.tsv
-CHARON_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua ~/.charon/dyld/16.0/dyld_shared_cache_arm64e > inv-16.0.tsv
+REVENANT_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua ~/.revenant/dyld/6.1.3/dyld_shared_cache_armv7 > inv-6.1.3.tsv
+REVENANT_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua ~/.revenant/dyld/12.0/dyld_shared_cache_arm64  > inv-12.0.tsv
+REVENANT_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua ~/.revenant/dyld/16.0/dyld_shared_cache_arm64e > inv-16.0.tsv
 awk -F'\t' '$1=="class" && $2=="NSTextList" {print $3, $5}' inv-6.1.3.tsv inv-12.0.tsv inv-16.0.tsv
 ```
 
@@ -50,7 +50,7 @@ format changed.
 The private call is deliberate and is written down here with the measurement that forces it: there is
 no public mechanism below 16.0, and `-[NSTextList _isOrdered]` is not declared in any SDK header, so
 the call goes through `objc_msgSend` with a typed return — the same shape
-`CharonConfigurationHost.m:267` and `UIApplicationDelegate+OpenURLOptions.m:28` use. A release whose
+`RevenantConfigurationHost.m:267` and `UIApplicationDelegate+OpenURLOptions.m:28` use. A release whose
 `NSTextList` lacks the selector answers NO rather than trapping, which is the honest answer for a list
 that cannot say. On a device the port runs, the selector is present (measured above), so the guard is
 never the path taken there.

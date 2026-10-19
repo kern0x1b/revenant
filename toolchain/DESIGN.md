@@ -9,20 +9,20 @@ For anyone arriving from the JVM world, the mapping is close to exact:
 
 | Maven / Gradle | here |
 |---|---|
-| `gradle build`, `gradle clean`, `gradle test` | `charon build`, `charon clean`, `charon test` - `config/extensions/charon/` |
-| `gradlew` | `charon`, installed once per machine from this configuration |
-| `build.gradle` per module | `charon.toml` in each port |
-| `task myTask { ... }` and `gradle myTask` | `[tasks.myTask]` with `script`, `shell` or `python`, and `charon task myTask` |
-| convention plugin / parent POM | `charon-base` and the platform's `charon-apple`, consumed with `python_requires` |
-| Gradle plugin applied to a build | `[platform] use = "apple-ios"`, a file of facts under `config/extensions/charon/platforms/` |
-| `~/.gradle/init.gradle`, toolchain config | the shared profiles `charon profiles` writes from the platform files |
+| `gradle build`, `gradle clean`, `gradle test` | `revenant build`, `revenant clean`, `revenant test` - `config/extensions/revenant/` |
+| `gradlew` | `revenant`, installed once per machine from this configuration |
+| `build.gradle` per module | `revenant.toml` in each port |
+| `task myTask { ... }` and `gradle myTask` | `[tasks.myTask]` with `script`, `shell` or `python`, and `revenant task myTask` |
+| convention plugin / parent POM | `revenant-base` and the platform's `revenant-apple`, consumed with `python_requires` |
+| Gradle plugin applied to a build | `[platform] use = "apple-ios"`, a file of facts under `config/extensions/revenant/platforms/` |
+| `~/.gradle/init.gradle`, toolchain config | the shared profiles `revenant profiles` writes from the platform files |
 | Maven Central / company Artifactory | this repository, registered as a `local-recipes-index` remote |
 | `gradle.lockfile`, `dependencyManagement` | `conan.lock` in each port |
 | `~/.m2/repository` | `~/.conan2` |
 
-## Charon and its platforms - the direction, being built in steps
+## The toolchain and its platforms - the direction, being built in steps
 
-iOS 6 is the first platform Charon builds for, not what Charon is. The driver
+iOS 6 is the first platform the toolchain builds for, not what the toolchain is. The driver
 is to be as usable for an application on an old macOS, a current iOS, or
 Android 2.x as it is here, and a repository says which platform it targets the
 way a Gradle build applies a plugin. Two things make it worth having: one way to
@@ -76,7 +76,7 @@ to obtain and verify them.
    assumes `.1.0.`; a declaration states each.
 2. Done: `[platform]` in the declaration; the profile is generated from the
    platform's facts.
-3. Done: the base is split into `charon-base` and `charon-apple`, whose hooks
+3. Done: the base is split into `revenant-base` and `revenant-apple`, whose hooks
    answer what a binary is and how it is verified, signed, bundled and
    packaged; the platform file names the module, the cross toolchain, the tools
    each architecture requires and what a bundle leaves out, and every name that
@@ -84,7 +84,7 @@ to obtain and verify them.
 4. Publish the prebuilt packages and fetch them with `conan cache restore`.
 5. A second platform - macOS on an old deployment target is the cheapest - to
    prove the core holds nothing Apple-mobile.
-6. The repository becomes `charon`, with platforms beside the core.
+6. The repository becomes `revenant`, with platforms beside the core.
 
 ## Newest upstream, and compatibility where it is missing
 
@@ -99,7 +99,7 @@ compatibility layer the platform supplies once, not a pin every port repeats.
 old Apple system lacks, each entry keyed by the release that introduced it, so
 a build for a newer release links none of it. `aligned_alloc`, which iOS has
 from 13.0 and libc++ calls unconditionally from 22.1, is its first entry: a
-hidden `charon_aligned_alloc` over `posix_memalign` keeping C11's contract. A
+hidden `revenant_aligned_alloc` over `posix_memalign` keeping C11's contract. A
 header force-included into the runtime's compile names calls to
 `aligned_alloc` after it, so the SDK's declaration keeps its availability and
 LLVM's `-Werror=unguarded-availability-new` stays on; the library is linked
@@ -123,7 +123,7 @@ reason is the work item, not the pin.
 **Shared configuration** - `config/`. Two profiles pin the target:
 `apple-ios-armv7` - armv7, iOS 6.0, the `iphoneos-sdk` package and `ld64` as build
 tools - and `apple-ios-armv8` - arm64 from iOS 7.0, the `iphoneos-sdk` package - both
-written by `charon profiles` from the platform file. They carry nothing a port
+written by `revenant profiles` from the platform file. They carry nothing a port
 chooses for itself: a C++ standard, CPU tuning or a later deployment target goes
 in the port's own profile, which includes one of these.
 `settings_user.yml` adds the iOS versions Conan does not ship. A machine picks
@@ -135,14 +135,14 @@ deliberately not here: the ports disagree on versions, and a shared set would
 make one port override another's. Each port carries its own recipes, names a
 git URL and a commit, and builds them itself.
 
-**Shared conventions** - `recipes/charon-base` and `recipes/charon-apple`. The base classes the recipe Charon
-writes for a port extends: the generators, the layout, and the check that refuses an operating
+**Shared conventions** - `recipes/revenant-base` and `recipes/revenant-apple`. The base classes the recipe the toolchain
+generates for a port extends: the generators, the layout, and the check that refuses an operating
 system or architecture this toolchain does not build for. This is the piece that stops ten ports from
 drifting into ten different spellings of the same build.
 
 ## What stays with the port
 
-Its `charon.toml`, its own recipes for the libraries it builds, and its own
+Its `revenant.toml`, its own recipes for the libraries it builds, and its own
 `conan.lock`. Duplication here is deliberate and cheap: two ports that both need
 OpenSSL both say so, and both get the same package out of the cache. What is not
 duplicated is the toolchain, the generated build files, or the knowledge of how
@@ -150,16 +150,16 @@ this target is built.
 
 A port's declaration should be readable in one screen - what it requires, what it
 builds, which tasks run in which order - and nothing in the port repeats what
-Charon can write from it.
+The toolchain can write from it.
 
 ## Adding a port
 
-1. Write the port's `charon.toml`: `[port]`, `[target]`, `[requires]`, its
+1. Write the port's `revenant.toml`: `[port]`, `[target]`, `[requires]`, its
    targets and its `[pipeline]`.
-2. `charon setup <this repo>` - installs this configuration and registers both
+2. `revenant setup <this repo>` - installs this configuration and registers both
    recipe indexes ahead of the general remotes, because `conan remote add` appends
    after ConanCenter, which would otherwise answer first.
-3. `charon build`
+3. `revenant build`
 4. Commit the resulting `conan.lock`.
 
 ## Adding a library
@@ -221,16 +221,16 @@ change to the recipes or the ports.
 Nothing in this section exists yet. It is the agreed shape for the part of a port
 that is still Conan Python and YAML - each library's `conanfile.py`,
 `conandata.yml` and `config.yml` - so that a repository carries declarations
-only and Conan stays Charon's engine underneath, the way Gradle uses Maven
+only and Conan stays Revenant's engine underneath, the way Gradle uses Maven
 repositories without anyone writing a POM. It is not Bazel: a declaration is
 compiled to Conan recipes and CMake, and content keying comes from Conan
-revisions once the text Charon writes is deterministic.
+revisions once the text the toolchain writes is deterministic.
 
 ### The workspace
 
-A root `charon.toml` with a `[workspace]` lists its modules by folder. A folder
+A root `revenant.toml` with a `[workspace]` lists its modules by folder. A folder
 that is not listed is not a module, whatever it contains. Each listed folder has
-its own `charon.toml` declaring one module. A root with no `[workspace]` is a
+its own `revenant.toml` declaring one module. A root with no `[workspace]` is a
 workspace of one module, which is the shape every port has today.
 
     [workspace]
@@ -238,7 +238,7 @@ workspace of one module, which is the shape every port has today.
 
 A label names a module or something it produces: `//libs/ogg` is the module,
 `//libs/ogg:ogg` its library, `//libs/tdlib:res/td_api.tl` one of its files.
-Labels resolve through the workspace list before any remote, and Charon writes
+Labels resolve through the workspace list before any remote, and the toolchain writes
 the local recipe index from the declarations; nobody writes it.
 
 Module kinds: `application` (a workspace may hold several), `library`,
@@ -269,7 +269,7 @@ not a way to edit a source: today's `replace_in_file` tables become patch files.
 `build` names the strategy, and each strategy owns its keys; a key that belongs
 to another strategy is refused rather than ignored.
 
-- `build = "sources"` - Charon compiles the listed sources, the way it builds a
+- `build = "sources"` - the toolchain compiles the listed sources, the way it builds a
   port's own static library today.
 - `build = "cmake"` - the tree's own CMake, with `cache = { ... }`.
 - `build = "configure"` - `command`, `environment` and `make-target`.
@@ -278,7 +278,7 @@ A step that has to run on the host before the cross build - tdlib's
 `prepare_cross_compiling` - is a task on the host toolchain, declared before the
 build step, not a fourth strategy.
 
-brotli, as it is built for revenant-webkit today:
+brotli, as it is built for frameworks/WebKit today:
 
     [library]
     name = "brotli"
@@ -291,7 +291,7 @@ brotli, as it is built for revenant-webkit today:
     headers = [{ from = "c/include/" }]
     licenses = ["LICENSE"]
 
-openssl, as it is built for revenant-webkit today:
+openssl, as it is built for frameworks/WebKit today:
 
     [library]
     name = "openssl"
@@ -369,7 +369,7 @@ under that prefix, and `{ from = "vpx/", keep = true }` keeps the folder's own
 name, so libvpx's headers land in `include/vpx/` and never in `include/vpx/vpx/`.
 `resources` are files a module ships beside its libraries, each with `from`
 naming its place in the tree, never a bare name to be searched for. Any of them can be
-found from outside a build with `charon where //libs/tdlib:res/td_api.tl`, which
+found from outside a build with `revenant where //libs/tdlib:res/td_api.tl`, which
 prints the path or fails; a tool never reads the cache layout itself.
 
 ### Dependencies expose headers and archives, and nothing else
@@ -436,7 +436,7 @@ and the availability define together, and the application bundles that runtime.
 
 ### Determinism
 
-Charon writes a library's recipe from its declaration alone: no absolute path, no
+The toolchain writes a library's recipe from its declaration alone: no absolute path, no
 time, no host name, keys in declaration order. The same declaration generated in
 two different folders gives the same text, and therefore the same recipe
 revision, so moving a repository never rebuilds a package. The generated port
@@ -450,15 +450,15 @@ two builds that covers the archive's members, the defined and undefined symbols,
 the minimum OS version recorded in every object or slice, and, for a dylib, its
 install name and load commands. The minimum version is not optional: iTgLegacy's
 libvpx had the same members and symbols while 110 of its 111 armv7 objects
-targeted iOS 7.0. The comparison is a Charon verb, not a script each port
+targeted iOS 7.0. The comparison is a toolchain verb, not a script each port
 rewrites.
 
 ### Order
 
 1. Done: generated recipes no longer bake the checkout path.
 2. Done: a verified baseline, today's recipes building each port end to end
-   through Charon.
-3. The comparison verb, and `charon where`.
+   through the toolchain.
+3. The comparison verb, and `revenant where`.
 4. Library modules by strategy - sources, then cmake, then configure - each
    library proven unchanged before its recipe is deleted, simplest first: ogg
    and brotli before tdlib and openssl.

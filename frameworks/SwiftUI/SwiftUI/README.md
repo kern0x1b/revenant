@@ -1,14 +1,13 @@
-# Eidolon
+# SwiftUI
 
-Своя реализация SwiftUI для iOS 6 armv7 поверх UIKit шестой системы. Имя — εἴδωλον, «образ, облик»:
-призрачный двойник у Гомера; в семье Charon, Shade и Revenant (Revenant — это движок WebKit, не этот проект).
+Своя реализация SwiftUI для iOS 6 armv7 поверх UIKit шестой системы, часть revenant рядом с тулчейном и эмулятором.
 
 **Это не SwiftUI Apple.** Ни строки кода Apple здесь нет и не будет: у настоящего SwiftUI нет исходников,
 он существует только как бинарник для arm64, и на iOS 6 он не переносится (разбор и цифры — в `../docs/research.md`).
 
-**Модуль называется `SwiftUI`, а не Eidolon, и это обязательно.** От имени модуля зависят манглы всех символов,
+**Модуль называется `SwiftUI`, а не SwiftUI, и это обязательно.** От имени модуля зависят манглы всех символов,
 которые приложение берёт у SwiftUI: с другим именем приложение не собралось бы без правки `import SwiftUI`
-и не связалось бы как гостевое для рекомпилятора. Eidolon — имя проекта, каталога, целей и документов.
+и не связалось бы как гостевое для рекомпилятора. SwiftUI — имя проекта, каталога, целей и документов.
 
 Совместимость двух видов:
 - **по исходникам** — приложение на обычном синтаксисе SwiftUI компилируется против этого модуля без правок текста;
@@ -161,8 +160,8 @@
   `RangeSet`, so it failed on `TextSelection` (`cannot find type 'RangeSet'`); the port ships armv7-apple-ios6.0 on the
   swift-runtime package, whose stdlib has it. Measured: every installed swift-runtime (6.4.0, six store entries) holds
   only `armv7-apple-ios.swiftmodule`; an arm64 library_evolution install (`xmake f -p iphoneos -a arm64`) fails in
-  charon@libcxx ("the probe client does not import __ZdlPv"; the cause was not
-  diagnosed further, and the recipe is charon's). When an arm64 runtime
+  revenant@libcxx ("the probe client does not import __ZdlPv"; the cause was not
+  diagnosed further, and the recipe is Revenant's). When an arm64 runtime
   installs, rebuild the check against `-resource-dir <runtime>/lib/swift`, not the SDK's stdlib.
 
 Из этого следуют требования к коду: модуль называется `SwiftUI`, имена и метки аргументов совпадают
@@ -185,20 +184,20 @@
 ## Сборка и проверка
 
 ```
-./build.sh                       # модуль SwiftUI, EidolonDemo.app, EidolonTests, EidolonProbe (armv7, iOS 6)
-../run-emu.sh t1 out/EidolonDemo.app EidolonTests          # модульные тесты движка в iLEmu
+./build.sh                       # модуль SwiftUI, SwiftUIDemo.app, SwiftUITests, SwiftUIProbe (armv7, iOS 6)
+../run-emu.sh t1 out/SwiftUIDemo.app SwiftUITests          # модульные тесты движка в iLEmu
 ../snapshots.sh [--accept]                          # снимочные тесты: деревья сценариев против Snapshots/reference
-../run-app.sh app1 out/EidolonDemo.app 560 ../scratch/ctl7.txt   # демо в эмуляторе со сценарием касаний
+../run-app.sh app1 out/SwiftUIDemo.app 560 ../scratch/ctl7.txt   # демо в эмуляторе со сценарием касаний
 ```
 
-Сборка идёт против установки пакета `charon@swift-runtime` 6.4.0, которую требует `../rtpkg`, в общем хранилище
+Сборка идёт против установки пакета `revenant@swift-runtime` 6.4.0, которую требует `../rtpkg`, в общем хранилище
 xmake; `../pkg-env.sh` спрашивает путь к каждому пакету у самого xmake (`xmake where`) и собирает флаги.
 Все модули и dylib — из одной установки: стандартная библиотека, конкурентность, оверлеи Foundation, UIKit,
 QuartzCore, CoreGraphics, Dispatch, ObjectiveC, CoreFoundation и CoreData. Цель — `armv7-apple-ios6.0` с
 `-bundled-swift-runtime`, **проверка доступности включена**: любое API новее iOS 6 компилятор называет сам, а не
 падение на устройстве (так нашлись и исправлены `CGPathAddRoundedRect`, `component(_:from:)`,
 `keyboardDismissMode`, `contentSizeForViewInPopover`; `NSItemProvider`/`NSUserActivity` в подписях помечены iOS 8).
-Combine — цель `Combine` проекта hades (`../../styx`): исходники OpenCombine с патчами пакета `charon@styx` 2026.10.19,
+Combine — цель `Combine` проекта revenant (`../../combine`): исходники OpenCombine с патчами пакета `revenant@combine` 2026.10.19,
 собранные против того же рантайма; допуск таймера — за `#available`; `../rtpkg` требует его с тем же рантаймом. Тесты
 OpenCombine против этого модуля — цель `CombineTests` там же.
 
@@ -211,7 +210,7 @@ OpenCombine против этого модуля — цель `CombineTests` т�
   iPad 2 (iOS 6.1.3) — все проходят.
 - Снимочные сценарии в приложении (iPod4,1 iOS 6.0): 16 деревьев, сверяются посимвольно с эталонами в
   `Snapshots/reference`; эталон нового сценария записывается только после ручной проверки дерева.
-- Производительность (безоконный пробник `EidolonProbe`, живое железо iOS 6.1.3; `../device-run/`): простой экран —
+- Производительность (безоконный пробник `SwiftUIProbe`, живое железо iOS 6.1.3; `../device-run/`): простой экран —
   полное обновление 1,6 мс на iPad 2 и 2,1 мс на iPhone 4S, первичная сборка и раскладка 6,5 мс. Глубокий экран —
   шесть строк вложенных стеков глубины d — до кэша размеров рос в 7–8 раз на уровень (d=3: 1174 мс на обновление,
   d=6 не дождались за 15 минут), с кэшем растёт линейно: d=1 — 14 мс, d=3 — 56 мс, d=6 — 139 мс (iPad 2). На iPhone 4S (те же сборка и сценарий, финальная версия): d=1 — 19 мс, d=3 — 78 мс, d=5 — 139 мс; обновление одной строки из шести — 4,9 / 15 / 25 мс. Кэш:
@@ -275,7 +274,7 @@ OpenCombine против этого модуля — цель `CombineTests` т�
   и 26.2 такого члена нет вовсе (`SwiftUICore.swiftinterface:8758-8762` — только `automatic`,
   `explicit(_:)` и `==`).
 - `blur` и шесть цветовых фильтров получают измеренную формулировку: размытие в каноне этого порта есть
-  (`apple-backports/UIKit/UIVisualEffect.m`, `CharonBlur.m`; `facts/UIKit/UIVisualEffect.md`), но это
+  (`apple-backports/UIKit/UIVisualEffect.m`, `RevenantBlur.m`; `facts/UIKit/UIVisualEffect.md`), но это
   `UIView`, а у модификатора SwiftUI нет вида, в который его положить; шесть фильтров ложатся на
   `compositingFilter` слоя, который порт уже ставит, и пока им не рисуется.
 - `SymbolVariants` взят из OpenSwiftUI (MIT, `OpenSwiftUIProject/OpenSwiftUI`,
@@ -374,7 +373,7 @@ OpenCombine против этого модуля — цель `CombineTests` т�
   `AttributeScope`, ни `AttributeScopes`, и объявить их в форме Apple нельзя вовсе — поэтому объявлено то, что релиз
   может исполнить: атрибут, чьё имя и чей тип значения совпадают с Apple, и ключ `NSAttributedString`, под который он
   пишется. Значение, дошедшее до нарисованной строки, здесь не проверяется: чтение такой строки требует создать шрифт,
-  а шрифт роняет headless-процесс на устройстве (измерено: EidolonTests падает с `Trace/BPT trap` на первом же
+  а шрифт роняет headless-процесс на устройстве (измерено: SwiftUITests падает с `Trace/BPT trap` на первом же
   создании `UIFont`), поэтому проверены имена, типы значений и соответствие ключу — по одному случаю на атрибут.
 
 - `TextSelection` — по форме 26.2 (`SwiftUI.swiftinterface:20146`): `Indices` с двумя случаями
@@ -390,7 +389,7 @@ OpenCombine против этого модуля — цель `CombineTests` т�
   (`arm64e-apple-ios.swiftinterface:17490` и в 26.2 то же), семь хранимых свойств и `init()`. Значений по
   умолчанию **ни один интерфейс не даёт**, и на хосте его не прочитать: тип член underscored-структуры и на
   публичной поверхности macOS его нет — **это было неверно**: подчёркнутое имя в Swift публичное, и
-  `eidolon/host/hostrenderer.swift` его читает. Замерено на фреймворке macOS 27: `colorMode` nonLinear,
+  `SwiftUI/host/hostrenderer.swift` его читает. Замерено на фреймворке macOS 27: `colorMode` nonLinear,
   `rendersAsynchronously` false, `isOpaque` **true**, `drawsPlatformViews` **true**,
   `prefersDisplayCompositing` false, `maxDrawableCount` **3**, `rbColorMode` nil. Внешний тип назван так,
   как его объявляет SDK, — `_RendererConfiguration`, без замены. В слой `CALayer` iOS 6 доходят три из семи:
@@ -442,7 +441,7 @@ OpenCombine против этого модуля — цель `CombineTests` т�
   `fill.contains(.none)` истинно, и так же оно и у Apple; проверка читала включение как тождество. Теперь
   тождество и включение проверяются отдельно, обе стороны равенства записаны.
 
-- Проверка на «виджет-бандл безусловно не собирается» лежит в `eidolon/tools/tabletests/`: `if` без
+- Проверка на «виджет-бандл безусловно не собирается» лежит в `SwiftUI/tools/tabletests/`: `if` без
   `#available` доходит до проверки типов как `any Widget`, а existential не отвечает `Widget`, и сборка
   отказана. Недоступной перегрузки `buildOptional` в интерфейсе 26.2 нет вовсе: у `WidgetBundleBuilder` есть
   две формы (`arm64e-apple-ios.swiftinterface:21949` и `:21970`), обе доступные, и ни одна не берёт такой
@@ -452,7 +451,7 @@ OpenCombine против этого модуля — цель `CombineTests` т�
   `static func buildOptional(_ widget: (any Widget)?) -> some Widget`. С ней проверка компилируется, и
   `tabletests/run.sh` выходит с 1: `negative-widget-bundle: FAIL -- expected a rejection naming cannot
   conform to 'Widget', got: it compiled`; без неё — выход 0 и отказ. Оба прогона в
-  `eidolon/host/runs/`. То есть проверка сторожит ровно то, что сторожит форма SDK, и может стать красной.
+  `SwiftUI/host/runs/`. То есть проверка сторожит ровно то, что сторожит форма SDK, и может стать красной.
 
 - Десять типов, доступных на iOS, которые мы **не носим**, и по какой причине каждая. Проверено по
   интерфейсу 26.2 (`iPhoneOS26.2.sdk/System/Library/Frameworks/SwiftUI.framework/Modules/SwiftUI.swiftmodule/arm64e-apple-ios.swiftinterface`
@@ -504,7 +503,7 @@ OpenCombine против этого модуля — цель `CombineTests` т�
 ```
 
 `local.env` нужен только для `run-emu.sh` и `snapshots.sh`, а не для сборки. Проверки таблиц
-(`eidolon/tools/tabletests/run.sh`) читают `eidolon/out/mods`, который пишет `eidolon/build.sh`.
+(`SwiftUI/tools/tabletests/run.sh`) читают `SwiftUI/out/mods`, который пишет `SwiftUI/build.sh`.
 
 ## Ограничения окружения
 
@@ -517,9 +516,9 @@ OpenCombine против этого модуля — цель `CombineTests` т�
 ## Наблюдения, которые ждут разбора
 
 - **Кнопка остаётся полупрозрачной после касания.** `Button(action:) { Text("Tap me").frame(width: 280,
-  height: 120).background(Color.white) }` в `VStack` приложения на пакете `charon@eidolon` (коммит 10f87e0),
-  запущенного `xmake emulate launch` на iPhone4,1 6.1.3 (Shade), после `tap 160 271` вызвала действие один раз
+  height: 120).background(Color.white) }` в `VStack` приложения на пакете `revenant@swiftui-uikit` (коммит 10f87e0),
+  запущенного `xmake emulate launch` на iPhone4,1 6.1.3 (эмулятор), после `tap 160 271` вызвала действие один раз
   (`tapped 1`, текст и фон сменились), но и через секунду гостевого времени без изменений экрана кнопка
   нарисована как нажатая: белый фон и надпись полупрозрачны. Снимки до и после касания —
-  `docs/device/button-before-tap-shade.png`, `docs/device/button-after-tap-shade.png`. На устройстве не
+  `docs/device/button-before-tap-emulator.png`, `docs/device/button-after-tap-emulator.png`. На устройстве не
   проверялось; не разобрано, остаётся ли подсветка после отпускания или так рисуется выключенная кнопка.

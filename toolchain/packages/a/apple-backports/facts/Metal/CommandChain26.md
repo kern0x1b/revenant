@@ -17,8 +17,8 @@ sh tests/backports/host/metal-census/chain26.sh
 ```
 the top of the Metal 4 command chain, against Apple's own objects:
   the port's descriptors are DEFINED in the binary, under their renamed names
-  ok   the control: ZZZNoSuchNameCharonR16 is not a class of this framework
-  ok   the control: ZZZNoSuchNameCharonR16 is not a symbol of anything loaded
+  ok   the control: ZZZNoSuchNameRevenantR16 is not a class of this framework
+  ok   the control: ZZZNoSuchNameRevenantR16 is not a symbol of anything loaded
   ok   MTL4CommandQueueErrorDomain resolves to a string
   ok   MTL4CommandQueueErrorDomain -> MTL4CommandQueueErrorDomain
 the two descriptors, fresh, on both sides
@@ -106,7 +106,7 @@ IDENTICAL on a second run
 
 ```
 the device: Apple M4 Pro
-ZZZNoSuchNameCharonR16 -> nil (right)
+ZZZNoSuchNameRevenantR16 -> nil (right)
 
 MTL4CommandQueue, both ways the 26.2 header declares them
    newMTL4CommandQueue -> <AGXG16XFamilyCommandQueue_mtlnext>
@@ -227,9 +227,9 @@ error. What raises is Metal 3's factory handed a Metal 4 descriptor.
 whole path down to `endCommandBuffer` exist and are measured in the table.
 
 **4. AND THE PORT'S OWN QUEUE IS AN EAGL OBJECT, which stands**, which is a different wall and the reason *this* file
-holds only the two descriptors: the queue is a wrapper over the port's `CharonMetalQueue`, which holds an
+holds only the two descriptors: the queue is a wrapper over the port's `RevenantMetalQueue`, which holds an
 EAGL context over OpenGL ES 2.0, and `OpenGLES/EAGL.h` is a DEVICE framework. That is why
-`MTL4CommandChain26.m` does not import `CharonMetal.h` - a host case that `#include`s the file could not
+`MTL4CommandChain26.m` does not import `RevenantMetal.h` - a host case that `#include`s the file could not
 compile it - and why the two descriptors, which hold only values, are measurable while the queue is not.
 
 So the six rows here are the ones whose behaviour can be checked against Apple's own objects, and the
@@ -256,15 +256,15 @@ error: the registry does not describe what the backports carry:
 
 **All ten are rows whose spelling names the PROTOCOL, and the check counts a member row from the protocol
 object's method list** - `carried_api()` over `objc.binary_inventory` (`modules/apple/backports.lua:1523`) - and
-not from a `Charon*` class's own methods, the port's own classes being its machinery and not names it carries.
-The methods were on `CharonMetal4CommandQueue` and the protocol was nowhere, so ten rows had nothing to answer
+not from a `Revenant*` class's own methods, the port's own classes being its machinery and not names it carries.
+The methods were on `RevenantMetal4CommandQueue` and the protocol was nowhere, so ten rows had nothing to answer
 for. The four `inert` rows did not fail because only `implemented` rows are held to it.
 
 **THE FIX IS THE CONFORMANCE, and the corpus asked for it**: `MTL4CommandQueue` in
 `coordination/corpus/ledger-2026-10-03/Metal.tsv` is a `protocol` row at 26.0 with status `header-ok` and
-`needs lift`. `@protocol MTL4CommandQueue` is transcribed into `CharonMetalProtocols.h` by
+`needs lift`. `@protocol MTL4CommandQueue` is transcribed into `RevenantMetalProtocols.h` by
 `tools/transcribe-protocols.py@52253c0650` - facts only: the base list, every member with its types, `@required` and
-`@optional` as sections, and `API_AVAILABLE(ios(26.0))` - and `CharonMetal4CommandQueue` declares conformance,
+`@optional` as sections, and `API_AVAILABLE(ios(26.0))` - and `RevenantMetal4CommandQueue` declares conformance,
 which is the only thing that makes clang emit `__OBJC_PROTOCOL_$_MTL4CommandQueue` and its method list. That
 tool's own comment carries the measurement: importing the header, using `id<name>` and naming it in
 `@protocol()` each emit none of it, and only a declaration that adopts it emits the object.
@@ -291,10 +291,10 @@ tool rather than in a header written by hand:
 **AND THE TRANSCRIPTION FOUND A SELECTOR THE PORT HAD WRONG**: `heap:operations:count:` over four parameters
 for the two update-mapping members, where the port and its rows said `heap:count:` over three. The corpus named
 the header's spelling all along - `-[MTL4CommandQueue updateBufferMappings:heap:operations:count:]` - and
-nothing compared it, because a `Charon*` class's methods are what the gate does not count. The same
+nothing compared it, because a `Revenant*` class's methods are what the gate does not count. The same
 transcription is what says Metal 4's `label` is `@property (readonly, nullable)` and atomic, so the queue's own
-is readonly and atomic too, and the descriptor factory reaches it through `-charonSetLabel:` - the port's own
-seam, in the shape of `-[UIPasteboard charonRecordOptions:]`, with a row of its own.
+is readonly and atomic too, and the descriptor factory reaches it through `-revenantSetLabel:` - the port's own
+seam, in the shape of `-[UIPasteboard revenantRecordOptions:]`, with a row of its own.
 ## Two more, both in the assertions rather than the code
 
 * **A COPY CARRIES WHAT THE DESCRIPTOR HOLDS.** The case first compared a copy against the caller's
@@ -309,7 +309,7 @@ seam, in the shape of `-[UIPasteboard charonRecordOptions:]`, with a row of its 
 
 `Metal/MTL4CommandQueue26.m` carries the Metal 4 queue: the class itself, the device's two factories
 and the capture scope over one. It is a **separate file from the two descriptors** because it imports
-`CharonMetal.h`, which reaches `OpenGLES/EAGL.h` -  so the descriptors are host-measurable and this is
+`RevenantMetal.h`, which reaches `OpenGLES/EAGL.h` -  so the descriptors are host-measurable and this is
 not, and the split is the honest shape of the thing:
 
 ```
@@ -330,12 +330,12 @@ everything else: -Os -g0 -Wall -Wno-unguarded-availability-new -Wno-unguarded-av
                  -Werror=objc-missing-property-synthesis -fmacro-prefix-map=<root>/=
 ```
 
-So this file reaches `CharonMetal.h` and `CharonMetal26Types.h` the way clang resolves a quoted include -
+So this file reaches `RevenantMetal.h` and `RevenantMetal26Types.h` the way clang resolves a quoted include -
 in the including file's own folder - and nothing from another backports folder is on its path at all.
 
 **A BARE SYNTAX CHECK OF THESE TWO FILES GIVES 0 ERRORS AND 5 `-Wunguarded-availability-new` WARNINGS**,
 which were 7 before the queue's members moved off the device: `MTLHeapType` and `MTLHazardTrackingMode`
-from `CharonMetal.h:181-182`, `MTLGPUAddress` from `CharonMetal26Types.h:320` and `MTL4CommandQueueDescriptor`
+from `RevenantMetal.h:181-182`, `MTLGPUAddress` from `RevenantMetal26Types.h:320` and `MTL4CommandQueueDescriptor`
 twice from the two factories. **The library build itself has none of them**, because the package compiles
 with `-Wno-unguarded-availability-new -Wno-unguarded-availability` as the line above shows; the two numbers
 are of different commands and this page now says which is which. `MTLEvent` is spelled `id` in this file's
@@ -343,7 +343,7 @@ event methods rather than `id<MTLEvent>`, which is what takes the count from 7 t
 `MTLEvent` to name and the SDK annotates the type 12.0 and later, while the selector is the header's either
 way, which is what a caller and the registry both see.
 
-**The queue is the port's own `CharonMetalQueue` under a Metal 4 name.** There is one queue in this port
+**The queue is the port's own `RevenantMetalQueue` under a Metal 4 name.** There is one queue in this port
 and it is the one that holds the EAGL context every draw goes through, so a Metal 4 caller asking for a
 Metal 4 queue gets the queue that works. `device` answers the port's shared device -  the same answer a
 Metal 3 caller gets -  and `label` is nil on a fresh queue and copied when set.
@@ -351,7 +351,7 @@ Metal 3 caller gets -  and `label` is nil on a fresh queue and copied when set.
 **`commit:count:` COMMITS rather than refusing**, through to the queue underneath, and the C array is
 spelled as MTL4CommandQueue.h:231 declares it. That is the row whose three earlier answers were all
 wrong, and the measured answer is that the call returns. **It answers on the QUEUE**, which it did not
-until the device probe asked: it was written in the `CharonMetalDevice` category with every other member
+until the device probe asked: it was written in the `RevenantMetalDevice` category with every other member
 of the protocol, so the device answered all fourteen of them and the queue none - see the run below.
 
 **The other twelve members are NOT all refusals, and the first version of this page said they were.** They
@@ -364,10 +364,10 @@ as `inert` - and the sort, with the facts line behind each group, is below. **Th
 
 **THE PROBE HAS NOW RUN**, on the emulated iPhone3,1 6.1.3 10B329, on 2026-10-04, and this section is what
 it said. `tests/backports/device/metalchain-probe` is a small xmake project of its own in the shape of
-`vdsp-probe` and `textkit2`: a `@addon/charon/daemon` target, a `control` file, `run.sh` and `run-guest.sh`.
+`vdsp-probe` and `textkit2`: a `@addon/revenant/daemon` target, a `control` file, `run.sh` and `run-guest.sh`.
 It builds the port's own Metal folder (59 files, 60 objects with the probe) rather than linking
 `libMetalBackports.dylib`, because the shape that links the package does not resolve on this machine today -
-`add_requires("charon@apple-backports", ...)` fails at configure with `error: attempt to call a nil value
+`add_requires("revenant@apple-backports", ...)` fails at configure with `error: attempt to call a nil value
 (global 'add_configs')`, in a four-line project as well as in this one, and passes an hour later with
 nothing in the tree changed. `tests/backports/device/metalchain-probe/xmake.lua` says what that costs: the
 probe tests every object the library carries and not the `.deb`.
@@ -398,12 +398,12 @@ metalchain: the port's Metal 4 chain against Apple's own answers
 NOT ANSWERED the_port_device_answers: MTLCreateSystemDefaultDevice gave nil, and the EAGL context line above says why
 NOT ANSWERED metalchain_queue_is_vended: there is no device to ask for a queue
 NOT ANSWERED metalchain_queue_from_descriptor_has_no_error: there is no device to ask, and the descriptor factory is a method on it
-     the Metal 4 queue is CharonMetal4CommandQueue
+     the Metal 4 queue is RevenantMetal4CommandQueue
 ok   metalchain_queue_label_is_nil: a fresh queue's label is nil
 ok   metalchain_queue_keeps_its_label: the label the queue is given is the label it answers
 NOT ANSWERED metalchain_queue_has_device: the port's queue answers the port's shared device, and there is none on this guest
 ok   metalchain_queue_has_no_wait_for_command_buffers: the queue has no such wait
-ok   the_ports_own_queue_answers_as_apples_does: the queue under test is an instance of the port's own CharonMetal4CommandQueue
+ok   the_ports_own_queue_answers_as_apples_does: the queue under test is an instance of the port's own RevenantMetal4CommandQueue
 NOT ANSWERED metalchain_buffer_has_no_status: there is no device to ask for a buffer
 ... (eight more, the same reason)
 FAIL metalchain_commit_returns: the queue answers -commit:count: (Apple's own queue does)
@@ -429,7 +429,7 @@ and returns while its row says `implemented` is a stub. Four groups, and the sor
 | group | members | status | what the probe asks, on the guest |
 | --- | --- | --- | --- |
 | (a) the no-op IS the answer | the four residency-set members, the two drawable members | `implemented`, and **no member prints a line** | all four residency members return, and nothing is printed for them |
-| (b) done over the port's own objects | `signalEvent:value:`, `waitForEvent:value:` | `implemented` | a `CharonMetalSharedEvent` is signalled through the queue, the value reads back as 7, and the wait returns at once for it |
+| (b) done over the port's own objects | `signalEvent:value:`, `waitForEvent:value:` | `implemented` | a `RevenantMetalSharedEvent` is signalled through the queue, the value reads back as 7, and the wait returns at once for it |
 | (c) not possible here | the four sparse-mapping members | `inert` | each called TWICE, and the guest's output carries exactly ONE line for it |
 
 The evidence for the sort, one line each: **every resource of this port is CPU-resident whatever the
@@ -444,10 +444,10 @@ synchronization on the current thread". The sparse mappings cannot be done becau
 refused at creation** and no heap this port makes is one: "a heap is already all of memory and is never
 paged" (`facts/Metal/Heaps.md`), so there is no mapping to update and none to copy. `inert` means "declared,
 does nothing, and says so once in the log the first time it is used" (`registry/README.md`), and the four now
-say so through one helper in the shape of `-[AUAudioUnit charon_noteInert:why:]` from
+say so through one helper in the shape of `-[AUAudioUnit revenant_noteInert:why:]` from
 `AVFAudio/AUAudioUnit9.m`.
 
-**THE EVENTS DO REAL WORK, and the guest can check it.** `CharonMetalSharedEvent` carries a state of its own
+**THE EVENTS DO REAL WORK, and the guest can check it.** `RevenantMetalSharedEvent` carries a state of its own
 - a signalled value, a setter, and a wait that blocks until the value is reached
 (`Metal/MTLSharedEvent12.m`) - and `@protocol MTLSharedEvent` refines `MTLEvent` in the 26.2 SDK
 (`MTLEvent.h:52`), so the port's own event is an `MTLEvent` by shape. It needs no EAGL context, so both are
@@ -487,7 +487,7 @@ what it measures, and printing the number it got is what turned this from "the s
   `objc_storeStrong` for the parameter retained it as an object. The guest died with
   `[cpu] fatal pid=12 pc=0x38dcc522 lr=0x38ddab87 fault=0x1 access=0x1 size=0x4` and
   `[control] thread ... frames=0x1d7f7,...`, and `0x1d7f7` is inside
-  `-[CharonMetal4CommandQueue updateBufferMappings:heap:operations:count:]` in the probe binary. A SIGBUS or a SIGSEGV
+  `-[RevenantMetal4CommandQueue updateBufferMappings:heap:operations:count:]` in the probe binary. A SIGBUS or a SIGSEGV
   on an address that is a small integer is an argument-count mistake before anything else, and the table of
   members in `metalchain.m` now carries each one's arity rather than matching on `:count:`.
 
@@ -495,10 +495,10 @@ what it measures, and printing the number it got is what turned this from "the s
 first run of the day read `metalchain: 18 check(s), 2 failure(s), 12 not answered`, and the two failures
 were `metalchain_commit_returns` and `metalchain_commit_returns_when_not_ended` with the line
 `FAIL metalchain_commit_returns: the queue answers -commit:count: (Apple's own queue does)`. Every member
-of `@protocol MTL4CommandQueue` below `-commit:count:` was written in the `CharonMetalDevice` category, so
+of `@protocol MTL4CommandQueue` below `-commit:count:` was written in the `RevenantMetalDevice` category, so
 all fourteen answered on the **device** and none on the queue. `nm` on the probe agrees:
-`-[CharonMetalDevice(CharonMetal4CommandQueue26) commit:count:]` and nothing of that name on
-`CharonMetal4CommandQueue`. They are on the queue now (commit `c102d8edf`), and the twelve that came with
+`-[RevenantMetalDevice(RevenantMetal4CommandQueue26) commit:count:]` and nothing of that name on
+`RevenantMetal4CommandQueue`. They are on the queue now (commit `c102d8edf`), and the twelve that came with
 them were then sorted by what this backend is, which took the run from `0 failure(s)` with twelve rows
 claiming a refusal the code did not make to `29 check(s), 2 failure(s)` with the two failures being the two
 `owed` commits and nothing else.
@@ -507,9 +507,9 @@ claiming a refusal the code did not make to `29 check(s), 2 failure(s)` with the
 
 1. **The guest cannot make an EAGL context, so every case that needs the port's device is unreachable
    there.** The probe asks for one itself, over ES 2.0 and over ES 1.1, and both answer `NIL`; the run's
-   emulator log names the renderer as `Shade GLES 1.1 Vulkan (SwiftShader Device (LLVM 10.0.0))`. Since
-   `CharonMetalDevice -init` is an `EAGLContext` and returns nil without one
-   (`Metal/CharonMetalDevice.m:30-38`), `MTLCreateSystemDefaultDevice()` answers nil there and the four
+   emulator log names the renderer as `Revenant GLES 1.1 Vulkan (SwiftShader Device (LLVM 10.0.0))`. Since
+   `RevenantMetalDevice -init` is an `EAGLContext` and returns nil without one
+   (`Metal/RevenantMetalDevice.m:30-38`), `MTLCreateSystemDefaultDevice()` answers nil there and the four
    cases `the_port_device_answers`, `metalchain_queue_is_vended`,
    `metalchain_queue_from_descriptor_has_no_error` and `metalchain_queue_has_device` have no object to ask.
    **This is the emulator, not the port**: on hardware the same context is what `facts/Metal/RenderPath.md`

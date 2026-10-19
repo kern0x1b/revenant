@@ -5,12 +5,12 @@ replaces said the port "does not draw the table's separators, so there is no dra
 to steer", and that is false about this tree's own code. `packages/a/apple-backports/UIKit/UITableView+Separators7.m`
 takes a table's separators over - it sets `separatorStyle` to None for that table, which is the
 release's own answer for a table with no separator, remembers what the style was, and draws the line
-itself in a view of its own inside each cell (`CharonTableSeparatorView`, `-charon_layoutSeparator`).
+itself in a view of its own inside each cell (`RevenantTableSeparatorView`, `-revenant_layoutSeparator`).
 So the port draws them, and it draws them at one of exactly two positions:
 
-- at the cell's own edges, at `separatorInset` - `-charon_layoutSeparator:147-150`;
+- at the cell's own edges, at `separatorInset` - `-revenant_layoutSeparator:147-150`;
 - narrowed by the table's `layoutMargins`, which is what `cellLayoutMarginsFollowReadableWidth` asks
-  for - `-charon_layoutSeparator:153-157`, and the flag is the port's own member on these bands
+  for - `-revenant_layoutSeparator:153-157`, and the flag is the port's own member on these bands
   (`UITableView+Separators7.m:226-236`).
 
 `separatorInsetReference` is the iOS 11 name for choosing between those two insets. So the question is
@@ -31,13 +31,13 @@ zzzBackportProbeXYZ	NONE
 
 Both band ends are below all three: the property is a later name than the flag that steers the port's
 one drawing, and later than `-separatorInset` itself. The class-scoped reading is the row's `source`:
-`xmake l tools/corpus/objc-inventory.lua` over `~/.charon/dyld/6.1.3/dyld_shared_cache_armv7` and
-`~/.charon/dyld/4.3/dyld_shared_cache_armv7`, where `UITableView` is in both dumps and its own selector
+`xmake l tools/corpus/objc-inventory.lua` over `~/.revenant/dyld/6.1.3/dyld_shared_cache_armv7` and
+`~/.revenant/dyld/4.3/dyld_shared_cache_armv7`, where `UITableView` is in both dumps and its own selector
 table holds no `-separatorInsetReference`, with `-setSeparatorStyle:` present on it in the same two
 dumps.
 
 **A selector-list index that cannot be used here, so nobody uses it again.** The obvious cheap check -
-`grep -cxF separatorInsetReference ~/.charon/dyld/6.1.3/selectors_armv7.txt` - answers 0 for 6.1.3 and
+`grep -cxF separatorInsetReference ~/.revenant/dyld/6.1.3/selectors_armv7.txt` - answers 0 for 6.1.3 and
 for 4.3, and so does the control it needs: the same file answers 0 for plain `separatorInset`, which
 first-rung places at **7.0**, and 1 for `reloadData`. So `selectors_armv7.txt` is a partial list, a zero
 in it says nothing about the release, and the only reader that has a self-test is `first-rung.lua`.

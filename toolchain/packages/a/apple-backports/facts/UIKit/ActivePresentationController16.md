@@ -15,8 +15,8 @@
 control on the same rows of the same reader:
 
 ```
-CHARON_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua ~/.charon/dyld/6.1.3/dyld_shared_cache_armv7 > inv-6.1.3.tsv
-CHARON_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua ~/.charon/dyld/12.0/dyld_shared_cache_arm64  > inv-12.0.tsv
+REVENANT_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua ~/.revenant/dyld/6.1.3/dyld_shared_cache_armv7 > inv-6.1.3.tsv
+REVENANT_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua ~/.revenant/dyld/12.0/dyld_shared_cache_arm64  > inv-12.0.tsv
 ```
 
 ```
@@ -34,8 +34,8 @@ such method at all, which is what `ios8presentation.json` records.
 ## What the port does
 
 The port keeps one presentation controller per presented view controller:
-`charon_set_presentation_controller` stores it in `CharonCustomTransition.m` when a presentation
-starts, and `charon_presentation_controller_of` reads it back — that is what `-[UIViewController
+`revenant_set_presentation_controller` stores it in `RevenantCustomTransition.m` when a presentation
+starts, and `revenant_presentation_controller_of` reads it back — that is what `-[UIViewController
 presentationController]` answers (`UIPresentationController.md`).
 
 `-activePresentationController` answers the stored controller only while it is one that has begun

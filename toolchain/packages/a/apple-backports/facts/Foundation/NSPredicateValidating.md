@@ -3,11 +3,11 @@
 Two rows of `registry/Foundation/ios26.json` that cannot be written yet, and the measurement that says why.
 **Neither name is declared by either SDK this package can read**, so the contract is not readable. There
 are two, not one: the build SDK, and the 26.2 copy `tools/intents/generate.sh` calls `SDK_262` - which the
-coordinator keeps unpacked under `charon/.agent-work/sdk-26.2`, a scratch directory a worktree sweep
+coordinator keeps unpacked under `toolchain/.agent-work/sdk-26.2`, a scratch directory a worktree sweep
 deletes, so it is named by that variable and not by a path that will not be there.
 
     $ SDK164=~/.xmake/packages/i/iphoneos-sdk/16.4/*/Developer.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS16.4.sdk
-    $ SDK262=$HOME/Git/projects/ios/charon/.agent-work/sdk-26.2/iPhoneOS26.2.sdk
+    $ SDK262=$HOME/Git/projects/ios/revenant/.agent-work/sdk-26.2/iPhoneOS26.2.sdk
     $ for sdk in "$SDK164" "$SDK262"; do
         echo "$(basename "$sdk") $(grep -rl NSPredicateValidating "$sdk" | wc -l) $(grep -rl allowEvaluationWithValidator "$sdk" | wc -l) $(grep -rl NSPredicate "$sdk" | wc -l)"
       done
@@ -27,7 +27,7 @@ metadata cannot settle it:
 
     $ xmake l tools/cache-index/first-rung.lua --self-test | grep "rung in the table"
     ok   every rung in the table is held (53 rungs)
-    $ ls ~/.charon/dyld | tail -1
+    $ ls ~/.revenant/dyld | tail -1
     18.0
 
 The rows' old `source` field read `SDK 26.5, Mac Catalyst, Foundation`, and both halves of it are wrong on

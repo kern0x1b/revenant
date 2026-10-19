@@ -21,7 +21,7 @@ a space.
 Measured on the host's Foundation:
 
 - failure and reason: `The file could not be saved. The disk is full.`;
-- the failure alone, domain `charon`: `Only the failure.`;
+- the failure alone, domain `revenant`: `Only the failure.`;
 - the failure alone, `NSCocoaErrorDomain` `4`: `Only the failure. The file
   doesn’t exist.` (the reason the release generates);
 - with `NSLocalizedDescriptionKey` as well: that description;

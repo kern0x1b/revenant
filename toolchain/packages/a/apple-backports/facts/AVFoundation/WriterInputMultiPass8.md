@@ -34,7 +34,7 @@ as the control of the search itself:
 | `sourceTimeRanges` | 0 | 0 | 0 | 0 | 0 | 2 |
 | `canPerformMultiplePassesOverSourceMediaData` | 0 | 0 | 0 | 0 | 0 | 2 |
 
-6.1.3's whole 113 981-name selector set (`~/.charon/dyld/6.1.3/selectors_armv7.txt`) carries none of the ten
+6.1.3's whole 113 981-name selector set (`~/.revenant/dyld/6.1.3/selectors_armv7.txt`) carries none of the ten
 either, and 11.0's armv64 set carries all of them. The three names in the second block are the guard's
 subject: they are 8.0's own, the port adds no member of any of the three, and `absent_AVFoundation.json`
 keeps all three `absent` - so reading one of them says which release this is without ever reading the
@@ -174,5 +174,5 @@ judged against; run the script once with no `AVFWMUTANT` before asking for a mut
 
     for r in 4.3 6.0 6.1.3 7.0 7.1 8.0; do
         printf '%-6s ' "$r"
-        strings -a ~/.charon/dyld/$r/dyld_shared_cache_armv7 | grep -cxF preferredMediaChunkDuration
+        strings -a ~/.revenant/dyld/$r/dyld_shared_cache_armv7 | grep -cxF preferredMediaChunkDuration
     done

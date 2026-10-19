@@ -26,7 +26,7 @@ a 20-point square covers 16 points plus the 4 of the line, not 24.
 It also calls `CGContextSetLineWidth` with the width it read at the end, every
 time, even though it never changed it. That is Apple's own code and is kept: a
 `CGContextSetLineWidth` is not free of consequence in a context whose line width
-was set through a path Charon does not see.
+was set through a path the toolchain does not see.
 
 Both private members, `-__createsImages` and `-set__createsImages:`, are carried:
 the renderer sets the flag from `-allowsImageOutput` and the base renderer pushes

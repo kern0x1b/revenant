@@ -44,7 +44,7 @@ implemented - nothing in this port's corpus archives an `AVAudioFormat`.
 **`AVAudioBuffer` is a real trap, measured, not assumed.** The build gate's own `band()`/
 `duplicated()` check refused to let this port define the class under its own name, and reading
 why was worth doing rather than working around: `objc.inventory` against the real iOS 6.0 and
-6.1.3 armv7 shared caches (`.charon/dyld/{6.0,6.1.3}/dyld_shared_cache_armv7`) shows
+6.1.3 armv7 shared caches (`.revenant/dyld/{6.0,6.1.3}/dyld_shared_cache_armv7`) shows
 `AVAudioBuffer` already exists on this release - as a **completely different, private,
 AudioQueue-era class** (`-initWithAudioQueueBuffer:channels:`, `-packetDescriptions`,
 `-bytesDataSize`, `-channels`; no `format`, no `audioBufferList`) that predates and has nothing to
@@ -56,26 +56,26 @@ with an unrecognized-selector, while the build itself stayed green - exactly the
 warning about this cluster, one level lower than expected.
 
 The fix follows the gate's own suggested pattern for this exact situation ("carry it under a name
-of Charon's own"): the base class lives under `CharonAudioBuffer`, declared and implemented in
-`AVFoundation/CharonAVAudioBuffer.h`/`AVAudioBuffer8.m`, never under the real, already-taken
+of Revenant's own"): the base class lives under `RevenantAudioBuffer`, declared and implemented in
+`AVFoundation/RevenantAVAudioBuffer.h`/`AVAudioBuffer8.m`, never under the real, already-taken
 `AVAudioBuffer` name. `AVAudioPCMBuffer` (`AVAudioPCMBuffer8.m`) keeps its real name - nothing
-collides there - and its *runtime* superclass is `CharonAudioBuffer`, not what Apple's own header
+collides there - and its *runtime* superclass is `RevenantAudioBuffer`, not what Apple's own header
 declares. That difference is invisible to every caller: Objective-C dispatch is dynamic, and an
 application compiled against Apple's SDK header only ever sends selectors, never inspects the
 declared ancestry at link time, so every method a real caller sends still resolves correctly.
 
 Not in the registry under `AVAudioBuffer.*`: `format`, `audioBufferList` and `mutableAudioBufferList`
-work on every `AVAudioPCMBuffer` instance (inherited from `CharonAudioBuffer`), but the registry
+work on every `AVAudioPCMBuffer` instance (inherited from `RevenantAudioBuffer`), but the registry
 only describes API by the name a caller and the corpus demand data actually use, and nothing
 references `AVAudioBuffer` directly - only `AVAudioPCMBuffer`'s own methods and properties are
 registered, since that is the class this port's registry can honestly claim to carry under its
 real name.
 
 `AVAudioBuffer`'s header declares its own storage as an opaque `@protected void *_impl` - the
-real class does not expose its layout either - so this port keeps its state in a `CharonAudioBufferImpl`
+real class does not expose its layout either - so this port keeps its state in a `RevenantAudioBufferImpl`
 struct of its own, stored behind a private ivar and shared between `AVAudioBuffer8.m` (the base
 class: `format`, `audioBufferList`, `mutableAudioBufferList`, `dealloc`) and `AVAudioPCMBuffer8.m`
-(the only real subclass this port carries) through `AVFoundation/CharonAVAudioBuffer.h`, a header
+(the only real subclass this port carries) through `AVFoundation/RevenantAVAudioBuffer.h`, a header
 private to this package.
 
 `-initWithPCMFormat:frameCapacity:` builds one `AudioBufferList` with as many `AudioBuffer`s as

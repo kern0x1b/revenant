@@ -28,7 +28,7 @@ Neither band end has the class or the accessor, and neither has `UIWindowScene` 
 arrived in iOS 13 and the two band ends are older than that:
 
 ```
-CHARON_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua ~/.charon/dyld/12.0/dyld_shared_cache_arm64 > inv-12.0.tsv
+REVENANT_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua ~/.revenant/dyld/12.0/dyld_shared_cache_arm64 > inv-12.0.tsv
 grep -c $'\tUIWindowScene\t' inv-12.0.tsv
 ```
 
@@ -47,7 +47,7 @@ names). The 16.0 line is the corroboration that these are 16.0 names and not por
 
 `UIWindowSceneGeometry` is a real, allocable class of the port's own with one resolved orientation,
 copied by `-copyWithZone:` and printed by `-description`. `-init` is unavailable exactly as the header
-says it is, so the value is made through `-initCharonWithOrientation:`, the same shape
+says it is, so the value is made through `-initRevenantWithOrientation:`, the same shape
 `UIWindowSceneGeometryPreferences.m` uses for its own unavailable `-init`.
 
 `-[UIWindowScene effectiveGeometry]` returns a snapshot built from `-[UIWindowScene interfaceOrientation]`,

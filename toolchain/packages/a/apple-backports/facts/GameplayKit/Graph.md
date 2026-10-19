@@ -21,8 +21,8 @@ read by `tools/release-split.lua`). `GameplayKitBase.h:26` defines `GK_BASE_AVAI
 accessors `API_AVAILABLE(ios(10.0))`. So the 9.0 classes are `GKGraph9.m` and `GKObstacleGraph9.m` --
 two files because `relcheck` refused one: `GKObstacleGraph` is 9.0 while everything else in that file was
 10.0.1, and one object cannot hold two releases. The 10.0 classes are `GKGraph10.m`, and the shared
-arithmetic and the one search are `CharonGKGraph.m`, a file that exports **no** API symbol: that is the
-trap `charon/AGENTS.md` names, and a file whose exports a band's release already has is left out of that
+arithmetic and the one search are `RevenantGKGraph.m`, a file that exports **no** API symbol: that is the
+trap `toolchain/AGENTS.md` names, and a file whose exports a band's release already has is left out of that
 band, so the call is `Undefined symbols` in later bands only.
 
 ## What the host answers, where it is surprising
@@ -196,10 +196,10 @@ whole 152 checks:
 
 | mutation | result |
 | --- | --- |
-| the search's tie rule `<=` -> `<` in `CharonGKGraph.m` | `FAIL host: m7 a path across the grid answers cells, start to end, both ends in it` -- `checks=149 failures=1` |
+| the search's tie rule `<=` -> `<` in `RevenantGKGraph.m` | `FAIL host: m7 a path across the grid answers cells, start to end, both ends in it` -- `checks=149 failures=1` |
 | the grid node's cost -> the constant 1 in `GKGraph9.m` | three `FAIL host:` lines, including both cost checks and the grid path -- `checks=149 failures=3` |
 | an obstacle's visibility test -> always pass in `GKObstacleGraph9.m` | two `FAIL host:` lines on the cut -- `checks=149 failures=2` |
-| an entry's `-charon_holdsPoint:` -> always YES in `CharonGKGraph.m` | `FAIL contract:` on the box element's own region -- `checks=149 failures=1` |
+| an entry's `-revenant_holdsPoint:` -> always YES in `RevenantGKGraph.m` | `FAIL contract:` on the box element's own region -- `checks=149 failures=1` |
 
 The first version of that last check did **not** fail on the third mutation, and the reason is worth
 recording: it asked a question the cell already answered. A point outside the box but sharing its cell is

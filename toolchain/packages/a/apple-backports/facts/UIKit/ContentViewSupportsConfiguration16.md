@@ -12,7 +12,7 @@
 
 The header carries the answer in its own last sentence: a view that does not implement the method is
 assumed compatible with configurations of the same kind as the one it holds. That is the rule the
-port's install path already applies — `charon_install_content` in `CharonConfigurationHost.m` reuses
+port's install path already applies — `revenant_install_content` in `RevenantConfigurationHost.m` reuses
 the installed view when `[configuration makeContentView]` is of the same class as the one it holds,
 and makes a new view otherwise — so implementing the method answers the port's own test rather than a
 second, weaker one.
@@ -20,9 +20,9 @@ second, weaker one.
 ## What the release carries, measured
 
 ```
-CHARON_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua ~/.charon/dyld/6.1.3/dyld_shared_cache_armv7 > inv-6.1.3.tsv
-CHARON_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua ~/.charon/dyld/12.0/dyld_shared_cache_arm64  > inv-12.0.tsv
-CHARON_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua ~/.charon/dyld/16.0/dyld_shared_cache_arm64e > inv-16.0.tsv
+REVENANT_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua ~/.revenant/dyld/6.1.3/dyld_shared_cache_armv7 > inv-6.1.3.tsv
+REVENANT_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua ~/.revenant/dyld/12.0/dyld_shared_cache_arm64  > inv-12.0.tsv
+REVENANT_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua ~/.revenant/dyld/16.0/dyld_shared_cache_arm64e > inv-16.0.tsv
 ```
 
 ```
@@ -40,7 +40,7 @@ places this API in the 16.0 band; the port's `UIListContentView` is its own clas
 ## What the port does
 
 `-[UIListContentView supportsConfiguration:]` returns YES when the configuration would install this
-kind of view — the same test `charon_install_content` makes — and NO for a configuration that makes
+kind of view — the same test `revenant_install_content` makes — and NO for a configuration that makes
 another kind, so a caller can ask before replacing rather than after.
 
 The port has exactly one content view: `-[UIListContentConfiguration makeContentView]` is the only

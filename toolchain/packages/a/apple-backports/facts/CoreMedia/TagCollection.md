@@ -5,8 +5,8 @@
 `grep -rl CMTagCollectionCreate` over those headers finds nothing. So the family cannot be written
 against that SDK at all: a source file cannot name a type it does not declare.
 
-`CharonCMTag26.h` transcribes 26.2's own declarations under `#if !__has_include(<CoreMedia/CMTag.h>)`,
-the way `CharonIntents262.h` and `CharonCKSyncEngine26.h` do: the `CMTagCategory` enum with its real
+`RevenantCMTag26.h` transcribes 26.2's own declarations under `#if !__has_include(<CoreMedia/CMTag.h>)`,
+the way `RevenantIntents262.h` and `RevenantCKSyncEngine26.h` do: the `CMTagCategory` enum with its real
 four-character codes, `CMTagDataType`, `CMTagValue`, the three-word `CMTag` struct, the
 `CMTagCollectionError` enum, the filter and applier callbacks, and the three bridged references -
 `CMTagCollectionRef` is `const struct CM_BRIDGED_TYPE(id) OpaqueCMTagCollection *`, so the
@@ -114,7 +114,7 @@ at -15749 and -12718. Inventing a name for it would be worse than carrying the n
 
 ## One bug the differential found in the port
 
-`charon_from` bridged the collection with a plain `__bridge` cast, which hands the reference to the
+`revenant_from` bridged the collection with a plain `__bridge` cast, which hands the reference to the
 caller **without transferring ownership**: ARC released the collection at the end of the statement and
 every later call through it was a use-after-free, which is the `objc_msgSend` fault at address `0x10`
 the first probe died on. The reference types are `CF_RETURNS_RETAINED`, so the `+1` belongs to the
@@ -257,22 +257,22 @@ from what is measured, and the nine that can are not in the tree because there i
 *hold* a `CMTag`, which is a three-word C struct with no lifetime of its own and cannot go into an
 `NSArray` as an object, and a way to ask one collection whether it carries another's tags, which is
 `CMTagCollectionContainsSpecifiedTags` - the port's own, in `CMTagCollection17.o`. Calling it from this
-object is the trap in `charon/AGENTS.md` ("a C function shared between backport files"), and the rule
+object is the trap in `toolchain/AGENTS.md` ("a C function shared between backport files"), and the rule
 for it is to put it in a file that exports no API symbol of its own. A half-written attempt that kept
 per-entry tag copies inside the group, and a `CMTagCollectionCopyAllTags` that no SDK declares, are in the
-work area as `CMTaggedBufferGroup17.half-draft.m` and `CharonCMTaggedBufferGroup26.h.draft`; neither is
+work area as `CMTaggedBufferGroup17.half-draft.m` and `RevenantCMTaggedBufferGroup26.h.draft`; neither is
 in the tree, and the invented helper is exactly what must not ship.
 
-So the next step is a small one and it is a real design decision: either a `charon_`-prefixed no-export
+So the next step is a small one and it is a real design decision: either a `revenant_`-prefixed no-export
 helper carrying `CMTagCollectionContainsSpecifiedTags` and the tags of a collection as a `NSArray` of
 `NSValue`s, or `CMTagCollectionCopyAllTags` added to the collection's own object. The measurements are
 done; the fifteen are not blocked on anything else.
 
 ## A group cannot hold a host collection, and that is the SDK, not the group
 
-Measured, not inferred. `charon_copy_all_tags` bridges a `CMTagCollectionRef` to `CharonCMTagCollection`
+Measured, not inferred. `revenant_copy_all_tags` bridges a `CMTagCollectionRef` to `RevenantCMTagCollection`
 and messages it, which works for a collection this package made and fails for one CoreMedia made:
-`-[__NSCFType charon_copyAllTags:]: unrecognized selector`. The other route - the host's own
+`-[__NSCFType revenant_copyAllTags:]: unrecognized selector`. The other route - the host's own
 `CMTagCollectionGetTags` - is the port's symbol on the 16.4 SDK, so the port cannot call it either.
 
 The consequence for the differential is that **each side's group must be built from that side's own

@@ -119,13 +119,13 @@ between processes. Candidates, in the order worth testing:
 - an event-transition epoch that is not bumped when a thread becomes runnable, so the session waits
   for a timer instead of dispatching.
 
-Reproduction: `SHADE_SHARED_IMAGE_CODE=1 sh scripts/measure.sh <name> iPhone3,1 <6.0 rootfs> 150`,
+Reproduction: `REVENANT_EMULATOR_SHARED_IMAGE_CODE=1 sh scripts/measure.sh <name> iPhone3,1 <6.0 rootfs> 150`,
 then `status` and `threads SpringBoard` through the control pipe once SpringBoard is up.
 
 ## The published index served removed blocks (2026-09-19)
 
 The index above was not a harmless experiment: it is on for every Jit, with or without
-`SHADE_SHARED_IMAGE_CODE`, and "anything that removes blocks bumps an epoch" was not true. A range
+`REVENANT_EMULATOR_SHARED_IMAGE_CODE`, and "anything that removes blocks bumps an epoch" was not true. A range
 invalidation (`request_range_transition` -> `finish_pending_invalidation` ->
 `A32AddressSpace::InvalidateCacheRanges`) removes blocks but keeps the slab's generation, and it
 never touched the index. The locked path refuses while `pending_ranges` is non-empty; the index
@@ -145,11 +145,11 @@ The descent session saw the same crash on 5.0 and 5.1.1, which fits a fault of t
 
 ## Building HEAD from commits alone
 
-Shade at upstream 411248c calls arm64 dynarmic interfaces (`NativeCodeSlab`,
+The emulator at upstream 411248c calls arm64 dynarmic interfaces (`NativeCodeSlab`,
 `Jit::Precompile`, `Jit::GeneratePortableIR`, `Jit::GetDispatchCounters`, ...) whose arm64
-implementations exist only in Charon's `packages/i/shade/patches/2026.09.16/dynarmic.patch`; the
+implementations exist only in Revenant's `packages/i/emulator/patches/2026.09.16/dynarmic.patch`; the
 pinned dynarmic implements them for x64 only. So an arm64 Mac cannot link HEAD from the submodule
-as committed. The reproducible control is upstream 411248c + Charon's `shade.patch` +
-`dynarmic.patch` - what the `shade` package builds - and the lab tree's own work is its difference
+as committed. The reproducible control is upstream 411248c + Revenant's `emulator.patch` +
+`dynarmic.patch` - what the `emulator` package builds - and the lab tree's own work is its difference
 from that, not from HEAD. The macOS portability that HEAD itself lacked (stat timestamps, xattr,
 libplist iterator, `madvise`, `shared_ptr::unique`) is committed as 4e39ea1 and 63b62e4.

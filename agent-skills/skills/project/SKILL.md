@@ -1,6 +1,6 @@
 ---
 name: project
-description: Lay out the app's project for Charon and xmake — the directory, the app target in xmake.lua (the app rule and the values it reads, apple_minimum and architectures, frameworks, -fobjc-arc on compile and link), Info.plist written by hand with CFBundleIdentifier, icons and launch images as plain PNG resources (no asset catalogs, nibs or storyboards), and the lock files to commit. Use after install and firmware, before writing code, whenever xmake.lua or Info.plist is created or changed, or when asked how an old-iOS app project is structured, which release an architecture needs, or why an icon or bundle identifier is missing.
+description: Lay out the app's project for the toolchain and xmake — the directory, the app target in xmake.lua (the app rule and the values it reads, apple_minimum and architectures, frameworks, -fobjc-arc on compile and link), Info.plist written by hand with CFBundleIdentifier, icons and launch images as plain PNG resources (no asset catalogs, nibs or storyboards), and the lock files to commit. Use after install and firmware, before writing code, whenever xmake.lua or Info.plist is created or changed, or when asked how an old-iOS app project is structured, which release an architecture needs, or why an icon or bundle identifier is missing.
 ---
 
 # The project: xmake.lua, Info.plist, resources
@@ -19,7 +19,7 @@ ignore `build/`, `.xmake/` and `.logs/`, and commit `xmake-requires.lock` and `x
 
 ## 2. Release and architectures
 
-`apple_minimum` is the lowest release the app runs on; it decides the architectures, and Charon
+`apple_minimum` is the lowest release the app runs on; it decides the architectures, and the toolchain
 refuses a pair that no device runs:
 
 | Architecture | Releases | Devices |
@@ -35,7 +35,7 @@ refuses a pair that no device runs:
   `add_values("apple.architectures", "armv7", "arm64")` to the target and keep `armv7` as the
   configured one. `xmake deb` then builds the arm64 slice for 7.0 beside armv7 at 6.0 and merges
   them; write `MinimumOSVersion` into `Info.plist` yourself, because every other file must be the
-  same in both slices. The import check reads 7.0 for arm64 (skill `firmware`). Charon documents
+  same in both slices. The import check reads 7.0 for arm64 (skill `firmware`). The toolchain documents
   this path, but it is not verified end to end: treat its first `xmake deb` as the test and
   read that log closely.
 
@@ -45,7 +45,7 @@ Add one target to `xmake.lua`, named after the app. Its name is the executable's
 (`<Name>.app`) and, unless `Info.plist` says otherwise, `CFBundleName` and `CFBundleDisplayName`.
 Write these lines yourself, one decision each:
 
-- the rule that makes a bundle: `add_rules("@addon/charon/app")`;
+- the rule that makes a bundle: `add_rules("@addon/revenant/app")`;
 - the sources, e.g. `add_files("src/*.m")` (and `.c`, `.mm` as the app has them);
 - the frameworks the code uses, e.g. `add_frameworks("UIKit", "Foundation", "CoreGraphics")`;
   a framework the lowest release does not have links against the SDK and is then refused by the
@@ -55,7 +55,7 @@ Write these lines yourself, one decision each:
   add_mflags("-fobjc-arc")
   add_ldflags("-fobjc-arc")
   ```
-  (`add_mxflags` too for `.mm`). The link flag makes clang force-load Charon's arclite, which
+  (`add_mxflags` too for `.mm`). The link flag makes clang force-load Revenant's arclite, which
   carries what older releases lack (the ARC entry points below 5.0, collection subscripting
   below 6.0). An iOS 6.0 app links green without it, which is why it is easy to lose; a lower
   release then refuses the build (below 5.0) or lacks the collection subscripts (5.x). Keep both
@@ -69,18 +69,18 @@ Write these lines yourself, one decision each:
   bundles into `Frameworks/` a shared-library target of the project or a package the target adds,
   by the name the target knows it by.
 
-A Swift target adds Charon's `swift` rule and the Swift runtime packages (skill `xmake-swift`), and
-`charon@styx` for Combine (skill `combine`); the code is the skill `swift`. The package control file
+A Swift target adds Revenant's `swift` rule and the Swift runtime packages (skill `xmake-swift`), and
+`revenant@combine` for Combine (skill `combine`); the code is the skill `swift`. The package control file
 and maintainer are the skill `package`'s.
 
 ## 4. Info.plist
 
-Write it by hand as an XML property list. Charon fills in only what is missing among
+Write it by hand as an XML property list. The toolchain fills in only what is missing among
 `CFBundleName`, `CFBundleDisplayName`, `CFBundleExecutable`, `CFBundleVersion`,
 `CFBundleShortVersionString` (both from `set_version`) and `MinimumOSVersion` (from
 `apple_minimum`). Everything else is yours:
 
-- `CFBundleIdentifier` — the bundle identifier from `PROJECT.md`. **Charon neither derives nor
+- `CFBundleIdentifier` — the bundle identifier from `PROJECT.md`. **the toolchain neither derives nor
   requires it**: a plist without one builds green, and the app has no identity on the device.
 - `CFBundleDisplayName` — the name under the icon, if not the target's name.
 - `CFBundlePackageType` = `APPL`.
@@ -92,7 +92,7 @@ Write it by hand as an XML property list. Charon fills in only what is missing a
 - The keys the app's features need (URL types, background modes, status bar style, …).
 
 Do not write `CFBundleExecutable` unless it equals the target name (the build refuses a mismatch).
-Leave `MinimumOSVersion` to Charon except for a universal app (step 2).
+Leave `MinimumOSVersion` to the toolchain except for a universal app (step 2).
 
 How to know it worked: `plutil -lint Info.plist` prints `Info.plist: OK`.
 
@@ -128,7 +128,7 @@ xmake show -t <Name>
 ```
 
 How to know it worked: the configure log has no `error:`; `xmake show -t <Name>` lists
-`@addon/charon/app` under `rules`, `-fobjc-arc` under both `mflags` and `ldflags`, the
+`@addon/revenant/app` under `rules`, `-fobjc-arc` under both `mflags` and `ldflags`, the
 frameworks, and the files. The linker line it prints carries `-miphoneos-version-min=<release>`.
 
 Refusals that show here or at the first `xmake` (the architecture check runs when the target
@@ -136,7 +136,7 @@ loads for a build), and what they mean:
 
 - `target(<Name>) builds for apple-ios and its project names no oldest release` → the
   `set_config("apple_minimum", …)` line is missing or after the include.
-- `target(<Name>) builds for apple-ios without includes("@addon/charon/apple-ios")` → the include
+- `target(<Name>) builds for apple-ios without includes("@addon/revenant/apple-ios")` → the include
   is missing.
 - `apple_minimum <r> is older than <first>, the first release an <arch> device runs; …` or
   `… is newer than 4.2.1, the last release an armv6 device runs` → the architecture and release
@@ -156,12 +156,12 @@ Then write the code (skill `objc` for Objective-C, `swift` for Swift), and build
   lacks what arclite would have carried.
 - A storyboard, `.xib` or `Assets.xcassets` in the project → build the interface in code and ship
   PNGs. Reason: nothing here compiles them; they would be copied raw and never read.
-- No `CFBundleIdentifier` because "the build passed" → write it. Reason: Charon does not check it.
+- No `CFBundleIdentifier` because "the build passed" → write it. Reason: the toolchain does not check it.
 - `CFBundleExecutable` different from the target name → drop it or match it. Reason: the build
   refuses a bundle whose plist names another executable.
 - Copying an Xcode project's `Info.plist` with `$(PRODUCT_BUNDLE_IDENTIFIER)` or
   `$(EXECUTABLE_NAME)` → write literal values. Reason: nothing expands Xcode's build variables.
-- `add_rules("@addon/charon/app")` on a target whose project lacks the `apple-ios` include, or the
+- `add_rules("@addon/revenant/app")` on a target whose project lacks the `apple-ios` include, or the
   include before `set_config("apple_minimum", …)` → keep the order the skill `install` wrote.
 - A project folder nested inside another checkout → run `xmake -P .` from it. Reason: the rules
   refuse to build a checkout nested inside another xmake project, which would lock the outer one.

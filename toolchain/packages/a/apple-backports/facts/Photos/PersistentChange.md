@@ -19,22 +19,22 @@ A token with no member at all is the point of the family: the class *is* the mom
 
 ## What the release this port deploys on carries
 
-    CHARON_ROOT=$PWD xmake l tools/corpus/cache-census.lua PHPersistent 6.1.3 4.3 12.0 16.0
+    REVENANT_ROOT=$PWD xmake l tools/corpus/cache-census.lua PHPersistent 6.1.3 4.3 12.0 16.0
 
 ```
-6.1.3     $HOME/.charon/dyld/6.1.3/dyld_shared_cache_armv7
+6.1.3     $HOME/.revenant/dyld/6.1.3/dyld_shared_cache_armv7
          images 524, of which naming PHPersistent 0
          classes 11378, of which PHPersistent* 0
          protocols 1171, of which PHPersistent* 0
-4.3       $HOME/.charon/dyld/4.3/dyld_shared_cache_armv7
+4.3       $HOME/.revenant/dyld/4.3/dyld_shared_cache_armv7
          images 354, of which naming PHPersistent 0
          classes 7187, of which PHPersistent* 0
          protocols 564, of which PHPersistent* 0
-12.0      $HOME/.charon/dyld/12.0/dyld_shared_cache_arm64
+12.0      $HOME/.revenant/dyld/12.0/dyld_shared_cache_arm64
          images 1368, of which naming PHPersistent 0
          classes 63192, of which PHPersistent* 3 (PHPersistentChangeFetchRequest PHPersistentChangeFetchResult PHPersistentChangeToken)
          protocols 11426, of which PHPersistent* 0
-16.0      $HOME/.charon/dyld/16.0/dyld_shared_cache_arm64e
+16.0      $HOME/.revenant/dyld/16.0/dyld_shared_cache_arm64e
          images 2664, of which naming PHPersistent 0
          classes 143137, of which PHPersistent* 7 (PHPersistentChange PHPersistentChangeEnumerationContext PHPersistentChangeFetchOptions PHPersistentChangeFetchRequest PHPersistentChangeFetchResult PHPersistentChangeToken PHPersistentObjectChangeDetails)
          protocols 25549, of which PHPersistent* 0
@@ -48,18 +48,18 @@ The zeros are on both ends this package deploys on, and the control is in the sa
 
 Neither band end has an image named Photos at all, and that is a run with a control too:
 
-    CHARON_ROOT=$PWD xmake l tools/corpus/cache-census.lua Photos 4.3 6.1.3 12.0
+    REVENANT_ROOT=$PWD xmake l tools/corpus/cache-census.lua Photos 4.3 6.1.3 12.0
 
 ```
-4.3       $HOME/.charon/dyld/4.3/dyld_shared_cache_armv7
+4.3       $HOME/.revenant/dyld/4.3/dyld_shared_cache_armv7
          images 354, of which naming Photos 0
          classes 7187, of which Photos* 0
          protocols 564, of which Photos* 0
-6.1.3     $HOME/.charon/dyld/6.1.3/dyld_shared_cache_armv7
+6.1.3     $HOME/.revenant/dyld/6.1.3/dyld_shared_cache_armv7
          images 524, of which naming Photos 0
          classes 11378, of which Photos* 0
          protocols 1171, of which Photos* 0
-12.0      $HOME/.charon/dyld/12.0/dyld_shared_cache_arm64
+12.0      $HOME/.revenant/dyld/12.0/dyld_shared_cache_arm64
          images 1368, of which naming Photos 17
          classes 63192, of which Photos* 2 (PhotosAXGlue PhotosGraphTestsCommon)
          protocols 11426, of which Photos* 0
@@ -76,7 +76,7 @@ the releases'.
 The `PH` prefix collides and the reader says which framework it came from -- the three `PH*` classes 6.1.3
 carries are preference-bundle cells:
 
-    CHARON_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua $HOME/.charon/dyld/6.1.3/dyld_shared_cache_armv7 \
+    REVENANT_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua $HOME/.revenant/dyld/6.1.3/dyld_shared_cache_armv7 \
       | awk -F'\t' '$2 ~ /^PH/ {print $2, $4}' | sort
 
 ```
@@ -88,7 +88,7 @@ PHSpinnerAndCheckmarkCell /System/Library/PreferenceBundles/MobilePhoneSettings.
 The release's own photo library is in those 524 images, ten classes of it in `AssetsLibrary` and five in
 `AssetsLibraryServices`:
 
-    CHARON_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua $HOME/.charon/dyld/6.1.3/dyld_shared_cache_armv7 \
+    REVENANT_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua $HOME/.revenant/dyld/6.1.3/dyld_shared_cache_armv7 \
       | awk -F'\t' '$4 ~ /AssetsLibrary/ {n=$4; sub(/.*\//,"",n); print n}' | sort | uniq -c
 
 ```
@@ -100,7 +100,7 @@ The release's own photo library is in those 524 images, ten classes of it in `As
 
 The release's library is `ALAssetsLibrary`, and the 26 selectors below are all of it:
 
-    CHARON_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua $HOME/.charon/dyld/6.1.3/dyld_shared_cache_armv7 \
+    REVENANT_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua $HOME/.revenant/dyld/6.1.3/dyld_shared_cache_armv7 \
       | awk -F'\t' '$2 == "ALAssetsLibrary"' | tr ',' '\n' | sed 's/^/  /'
 
 ```
@@ -176,7 +176,7 @@ Three things follow, and none of them changes the four rows.
     printf '%s\n' changeDetailsForObject: changeDetailsForObjectType:error: enumerateChangesWithBlock: \
         insertedLocalIdentifiers updatedLocalIdentifiers deletedLocalIdentifiers ZZZNoSuchSelectorControl_photos16a \
         > /tmp/photos16a-pats.txt
-    strings -a $HOME/.charon/dyld/12.0/dyld_shared_cache_arm64 | grep -xF -f /tmp/photos16a-pats.txt | sort | uniq -c
+    strings -a $HOME/.revenant/dyld/12.0/dyld_shared_cache_arm64 | grep -xF -f /tmp/photos16a-pats.txt | sort | uniq -c
 
 ```
       9 changeDetailsForObject:
@@ -206,6 +206,6 @@ Not the arithmetic: the port already computes the inserted, the changed and the 
 
 The rows land `absent`, and the claim is about the release: on 6.1.3 there is no token to take, no history to read and no way to ask "since", so nothing in the release answers any of the four names.
 
-Source: the headers of the iOS 16.4 SDK for the declarations and their availability; `coordination/corpus/sdk-26.2-surface.tsv` for the `introduced` the registry carries; `CHARON_ROOT=$PWD xmake l tools/corpus/cache-census.lua PHPersistent 6.1.3 4.3 12.0 16.0` and `... cache-census.lua Photos 4.3 6.1.3 12.0` for the two censuses and their controls; `CHARON_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua $HOME/.charon/dyld/6.1.3/dyld_shared_cache_armv7` for the release's whole Objective-C metadata, the 26 selectors of `ALAssetsLibrary`, the three `PH*` preference-bundle cells and the image counts; `tools/cache-index/first-rung.lua` over the 50 held rungs for every first rung in the table above; one `strings -a` pass over the arm64 cache of 12.0 with the nonsense-selector control for the shape column; `Changes.md` ("Observing changes", and "The run of 2026-10-01, on the iPad 2") for what the release posts when the library changes, measured on an iPad 2 running 6.1.3.
+Source: the headers of the iOS 16.4 SDK for the declarations and their availability; `coordination/corpus/sdk-26.2-surface.tsv` for the `introduced` the registry carries; `REVENANT_ROOT=$PWD xmake l tools/corpus/cache-census.lua PHPersistent 6.1.3 4.3 12.0 16.0` and `... cache-census.lua Photos 4.3 6.1.3 12.0` for the two censuses and their controls; `REVENANT_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua $HOME/.revenant/dyld/6.1.3/dyld_shared_cache_armv7` for the release's whole Objective-C metadata, the 26 selectors of `ALAssetsLibrary`, the three `PH*` preference-bundle cells and the image counts; `tools/cache-index/first-rung.lua` over the 50 held rungs for every first rung in the table above; one `strings -a` pass over the arm64 cache of 12.0 with the nonsense-selector control for the shape column; `Changes.md` ("Observing changes", and "The run of 2026-10-01, on the iPad 2") for what the release posts when the library changes, measured on an iPad 2 running 6.1.3.
 
 What Apple's Photos of 16.0 answers for a token taken after a write the application never saw is **not** answered here. That needs a device whose Photos library holds assets and whose history is long enough to have dropped, which this machine has not; the question is not needed for any of these four rows, whose claim is about 6.1.3.

@@ -7,7 +7,7 @@ Source: the armv7s shared cache of iOS 10.0.1, confirmed on the host, where the
 class still carries this name and `-[NSUnitFuelEfficiency milesPerGallon]` still
 uses it.
 
-It is carried under Apple's own name rather than a Charon one because
+It is carried under Apple's own name rather than a toolchain one because
 `NSDimension` archives its converter as an object, so the class name is written
 into the archive. Under any other name an archive written here would not open in
 the real Foundation, and one written there would not open here — and archive
@@ -21,7 +21,7 @@ none to match, so the object would stay in every band and a release that has the
 class would end up with two of that name.
 
 The name cannot simply be given up, because an archive names the class and an
-unarchiver looks it up by that name. So the class is defined under a Charon name
+unarchiver looks it up by that name. So the class is defined under a toolchain name
 and Apple's name is registered **for** it, as a subclass made at run time, and only
 where `objc_getClass` shows the runtime has none. On iOS 6 ours answers to the
 name; on a release that has its own, nothing is registered and the system's is

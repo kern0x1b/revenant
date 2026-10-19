@@ -8,8 +8,8 @@ not about one image. This page is the rung that decides those, and it was run on
 `coordination/heavy.sh`, at a load of 9.08.
 
 ```
-CHARON_ROOT=<worktree> xmake l tools/corpus/objc-inventory.lua \
-  ~/.charon/dyld/6.1.3/dyld_shared_cache_armv7 > inventory-6.1.3.tsv
+REVENANT_ROOT=<worktree> xmake l tools/corpus/objc-inventory.lua \
+  ~/.revenant/dyld/6.1.3/dyld_shared_cache_armv7 > inventory-6.1.3.tsv
 12549 lines: 11378 classes, 1171 protocols
 ```
 
@@ -88,7 +88,7 @@ MediaPlayer` on every band, so the release's own MediaPlayer is in the process w
 that image already loads AVFoundation:
 
 ```
-$ otool -L ~/.charon/dyld/6.1.3/MediaPlayer
+$ otool -L ~/.revenant/dyld/6.1.3/MediaPlayer
 MediaPlayer:
 	/System/Library/Frameworks/MediaPlayer.framework/MediaPlayer (compatibility version 1.0.0, current version 1.0.0)
 	... 38 of its 39 LC_LOAD_DYLIB entries elided here; AVFoundation and CoreMotion are its last two ...
@@ -96,7 +96,7 @@ MediaPlayer:
 	/System/Library/Frameworks/CoreMotion.framework/CoreMotion (compatibility version 1.0.0, current version 1491.92.0)
 ```
 
-`~/.charon/dyld/6.1.3/MediaPlayer` is the file 6.1.3 ships **beside** its shared cache - the
+`~/.revenant/dyld/6.1.3/MediaPlayer` is the file 6.1.3 ships **beside** its shared cache - the
 `outside_armv7` case `check_band_caches()` names - so this is a read of a release file and not of a cache
 image. AVFoundation is one of 39, beside CoreMedia, CoreVideo, CoreGraphics, ImageIO, QuartzCore,
 AudioToolbox and MobileCoreServices. So the change is a declaration and not a load: what was missing was the
@@ -116,7 +116,7 @@ and `absent` is reserved for a row the release makes impossible.
 under `tests/backports/host/mediaplayeritem/`, which `packages/a/apple-backports/README.md` asks of every
 implemented entry. `run.sh` there builds `probe.m` alone, and the folder's stand-in tree carries MediaPlayer
 and UIKit headers but no AVFoundation one, so the stand-in seam the object uses
-(`CHARON_MEDIAPLAYER_STANDIN`, which no test in this series defines) is never taken. What it would compare
+(`REVENANT_MEDIAPLAYER_STANDIN`, which no test in this series defines) is never taken. What it would compare
 is the port's own accessor pair against the host's `AVPlayerItem.nowPlayingInfo`, which a Mac's AVFoundation
 declares already - the same host-is-not-the-measurement problem `MPMediaItemStandin.h:1-5` records for
 `MPMediaItem.albumTrackNumber`, and the same answer: a stand-in build, not the host's framework. That is a

@@ -25,7 +25,7 @@ the book, which is what the API promises, and it is what
 ## The predicates
 
 `+[CNContact predicateForContactsMatchingName:]` and the five others answer a
-predicate of Charon's own, which the store reads:
+predicate of Revenant's own, which the store reads:
 
 | predicate | what runs |
 | --- | --- |
@@ -40,7 +40,7 @@ The predicate also answers `-evaluateWithObject:` for a `CNContact`, so it can
 filter an array in hand; iOS 9's own predicate raises instead. A predicate that
 is not one of these six is refused with `CNErrorCodePredicateInvalid` rather
 than quietly ignored. It answers `-copyWithZone:` too, since `CNContactFetchRequest.predicate`
-is a `copy` property - found crashing on real hardware (`-[CharonContactPredicate
+is a `copy` property - found crashing on real hardware (`-[RevenantContactPredicate
 copyWithZone:]` unimplemented, NSInvalidArgumentException) the first time a
 fetch request was ever given one of these six.
 
@@ -81,7 +81,7 @@ and the contact remembers them, so reading another property raises
 is not a plain key - what `descriptorForAllComparatorKeys`,
 `descriptorForRequiredKeysForStyle:` and
 `+[CNContactVCardSerialization descriptorForRequiredKeys]` answer - is a class
-of Charon's own that holds the list of keys it stands for.
+of Revenant's own that holds the list of keys it stands for.
 
 ## The name of a contact
 

@@ -74,15 +74,15 @@ carries nothing under the name, and here the class's own metadata carries neithe
 
 `CarPlaySessionConfiguration12.m` carries the class, `initWithDelegate:`, `delegate`, `setDelegate:` and
 `limitedUserInterfaces` — all 12.0. `CarPlaySessionConfiguration13.m` carries `contentStyle`, which is
-13.0, as a category. A category cannot carry storage, so `_charonContentStyle` sits with the class's own
+13.0, as a category. A category cannot carry storage, so `_revenantContentStyle` sits with the class's own
 ivars in the 12.0 object and the 13.0 category reads it through the accessor in
-`CharonCarPlaySessionConfiguration.h`.
+`RevenantCarPlaySessionConfiguration.h`.
 
 The reader there has **no writer**, and that is deliberate. The header declares the property `readonly`
 with no public setter and the release's only writer is the connected system's private `-setContentStyle:`,
-so a Charon setter would be a writer nothing calls — dead code rather than the `inert` a row means.
+so a toolchain setter would be a writer nothing calls — dead code rather than the `inert` a row means.
 `inert` is about the *symbol*, and the symbol is the getter, which loads and answers. (The 17.4 members of
-the navigation session are the opposite case and do have Charon writers, because a public readwrite
+the navigation session are the opposite case and do have Revenant writers, because a public readwrite
 property needs one: `facts/CarPlay/NavigationSession174.md`.)
 
 The 12.0 object says `@dynamic contentStyle` and does **not** `@synthesize` it, because the compiler
@@ -93,8 +93,8 @@ auto-synthesises every property an SDK header declares whether or not the object
 
 ```
 CarPlaySessionConfiguration12.o  initWithDelegate: limitedUserInterfaces delegate setDelegate:
-                                charon_contentStyle .cxx_destruct
-CarPlaySessionConfiguration13.o  -[CPSessionConfiguration(CharonContentStyle13) contentStyle]
+                                revenant_contentStyle .cxx_destruct
+CarPlaySessionConfiguration13.o  -[CPSessionConfiguration(RevenantContentStyle13) contentStyle]
 ```
 
 ## What this page does not claim

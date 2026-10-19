@@ -16,9 +16,9 @@ So: **nullable**, **weak**, **readonly**, and of **10.0**, unavailable on macOS.
 asserts each of those from this line — the selector's presence in the library, that it answers an
 `HMHome *`, that an accessory with no home identifier answers nil rather than a home, and that the answer
 for one that has an identifier is the home that identifier names, compared against
-`CharonHomeKitHome(identifier)`, the graph's own entry point.
+`RevenantHomeKitHome(identifier)`, the graph's own entry point.
 
-The port's accessory already carries the identifier of its home in `charon_homeIdentifier`, the same
+The port's accessory already carries the identifier of its home in `revenant_homeIdentifier`, the same
 field the home graph's entry points are given, so the answer reuses the graph and there is no second way
 to reach a home in this library.
 
@@ -52,7 +52,7 @@ is what the property is, so a caller can iterate the answer without first asking
 There is **no host HomeKit on this machine** to ask: no `HomeKit.framework` exists in any macOS SDK here,
 so nothing can be sent a message, and 52 of the SDK's 62 HomeKit headers mark themselves
 `API_UNAVAILABLE(macos)`. So the checks for these rows are the header's declared contract, plus a selector
-presence count against the 12.0 and 16.0 arm64 caches in `~/.charon/dyld` — which confirms a **name**
+presence count against the 12.0 and 16.0 arm64 caches in `~/.revenant/dyld` — which confirms a **name**
 first appeared at a release, and is **not** a behaviour oracle. Both facts are recorded in the registry
 rows' `source`, and the standing limit is in `coordination/crutches.md`.
 

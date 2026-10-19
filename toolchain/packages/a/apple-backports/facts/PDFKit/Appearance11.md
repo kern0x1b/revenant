@@ -7,7 +7,7 @@ by neither 6.1.3 nor 4.3 - so it is the port's own, like `PDFDocument`, `PDFPage
 
 What makes it different from those three is that **nothing in the 26.2 SDK hands one out**. There is no
 `-[PDFAnnotation appearanceCharacteristics]`, and `grep -rn appearanceCharacteristics` across
-`PDFKit.framework/Headers` in `charon/.agent-work/sdk-26.2/iPhoneOS26.2.sdk` finds this class's own
+`PDFKit.framework/Headers` in `toolchain/.agent-work/sdk-26.2/iPhoneOS26.2.sdk` finds this class's own
 key-values property at `PDFAppearanceCharacteristics.h:69` and nothing else anywhere. So there is no
 document to read it out of, and no path in the API that returns one.
 
@@ -29,7 +29,7 @@ the same shape `tests/backports/host/uikit2/run.sh` uses - and it prints **only*
 in the same order and the same keys `host.m` prints it.
 
 So the two printing helpers are written out twice, once per binary, and that is forced rather than
-tidy: `host.m` includes `<PDFKit/PDFKit.h>` and `color.m` includes `"CharonPDFKit.h"`, and a
+tidy: `host.m` includes `<PDFKit/PDFKit.h>` and `color.m` includes `"RevenantPDFKit.h"`, and a
 translation unit holding both would have two `@interface PDFDocument` definitions that disagree -
 which is the reason this harness is separate processes in the first place. Their shapes stay identical
 on purpose, because `run.sh` compares by key and a key only one side prints is not a fact at all.

@@ -18,7 +18,7 @@ than the host's, and each difference is named in the row itself.
 
 | | tool | what it answers |
 | --- | --- | --- |
-| presence, 6.1.3 and 4.3, armv7 | `tools/cache-index/first-rung.lua`, over the 50 per-release indexes in `~/.charon/cache-index` | whether a name exists in a release's export trie and symbol table |
+| presence, 6.1.3 and 4.3, armv7 | `tools/cache-index/first-rung.lua`, over the 50 per-release indexes in `~/.revenant/cache-index` | whether a name exists in a release's export trie and symbol table |
 | what this Mac answers | `tests/backports/host/security/trust-accessors.m`, linked with the port's own eight objects | the host's Security.framework beside the port's, on one run, key by key |
 | the release's own accessors | the same case, through the port | which chain, which verdict, which property keys |
 

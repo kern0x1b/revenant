@@ -2,8 +2,8 @@
 
 ## The four pieces
 
-`CharonCloudKitErrors.m`, `CharonCloudKitPaths.m` and `CharonCloudKitTransport.m`, over
-`CharonCloudKit.h`. They are helpers and not API: no class or symbol in them is in the registry.
+`RevenantCloudKitErrors.m`, `RevenantCloudKitPaths.m` and `RevenantCloudKitTransport.m`, over
+`RevenantCloudKit.h`. They are helpers and not API: no class or symbol in them is in the registry.
 
 1. **The errors.** Every code `CKErrorCode` names, built from the payload's own `serverErrorCode`
    (the strings the service sends, mapped to the codes the header lists), `reason` or `errorMessage`,
@@ -18,7 +18,7 @@
 3. **The field mapping.** A field is a string, a number, a date, data, a reference, an asset, a
    location, or an array or a dictionary of those; each has its own wire form and the mapping is
    written once and used both ways.
-4. **The connection.** `NSURLConnection`, the release's own, in `CharonCloudKitTransport.m`.
+4. **The connection.** `NSURLConnection`, the release's own, in `RevenantCloudKitTransport.m`.
 
 ## Why NSURLConnection and not NSURLSession
 
@@ -48,11 +48,11 @@ Refused before a connection is made:
 
 ## The token
 
-`CharonCKCredentials` takes either a developer token the application minted, which needs no
+`RevenantCKCredentials` takes either a developer token the application minted, which needs no
 cryptography, or the container's web services authentication key from its bundle - the `.p8`, or the
 PEM under the Info.plist key CloudKit's own tooling writes. The key is used to sign the JWT of
 CloudKit's own format: the header, the three-member payload (`iss`, `iat`, `exp`, `sub`, all the
-team), and the ES256 signature, which is charon@micro-ecc's through `CharonCKSignES256`. A token is
+team), and the ES256 signature, which is revenant@micro-ecc's through `RevenantCKSignES256`. A token is
 cached until shortly before the hour it is good for.
 
 A key with no team answers `CKErrorBadContainer` rather than a token: the token's own claims name the

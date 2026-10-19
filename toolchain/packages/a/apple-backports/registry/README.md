@@ -46,7 +46,7 @@ such a row could never be `implemented` and the check would hold it red
 forever. They are `kind: "type"` (the typedef, enumeration or struct itself)
 and `kind: "case"` (one case of it, named by its own symbol), and the check
 asks a different question of them: a header the build reads - the tree's own, a
-Charon header generated or written, or the SDK it compiled against - must
+toolchain header generated or written, or the SDK it compiled against - must
 **declare** the name. That is read, never taken on trust from the entry, so an
 `implemented` type or case no header declares is held exactly as red as an
 implemented class nothing builds. `introduced` still says when the release

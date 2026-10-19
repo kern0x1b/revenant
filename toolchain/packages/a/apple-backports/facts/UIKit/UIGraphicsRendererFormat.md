@@ -18,5 +18,5 @@ part of this backport.
 The format the application hands to a renderer does not carry the bounds: the
 renderer copies the format and writes the bounds it was made with into that copy.
 `-[UIGraphicsRenderer format]` therefore answers a format whose bounds are the
-renderer's, while the one the application kept still has whatever it had. Charon
+renderer's, while the one the application kept still has whatever it had. The toolchain
 does this through a private `-_setBounds:`, since the property is read only.

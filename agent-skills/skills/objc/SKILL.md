@@ -1,6 +1,6 @@
 ---
 name: objc
-description: Write the app's Objective-C for old iOS (iPhone OS 3 to iOS 9, armv7) with Charon — ARC on the compile and the link, weak references below iOS 5 and the objects they abort on, which API each release really has (read from the release's own libraries with xmake firmware classes, not from the modern SDK's availability marks), reaching newer API through a backport, the release's older API or a guard (NSClassFromString, respondsToSelector:, @available and what each costs at xmake deb), and an interface built from the release's own UIKit controls. Use at the code step when PROJECT.md says Objective-C, when a build warns about weak imports or selectors a release does not implement, or when the user asks which API an old release has.
+description: Write the app's Objective-C for old iOS (iPhone OS 3 to iOS 9, armv7) with the toolchain — ARC on the compile and the link, weak references below iOS 5 and the objects they abort on, which API each release really has (read from the release's own libraries with xmake firmware classes, not from the modern SDK's availability marks), reaching newer API through a backport, the release's older API or a guard (NSClassFromString, respondsToSelector:, @available and what each costs at xmake deb), and an interface built from the release's own UIKit controls. Use at the code step when PROJECT.md says Objective-C, when a build warns about weak imports or selectors a release does not implement, or when the user asks which API an old release has.
 ---
 
 # Objective-C for old iOS
@@ -8,7 +8,7 @@ description: Write the app's Objective-C for old iOS (iPhone OS 3 to iOS 9, armv
 You write the app's Objective-C yourself, from the decisions in `PROJECT.md`, against the releases
 it names. The compiler is clang with the iOS 16.4 SDK: it knows every API up to iOS 16 and does not
 stop you from calling one the lowest release lacks. What the app may call is decided by the
-release's own libraries, which Charon checks at every build (skill `build`). This skill is how to
+release's own libraries, which the toolchain checks at every build (skill `build`). This skill is how to
 write code that passes those checks honestly and runs on the oldest release in `PROJECT.md`.
 
 Read `PROJECT.md` first: `apple_minimum`, the releases to check, the devices, the frameworks, the
@@ -26,7 +26,7 @@ add_ldflags("-fobjc-arc")
 A tweak or a `library` target is linked as a shared library, whose link reads `add_shflags`, not
 `add_ldflags`: give it `add_shflags("-fobjc-arc")` (skill `xmake-objc`).
 
-The link flag is what makes clang force-load arclite into the image. Charon's arclite carries the
+The link flag is what makes clang force-load arclite into the image. Revenant's arclite carries the
 ARC entry points (`objc_retain`, `objc_storeWeak`, …) below iOS 5, where the system has none, and
 the collection subscripting methods (`objectAtIndexedSubscript:`, `objectForKeyedSubscript:`, …)
 below iOS 6; from 5.0 on each entry point calls the system's own.
@@ -81,7 +81,7 @@ xmake firmware -y --arch=armv7 classes 6.0
 
 It fetches the libraries of the earliest armv7 release not older than the one named, if they are
 not held yet (skill `firmware`), and writes `classes_armv7.json` beside them, under
-`~/.charon/dyld/<release>/` (`$CHARON_HOME/dyld/<release>/` if `CHARON_HOME` is set; `-o FILE`
+`~/.revenant/dyld/<release>/` (`$REVENANT_HOME/dyld/<release>/` if `REVENANT_HOME` is set; `-o FILE`
 writes it elsewhere). It prints `<path>: the Objective-C classes of iOS <release> for armv7`. The
 file maps every Objective-C class of the release to its `superclass`, `image`, `instance` and
 `class` method names and `protocols`. Methods are inherited: walk `superclass` until you find the
@@ -111,30 +111,30 @@ Two readings of the file need care:
 The file holds Objective-C classes only. C functions and constants (GCD, CoreGraphics, …) are
 checked by the import check of every build (skill `build`).
 
-Charon's `charon@apple-compat` carries shims for C calls of the system library that a later
+Revenant's `revenant@apple-compat` carries shims for C calls of the system library that a later
 release added or changed: `arc4random_buf` (4.3), `openat`, `fchmodat`, `unlinkat`, `fdopendir`
 (8.0), `clock_gettime`, `clock_getres` (10.0), `aligned_alloc` (13.0), and
 `dispatch_get_global_queue` given a class of service (8.0) — one header each under
-`include/charon/` of the package at the pinned repository tag. A target names the calls it takes,
+`include/revenant/` of the package at the pinned repository tag. A target names the calls it takes,
 and the shim replaces that call in every file of the target:
 
 ```lua
-add_requires("charon@apple-compat", {alias = "apple-compat"})
+add_requires("revenant@apple-compat", {alias = "apple-compat"})
 -- in the target:
 add_packages("apple-compat")
 add_values("apple.compat", "dispatch_get_global_queue", "clock_gettime")
 ```
 
 How to know it worked: in the `-v` build log each compile line carries
-`-include<…>/include/charon/<call>.h` (no space after `-include`) for every call named.
+`-include<…>/include/revenant/<call>.h` (no space after `-include`) for every call named.
 
 ## 4. Calling what the lowest release lacks
 
 For each API newer than `apple_minimum`, choose in this order, and record the choice in `PROJECT.md`:
 
-1. **A backport**, if `charon@apple-backports` implements it: the app calls the modern API and the
+1. **A backport**, if `revenant@apple-backports` implements it: the app calls the modern API and the
    backport supplies it on the old release (skill `backports`). For a C call of the system library,
-   `charon@apple-compat` carries shims (§3).
+   `revenant@apple-compat` carries shims (§3).
 2. **The release's own older API**: `UIAlertView` for `UIAlertController`, `NSURLConnection` for
    `NSURLSession`, frames and `autoresizingMask` for Auto Layout below 6.0.
 3. **A guard, and the newer API only where it exists:**
@@ -157,7 +157,7 @@ behind a check, the user agreed, and it is written under `## Limits` (skill `sel
 value says why:
 
 ```lua
-set_values("charon.waive.weak-imports", "NSURLSession is reached only inside @available(iOS 7.0, *)")
+set_values("revenant.waive.weak-imports", "NSURLSession is reached only inside @available(iOS 7.0, *)")
 ```
 
 The waiver covers the whole target, including weak imports added after it was written: from
@@ -192,7 +192,7 @@ controls, drawn by its own UIKit, not from imitating them:
 - Controls are the system's: `UISwitch`, `UISlider`, `UISegmentedControl`, `UIStepper` (from 5.0),
   `UIActivityIndicatorView`, `UIAlertView`, `UIActionSheet`. Colour bars through their `tintColor`
   or `+appearance` (5.0); do not redraw them.
-- Build the interface in code. Charon's app rule compiles no nib or storyboard: `app.resources`
+- Build the interface in code. Revenant's app rule compiles no nib or storyboard: `app.resources`
   folders are copied into the bundle as they are (skill `project`).
 - Size views from what the device reports (`[UIScreen mainScreen].bounds`, the view's own bounds)
   with frames and `autoresizingMask`; Auto Layout only from 6.0.
@@ -214,11 +214,11 @@ controls, drawn by its own UIKit, not from imitating them:
 - `respondsToSelector:` asked of the wrong object (the class instead of the instance, a bar instead
   of the view) → it answers for that object only.
 - `dispatch_get_global_queue(QOS_CLASS_…, 0)` → a class of service is iOS 8; iOS 6 answers `NULL`.
-  Take `charon@apple-compat` with `add_values("apple.compat", "dispatch_get_global_queue")` (§3):
+  Take `revenant@apple-compat` with `add_values("apple.compat", "dispatch_get_global_queue")` (§3):
   it maps each class to the priority `queue.h` gives for it (on iOS 6.1.3 in the emulator,
   `QOS_CLASS_USER_INITIATED` then gave the `_HIGH` queue). Otherwise pass the release's own
   `DISPATCH_QUEUE_PRIORITY_DEFAULT` (or `_HIGH`, `_LOW`, `_BACKGROUND`).
-- `add_requires("charon@apple-compat")` without `alias = "apple-compat"` → `xmake f` stops with
+- `add_requires("revenant@apple-compat")` without `alias = "apple-compat"` → `xmake f` stops with
   `target(<Name>) names apple.compat symbols without add_packages("apple-compat")`: the project
   knows the package only by its alias.
 - `dispatch_sync` to the main queue from the main thread → deadlock, on every release ("Calls to
@@ -227,5 +227,5 @@ controls, drawn by its own UIKit, not from imitating them:
 - A private class or method from the classes file used because it is "there" → public API only; if
   the release has no public way, take a backport or the older API, or tell the user it cannot be
   done on that release and write it under `## Limits`.
-- `charon.waive.weak-imports` without guards, or `-Wno-…` over a real warning, to get green → the
+- `revenant.waive.weak-imports` without guards, or `-Wno-…` over a real warning, to get green → the
   call crashes on the device instead; guard it or backport it.

@@ -13,7 +13,7 @@ of that is a wall on this release:
 
 ## What the sheet shows, and where each line comes from
 
-`CharonCertificateLines` reads the trust and nothing else:
+`RevenantCertificateLines` reads the trust and nothing else:
 
 1. `SecCertificateCopySubjectSummary` of the leaf certificate, then of every certificate behind it,
    each prefixed `- ` so the chain is readable;
@@ -40,7 +40,7 @@ have.
 ## The host differential, and the two lines it cannot reach
 
 `tests/backports/host/certificatepresentation` builds a real `SecTrustRef` on the host out of two
-embedded certificates - a leaf for "Charon Backports" and the test CA that issued it, both written out
+embedded certificates - a leaf for "Revenant Backports" and the test CA that issued it, both written out
 as DER so the chain is the same on every machine - and requires the port's sheet to say what the host's
 own Security says about it: the same subject summary, the same chain line for the certificate behind
 the leaf, the same wording for the same `SecTrustResultType`, and no line at all for the NULL trust the
@@ -50,7 +50,7 @@ an unmarked chain line - must each change a record or the run fails.
 
 What the host cannot answer is `SecTrustCopyProperties`: it is `API_UNAVAILABLE(maccatalyst)`, not
 deprecated, so a host build cannot even compile the call, and the `SecTrustCopyProperties` lines are
-behind `#ifndef CHARON_HOST_DIFFERENTIAL` in the armv7 build and in no other. Those lines are the
+behind `#ifndef REVENANT_HOST_DIFFERENTIAL` in the armv7 build and in no other. Those lines are the
 trust's own dates and policy, and the emulator is what covers them. The host has no
 `SFCertificatePresentation` of its own in this SDK either, so the oracle is the trust and not the
 system's sheet - which is the same shape the port's `Security/SecTrustEvaluateWithError.m` is in.

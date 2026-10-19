@@ -1,15 +1,15 @@
-# charon@appintents
+# revenant@appintents
 
 The AppIntents framework of iOS 16, as one Swift module a port writes `import AppIntents` for, built
-against the `charon@swift-runtime` a port carries.
+against the `revenant@swift-runtime` a port carries.
 
     target("my-port")
-        add_requires("charon@swift-runtime")
-        add_requires("charon@appintents")
+        add_requires("revenant@swift-runtime")
+        add_requires("revenant@appintents")
         add_packages("swift-runtime", "appintents")
 
 `AppIntents.swiftmodule` is built for the port's own architecture and release (armv7 at iOS 6.1.3
-and later), the way Styx's `Combine` is: one module, so a declaration of one file sees every other,
+and later), the way Combine's `Combine` is: one module, so a declaration of one file sees every other,
 and `libAppIntents.a` beside it. A port that carries the backports asks for the runtime built with
 them, and gets the port's headers with it.
 
@@ -27,12 +27,12 @@ no live activity. Every API for those exists here, and each one is the port's ow
 
 | the framework would | this module | where |
 | --- | --- | --- |
-| hand the app's shortcuts to the system | writes them into the port's own store, and `appShortcuts()` reads them back | `Shortcuts.swift`, `CharonShortcutStore` |
+| hand the app's shortcuts to the system | writes them into the port's own store, and `appShortcuts()` reads them back | `Shortcuts.swift`, `RevenantShortcutStore` |
 | write a donation to the system index | writes it to a plist under Application Support, and `donations()` reads it back | `Donation.swift`, `IntentDonationStore` |
 | hand a widget's relevant intents to the timeline | the same store, and `relevantIntents()` reads it back | `Donation.swift`, `RelevantIntentStore` |
 | show a confirmation, a choice or a dialog | the in-process handler `IntentConfirmationRequest.handler` / `IntentChoiceRequest.handler` answers; with none, the run continues as the caller asked | `IntentResult.swift` |
 | set a focus filter | `current` is nothing, which is what a device with no focus filter answers | `SystemIntents.swift` |
-| open a URL through LaunchServices | the port's own `CharonURL.handler`; the open is recorded and nothing else | `URLRepresentations.swift` |
+| open a URL through LaunchServices | the port's own `RevenantURL.handler`; the open is recorded and nothing else | `URLRepresentations.swift` |
 | expand a macro with the framework's plugin | the declarations are there; a port writes the conformance out | `facts/AppIntents/Macros.md` |
 
 None of these is a silent fake: each is a real value in the port's own store or a real, absent answer,
@@ -76,21 +76,21 @@ To build one of these Swift packages without a port, give `xmake` a project of i
 the gate's `resolve()` shapes one (`coordination/build-gate.lua:44-48`):
 
     set_project("gate-tipkit")
-    add_repositories("charon <path to a checkout>")
-    add_addons("charon v0.8.13")             -- the newest version the checkout's recipe names
+    add_repositories("revenant <path to a checkout>")
+    add_addons("revenant v0.8.13")             -- the newest version the checkout's recipe names
     set_config("apple_minimum", "6.1.3")
-    includes("@addon/charon/apple-ios")
+    includes("@addon/revenant/apple-ios")
     set_defaultplat("iphoneos")
     set_defaultarchs("iphoneos|armv7")
-    add_requires("charon@swift-runtime", {alias = "swift-runtime"})
-    add_requires("charon@appintents", {alias = "appintents"})
-    add_requires("charon@tipkit", {alias = "tipkit"})
+    add_requires("revenant@swift-runtime", {alias = "swift-runtime"})
+    add_requires("revenant@appintents", {alias = "appintents"})
+    add_requires("revenant@tipkit", {alias = "tipkit"})
 
 A **fresh directory name per attempt** matters: xmake keeps a repository search index under
 `~/.xmake/cache/quick_search`, and a directory name it has seen before is answered from that index
 rather than from the checkout, so a stale entry makes a package that is present look absent. The
 projects must be built through `heavy.sh` even to resolve, because resolution alone takes the lock.
 
-`charon@activitykit`, `charon@tipkit` and `charon@widgetkit` are built the same way, each adding its
-own `add_requires("charon@<name>", {alias = "<name>"})`; `activitykit` needs `charon@appintents`
-first, `tipkit` needs `charon@appintents`, and `widgetkit` needs both.
+`revenant@activitykit`, `revenant@tipkit` and `revenant@widgetkit` are built the same way, each adding its
+own `add_requires("revenant@<name>", {alias = "<name>"})`; `activitykit` needs `revenant@appintents`
+first, `tipkit` needs `revenant@appintents`, and `widgetkit` needs both.

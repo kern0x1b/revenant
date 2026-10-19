@@ -13,7 +13,7 @@ Corpus: `DEMAND-AVFoundation-10.tsv`, 5 rows, CRASH-ON-USE, each called by 1 app
 answers 10.0.1 for all five (10.0.1 is the oldest *held* rung that carries the names; the SDK's own
 `introduced` is 10.0, which is what the registry rows use).
 
-`objc.inventory` over `~/.charon/dyld/6.1.3/dyld_shared_cache_armv7` shows `AVPlayerItemVideoOutput`
+`objc.inventory` over `~/.revenant/dyld/6.1.3/dyld_shared_cache_armv7` shows `AVPlayerItemVideoOutput`
 already carries `-initWithPixelBufferAttributes:` - the same pixel-buffer-attributes dictionary that
 `-initWithOutputSettings:` takes under its later name - so `AVFoundationDemand10.m` forwards one to
 the other rather than reimplementing the class.

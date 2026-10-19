@@ -19,12 +19,12 @@ about the release has to be the claim the release's own cache supports.
 ## The census, with the control that certifies the reader
 
 ```
-$ CHARON_ROOT=$PWD xmake l tools/corpus/cache-census.lua CP 6.1.3 4.3
-6.1.3     ~/.charon/dyld/6.1.3/dyld_shared_cache_armv7
+$ REVENANT_ROOT=$PWD xmake l tools/corpus/cache-census.lua CP 6.1.3 4.3
+6.1.3     ~/.revenant/dyld/6.1.3/dyld_shared_cache_armv7
          images 524, of which naming CP 1
          classes 11378, of which CP* 112 (CPAggregateDictionary CPArchive CPBitmapStore ... CPZone)
          protocols 1171, of which CP* 5 (CPCopying CPDisposable CPEnhancedWarningReporting CPGraphicUser CPVisitor)
-4.3       ~/.charon/dyld/4.3/dyld_shared_cache_armv7
+4.3       ~/.revenant/dyld/4.3/dyld_shared_cache_armv7
          images 354, of which naming CP 0
          classes 7187, of which CP* 99 (CPAggregateDictionary CPArchive CPBitmapStore ... CPZone)
          protocols 564, of which CP* 3 (CPDisposable CPEnhancedWarningReporting CPVisitor)
@@ -34,8 +34,8 @@ control: 219 name(s) beginning CP found in this run, so a zero on another rung i
 and the rung the nine rows were wrong about:
 
 ```
-$ CHARON_ROOT=$PWD xmake l tools/corpus/cache-census.lua CP 12.0
-12.0      ~/.charon/dyld/12.0/dyld_shared_cache_arm64
+$ REVENANT_ROOT=$PWD xmake l tools/corpus/cache-census.lua CP 12.0
+12.0      ~/.revenant/dyld/12.0/dyld_shared_cache_arm64
          images 1368, of which naming CP 4
          classes 63192, of which CP* 348 (CPActionSheetTemplate CPAlertAction CPAlertTemplate CPBarButton
              CPGridButton CPGridTemplate ...)
@@ -52,7 +52,7 @@ release's answer and not the reader's.
 Class-scoped, for the four names the nine rows are about:
 
 ```
-$ CHARON_ROOT=$PWD xmake l tools/corpus/cache-census.lua CPNavigationSession 6.1.3 4.3 12.0
+$ REVENANT_ROOT=$PWD xmake l tools/corpus/cache-census.lua CPNavigationSession 6.1.3 4.3 12.0
 6.1.3  classes 11378, of which CPNavigationSession* 0        protocols 1171, of which CPNavigationSession* 0
 4.3    classes 7187,  of which CPNavigationSession* 0        protocols 564,  of which CPNavigationSession* 0
 12.0   classes 63192, of which CPNavigationSession* 1 (CPNavigationSession)
@@ -73,7 +73,7 @@ selector sets — so this is the measurement a member row may rest on, and a nam
 in a cache is not a member of a class:
 
 ```
-$ CHARON_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua ~/.charon/dyld/12.0/dyld_shared_cache_arm64 \
+$ REVENANT_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua ~/.revenant/dyld/12.0/dyld_shared_cache_arm64 \
       > .agent-work/runs/carplay-12/objc12.tsv          # 74618 lines
 $ python3 .agent-work/runs/carplay-12/members-at-12.py  # reads the two selector columns, asserts a control
 control: NSObject at 12.0 answers -class and -hash through the same reader, so a 0 below is the release's
@@ -122,7 +122,7 @@ Two things in the 12.0 lists are worth reading, because the port's objects are b
   *provider*, not the two-argument `-initWithTrip:mapTemplate:` the 16.0 and 18.0 caches carry, and
   the class has `-provider` and `-setProvider:` beside it. So at 12.0 the creator was handed a
   provider object as well as the trip and the template. The port's own factory
-  `+charon_sessionForTrip:mapTemplate:` is a `charon_` name and takes two, which is a port-internal
+  `+revenant_sessionForTrip:mapTemplate:` is a `revenant_` name and takes two, which is a port-internal
   seam and not this initializer; what the row rests on is the direction both releases agree on: the
   app is handed the session, it does not build one.
 - **neither class declares `-init` or `+new` of its own.** `CPRouteChoice` *does* declare `-init` at

@@ -89,7 +89,7 @@ The F1 shape fed to the new driver, so the check is shown failing and not only p
 ```
 INVALID MUTANT sec-identity-nocopy  the CONTROL is red ...: access-empty-true: got 0 and the port claims 1
 INVALID MUTANT sec-identity-noretain the CONTROL is red ...: access-empty-true: got 0 and the port claims 1
-INVALID MUTANT defaults-below-enum  the CONTROL is red ...: port-class: the port's CharonSecProtocolOptions was not found
+INVALID MUTANT defaults-below-enum  the CONTROL is red ...: port-class: the port's RevenantSecProtocolOptions was not found
 run-cases: 3 failure(s) - 20 cases, 18 mutants, 14 noticed          EXIT=3
 ```
 
@@ -174,11 +174,11 @@ the set, eleven are inside the guard and nine are outside it - and the nine are 
 | case | why it is outside the guard | proven by |
 | --- | --- | --- |
 | `network-fetch` | the port's functions are named as the HEADER names them (`SecTrustSetNetworkFetchAllowed`, ...), and the guard matches only `sec_*` | dropping `$N` leaves the case **GREEN, exit 0**, with `nm -u` showing those symbols undefined - the host answered |
-| `supported`, `attributes`, `certificate-name` | they reach the port through `Charon*` helpers, which the guard does not match | same shape as `network-fetch` |
+| `supported`, `attributes`, `certificate-name` | they reach the port through `Revenant*` helpers, which the guard does not match | same shape as `network-fetch` |
 | `trust-result` | it resolves the port by `dlsym(RTLD_DEFAULT, ...)`, so there is no link-time reference to find at all | reading the case: the name is a **string** |
-| `padding`, `verify-pairs` | the port's entry points are `Charon*` class names the host does not export, so a dropped source is caught by the LINK and not by the guard | dropping `$F`: `BUILD padding FAILED to build` on the undefined `_CharonSecurityPaddingFor`, and `BUILD verify-pairs FAILED to build` on `_CharonSecurityCarries` |
+| `padding`, `verify-pairs` | the port's entry points are `Revenant*` class names the host does not export, so a dropped source is caught by the LINK and not by the guard | dropping `$F`: `BUILD padding FAILED to build` on the undefined `_RevenantSecurityPaddingFor`, and `BUILD verify-pairs FAILED to build` on `_RevenantSecurityCarries` |
 | `certificate-fields`, `certificate-name` | the same empty `called` set, and here the build still succeeds - the host answers the names the case uses - so what catches the drop is the COMPARISON | dropping `$D`: `RED certificate-fields DIFFERS null-out: a NULL out-parameter is errSecParam (-50)` |
-| `protocol-options-flags` | it reaches the port through a `Charon*` holder class rather than a `sec_*` name, so its `called` set is empty; the drop is again caught by the comparison | dropping `$PF`: `RED protocol-options-flags DIFFERS port-class: the port's CharonSecProtocolFlags was not found` |
+| `protocol-options-flags` | it reaches the port through a `Revenant*` holder class rather than a `sec_*` name, so its `called` set is empty; the drop is again caught by the comparison | dropping `$PF`: `RED protocol-options-flags DIFFERS port-class: the port's RevenantSecProtocolFlags was not found` |
 
 Four of those drops were run at once - `$F` from `padding` and from `verify-pairs`, `$D` from
 `certificate-fields`, `$PF` from `protocol-options-flags` - and the run ends non-zero with the driver's
@@ -198,13 +198,13 @@ set is those six and the guard has something to check. Dropping `$SI` from its l
 non-zero, but by the LINK and not by `MISSING`:
 
 ```
-BUILD  sec-identity FAILED to build          (the undefined symbol is CharonSecIdentity, which the
+BUILD  sec-identity FAILED to build          (the undefined symbol is RevenantSecIdentity, which the
 NOTRUN sec-identity  the build failed, so the case never ran        host has no such class)
 run-cases: 1 failure(s) - 19 cases, 18 mutants, 17 noticed          EXIT=1
 ```
 
 which is the same shape as `supported` and `verify-pairs` above: a case whose port entry points are
-`Charon*` class names cannot fall through to the host, so the link refuses it before the guard is
+`Revenant*` class names cannot fall through to the host, so the link refuses it before the guard is
 reached. Both shapes end the run non-zero; they are not the same check.
 
 **A source dropped from the link line CAN hide**, and `network-fetch` is the proof rather than my

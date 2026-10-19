@@ -13,7 +13,7 @@ Source: UIKit of the armv7s cache of iOS 10.3.4.
 | `-copyWithZone:` | `[super copyWithZone:]`, then scale, opacity and range are carried over. |
 
 `-setPrefersExtendedRange:` also clears the private override colour space, the
-override bits per component and the grayscale flag. Charon carries none of those
+override bits per component and the grayscale flag. The toolchain carries none of those
 three: nothing on iOS 6 sets them, they are in no header, and the plain path is
 the only one reachable.
 
@@ -25,6 +25,6 @@ are not part of this backport.
 `+defaultFormat` asks `-[UIDevice _supportsDeepColor]`. No device that runs
 armv7 has a wide colour display - it arrived with the iPhone 7 - so the answer on
 an iPhone 4S or an iPad 2 is always no, and `prefersExtendedRange` is always
-`NO`. Charon answers `NO` outright rather than asking a method iOS 6 does not
+`NO`. The toolchain answers `NO` outright rather than asking a method iOS 6 does not
 have. This is the real behaviour of the real implementation on this hardware, not
 a simplification: on a device without deep colour the same branch is taken.

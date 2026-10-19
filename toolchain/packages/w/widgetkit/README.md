@@ -1,13 +1,13 @@
-# charon@widgetkit
+# revenant@widgetkit
 
 The WidgetKit framework of iOS 14, as one Swift module a port writes `import WidgetKit` for, built
-against the `charon@swift-runtime` a port carries.
+against the `revenant@swift-runtime` a port carries.
 
     target("my-port")
-        add_requires("charon@swift-runtime")
-        add_requires("charon@appintents")
-        add_requires("charon@activitykit")
-        add_requires("charon@widgetkit")
+        add_requires("revenant@swift-runtime")
+        add_requires("revenant@appintents")
+        add_requires("revenant@activitykit")
+        add_requires("revenant@widgetkit")
         add_packages("swift-runtime", "appintents", "activitykit", "widgetkit")
 
 ## What the module is
@@ -29,9 +29,9 @@ So:
   draws is the app's own view, which is whatever the port has (including the SwiftUI it may already
   carry);
 * `WidgetCenter.reloadTimelines(ofKind:)` and `reloadAllTimelines()` are the port's own redraw: they
-  call the handler the app installs in `CharonWidgetRegistry.shared.redraw`, and nothing else;
+  call the handler the app installs in `RevenantWidgetRegistry.shared.redraw`, and nothing else;
 * `currentConfigurations()` and `getCurrentConfigurations(_:)` answer with the configurations the app
-  registered in `CharonWidgetRegistry`, which is where `WidgetInfo.widgetConfigurationIntent(of:)` reads
+  registered in `RevenantWidgetRegistry`, which is where `WidgetInfo.widgetConfigurationIntent(of:)` reads
   the intent back from;
 * `currentPushInfo` is `nil` unless a caller installs one, because only the system's host mints a push
   token for a widget;
@@ -66,15 +66,15 @@ To build one of these Swift packages without a port, give `xmake` a project of i
 the gate's `resolve()` shapes one (`coordination/build-gate.lua:44-48`):
 
     set_project("gate-tipkit")
-    add_repositories("charon <path to a checkout>")
-    add_addons("charon v0.8.13")             -- the newest version the checkout's recipe names
+    add_repositories("revenant <path to a checkout>")
+    add_addons("revenant v0.8.13")             -- the newest version the checkout's recipe names
     set_config("apple_minimum", "6.1.3")
-    includes("@addon/charon/apple-ios")
+    includes("@addon/revenant/apple-ios")
     set_defaultplat("iphoneos")
     set_defaultarchs("iphoneos|armv7")
-    add_requires("charon@swift-runtime", {alias = "swift-runtime"})
-    add_requires("charon@appintents", {alias = "appintents"})
-    add_requires("charon@tipkit", {alias = "tipkit"})
+    add_requires("revenant@swift-runtime", {alias = "swift-runtime"})
+    add_requires("revenant@appintents", {alias = "appintents"})
+    add_requires("revenant@tipkit", {alias = "tipkit"})
 
 A **fresh directory name per attempt** matters: xmake keeps a repository search index under
 `~/.xmake/cache/quick_search`, and a directory name it has seen before is answered from that index

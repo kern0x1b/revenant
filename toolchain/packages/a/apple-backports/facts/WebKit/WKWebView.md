@@ -99,7 +99,7 @@ rung is `WKQuadObject`, which belongs to the private `WebCore.framework` and not
 
 ```
 $ for r in 6.1.3 4.3; do echo "== $r"; \
-    CHARON_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua ~/.charon/dyld/$r/dyld_shared_cache_armv7 | \
+    REVENANT_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua ~/.revenant/dyld/$r/dyld_shared_cache_armv7 | \
     awk -F'\t' '$1=="class" && $2 ~ /^WK/ {print "  " $2 "  " $4}'; done
 == 6.1.3
   WKQuadObject  /System/Library/PrivateFrameworks/WebCore.framework/WebCore
@@ -108,12 +108,12 @@ $ for r in 6.1.3 4.3; do echo "== $r"; \
 ```
 
 ```
-$ CHARON_ROOT=$PWD xmake l tools/corpus/cache-census.lua WK 6.1.3 4.3
-6.1.3     ~/.charon/dyld/6.1.3/dyld_shared_cache_armv7
+$ REVENANT_ROOT=$PWD xmake l tools/corpus/cache-census.lua WK 6.1.3 4.3
+6.1.3     ~/.revenant/dyld/6.1.3/dyld_shared_cache_armv7
          images 524, of which naming WK 0
          classes 11378, of which WK* 1 (WKQuadObject)
          protocols 1171, of which WK* 0
-4.3       ~/.charon/dyld/4.3/dyld_shared_cache_armv7
+4.3       ~/.revenant/dyld/4.3/dyld_shared_cache_armv7
          images 354, of which naming WK 0
          classes 7187, of which WK* 1 (WKQuadObject)
          protocols 564, of which WK* 0
@@ -133,7 +133,7 @@ defined by `UIWebViewWebViewDelegate` -- the private object that sits between th
 
 ```
 $ for r in 6.1.3 4.3; do echo "== $r"; \
-    CHARON_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua ~/.charon/dyld/$r/dyld_shared_cache_armv7 | \
+    REVENANT_ROOT=$PWD xmake l tools/corpus/objc-inventory.lua ~/.revenant/dyld/$r/dyld_shared_cache_armv7 | \
     awk -F'\t' '$1=="class" && ($5 ~ /runJavaScript(Alert|Confirm|TextInput)Panel|didReceiveServerRedirectForProvisionalLoadForFrame|decidePolicyFor(MIMEType|NewWindowAction)|resource:didReceiveAuthenticationChallenge/){print "  " $2}'; done
 == 6.1.3
   NSHTMLWebDelegate
@@ -175,8 +175,8 @@ The two rows the release carries nothing for at all, at either rung:
 
 ```
 $ for r in 6.1.3 4.3; do printf '%s  selector webViewDidClose: %s  selectors naming a web content process: %s\n' \
-    "$r" "$(grep -cxF 'webViewDidClose:' ~/.charon/dyld/$r/selectors_armv7.txt)" \
-                "$(grep -c WebContentProcess ~/.charon/dyld/$r/selectors_armv7.txt)"; done
+    "$r" "$(grep -cxF 'webViewDidClose:' ~/.revenant/dyld/$r/selectors_armv7.txt)" \
+                "$(grep -c WebContentProcess ~/.revenant/dyld/$r/selectors_armv7.txt)"; done
 6.1.3  selector webViewDidClose: 0  selectors naming a web content process: 0
 4.3    selector webViewDidClose: 0  selectors naming a web content process: 0
 ```

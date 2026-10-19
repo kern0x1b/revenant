@@ -77,7 +77,7 @@ printing a number.
 
 ## The 6.1.3 cache, and what its numbers do not mean
 
-The whole-cache selector list for 6.1.3 (`~/.charon/dyld/6.1.3/selectors_armv7.txt`, 113981 entries) contains
+The whole-cache selector list for 6.1.3 (`~/.revenant/dyld/6.1.3/selectors_armv7.txt`, 113981 entries) contains
 **10 of the 22** names: albumTrackNumber, albumTrackCount, discNumber, discCount, lyrics, isCompilation,
 comments, assetURL, dateAdded, isPreorder. Both controls hold - `prepareToPlay` found, a nonsense name absent.
 

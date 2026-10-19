@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to Katabasis. This project is a research prototype; versions
+All notable changes to the recompiler. This project is a research prototype; versions
 are informal.
 
 ## Unreleased

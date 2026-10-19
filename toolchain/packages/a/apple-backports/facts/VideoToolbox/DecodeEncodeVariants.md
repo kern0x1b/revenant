@@ -19,7 +19,7 @@ _VTCompressionSessionEncodeFrameWithOutputHandler                      4.3=0  6.
 ```
 
 The 16.4 SDK declares none of the six either; its `VTDecompressionSession.h` and `VTCompressionSession.h`
-name them nowhere, so all six are declared in `CharonVideoToolbox.h`, transcribed from SDK 26.2.
+name them nowhere, so all six are declared in `RevenantVideoToolbox.h`, transcribed from SDK 26.2.
 
 ## The four that are carried, and the refusal each one earns
 
@@ -157,7 +157,7 @@ attached rather than with a remedy that would fail the same way twice.
 
 ## Source
 
-- The ladder: `tools/corpus/dump-cache.lua` over `~/.charon/dyld/4.3/dyld_shared_cache_armv7` (read-only) and
+- The ladder: `tools/corpus/dump-cache.lua` over `~/.revenant/dyld/4.3/dyld_shared_cache_armv7` (read-only) and
   v-audio's 6.1.3 armv7 dump.
 - SDK 26.2 `VTDecompressionSession.h:388-480` and `:484-566`, `VTCompressionSession.h:349-428`; `VTErrors.h:42`
   and `:45` for the two codes.

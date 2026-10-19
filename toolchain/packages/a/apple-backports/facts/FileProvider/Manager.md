@@ -74,7 +74,7 @@ red against -1005 and -2001.
 and `-[NSFileProviderManager requestDownloadForItemWithIdentifier:requestedRange:completionHandler:]`
 are rows in `coordination/corpus/ledger/FileProvider.tsv` at 11.0, and **the 26.2 header does not
 declare either of them** — measured by reading `NSFileProviderManager.h` out of the 26.2 SDK
-(`charon/.agent-work/sdk-26.2`) for every declaration. They are 16.4-era declarations that 26.2 no
+(`toolchain/.agent-work/sdk-26.2`) for every declaration. They are 16.4-era declarations that 26.2 no
 longer carries, so the target SDK has no version for them and they get **no registry row**: a row
 would have to carry an `introduced` this SDK does not say. The ledger is not wrong to list them —
 it records the 16.4 surface — and the disagreement is recorded here rather than settled by picking
