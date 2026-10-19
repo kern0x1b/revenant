@@ -13,5 +13,11 @@ The workspace contract (`$HOME/Git/projects/ios/AGENTS.md`) applies. Inside hade
 - Third-party code is a package of `third_party/packages/<letter>/<name>/`: the upstream by url and commit or
   checksum, our changes as `git format-patch` files in its `patches/`, applied in order by `add_patches`. Never
   commit a copy of upstream code.
+- Skills live in `.agents/skills/` at the top of hades (`.claude/skills` links there); a member keeps none of its
+  own. xmake's own skills come from the `xmake-skills` plugin pinned in `.claude/settings.json`, never a copy.
+  psychopomp is a plugin of the hades marketplace (`.claude-plugin/marketplace.json`).
+- Workspace-wide procedures are skills in `$HOME/Git/projects/ios/.agents/skills/`: `device-session`,
+  `canon-install`, `patch-merge`, `worktree-sweep`, `session-handoff`, `band-launch`, `band-supervise`. A session
+  started inside hades does not list them: read `<name>/SKILL.md` there.
 - Before handing a change over: `xmake l tools/check.lua <member>` for each member it touches that has a check
   there, then that member's own gate (charon's `backports-gate` skill, shade's boot skill).

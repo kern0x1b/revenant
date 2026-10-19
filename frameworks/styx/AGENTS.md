@@ -88,7 +88,5 @@ that applies to all projects here lives in `$HOME/Git/projects/ios/AGENTS.md`
 (§2–§6); read it for rules on the agent work area (`.agent-work/`), git
 worktrees (`.agent-work/worktrees/`), delegation, safety, and shared skills.
 
-Workspace-wide procedures are skills in `$HOME/Git/projects/ios/.agents/skills/`: `device-session` (claim, run, install, launch, tap on a real device), `canon-install`, `patch-merge`, `worktree-sweep`, `session-handoff`, `band-launch`, `band-supervise`. A session started inside this repository does not list them — read `<name>/SKILL.md` there.
-
 [Charon]: https://github.com/kern0x1b/charon
 [Eidolon]: https://github.com/kern0x1b/eidolon

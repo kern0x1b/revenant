@@ -48,9 +48,7 @@ through SpringBoard; the engine tests are a console binary and go through `run`.
 A change is done when the engine tests, every snapshot and the ledger check (`coverage.lua --check`, after
 `bridge/api-surface.sh`) pass. Anything that
 touches layout, gestures, animation, dialogs or navigation also gets a run on hardware (an iPad 2 or an iPhone 4S on
-iOS 6.1.3): the repository skill `device-ssh-access` says how to reach one from here.
-
-Workspace-wide procedures are skills in `$HOME/Git/projects/ios/.agents/skills/`: `device-session` (claim, run, install, launch, tap on a real device), `canon-install`, `patch-merge`, `worktree-sweep`, `session-handoff`, `band-launch`, `band-supervise`. A session started inside this repository does not list them — read `<name>/SKILL.md` there.
+iOS 6.1.3): the skill `eidolon-device` says how to reach one from here.
 
 ## Rules that matter
 

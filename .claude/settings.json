@@ -1,0 +1,29 @@
+{
+  "env": {
+    "BASH_DEFAULT_TIMEOUT_MS": "600000",
+    "BASH_MAX_TIMEOUT_MS": "600000"
+  },
+  "permissions": {
+    "deny": [
+      "Bash(git reset --hard *)",
+      "Bash(git push --force *)",
+      "Bash(git push -f *)",
+      "Bash(git push --force-with-lease *)",
+      "Bash(git checkout -- *)",
+      "Bash(git clean -f *)"
+    ]
+  },
+  "autoMemoryEnabled": false,
+  "extraKnownMarketplaces": {
+    "xmake-skills": {
+      "source": {
+        "source": "github",
+        "repo": "xmake-io/xmake-skills",
+        "ref": "ef67caa46353af102a9914a82bfed93f952ca8aa"
+      }
+    }
+  },
+  "enabledPlugins": {
+    "xmake-skills@xmake-skills": true
+  }
+}

@@ -2,7 +2,7 @@
 
 Orientation for anyone — human or AI assistant — working on this repository.
 Read it before making changes. Task-specific playbooks live as skills under
-`.agents/skills/` (build, deploy, test, debug, device-ssh-access); this file is
+hades' `.agents/skills/` (revenant-build, revenant-deploy, revenant-test, revenant-debug, revenant-device); this file is
 the map.
 
 ## What this is
@@ -114,7 +114,6 @@ CMake that Charon writes from `charon.toml`, like the dylibs beside it — that 
 - Deploy: `charon install` packages, copies each .deb to `/tmp`, runs
   `dpkg -i … && rm`, refuses a .deb whose app would replace another bundle id,
   and runs `su mobile -c uicache` when the package holds an app; `charon deploy`
-  for the engine alone. Claim the device first (`device-ssh-access`).
+  for the engine alone. Claim the device first (`revenant-device`).
 - Documentation: `docs/` (`architecture.md`, `network.md`, `compatibility.md`, `building.md`, `memory-and-caches.md`).
-- Playbooks: `.agents/skills/{build,deploy,test,debug,device-ssh-access}/SKILL.md`.
-- Workspace-wide procedures are skills in `$HOME/Git/projects/ios/.agents/skills/`: `device-session` (claim, run, install, launch, tap on a real device), `canon-install`, `patch-merge`, `worktree-sweep`, `session-handoff`, `band-launch`, `band-supervise`. A session started inside this repository does not list them — read `<name>/SKILL.md` there.
+- Playbooks: hades' `.agents/skills/revenant-{build,deploy,test,debug,device}/SKILL.md`.

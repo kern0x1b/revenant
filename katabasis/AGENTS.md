@@ -77,7 +77,7 @@ repository.
   (`coordination/crutches.md`, the xmake addon lock entry).
 - **The payload under `~/.xmake/addons` is never edited by hand**: no copying files into it, no
   `xmake addon --remove`. A stale payload is diagnosed read-only
-  (`.agents/skills/xmake-addon-refresh`) and handed to the coordinator.
+  (the skill `katabasis-addon-refresh`) and handed to the coordinator.
 
 ## Devices
 
@@ -87,5 +87,3 @@ install, launch, tap, respring, cleanup — is the workspace skill `device-sessi
 in `$HOME/Git/projects/ios/charon/COORDINATION.md` §5 "Traps". Specific to this repository: the
 4S carries the owner's real Telegram account — never read, log, or forward chat or contact
 content, never tap a chat-list row, and don't leave Telegram open after a check.
-
-Workspace-wide procedures are skills in `$HOME/Git/projects/ios/.agents/skills/`: `device-session` (claim, run, install, launch, tap on a real device), `canon-install`, `patch-merge`, `worktree-sweep`, `session-handoff`, `band-launch`, `band-supervise`. A session started inside this repository does not list them — read `<name>/SKILL.md` there.

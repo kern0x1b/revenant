@@ -18,7 +18,7 @@ and the two rules every target uses (`shade.module`: C++20, the warnings, the mo
 public include root, LTO in release; `shade.glsl`: the Vulkan shaders through `shade_glsl_to_spirv`, the host tool in `tools/glsl` on the glslang
 library, which writes each shader as the C word list the renderer includes; it is a build fence, so the renderer's
 shaders wait for it). The program is
-`build/macosx/arm64/release/shade`; the skill `shade-boot` (`.agents/skills/shade-boot/SKILL.md`)
+`build/macosx/arm64/release/shade`; the skill `shade-boot` (hades' `.agents/skills/shade-boot/SKILL.md`)
 builds it, boots a root filesystem and reads the log.
 
 The kernel's libraries share `shade_kernel_api`, a target with no sources that carries the kernel's
@@ -30,8 +30,6 @@ ARMv6 linker (`tools/bootstrap_armv6_ld.sh`) and a root filesystem to link again
 `xmake build shade_install_guest_dns_probe` puts it and its launchd job into that root filesystem.
 Persistent IR artifacts are keyed on `DYNARMIC_BUILD_FINGERPRINT`, which the dynarmic package defines
 from its commit and its patches' checksums.
-
-Workspace-wide procedures are skills in `$HOME/Git/projects/ios/.agents/skills/`: `device-session` (claim, run, install, launch, tap on a real device), `canon-install`, `patch-merge`, `worktree-sweep`, `session-handoff`, `band-launch`, `band-supervise`. A session started inside this repository does not list them — read `<name>/SKILL.md` there.
 
 ## Layout
 
