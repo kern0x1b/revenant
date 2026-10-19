@@ -19,5 +19,7 @@ consume charon as an xmake repository.
 Forks of third-party code are kept as an upstream pin plus our patches, not as copies (`third_party/<name>/UPSTREAM`
 and `patches/`), applied by a Lua step of the build.
 
-Each member's history was brought in with `git subtree add` and is kept whole: `git log -- charon/` shows charon's
-commits. Building and testing follow each member's own README.
+Each member's history was brought in with `git subtree add` and is kept whole, as the second parent of the commit
+that brought it in ("Bring <member> into hades with its history"). Those commits name their files without the
+member's folder, so the history before the move is read from that parent: `git log <bring-commit>^2 -- <path in the
+member>`. Building and testing follow each member's own README.
