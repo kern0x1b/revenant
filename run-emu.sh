@@ -37,7 +37,8 @@ if [ "$count" -gt 1 ]; then
 fi
 folder=""
 if [ "$count" = 1 ]; then
-  folder=$(python3 -c 'import json,sys; print(json.load(open(sys.argv[1])).get("stdout","").rsplit("/results/",1)[0])' "$(cat "$out/.verdicts")" 2>/dev/null || true)
+  # the text before the last "/results/" of the verdict's stdout, as rsplit("/results/", 1)[0] gives it
+  folder=$(jq -r '(.stdout // "") | split("/results/") | if length > 1 then .[:-1] | join("/results/") else (.[0] // "") end' "$(cat "$out/.verdicts")" 2>/dev/null || true)
 fi
 [ -n "$folder" ] || folder=$(sed -n 's/^run folder //p' "$out/run.log" | tail -1)
 if [ -z "$folder" ] || [ ! -d "$folder/results" ]; then
