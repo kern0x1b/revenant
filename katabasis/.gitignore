@@ -1,0 +1,87 @@
+# Build artifacts and large binaries — this repo tracks SOURCE only.
+
+# Emulator runs, caches, clones (gigabytes)
+emu/*.noindex/
+*.noindex/
+emu/runs.noindex/
+emu/cache.noindex/
+emu/tmp.noindex/
+
+# Translated apps, arm64 input dumps, unpacked payloads. Ignore the workspace contents but keep
+# the includes headers -- they are source (per-app framework/C surface + the shared common one).
+targets/*
+!targets/*-includes.h
+oba
+oba-*
+!oba-includes.h
+
+# Prebuilt dependencies and SDK bits: the checkouts themselves (fetched, not written here), but not
+# the patches this band's work applies to them on top of a pinned base commit -- those are source.
+/deps/*
+!/deps/patches
+swift/
+
+# Per-build output directories
+out/
+out2/
+*-out*/
+**/out/
+**/out2/
+p*/switch/
+xlate/build/
+
+# Object/bitcode/library artifacts
+*.o
+*.a
+*.bc
+*.dylib
+*.so
+*.dSYM/
+
+# WIP backups (stopgap copies)
+.wip-backups/
+
+# Coverage / bitcode scratch
+coverage/
+bitcode/
+
+# macOS cruft
+.DS_Store
+
+# Emulator binary (prebuilt)
+emu/ilemu
+emu/*/ilemu
+
+# Scratch logs, locks, xmake caches, packaged apps
+*.out
+*.log
+*.lock
+*.ipa
+.xmake/
+emu/probe/
+**/PkgInfo
+
+# Generated translator output left in test dirs
+p*/guest.c
+p*/host.c
+p*/passthrough.txt
+
+# Personal-data floor — never commit local paths, device or credential details
+device.env
+*.env
+**/device.env
+
+# Agent work area — runtime-independent, never source
+/.agent-work/
+
+# Run output — device logs, screenshots, script reports, generated tables. It goes to
+# .agent-work/, never into a commit (AGENTS.md, Conventions).
+device-logs/
+*.absent.tsv
+*.png
+*.ips
+*.crash
+p*/report.txt
+p*/imports.txt
+perf/results.txt
+survey/*.txt

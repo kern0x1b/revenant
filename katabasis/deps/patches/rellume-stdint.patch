@@ -1,0 +1,13 @@
+diff --git a/src/instr.h b/src/instr.h
+index 5233e78..8c16eef 100644
+--- a/src/instr.h
++++ b/src/instr.h
+@@ -24,6 +24,8 @@
+ #ifndef RELLUME_INSTR_H
+ #define RELLUME_INSTR_H
+ 
++#include <cstdint>
++
+ #ifdef RELLUME_WITH_X86_64
+ #include <fadec.h>
+ #endif // RELLUME_WITH_X86_64

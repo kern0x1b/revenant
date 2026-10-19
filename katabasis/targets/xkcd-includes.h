@@ -1,0 +1,55 @@
+#import <UIKit/UIKit.h>
+#import <Foundation/Foundation.h>
+#import <CoreGraphics/CoreGraphics.h>
+#import <QuartzCore/QuartzCore.h>
+#import <CoreData/CoreData.h>
+#import <CoreText/CoreText.h>
+#import <ImageIO/ImageIO.h>
+#import <Social/Social.h>
+#import <Accounts/Accounts.h>
+#import <MobileCoreServices/MobileCoreServices.h>
+#import <CFNetwork/CFNetwork.h>
+#import <Security/Security.h>
+#import <SystemConfiguration/SystemConfiguration.h>
+#import <MessageUI/MessageUI.h>
+#import <AudioToolbox/AudioToolbox.h>
+#import <AVFoundation/AVFoundation.h>
+#import <objc/runtime.h>
+#include <stdio.h>
+// libSystem C imports Realm and friends pull in; declaring them lets xlgen bridge them
+// instead of trapping (all present on iOS 6's libSystem).
+#include <pthread.h>
+#include <CommonCrypto/CommonCrypto.h>
+#include <CommonCrypto/CommonCryptor.h>
+#include <CommonCrypto/CommonHMAC.h>
+#include <CommonCrypto/CommonDigest.h>
+#include <libkern/OSAtomic.h>
+#include <mach-o/dyld.h>
+#include <mach-o/arch.h>
+#include <execinfo.h>
+#include <asl.h>
+// libc++/libc++abi's own libSystem calls (wide-char, locale, syslog) so they bridge, not trap.
+#include <syslog.h>
+#include <wchar.h>
+#include <wctype.h>
+#include <xlocale.h>
+// Realm/Core Data/SQLite static-init + runtime surface (all present on iOS 6's libSystem).
+#include <sys/mman.h>
+#include <sys/stat.h>
+#include <sys/sysctl.h>
+#include <sys/mount.h>
+#include <sys/event.h>
+#include <sys/time.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <dlfcn.h>
+#include <semaphore.h>
+#include <net/if.h>
+#include <mach/mach.h>
+#include <mach/mach_time.h>
+#include <mach-o/getsect.h>
+#include <zlib.h>
+#include <objc/objc-sync.h>
+#include <sys/utsname.h>
+#include <sqlite3.h>
+#include "common-includes.h"

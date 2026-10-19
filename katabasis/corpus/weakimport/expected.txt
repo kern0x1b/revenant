@@ -1,0 +1,19 @@
+getppid present
+execl present
+os_unfair_lock_lock absent
+execl -1 ENOENT
+execle -1 ENOENT
+execlp -1 ENOENT
+execv -1 ENOENT
+execve -1 ENOENT
+execvp -1 ENOENT
+execvP -1 ENOENT
+execv a b
+execv exited 0
+execvp a b
+execvp exited 0
+execvP a b
+execvP exited 0
+execlp a b
+execlp exited 0
+arg0 arg1 env

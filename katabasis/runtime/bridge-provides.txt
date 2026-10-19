@@ -1,0 +1,4 @@
+_objc_readClassPair
+__objc_realizeClassFromSwift
+_objc_setHook_lazyClassNamer
+_objc_setHook_getImageName

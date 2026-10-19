@@ -1,0 +1,45 @@
+static: self is the class: 1
+static: name: XLPairStatic
+static: superclass: NSObject, the expected one: 1
+static: isa is the metaclass: 1, and a metaclass: 1
+static: class method: 141
+static: instances respond: 1, the class responds to the class method: 1
+static: instance class is the class: 1
+static: instance method: 42
+static: [instance class] is the class: 1
+static: subclass of NSObject: 1
+listed: found by name: 1
+listed: root found by name: 1
+listed: self is the class: 1
+listed: name: XLPairListed
+listed: superclass: XLPairRoot, the expected one: 1
+listed: isa is the metaclass: 1, and a metaclass: 1
+listed: class method: 141
+listed: instances respond: 1, the class responds to the class method: 1
+listed: instance class is the class: 1
+listed: instance method: 42
+listed: [instance class] is the class: 1
+readClassPair: returns the class: 1
+readClassPair: found by name: 1
+built: self is the class: 1
+built: name: XLPairBuilt
+built: superclass: NSObject, the expected one: 1
+built: isa is the metaclass: 1, and a metaclass: 1
+built: class method: 141
+built: instances respond: 1, the class responds to the class method: 1
+built: instance class is the class: 1
+built: instance method: 42
+built: [instance class] is the class: 1
+built: subclass of NSObject: 1
+subclass: returns the class: 1
+subclass: superclass is the built one: 1
+subclass: inherited method: 42
+subclass: own method: 43
+subclass: inherited class method: 141
+subclass: instance is a kind of the built class: 1
+realizeClassFromSwift: returns the class: 1
+realizeClassFromSwift: found by name: 1
+realizeClassFromSwift: superclass: NSObject
+lazy: returns the class: 1
+lazy: name: XLPairLazy
+lazy: instance method: 42

@@ -1,0 +1,36 @@
+diff --git a/src/a64/main.cc b/src/a64/main.cc
+index f8be8b9..a14f37d 100644
+--- a/src/a64/main.cc
++++ b/src/a64/main.cc
+@@ -316,6 +316,17 @@ bool Lifter::Lift(const Instr& inst) {
+             SetGp(a64.rt, /*w32=*/false, res);
+             break;
+         }
++        // TPIDRRO_EL0, read-only from EL0 (no MSR case: real userspace code never writes it,
++        // only the kernel does from EL1 at context-switch time -- e.g. Darwin's per-thread TSD
++        // block, which Swift's exclusivity-checking runtime reads through it: `mrs x24,
++        // TPIDRRO_EL0` then a fixed-offset load, previously "cannot decode function" here since
++        // nothing answered the mrs. The host slot is set up per guest thread in runtime/runtime.c.
++        case 0xde83: {// TPIDRRO_EL0
++            unsigned idx = SptrIdx::aarch64::TPIDRRO_EL0;
++            auto res = irb.CreateLoad(irb.getInt64Ty(), fi.sptr[idx]);
++            SetGp(a64.rt, /*w32=*/false, res);
++            break;
++        }
+         case 0xda10: {// NZCV (bits 31-28)
+             llvm::Value* nzcv = irb.getInt64(0);
+             nzcv = irb.CreateOr(nzcv, irb.CreateShl(irb.CreateZExt(GetFlag(ArchReg::SF), irb.getInt64Ty()), 31)); // nzcv |= n << 31
+
+diff --git a/data/rellume/cpustruct-aarch64.json b/data/rellume/cpustruct-aarch64.json
+index b44a8ce..03e7233 100644
+--- a/data/rellume/cpustruct-aarch64.json
++++ b/data/rellume/cpustruct-aarch64.json
+@@ -38,7 +38,7 @@
+     {"name": "x30", "size": 8, "reg": ["GP(30)", "I64"], "export": true},
+     {"name": "sp",  "size": 8, "reg": ["GP(31)", "I64"], "export": true},
+     {"name": "tpidr_el0", "size": 8, "reg": ["INVALID", "I64"]},
+-    {               "size": 8},
++    {"name": "tpidrro_el0", "size": 8, "reg": ["INVALID", "I64"], "export": true},
+ 
+     {"name": "v0",  "size": 16, "reg": ["VEC(0)", "V2I64"], "export": true},
+     {"name": "v1",  "size": 16, "reg": ["VEC(1)", "V2I64"], "export": true},

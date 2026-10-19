@@ -1,0 +1,20 @@
+diff --git a/decode.c b/decode.c
+index fcabcc0..b35f63d 100644
+--- a/decode.c
++++ b/decode.c
+@@ -468,9 +468,12 @@ static Inst find_bfm_alias(Op op, bool w32, Reg rd, Reg rn, u8 immr, u8 imms) {
+ 		case  7: inst.op = A64_EXTEND; inst.extend.type = (sign) ? SXTB : UXTB; return inst;
+ 		case 15: inst.op = A64_EXTEND; inst.extend.type = (sign) ? SXTH : UXTH; return inst;
+ 		case 31:
+-			inst.op = A64_EXTEND;
+-			inst.extend.type = SXTW;
+-			return (sign) ? inst : errinst("find_bfm_alias: there is no UXTW instruction");
++			if (sign) {
++				inst.op = A64_EXTEND;
++				inst.extend.type = SXTW;
++				return inst;
++			}
++			break;
+ 		}
+ 	}
+ 

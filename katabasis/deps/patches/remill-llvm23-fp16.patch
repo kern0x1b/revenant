@@ -1,0 +1,41 @@
+diff --git a/lib/BC/Util.cpp b/lib/BC/Util.cpp
+index dd02c75..05d18a6 100644
+--- a/lib/BC/Util.cpp
++++ b/lib/BC/Util.cpp
+@@ -1933,6 +1933,10 @@ llvm::Value *LoadFromMemory(const IntrinsicTable &intrinsics,
+ 
+   switch (type->getTypeID()) {
+     case llvm::Type::HalfTyID: {
++#if LLVM_VERSION_MAJOR >= 23
++      return ir.CreateBitCast(ir.CreateCall(intrinsics.read_memory_16, args_2),
++                              type);
++#else
+       llvm::Type *types[] = {llvm::Type::getFloatTy(context)};
+ #if LLVM_VERSION_MAJOR >= 21
+       auto converter = llvm::Intrinsic::getOrInsertDeclaration(
+@@ -1944,6 +1948,7 @@ llvm::Value *LoadFromMemory(const IntrinsicTable &intrinsics,
+       llvm::Value *conv_args[] = {
+           ir.CreateCall(intrinsics.read_memory_16, args_2)};
+       return ir.CreateFPTrunc(ir.CreateCall(converter, conv_args), type);
++#endif  // LLVM_VERSION_MAJOR
+     }
+ 
+     case llvm::Type::FloatTyID:
+@@ -2116,6 +2121,9 @@ llvm::Value *StoreToMemory(const IntrinsicTable &intrinsics,
+   auto type = val_to_store->getType();
+   switch (type->getTypeID()) {
+     case llvm::Type::HalfTyID: {
++#if LLVM_VERSION_MAJOR >= 23
++      args_3[2] = ir.CreateBitCast(val_to_store, llvm::Type::getInt16Ty(context));
++#else
+       llvm::Type *types[] = {llvm::Type::getFloatTy(context)};
+ #if LLVM_VERSION_MAJOR >= 21
+       auto converter = llvm::Intrinsic::getOrInsertDeclaration(
+@@ -2128,6 +2136,7 @@ llvm::Value *StoreToMemory(const IntrinsicTable &intrinsics,
+           ir.CreateFPExt(val_to_store, llvm::Type::getFloatTy(context))};
+       args_3[2] = ir.CreateCall(converter, conv_args);
+ 
++#endif  // LLVM_VERSION_MAJOR
+       return ir.CreateCall(intrinsics.write_memory_16, args_3);
+     }
+ 
