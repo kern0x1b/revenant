@@ -332,7 +332,7 @@ void CompatibilityKernel::dispatch_mach(Cpu& cpu, std::uint32_t trap)
                     PendingTimerKind::MachWaitUntil, std::nullopt, false,
                     std::move(bootstrap_retry) };
             process_.waiting_for_events = true;
-            cpu.halt(Umbra::HaltReason::UserDefined5);
+            cpu.halt(Dynarmic::HaltReason::UserDefined5);
         }
         return;
     }
@@ -372,7 +372,7 @@ void CompatibilityKernel::dispatch_mach(Cpu& cpu, std::uint32_t trap)
                 PendingTimer { deadline, PendingTimerKind::ThreadSwitch,
                     std::nullopt, false, std::nullopt };
             process_.waiting_for_events = true;
-            cpu.halt(Umbra::HaltReason::UserDefined5);
+            cpu.halt(Dynarmic::HaltReason::UserDefined5);
             return;
         }
 
@@ -382,7 +382,7 @@ void CompatibilityKernel::dispatch_mach(Cpu& cpu, std::uint32_t trap)
         scheduler_yields_[cpu.processor_id()] =
             SchedulerYieldRequest { option == switch_option_depress,
                 option_time_ms };
-        cpu.halt(Umbra::HaltReason::UserDefined8);
+        cpu.halt(Dynarmic::HaltReason::UserDefined8);
         return;
     }
     case darwin::mach::clock::sleep_trap: {
@@ -442,7 +442,7 @@ void CompatibilityKernel::dispatch_mach(Cpu& cpu, std::uint32_t trap)
                 PendingTimer { deadline, PendingTimerKind::ClockSleep,
                     wakeup_time_address, calendar_clock, std::nullopt };
             process_.waiting_for_events = true;
-            cpu.halt(Umbra::HaltReason::UserDefined5);
+            cpu.halt(Dynarmic::HaltReason::UserDefined5);
             return;
         }
 
@@ -565,7 +565,7 @@ void CompatibilityKernel::dispatch_mach(Cpu& cpu, std::uint32_t trap)
         scheduler_yields_[cpu.processor_id()] =
             SchedulerYieldRequest { true, quantum_milliseconds };
         registers[0] = 1;
-        cpu.halt(Umbra::HaltReason::UserDefined8);
+        cpu.halt(Dynarmic::HaltReason::UserDefined8);
         return;
     }
     case darwin::mach::scheduler::swtch_trap: {
@@ -578,7 +578,7 @@ void CompatibilityKernel::dispatch_mach(Cpu& cpu, std::uint32_t trap)
         scheduler_yields_[cpu.processor_id()] =
             SchedulerYieldRequest { false, 0 };
         registers[0] = 1;
-        cpu.halt(Umbra::HaltReason::UserDefined8);
+        cpu.halt(Dynarmic::HaltReason::UserDefined8);
         return;
     }
     default:

@@ -131,7 +131,7 @@ bool CompatibilityKernel::dispatch_mach_thread_lifecycle_message(
         pending_mach_receives_.erase(cpu.processor_id());
         pending_psynch_waits_.erase(cpu.processor_id());
         cpu.registers()[0] = darwin::mach::success;
-        cpu.halt(Umbra::HaltReason::UserDefined1);
+        cpu.halt(Dynarmic::HaltReason::UserDefined1);
         return true;
     }
 

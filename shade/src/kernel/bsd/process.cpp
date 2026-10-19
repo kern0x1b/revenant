@@ -284,7 +284,7 @@ void CompatibilityKernel::dispatch_bsd_process(Cpu& cpu, std::uint32_t number)
     case 1: // exit
         exit_process(registers[0]);
         bsd_success(cpu, 0);
-        cpu.halt(Umbra::HaltReason::UserDefined1);
+        cpu.halt(Dynarmic::HaltReason::UserDefined1);
         return;
     case 2: { // fork
         const auto child = fork_handler_ ? fork_handler_(cpu) : std::nullopt;
@@ -387,7 +387,7 @@ void CompatibilityKernel::dispatch_bsd_process(Cpu& cpu, std::uint32_t number)
                       " target=" + std::to_string(target_pid) + "\n");
         process_.waiting_for_events = true;
         bsd_success(cpu, 0);
-        cpu.halt(Umbra::HaltReason::UserDefined5);
+        cpu.halt(Dynarmic::HaltReason::UserDefined5);
         return;
     }
     case 20: // getpid
@@ -662,7 +662,7 @@ void CompatibilityKernel::dispatch_bsd_process(Cpu& cpu, std::uint32_t number)
             return;
         }
         performance_counters().record_exec();
-        cpu.halt(Umbra::HaltReason::UserDefined6);
+        cpu.halt(Dynarmic::HaltReason::UserDefined6);
         return;
     }
     case 96: // setpriority

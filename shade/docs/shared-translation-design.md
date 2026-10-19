@@ -145,11 +145,11 @@ The descent session saw the same crash on 5.0 and 5.1.1, which fits a fault of t
 
 ## Building HEAD from commits alone
 
-Shade at upstream 411248c calls arm64 umbra interfaces (`NativeCodeSlab`,
+Shade at upstream 411248c calls arm64 dynarmic interfaces (`NativeCodeSlab`,
 `Jit::Precompile`, `Jit::GeneratePortableIR`, `Jit::GetDispatchCounters`, ...) whose arm64
-implementations exist only in Charon's `packages/i/shade/patches/2026.09.16/umbra.patch`; the
-pinned umbra implements them for x64 only. So an arm64 Mac cannot link HEAD from the submodule
+implementations exist only in Charon's `packages/i/shade/patches/2026.09.16/dynarmic.patch`; the
+pinned dynarmic implements them for x64 only. So an arm64 Mac cannot link HEAD from the submodule
 as committed. The reproducible control is upstream 411248c + Charon's `shade.patch` +
-`umbra.patch` - what the `shade` package builds - and the lab tree's own work is its difference
+`dynarmic.patch` - what the `shade` package builds - and the lab tree's own work is its difference
 from that, not from HEAD. The macOS portability that HEAD itself lacked (stat timestamps, xattr,
 libplist iterator, `madvise`, `shared_ptr::unique`) is committed as 4e39ea1 and 63b62e4.

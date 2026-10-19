@@ -635,7 +635,7 @@ bool CompatibilityKernel::dispatch_bsd_pthread(Cpu& cpu, std::uint32_t number)
         } else {
             bsd_success(cpu, 0);
         }
-        cpu.halt(Umbra::HaltReason::UserDefined1);
+        cpu.halt(Dynarmic::HaltReason::UserDefined1);
         return true;
     }
     case 366: { // bsdthread_register, Darwin 10 ARM32 v1
@@ -789,7 +789,7 @@ bool CompatibilityKernel::dispatch_bsd_pthread(Cpu& cpu, std::uint32_t number)
             output_.write(
                 "[pthread] workqueue park pid=" + std::to_string(process_.pid) +
                 " slot=" + std::to_string(processor) + "\n");
-            cpu.halt(Umbra::HaltReason::UserDefined5);
+            cpu.halt(Dynarmic::HaltReason::UserDefined5);
             return true;
         }
 

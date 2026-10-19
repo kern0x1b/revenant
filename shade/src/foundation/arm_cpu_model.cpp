@@ -152,7 +152,7 @@ namespace {
             std::uint32_t, std::uint32_t instruction) const noexcept override
         {
             // Keep the common static issue baseline for the ARM/Thumb
-            // instructions shared with ARM1176. Umbra supplies the ARMv7
+            // instructions shared with ARM1176. Dynarmic supplies the ARMv7
             // decoder; this model is intentionally not a microarchitectural
             // Cortex-A8/A9 simulator.
             if (!thumb) {

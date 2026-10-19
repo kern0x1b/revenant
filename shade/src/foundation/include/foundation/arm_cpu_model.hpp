@@ -59,7 +59,7 @@ enum class ArmUnpredictableInstructionPolicy : std::uint8_t {
 }
 
 // A device-specific ARM core model. It selects both the decoder architecture
-// and a static instruction-issue baseline. Umbra queries timing while
+// and a static instruction-issue baseline. Dynarmic queries timing while
 // translating a block and embeds the result in its cycle count, so this
 // abstraction does not add a virtual call to execution of an already compiled
 // block. Cache, TLB, pipeline dependency, and branch-predictor state remain

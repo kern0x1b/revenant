@@ -21,7 +21,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 
-#include <umbra/interface/A32/a32.h>
+#include <dynarmic/interface/A32/a32.h>
 
 #include "../support.hpp"
 
@@ -483,7 +483,7 @@ bool CompatibilityKernel::dispatch_bsd_record_locking(
     process_.waiting_for_events = true;
     output_.write("[vfs] fcntl lock wait pid=" + std::to_string(process_.pid) +
                   " fd=" + std::to_string(fd) + "\n");
-    cpu.halt(Umbra::HaltReason::UserDefined5);
+    cpu.halt(Dynarmic::HaltReason::UserDefined5);
     return true;
 }
 
@@ -543,7 +543,7 @@ bool CompatibilityKernel::dispatch_bsd_filesystem_locking(
     process_.waiting_for_events = true;
     output_.write("[vfs] flock wait pid=" + std::to_string(process_.pid) +
                   " fd=" + std::to_string(fd) + "\n");
-    cpu.halt(Umbra::HaltReason::UserDefined5);
+    cpu.halt(Dynarmic::HaltReason::UserDefined5);
     return true;
 }
 

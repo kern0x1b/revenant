@@ -1600,7 +1600,7 @@ void CompatibilityKernel::dispatch_bsd_events(Cpu& cpu, std::uint32_t number)
             "[network] poll wait pid=" + std::to_string(process_.pid) +
             " nfds=" + std::to_string(descriptor_count) + "\n");
         bsd_success(cpu, 0);
-        cpu.halt(Umbra::HaltReason::UserDefined5);
+        cpu.halt(Dynarmic::HaltReason::UserDefined5);
         return;
     }
     case 93: { // select
@@ -1740,7 +1740,7 @@ void CompatibilityKernel::dispatch_bsd_events(Cpu& cpu, std::uint32_t number)
             "[network] select wait pid=" + std::to_string(process_.pid) +
             " nfds=" + std::to_string(descriptor_count) + "\n");
         bsd_success(cpu, 0);
-        cpu.halt(Umbra::HaltReason::UserDefined5);
+        cpu.halt(Dynarmic::HaltReason::UserDefined5);
         return;
     }
     case 202: { // __sysctl

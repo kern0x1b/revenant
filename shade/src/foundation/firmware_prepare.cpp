@@ -25,7 +25,7 @@
 #include <utility>
 #include <vector>
 
-#include <umbra/interface/exclusive_monitor.h>
+#include <dynarmic/interface/exclusive_monitor.h>
 
 #include "foundation/address_space.hpp"
 #include "foundation/cpu.hpp"
@@ -615,7 +615,7 @@ FirmwarePrepareStats FirmwarePreparer::run()
             stats.prepared_memory_bytes =
                 std::max(stats.prepared_memory_bytes, firmware_memory);
 
-            Umbra::ExclusiveMonitor monitor { 1U };
+            Dynarmic::ExclusiveMonitor monitor { 1U };
             CpuCluster cluster { 1U, 1U, memory, 1U, cpu_model_, monitor, 0U,
                 artifacts };
             const auto slab_bytes =

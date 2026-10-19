@@ -4,7 +4,7 @@
 
 Shade boots a firmware's own userland — launchd, the daemons, SpringBoard and the
 applications — over an emulated XNU kernel, on a JIT-translated ARM CPU
-([Umbra](https://github.com/kern0x1b/umbra)). It exists so that software built for
+([Dynarmic](https://github.com/MC-XiaoXiao/dynarmic), with our patches). It exists so that software built for
 old iPhones, iPods and iPads can be started and tested on a Mac before it goes to
 a real device.
 
@@ -25,7 +25,7 @@ a real device.
 ## How it works
 
 `shade boot` loads the root filesystem and starts `launchd` as the guest's first
-process. The guest's CPU is translated to host code by Umbra; its system calls,
+process. The guest's CPU is translated to host code by Dynarmic; its system calls,
 Mach messages and IOKit requests are answered by Shade's own kernel model in
 `src/kernel`, `src/mach` and `src/device_state`. Frameworks the emulated hardware
 would serve — graphics, audio, telephony — are answered where they cross the
@@ -44,13 +44,14 @@ boundary, in `src/graphics`, `src/media` and `src/telephony`.
 ## Build
 
 ```sh
-git submodule update --init
 cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
 cmake --build build
 ```
 
-Options are `SHADE_ENABLE_SDL2`, `SHADE_ENABLE_VULKAN` and `SHADE_ENABLE_IPO`. The bundled
-Boost is 1.81.0 and needs no compiler flag with Apple clang 21.
+Configure prepares Dynarmic and Boost from hades' pins (`../third_party/dynarmic`, `../third_party/boost`)
+under `../.deps/` when they are not there yet (`xmake l ../third_party/fetch.lua <name>` does the same by hand).
+Options are `SHADE_ENABLE_SDL2`, `SHADE_ENABLE_VULKAN` and `SHADE_ENABLE_IPO`. Boost is the 1.81.0
+release and needs no compiler flag with Apple clang 21.
 Through Charon the build is the `shade` package: `xmake emulate` builds and runs it.
 
 ## Usage
@@ -73,9 +74,8 @@ the host's, which the guest's own watchdogs need.
 | --- | --- |
 | `app/` | the `shade` program: verbs, live control, the desktop window |
 | `src/` | the library: kernel, Mach, device state, graphics, media, network, runtime |
-| `external/umbra` | the JIT core, a submodule |
-| `external/ext-boost` | the Boost headers it builds against, a submodule |
 | `external/vulkan-memory-allocator` | the Vulkan memory allocator, vendored |
+| `../third_party/dynarmic`, `../third_party/boost` | the pins of the JIT core (with our patches) and of Boost; their sources are prepared under `../.deps/` |
 | `tools/` | guest-side probes and the boot logo script |
 
 ## Documentation

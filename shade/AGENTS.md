@@ -7,7 +7,8 @@ Working notes for whoever is changing Shade, human or AI.
 An emulator that boots a legacy iOS firmware's own userland. It does not emulate
 hardware registers: it emulates an XNU kernel (system calls, Mach, IOKit) and the
 devices the firmware asks about, and lets the firmware's real launchd, daemons and
-frameworks run on top, on a JIT-translated ARM CPU (`external/umbra`).
+frameworks run on top, on a JIT-translated ARM CPU (Dynarmic, pinned with our patches in hades'
+`third_party/dynarmic` and prepared under `.deps/dynarmic`).
 
 ## Build and run
 
@@ -23,14 +24,16 @@ Workspace-wide procedures are skills in `$HOME/Git/projects/ios/.agents/skills/`
 - `src/kernel/` the BSD and Mach side of the kernel; `src/mach/` Mach messaging
   and the execution policies; `src/device_state/` what the firmware is told about
   the device (identity, kernel configuration, activation).
-- `src/foundation/` the address space, the CPU wrapper around Umbra, file page
+- `src/foundation/` the address space, the CPU wrapper around Dynarmic, file page
   cache and host file watcher.
 - `src/graphics/`, `src/media/`, `src/network/`, `src/telephony/`,
   `src/bluetooth/`, `src/storage/`, `src/crypto/` the devices and frameworks the
   guest talks to; `src/host/` is what they use on the Mac.
 - `src/debug/` the gdb remote stub (`--gdb PORT`): registers, memory, software
   breakpoints, all processes as `pPID.TID`.
-- `external/` see `THIRD-PARTY.md`; do not edit the vendored trees.
+- `external/` see `THIRD-PARTY.md`; do not edit the vendored trees. Dynarmic and Boost are not
+  vendored: a change to Dynarmic is a new patch in `../third_party/dynarmic/patches/`, never an edit
+  of `.deps/dynarmic`.
 
 ## Things that bite
 

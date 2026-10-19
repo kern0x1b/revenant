@@ -82,7 +82,7 @@ namespace {
         const auto host_page =
             reinterpret_cast<std::uintptr_t>(backing.bytes.data());
         if constexpr (sizeof(std::uintptr_t) >= sizeof(std::uint64_t)) {
-            // Umbra's absolute-offset page-table mode adds the full Guest
+            // Dynarmic's absolute-offset page-table mode adds the full Guest
             // address to this entry. Keep the arithmetic in uintptr_t so the
             // deliberately-before-object pointer is never formed by C++ pointer
             // arithmetic; the generated access always lands inside bytes.

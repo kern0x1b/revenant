@@ -2,7 +2,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 //
-// Execute guest ARM code through Umbra and coordinate translation
+// Execute guest ARM code through Dynarmic and coordinate translation
 // and CPU callbacks.
 
 #include "foundation/cpu.hpp"
@@ -31,16 +31,16 @@
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wshadow"
 #endif
-#include <umbra/backend/x64/a32_jitstate.h>
-#include <umbra/backend/x64/exclusive_monitor_friend.h>
-#include <umbra/frontend/A32/a32_ir_emitter.h>
-#include <umbra/interface/A32/coprocessor.h>
-#include <umbra/ir/basic_block.h>
+#include <dynarmic/backend/x64/a32_jitstate.h>
+#include <dynarmic/backend/x64/exclusive_monitor_friend.h>
+#include <dynarmic/frontend/A32/a32_ir_emitter.h>
+#include <dynarmic/interface/A32/coprocessor.h>
+#include <dynarmic/ir/basic_block.h>
 #if defined(__GNUC__) || defined(__clang__)
 #pragma GCC diagnostic pop
 #endif
 
-#include "umbra_ir_artifact.hpp"
+#include "dynarmic_ir_artifact.hpp"
 #include "foundation/arm_unpredictable_instruction.hpp"
 #include "foundation/jit_artifact.hpp"
 #include "foundation/jit_code_cache_governor.hpp"
@@ -118,14 +118,14 @@ namespace {
         return enabled;
     }
 
-    [[nodiscard]] Umbra::A32::ArchVersion umbra_architecture_version(
+    [[nodiscard]] Dynarmic::A32::ArchVersion dynarmic_architecture_version(
         ArmArchitectureVersion version)
     {
         switch (version) {
         case ArmArchitectureVersion::Armv6K:
-            return Umbra::A32::ArchVersion::v6K;
+            return Dynarmic::A32::ArchVersion::v6K;
         case ArmArchitectureVersion::Armv7:
-            return Umbra::A32::ArchVersion::v7;
+            return Dynarmic::A32::ArchVersion::v7;
         }
         throw std::invalid_argument { "unsupported ARM architecture version" };
     }
@@ -431,7 +431,7 @@ namespace {
         void record_result(std::uint64_t consumed_ticks,
             std::uint64_t host_yield_checks, bool host_yielded,
             std::uint64_t svc_calls, std::optional<std::uint32_t> svc,
-            Umbra::HaltReason halt_reason) noexcept
+            Dynarmic::HaltReason halt_reason) noexcept
         {
             consumed_ticks_ = consumed_ticks;
             host_yield_checks_ = host_yield_checks;
@@ -461,7 +461,7 @@ namespace {
     [[nodiscard]] std::uint64_t logical_committed_code_bytes(
         std::uint64_t used_bytes) noexcept
     {
-        // Linux Umbra maps the complete slab in one anonymous mapping and
+        // Linux Dynarmic maps the complete slab in one anonymous mapping and
         // does not expose a page-commit counter.  Count the emitted code range
         // rounded to host pages as logical committed code; physical residency
         // remains the separately sampled process RSS.
@@ -480,18 +480,18 @@ namespace {
     // shape.
     constexpr std::uint32_t jit_artifact_format_version = 8U;
 
-#ifndef SHADE_UMBRA_BUILD_FINGERPRINT
-#define SHADE_UMBRA_BUILD_FINGERPRINT 0x0ULL
+#ifndef SHADE_DYNARMIC_BUILD_FINGERPRINT
+#define SHADE_DYNARMIC_BUILD_FINGERPRINT 0x0ULL
 #endif
 
-    constexpr std::uint64_t jit_artifact_umbra_build_fingerprint =
-        SHADE_UMBRA_BUILD_FINGERPRINT;
+    constexpr std::uint64_t jit_artifact_dynarmic_build_fingerprint =
+        SHADE_DYNARMIC_BUILD_FINGERPRINT;
     // A zero fingerprint means the dependency producer could not be identified
-    // (for example, when Umbra is supplied without its Git metadata).  Such
+    // (for example, when Dynarmic is supplied without its Git metadata).  Such
     // a key cannot establish producer compatibility, so it must never authorize
     // a persistent IR import.
     constexpr bool jit_artifact_producer_fingerprint_available =
-        jit_artifact_umbra_build_fingerprint != 0U;
+        jit_artifact_dynarmic_build_fingerprint != 0U;
 
     [[nodiscard]] ArmCpuModelKind jit_artifact_cpu_model(
         const ArmCpuModel& cpu_model) noexcept
@@ -516,7 +516,7 @@ namespace {
             std::uint64_t result = 0;
 #if (defined(__GNUC__) || defined(__clang__)) &&                               \
     (defined(__x86_64__) || defined(_M_X64))
-            // Keep these bit positions aligned with Umbra's X64 HostFeature
+            // Keep these bit positions aligned with Dynarmic's X64 HostFeature
             // enum. Its emitter selects different instructions for these
             // capabilities, so the portable-IR key must distinguish them even
             // though the artifact itself is not native host code.
@@ -576,7 +576,7 @@ namespace {
 #if defined(__x86_64__) || defined(_M_X64)
         return true;
 #else
-        // Umbra's ARM64 A32 emitter currently rejects Interpret terminals;
+        // Dynarmic's ARM64 A32 emitter currently rejects Interpret terminals;
         // keep portable IR as a publish-only diagnostic/cache format until that
         // backend can validate and emit every imported terminal safely.
         return false;
@@ -587,14 +587,14 @@ namespace {
     // block, because the dispatcher is where a run's remaining ticks are
     // checked. Block linking, the return stack buffer and the fast dispatcher
     // would let a run go on through a block. Code emitted with them differs.
-    [[nodiscard]] Umbra::OptimizationFlag jit_optimizations()
+    [[nodiscard]] Dynarmic::OptimizationFlag jit_optimizations()
     {
         if (!performance_counters().block_profile_enabled())
-            return Umbra::all_safe_optimizations;
-        return Umbra::all_safe_optimizations &
-               ~(Umbra::OptimizationFlag::BlockLinking |
-                   Umbra::OptimizationFlag::ReturnStackBuffer |
-                   Umbra::OptimizationFlag::FastDispatch);
+            return Dynarmic::all_safe_optimizations;
+        return Dynarmic::all_safe_optimizations &
+               ~(Dynarmic::OptimizationFlag::BlockLinking |
+                   Dynarmic::OptimizationFlag::ReturnStackBuffer |
+                   Dynarmic::OptimizationFlag::FastDispatch);
     }
 
     // The artifact key does not carry the optimization flags. An artifact
@@ -611,10 +611,10 @@ namespace {
 
 } // namespace
 
-class JitCallbacks final : public Umbra::A32::UserCallbacks {
+class JitCallbacks final : public Dynarmic::A32::UserCallbacks {
 public:
     struct ValidatedArtifactBlock {
-        Umbra::IR::Block block;
+        Dynarmic::IR::Block block;
         JitArtifactLookup lookup;
     };
 
@@ -642,7 +642,7 @@ public:
     {
     }
 
-    void attach(Cpu* owner, Umbra::A32::Jit* jit)
+    void attach(Cpu* owner, Dynarmic::A32::Jit* jit)
     {
         owner_ = owner;
         jit_ = jit;
@@ -653,8 +653,8 @@ public:
         process_id_ = process_id;
     }
 
-    bool PreCodeReadHook(bool, Umbra::A32::VAddr address,
-        Umbra::A32::IREmitter& ir) override
+    bool PreCodeReadHook(bool, Dynarmic::A32::VAddr address,
+        Dynarmic::A32::IREmitter& ir) override
     {
         if (ir.block.CycleCount() == 0) {
             performance_counters().record_translation_block();
@@ -695,15 +695,15 @@ public:
 
     void CodeTranslationCompleted(std::uint64_t location_descriptor,
         std::uint64_t translation_nanoseconds,
-        const Umbra::IR::Block& block) noexcept override
+        const Dynarmic::IR::Block& block) noexcept override
     {
         if (performance_counters().block_profile_enabled()) {
             // The emitted code charges this cycle count when the block ends.
             const auto terminal = block.GetTerminal();
             TranslatedBlock translated { block.CycleCount(), BlockEnd::Other };
-            if (boost::get<Umbra::IR::Term::LinkBlock>(&terminal))
+            if (boost::get<Dynarmic::IR::Term::LinkBlock>(&terminal))
                 translated.end = BlockEnd::LinkBlock;
-            else if (boost::get<Umbra::IR::Term::LinkBlockFast>(&terminal))
+            else if (boost::get<Dynarmic::IR::Term::LinkBlockFast>(&terminal))
                 translated.end = BlockEnd::LinkBlockFast;
             performance_counters().block_profile().record_translation(
                 static_cast<std::uint32_t>(process_id_), location_descriptor,
@@ -713,7 +713,7 @@ public:
             location_descriptor, translation_nanoseconds, &block);
     }
 
-    [[nodiscard]] ArtifactImportOutcome import_artifact(Umbra::A32::Jit& jit,
+    [[nodiscard]] ArtifactImportOutcome import_artifact(Dynarmic::A32::Jit& jit,
         std::uint64_t location_descriptor) const noexcept
     {
         auto validated = validated_artifact_block(location_descriptor);
@@ -724,20 +724,20 @@ public:
                 jit.PrecompileWithResult(std::move(validated->block));
             if (artifact_store_) {
                 if (emitted ==
-                    Umbra::A32::Jit::PortableIREmitOutcome::NativeEmitted) {
+                    Dynarmic::A32::Jit::PortableIREmitOutcome::NativeEmitted) {
                     artifact_store_->record_native_imported(validated->lookup);
                 } else if (emitted ==
-                           Umbra::A32::Jit::PortableIREmitOutcome::
+                           Dynarmic::A32::Jit::PortableIREmitOutcome::
                                AlreadyPresent) {
                     artifact_store_->record_already_present(validated->lookup);
                 }
             }
             switch (emitted) {
-            case Umbra::A32::Jit::PortableIREmitOutcome::NativeEmitted:
+            case Dynarmic::A32::Jit::PortableIREmitOutcome::NativeEmitted:
                 return ArtifactImportOutcome::Imported;
-            case Umbra::A32::Jit::PortableIREmitOutcome::AlreadyPresent:
+            case Dynarmic::A32::Jit::PortableIREmitOutcome::AlreadyPresent:
                 return ArtifactImportOutcome::AlreadyPresent;
-            case Umbra::A32::Jit::PortableIREmitOutcome::EmitFailed:
+            case Dynarmic::A32::Jit::PortableIREmitOutcome::EmitFailed:
                 return ArtifactImportOutcome::Failed;
             }
             return ArtifactImportOutcome::Failed;
@@ -753,7 +753,7 @@ public:
     }
 
     [[nodiscard]] bool generate_portable_artifact(
-        Umbra::A32::Jit& jit, std::uint64_t location_descriptor) noexcept
+        Dynarmic::A32::Jit& jit, std::uint64_t location_descriptor) noexcept
     {
         if (!artifact_store_ || !jit_artifact_producer_fingerprint_available) {
             return false;
@@ -802,7 +802,7 @@ public:
         return artifact_store_ && artifact_store_->size() != 0U;
     }
 
-    // Preparation is deliberately separate from the Umbra miss callback:
+    // Preparation is deliberately separate from the Dynarmic miss callback:
     // store lookup, dependency validation, and IR deserialization all happen
     // before Jit::Run. The miss callback only consumes this executor-local
     // slot after NativeCodeSlab::find_block has failed.
@@ -1040,7 +1040,7 @@ public:
 
     [[nodiscard]] bool complete_demand_artifact_emit(
         std::uint64_t location_descriptor, std::uint64_t slab_generation,
-        Umbra::A32::Jit::PortableIREmitOutcome outcome) noexcept
+        Dynarmic::A32::Jit::PortableIREmitOutcome outcome) noexcept
     {
         if (demand_artifact_state_ != DemandArtifactState::HandedOff ||
             demand_artifact_location_ != location_descriptor ||
@@ -1049,20 +1049,20 @@ public:
         }
         demand_artifact_.reset();
         switch (outcome) {
-        case Umbra::A32::Jit::PortableIREmitOutcome::NativeEmitted:
+        case Dynarmic::A32::Jit::PortableIREmitOutcome::NativeEmitted:
             demand_artifact_state_ = DemandArtifactState::NativeEmitted;
             if (artifact_store_) {
                 artifact_store_->record_demand_native_emitted();
             }
             return false;
-        case Umbra::A32::Jit::PortableIREmitOutcome::AlreadyPresent:
+        case Dynarmic::A32::Jit::PortableIREmitOutcome::AlreadyPresent:
             if (artifact_store_) {
                 artifact_store_->record_already_present(
                     demand_artifact_lookup_);
             }
             discard_demand_artifact();
             return false;
-        case Umbra::A32::Jit::PortableIREmitOutcome::EmitFailed:
+        case Dynarmic::A32::Jit::PortableIREmitOutcome::EmitFailed:
             if (artifact_store_) {
                 artifact_store_->record_demand_emit_failed();
             }
@@ -1072,9 +1072,9 @@ public:
         return true;
     }
 
-    // Called by Umbra only after NativeCodeSlab::find_block misses. This
+    // Called by Dynarmic only after NativeCodeSlab::find_block misses. This
     // function does not access the store and does not allocate or lock.
-    [[nodiscard]] Umbra::IR::Block* take_demand_artifact(
+    [[nodiscard]] Dynarmic::IR::Block* take_demand_artifact(
         std::uint64_t location_descriptor,
         std::uint64_t slab_generation) noexcept
     {
@@ -1155,7 +1155,7 @@ private:
                     std::nullopt
                 };
             }
-            auto block = deserialize_umbra_ir(artifact.data.normalized_ir);
+            auto block = deserialize_dynarmic_ir(artifact.data.normalized_ir);
             if (!block) {
                 artifact_store_->record_validation_rejection(
                     JitArtifactValidationRejection::DeserializeFailed);
@@ -1283,7 +1283,7 @@ private:
 
     void translation_completed(std::uint64_t location_descriptor,
         std::uint64_t translation_nanoseconds,
-        const Umbra::IR::Block* optimized_block) noexcept
+        const Dynarmic::IR::Block* optimized_block) noexcept
     {
         maybe_check_host_yield(
             0U, translation_nanoseconds >=
@@ -1437,10 +1437,10 @@ public:
     void InterpreterFallback(std::uint32_t pc, std::size_t count) override
     {
         std::ostringstream message;
-        message << "Umbra interpreter fallback at 0x" << std::hex << pc
+        message << "Dynarmic interpreter fallback at 0x" << std::hex << pc
                 << " for " << std::dec << count << " instruction(s)";
         exception_ = message.str();
-        jit_->HaltExecution(Umbra::HaltReason::UserDefined3);
+        jit_->HaltExecution(Dynarmic::HaltReason::UserDefined3);
     }
 
     void CallSVC(std::uint32_t immediate) override
@@ -1449,41 +1449,41 @@ public:
         ++svc_calls_;
         svc_ = immediate;
         if (owner_->svc_dispatch_mode_ == SvcDispatchMode::Deferred) {
-            jit_->HaltExecution(Umbra::HaltReason::UserDefined2);
+            jit_->HaltExecution(Dynarmic::HaltReason::UserDefined2);
             return;
         }
         if (owner_->svc_handler_) {
             owner_->svc_handler_(*owner_, immediate);
-            // Immediate HLE executes inside Umbra's callback and can spend
+            // Immediate HLE executes inside Dynarmic's callback and can spend
             // far longer in host wall time than the surrounding Guest block
             // accounts in instruction ticks.  Re-check the existing host-only
             // cooperation deadline at this safe syscall boundary so the outer
             // scheduler can service an equal-priority runnable peer.
             maybe_check_host_yield(0, true);
         } else {
-            jit_->HaltExecution(Umbra::HaltReason::UserDefined2);
+            jit_->HaltExecution(Dynarmic::HaltReason::UserDefined2);
         }
     }
 
     void ExceptionRaised(
-        std::uint32_t pc, Umbra::A32::Exception exception) override
+        std::uint32_t pc, Dynarmic::A32::Exception exception) override
     {
-        if (exception == Umbra::A32::Exception::Yield) {
+        if (exception == Dynarmic::A32::Exception::Yield) {
             // ARM YIELD is a scheduler hint, not a guest fault.  The
             // translator has already advanced the guest PC before invoking
             // this callback, so route it through the existing explicit guest
             // yield boundary and let XNU choose the next runnable thread.
-            jit_->HaltExecution(Umbra::HaltReason::UserDefined8);
+            jit_->HaltExecution(Dynarmic::HaltReason::UserDefined8);
             return;
         }
-        if (exception == Umbra::A32::Exception::Breakpoint &&
+        if (exception == Dynarmic::A32::Exception::Breakpoint &&
             owner_->debug_breakpoints_enabled_) {
             breakpoint_ = pc;
             owner_->registers()[15] = pc;
-            jit_->HaltExecution(Umbra::HaltReason::UserDefined7);
+            jit_->HaltExecution(Dynarmic::HaltReason::UserDefined7);
             return;
         }
-        if (exception == Umbra::A32::Exception::UnpredictableInstruction) {
+        if (exception == Dynarmic::A32::Exception::UnpredictableInstruction) {
             const auto thumb = (jit_->Cpsr() & (1U << 5U)) != 0U;
             std::optional<std::uint32_t> instruction;
             if (thumb) {
@@ -1505,12 +1505,12 @@ public:
                 return;
             }
         }
-        if (exception == Umbra::A32::Exception::UndefinedInstruction &&
+        if (exception == Dynarmic::A32::Exception::UndefinedInstruction &&
             is_trap_instruction(pc)) {
             // The permanently undefined encoding dyld and libSystem use to
             // abort ("trap") is a breakpoint to Darwin, not an illegal
             // instruction: the process dies of SIGTRAP.
-            exception = Umbra::A32::Exception::Breakpoint;
+            exception = Dynarmic::A32::Exception::Breakpoint;
         }
         std::ostringstream message;
         message << "ARM exception " << static_cast<unsigned>(exception)
@@ -1518,7 +1518,7 @@ public:
         exception_ = message.str();
         exception_kind_ = exception;
         exception_pc_ = pc;
-        jit_->HaltExecution(Umbra::HaltReason::UserDefined3);
+        jit_->HaltExecution(Dynarmic::HaltReason::UserDefined3);
     }
 
     bool is_trap_instruction(std::uint32_t pc)
@@ -1560,7 +1560,7 @@ public:
     {
         return host_yield_requested_;
     }
-    std::uint64_t GetTicksForCode(bool is_thumb, Umbra::A32::VAddr address,
+    std::uint64_t GetTicksForCode(bool is_thumb, Dynarmic::A32::VAddr address,
         std::uint32_t instruction) override
     {
         return cpu_model_.ticks_for_instruction(is_thumb, address, instruction);
@@ -1594,7 +1594,7 @@ public:
                                    : std::chrono::steady_clock::time_point { };
     }
 
-    CpuRunResult result(Umbra::HaltReason reason) const
+    CpuRunResult result(Dynarmic::HaltReason reason) const
     {
         return CpuRunResult { reason, consumed_, svc_, svc_calls_, fault_,
             breakpoint_, exception_, host_yield_requested_,
@@ -1637,7 +1637,7 @@ public:
             translation_recorder_->set_work_signal(jit_work_signal_);
     }
 
-    // Drain only after Umbra has returned to a host safe point. The hot
+    // Drain only after Dynarmic has returned to a host safe point. The hot
     // callback records raw descriptors into fixed executor-local storage.
     // Validation and merging are deliberately kept here rather than in the
     // translation callback. Cpu::run does not drain this recorder; an explicit
@@ -1865,8 +1865,8 @@ private:
             key.image_slide = 0U;
             key.hle_abi_version = jit_artifact_hle_abi_version;
             key.backend_abi_version = jit_artifact_backend_abi_version;
-            key.umbra_build_fingerprint =
-                jit_artifact_umbra_build_fingerprint;
+            key.dynarmic_build_fingerprint =
+                jit_artifact_dynarmic_build_fingerprint;
             key.codegen_options = jit_artifact_codegen_options;
             key.host_isa = jit_artifact_host_isa();
             key.host_feature_mask = jit_artifact_host_feature_mask();
@@ -1879,7 +1879,7 @@ private:
 
     [[nodiscard]] bool publish_artifact(std::uint64_t location_descriptor,
         std::uint64_t translation_nanoseconds,
-        const Umbra::IR::Block* optimized_block) noexcept
+        const Dynarmic::IR::Block* optimized_block) noexcept
     {
         if (!artifact_store_)
             return false;
@@ -1907,11 +1907,11 @@ private:
             }
             data.constant_dependencies = translation_constant_dependencies_;
             if (optimized_block != nullptr) {
-                const auto serialized = serialize_umbra_ir(*optimized_block);
+                const auto serialized = serialize_dynarmic_ir(*optimized_block);
                 if (!serialized)
                     return false;
                 if (portable_generation_location_ == location_descriptor) {
-                    const auto validated = deserialize_umbra_ir(*serialized);
+                    const auto validated = deserialize_dynarmic_ir(*serialized);
                     if (!validated ||
                         validated->Location().Value() != location_descriptor) {
                         return false;
@@ -1933,9 +1933,9 @@ private:
     }
 
     [[nodiscard]] static std::vector<std::byte> normalized_ir(
-        const Umbra::IR::Block& block)
+        const Dynarmic::IR::Block& block)
     {
-        auto dump = Umbra::IR::DumpBlock(block);
+        auto dump = Dynarmic::IR::DumpBlock(block);
         std::string canonical;
         canonical.reserve(dump.size());
         for (std::size_t index = 0; index < dump.size();) {
@@ -2032,7 +2032,7 @@ private:
         fault_ = MemoryFault { address, size, access,
             "unmapped address or protection failure" };
         if (jit_ != nullptr) {
-            jit_->HaltExecution(Umbra::HaltReason::MemoryAbort);
+            jit_->HaltExecution(Dynarmic::HaltReason::MemoryAbort);
         }
     }
 
@@ -2045,7 +2045,7 @@ private:
             // UserDefined2 is the existing scheduler AST boundary. It keeps
             // the current XNU quantum and therefore does not model a guest
             // yield or alter any kernel-visible ABI state.
-            jit_->HaltExecution(Umbra::HaltReason::UserDefined2);
+            jit_->HaltExecution(Dynarmic::HaltReason::UserDefined2);
         }
     }
 
@@ -2053,7 +2053,7 @@ private:
     const ArmCpuModel& cpu_model_;
     Cpu* owner_ { };
     std::uint32_t process_id_ { };
-    Umbra::A32::Jit* jit_ { };
+    Dynarmic::A32::Jit* jit_ { };
     std::uint64_t ticks_remaining_ { };
     std::uint64_t slice_ticks_remaining_ { };
     std::uint64_t consumed_ { };
@@ -2062,7 +2062,7 @@ private:
     std::optional<MemoryFault> fault_;
     std::optional<std::uint32_t> breakpoint_;
     std::string exception_;
-    std::optional<Umbra::A32::Exception> exception_kind_;
+    std::optional<Dynarmic::A32::Exception> exception_kind_;
     std::uint32_t exception_pc_ { };
     std::shared_ptr<JitTranslationProfile> translation_profile_;
     std::shared_ptr<JitArtifactStore> artifact_store_;
@@ -2070,11 +2070,11 @@ private:
     bool explicit_artifact_publication_ { };
     std::optional<std::uint64_t> portable_generation_location_;
     bool portable_generation_published_ { };
-    Umbra::IR::Block* translation_block_ { };
+    Dynarmic::IR::Block* translation_block_ { };
     std::vector<std::uint32_t> translation_code_pages_;
     std::vector<JitConstantDependency> translation_constant_dependencies_;
     bool constant_dependency_failed_ { };
-    std::optional<Umbra::IR::Block> demand_artifact_;
+    std::optional<Dynarmic::IR::Block> demand_artifact_;
     JitArtifactLookup demand_artifact_lookup_;
     JitArtifactKey demand_artifact_key_ { };
     std::uint64_t demand_artifact_location_ { };
@@ -2094,18 +2094,18 @@ private:
 };
 
 // The iPhone ARM user ABI uses CP15 thread-pointer registers in addition to
-// the older cthread_self fast trap. Umbra deliberately leaves CP15 to its
+// the older cthread_self fast trap. Dynarmic deliberately leaves CP15 to its
 // client, so model only the architecturally visible user-thread and barrier
 // subset here. Memory is coherent in AddressSpace; cache/barrier operations
 // therefore need no host-side work, but must remain legal instructions.
-class ArmSystemControlCoprocessor final : public Umbra::A32::Coprocessor {
+class ArmSystemControlCoprocessor final : public Dynarmic::A32::Coprocessor {
 public:
-    using CoprocReg = Umbra::A32::CoprocReg;
-    using Callback = Umbra::A32::Coprocessor::Callback;
+    using CoprocReg = Dynarmic::A32::CoprocReg;
+    using Callback = Dynarmic::A32::Coprocessor::Callback;
     using CallbackOrAccessOneWord =
-        Umbra::A32::Coprocessor::CallbackOrAccessOneWord;
+        Dynarmic::A32::Coprocessor::CallbackOrAccessOneWord;
     using CallbackOrAccessTwoWords =
-        Umbra::A32::Coprocessor::CallbackOrAccessTwoWords;
+        Dynarmic::A32::Coprocessor::CallbackOrAccessTwoWords;
 
     explicit ArmSystemControlCoprocessor(JitCallbacks& callbacks)
         : callbacks_ { callbacks }
@@ -2127,7 +2127,7 @@ public:
 
         // The guest ARM cache maintenance instructions are no-ops for the
         // coherent host-backed memory model.  Keeping them as callbacks also
-        // avoids Umbra compiling an illegal-instruction assertion.
+        // avoids Dynarmic compiling an illegal-instruction assertion.
         if (CRn == CoprocReg::C7 || CRn == CoprocReg::C8) {
             return Callback { &noop, nullptr };
         }
@@ -2218,7 +2218,7 @@ public:
     };
 
     JitExecutor(std::size_t processor_id, std::size_t execution_slot,
-        AddressSpace& memory, Umbra::ExclusiveMonitor& monitor,
+        AddressSpace& memory, Dynarmic::ExclusiveMonitor& monitor,
         const ArmCpuModel& cpu_model,
         std::shared_ptr<JitArtifactStore> artifact_store,
         std::shared_ptr<ExecutionContext> execution_context,
@@ -2269,7 +2269,7 @@ public:
             execution_context_->create_link_cell();
         execution_context_->link(exclusive_monitor_lock_link_cell_,
             static_cast<std::uint64_t>(reinterpret_cast<std::uintptr_t>(
-                Umbra::GetExclusiveMonitorLockPointer(&monitor_))));
+                Dynarmic::GetExclusiveMonitorLockPointer(&monitor_))));
         exclusive_monitor_lock_link_cell_address_ =
             execution_context_->link_cell_address(
                 exclusive_monitor_lock_link_cell_);
@@ -2277,7 +2277,7 @@ public:
             execution_context_->create_link_cell();
         execution_context_->link(exclusive_monitor_addresses_link_cell_,
             static_cast<std::uint64_t>(reinterpret_cast<std::uintptr_t>(
-                Umbra::GetExclusiveMonitorAddressPointer(&monitor_, 0))));
+                Dynarmic::GetExclusiveMonitorAddressPointer(&monitor_, 0))));
         exclusive_monitor_addresses_link_cell_address_ =
             execution_context_->link_cell_address(
                 exclusive_monitor_addresses_link_cell_);
@@ -2285,7 +2285,7 @@ public:
             execution_context_->create_link_cell();
         execution_context_->link(exclusive_monitor_values_link_cell_,
             static_cast<std::uint64_t>(reinterpret_cast<std::uintptr_t>(
-                Umbra::GetExclusiveMonitorValuePointer(&monitor_, 0))));
+                Dynarmic::GetExclusiveMonitorValuePointer(&monitor_, 0))));
         exclusive_monitor_values_link_cell_address_ =
             execution_context_->link_cell_address(
                 exclusive_monitor_values_link_cell_);
@@ -2375,7 +2375,7 @@ public:
             const auto profiling_calls = profiling_blocks && !single_step;
             decltype(jit_->GetHostExecutionBudgetResult()) native_budget_result { };
             std::uint32_t native_blocks_executed { };
-            Umbra::HaltReason reason { };
+            Dynarmic::HaltReason reason { };
             for (;;) {
                 const auto consumed_before = callbacks_->consumed_ticks();
                 std::uint64_t block_location { };
@@ -2385,8 +2385,8 @@ public:
                 if (profiling_calls) {
                     callbacks_->begin_jit_call(1);
                     block_location = current_location_descriptor();
-                    const Umbra::A32::LocationDescriptor block_descriptor {
-                        Umbra::IR::LocationDescriptor { block_location }
+                    const Dynarmic::A32::LocationDescriptor block_descriptor {
+                        Dynarmic::IR::LocationDescriptor { block_location }
                     };
                     // LR at the block's start: for an entry block, the return
                     // address of the call that reached it (the block profile's
@@ -2408,8 +2408,8 @@ public:
                 if (profiling_calls) {
                     const auto block_ticks =
                         callbacks_->consumed_ticks() - consumed_before;
-                    const Umbra::A32::LocationDescriptor block_descriptor {
-                        Umbra::IR::LocationDescriptor { block_location }
+                    const Dynarmic::A32::LocationDescriptor block_descriptor {
+                        Dynarmic::IR::LocationDescriptor { block_location }
                     };
                     performance_counters().block_profile().record_run(
                         static_cast<std::uint32_t>(process_id_), block_location,
@@ -2426,8 +2426,8 @@ public:
                 }
                 // Run() returns no halt bit when the call's ticks are spent
                 // (Step is set only by the single-step entry).
-                const auto halted_for_ticks = reason == Umbra::HaltReason {} ||
-                                              reason == Umbra::HaltReason::Step;
+                const auto halted_for_ticks = reason == Dynarmic::HaltReason {} ||
+                                              reason == Dynarmic::HaltReason::Step;
                 if (!profiling_calls || !halted_for_ticks ||
                     callbacks_->slice_ticks_remaining() == 0U ||
                     callbacks_->host_yield_pending() ||
@@ -2436,7 +2436,7 @@ public:
                         native_blocks_executed >= native_block_budget)) {
                     break;
                 }
-                jit_->ClearHalt(Umbra::HaltReason::Step);
+                jit_->ClearHalt(Dynarmic::HaltReason::Step);
             }
             native_budget_result.blocks_executed = native_blocks_executed;
             const auto jit_elapsed =
@@ -2517,7 +2517,7 @@ public:
 
     void clear_halt()
     {
-        // Clearing Umbra's AST must also retire the matching request
+        // Clearing Dynarmic's AST must also retire the matching request
         // bookkeeping. Otherwise a wake that is consumed while servicing a
         // Mach event can leave the next run looking like a continuation of
         // the old preemption request.
@@ -2528,7 +2528,7 @@ public:
         }
     }
 
-    void halt(Umbra::HaltReason reason)
+    void halt(Dynarmic::HaltReason reason)
     {
         if (jit_) {
             jit_->HaltExecution(reason);
@@ -2544,7 +2544,7 @@ public:
                     std::chrono::steady_clock::now();
             }
         }
-        halt(Umbra::HaltReason::UserDefined2);
+        halt(Dynarmic::HaltReason::UserDefined2);
     }
 
     [[nodiscard]] bool guest_preemption_requested() const noexcept
@@ -2782,7 +2782,7 @@ private:
             location_descriptor);
     }
 
-    static Umbra::IR::Block* portable_ir_demand_provider(void* user_arg,
+    static Dynarmic::IR::Block* portable_ir_demand_provider(void* user_arg,
         std::uint64_t location_descriptor,
         std::uint64_t slab_generation) noexcept
     {
@@ -2793,7 +2793,7 @@ private:
 
     static void portable_ir_emit_completion(void* user_arg,
         std::uint64_t location_descriptor, std::uint64_t slab_generation,
-        Umbra::A32::Jit::PortableIREmitOutcome outcome) noexcept
+        Dynarmic::A32::Jit::PortableIREmitOutcome outcome) noexcept
     {
         auto& executor = *static_cast<JitExecutor*>(user_arg);
         if (!executor.callbacks_->complete_demand_artifact_emit(
@@ -2907,10 +2907,10 @@ private:
 
     [[nodiscard]] std::uint64_t current_location_descriptor() const
     {
-        const Umbra::A32::LocationDescriptor descriptor { jit_->Regs()[15],
-            Umbra::A32::PSR { jit_->Cpsr() },
-            Umbra::A32::FPSCR { jit_->Fpscr() } };
-        return static_cast<Umbra::IR::LocationDescriptor>(descriptor)
+        const Dynarmic::A32::LocationDescriptor descriptor { jit_->Regs()[15],
+            Dynarmic::A32::PSR { jit_->Cpsr() },
+            Dynarmic::A32::FPSCR { jit_->Fpscr() } };
+        return static_cast<Dynarmic::IR::LocationDescriptor>(descriptor)
             .Value();
     }
 
@@ -2979,7 +2979,7 @@ private:
         if (result == JitDemandArtifactStageResult::Staged) {
             transient_backoff.reset();
         } else {
-            // The former always-installed Umbra provider reported a miss
+            // The former always-installed Dynarmic provider reported a miss
             // for every translated block. Preserve one demand-attempt miss at
             // the preparation boundary without putting that callback back on
             // the ordinary translation path.
@@ -3094,18 +3094,18 @@ private:
         observed_slab_generation_ = slab_generation;
     }
 
-    [[nodiscard]] static constexpr Umbra::HaltReason all_halt_reasons()
+    [[nodiscard]] static constexpr Dynarmic::HaltReason all_halt_reasons()
     {
-        return Umbra::HaltReason::CacheInvalidation |
-               Umbra::HaltReason::MemoryAbort |
-               Umbra::HaltReason::UserDefined1 |
-               Umbra::HaltReason::UserDefined2 |
-               Umbra::HaltReason::UserDefined3 |
-               Umbra::HaltReason::UserDefined4 |
-               Umbra::HaltReason::UserDefined5 |
-               Umbra::HaltReason::UserDefined6 |
-               Umbra::HaltReason::UserDefined7 |
-               Umbra::HaltReason::UserDefined8;
+        return Dynarmic::HaltReason::CacheInvalidation |
+               Dynarmic::HaltReason::MemoryAbort |
+               Dynarmic::HaltReason::UserDefined1 |
+               Dynarmic::HaltReason::UserDefined2 |
+               Dynarmic::HaltReason::UserDefined3 |
+               Dynarmic::HaltReason::UserDefined4 |
+               Dynarmic::HaltReason::UserDefined5 |
+               Dynarmic::HaltReason::UserDefined6 |
+               Dynarmic::HaltReason::UserDefined7 |
+               Dynarmic::HaltReason::UserDefined8;
     }
 
     void ensure_jit()
@@ -3118,7 +3118,7 @@ private:
                 reinterpret_cast<std::uintptr_t>(callbacks_.get()))) {
             throw std::logic_error { "JIT runtime callback link is not bound" };
         }
-        Umbra::A32::UserConfig config { callbacks_.get() };
+        Dynarmic::A32::UserConfig config { callbacks_.get() };
         config.native_code_slab = execution_context_->native_code_slab();
         config.callbacks_link = runtime_link_cell_address_;
         if (performance_counters().native_lookup_diagnostics_enabled()) {
@@ -3141,7 +3141,7 @@ private:
             exclusive_monitor_values_link_cell_address_;
         config.processor_id = processor_id_;
         config.global_monitor = &monitor_;
-        config.arch_version = umbra_architecture_version(
+        config.arch_version = dynarmic_architecture_version(
             callbacks_->cpu_model().architecture_version());
         config.always_little_endian = true;
         config.enable_cycle_counting = true;
@@ -3149,10 +3149,10 @@ private:
         config.check_halt_on_memory_access = true;
         config.code_cache_size = code_cache_size_;
         config.coprocessors[15] = cp15_;
-        using UmbraPageTable = std::array<std::uint8_t*,
-            Umbra::A32::UserConfig::NUM_PAGE_TABLE_ENTRIES>;
+        using DynarmicPageTable = std::array<std::uint8_t*,
+            Dynarmic::A32::UserConfig::NUM_PAGE_TABLE_ENTRIES>;
         static_assert(AddressSpace::page_count ==
-                      Umbra::A32::UserConfig::NUM_PAGE_TABLE_ENTRIES);
+                      Dynarmic::A32::UserConfig::NUM_PAGE_TABLE_ENTRIES);
         auto** read_table = callbacks_->jit_read_page_table();
         auto** write_table = callbacks_->jit_write_page_table();
         if (read_table || write_table) {
@@ -3163,9 +3163,9 @@ private:
                 static_cast<std::uint64_t>(
                     reinterpret_cast<std::uintptr_t>(write_table)));
             config.read_page_table =
-                reinterpret_cast<UmbraPageTable*>(read_table);
+                reinterpret_cast<DynarmicPageTable*>(read_table);
             config.page_table =
-                reinterpret_cast<UmbraPageTable*>(write_table);
+                reinterpret_cast<DynarmicPageTable*>(write_table);
             config.absolute_offset_page_table =
                 sizeof(std::uintptr_t) >= sizeof(std::uint64_t);
             config.detect_misaligned_access_via_page_table =
@@ -3177,7 +3177,7 @@ private:
         const auto started = measure
                                  ? std::chrono::steady_clock::now()
                                  : std::chrono::steady_clock::time_point { };
-        jit_ = std::make_unique<Umbra::A32::Jit>(config);
+        jit_ = std::make_unique<Dynarmic::A32::Jit>(config);
         demand_artifact_enabled_ =
             callbacks_->demand_artifact_catalog_nonempty();
         recorded_dispatch_counters_ = { };
@@ -3377,7 +3377,7 @@ private:
         // A32JitState includes the executor's RSB arrays.  The link cells are
         // allocated by the shared ExecutionContext but their payload is still
         // executor-local mutable state and is counted here exactly once.
-        return link_cell_bytes + sizeof(Umbra::Backend::X64::A32JitState) +
+        return link_cell_bytes + sizeof(Dynarmic::Backend::X64::A32JitState) +
                fast_dispatch_table_bytes;
     }
 
@@ -3400,7 +3400,7 @@ public:
         std::lock_guard lock { execution_mutex_ };
         if (jit_) {
             throw std::logic_error {
-                "cannot resize a live Umbra code cache"
+                "cannot resize a live Dynarmic code cache"
             };
         }
         code_cache_size_ = bytes;
@@ -3411,7 +3411,7 @@ private:
     std::size_t execution_slot_ { };
     std::uint32_t process_id_ { };
     AddressSpace& memory_;
-    Umbra::ExclusiveMonitor& monitor_;
+    Dynarmic::ExclusiveMonitor& monitor_;
     std::unique_ptr<JitCallbacks> callbacks_;
     std::shared_ptr<ArmSystemControlCoprocessor> cp15_;
     std::shared_ptr<ExecutionContext> execution_context_;
@@ -3436,7 +3436,7 @@ private:
     std::size_t exclusive_monitor_values_link_cell_ { };
     const std::atomic<std::uint64_t>*
         exclusive_monitor_values_link_cell_address_ { };
-    std::unique_ptr<Umbra::A32::Jit> jit_;
+    std::unique_ptr<Dynarmic::A32::Jit> jit_;
     JitHostExecutionBudget host_execution_budget_;
     AddressRanges own_image_ranges_;
     std::uint32_t own_image_count_ { 0xffffffffU };
@@ -3454,7 +3454,7 @@ private:
     std::uint64_t recorded_recycled_code_bytes_ { };
     std::uint64_t recorded_full_generation_clears_ { };
     std::uint64_t recorded_executor_local_bytes_ { };
-    Umbra::A32::DispatchCounters recorded_dispatch_counters_ { };
+    Dynarmic::A32::DispatchCounters recorded_dispatch_counters_ { };
     std::uint64_t observed_invalidation_epoch_ { };
     std::uint64_t observed_slab_generation_ { };
     std::unordered_map<std::uint64_t, ArtifactProbe> artifact_probes_;
@@ -3519,7 +3519,7 @@ class CpuExecutionPool {
     };
 
 public:
-    CpuExecutionPool(AddressSpace& memory, Umbra::ExclusiveMonitor& monitor,
+    CpuExecutionPool(AddressSpace& memory, Dynarmic::ExclusiveMonitor& monitor,
         std::size_t execution_slot_count, std::size_t first_processor_id,
         const ArmCpuModel& cpu_model,
         std::shared_ptr<JitArtifactStore> artifact_store,
@@ -3554,7 +3554,7 @@ public:
                 "precompile_lane_count must be at least one"
             };
         }
-        // Translation and native emission have independent Umbra mutable
+        // Translation and native emission have independent Dynarmic mutable
         // state. Lanes publish into the same synchronized NativeCodeSlab, but
         // never take a Guest executor's execution mutex. Reusing the first
         // monitor slot is safe because these executors never run Guest code or
@@ -4818,7 +4818,7 @@ private:
             native_profile_scan_generation_.slab_generation != 0U &&
             current.slab_generation != 0U) {
             // The image and its explicit-clear epoch did not change, so only
-            // Umbra's linear slab capacity could have advanced the native
+            // Dynarmic's linear slab capacity could have advanced the native
             // generation. Replaying the complete prediction into the empty
             // slab would immediately consume its demand reserve and can form
             // a clear/replay/retranslate loop. The currently executing Guest
@@ -5061,7 +5061,7 @@ private:
     AddressSpace& memory_;
     std::shared_ptr<ExecutionContext> execution_context_;
     std::shared_ptr<JitNativePreimportTracker> native_preimport_tracker_;
-    Umbra::ExclusiveMonitor& monitor_;
+    Dynarmic::ExclusiveMonitor& monitor_;
     const ArmCpuModel& cpu_model_;
     std::shared_ptr<JitArtifactStore> artifact_store_;
     std::size_t code_cache_size_ { 64U * 1024U * 1024U };
@@ -5121,7 +5121,7 @@ private:
 };
 
 Cpu::Cpu(std::size_t processor_id, AddressSpace& memory,
-    Umbra::ExclusiveMonitor& monitor)
+    Dynarmic::ExclusiveMonitor& monitor)
     : Cpu { processor_id, std::make_shared<CpuExecutionPool>(memory, monitor, 1,
                               processor_id, default_arm_cpu_model(), nullptr) }
 {
@@ -5207,9 +5207,9 @@ void Cpu::raise_memory_fault(
         return;
     }
     // A deferred SVC is dispatched after the executor has returned, so there
-    // is no Umbra callback object available to carry MemoryFault. Preserve
+    // is no Dynarmic callback object available to carry MemoryFault. Preserve
     // the scheduler-visible fatal boundary in that case.
-    halt(Umbra::HaltReason::UserDefined4);
+    halt(Dynarmic::HaltReason::UserDefined4);
 }
 void Cpu::clear_halt()
 {
@@ -5218,7 +5218,7 @@ void Cpu::clear_halt()
         active_executor_->clear_halt();
     }
 }
-void Cpu::halt(Umbra::HaltReason reason)
+void Cpu::halt(Dynarmic::HaltReason reason)
 {
     requested_halt_reason_ = requested_halt_reason_ | reason;
     if (active_executor_) {
@@ -5229,25 +5229,25 @@ void Cpu::halt(Umbra::HaltReason reason)
 void Cpu::request_guest_preemption()
 {
     performance_counters().record_scheduler_preemption_request();
-    const bool coalesced = Umbra::Has(requested_halt_reason_,
-                               Umbra::HaltReason::UserDefined2) ||
+    const bool coalesced = Dynarmic::Has(requested_halt_reason_,
+                               Dynarmic::HaltReason::UserDefined2) ||
                            (active_executor_ != nullptr &&
                                active_executor_->guest_preemption_requested());
     if (coalesced) {
         performance_counters().record_scheduler_preemption_coalesced();
     }
     requested_halt_reason_ =
-        requested_halt_reason_ | Umbra::HaltReason::UserDefined2;
+        requested_halt_reason_ | Dynarmic::HaltReason::UserDefined2;
     if (active_executor_) {
         active_executor_->request_guest_preemption();
     }
 }
 
-Umbra::HaltReason Cpu::consume_requested_halt_reason()
+Dynarmic::HaltReason Cpu::consume_requested_halt_reason()
 {
     const auto reason = requested_halt_reason_;
     requested_halt_reason_ = { };
-    if (Umbra::Has(reason, Umbra::HaltReason::UserDefined2)) {
+    if (Dynarmic::Has(reason, Dynarmic::HaltReason::UserDefined2)) {
         performance_counters().record_scheduler_preemption_deferred_consume();
     }
     return reason;
@@ -5409,7 +5409,7 @@ CpuCluster::CpuCluster(std::size_t initial_processor_count,
 CpuCluster::CpuCluster(std::size_t initial_processor_count,
     std::size_t maximum_processor_count, AddressSpace& memory,
     std::size_t execution_slot_count, const ArmCpuModel& cpu_model,
-    Umbra::ExclusiveMonitor& monitor, std::size_t monitor_processor_base,
+    Dynarmic::ExclusiveMonitor& monitor, std::size_t monitor_processor_base,
     std::shared_ptr<JitArtifactStore> artifact_store,
     std::shared_ptr<GuestExclusiveAddressResolver> address_resolver,
     std::size_t precompile_lane_count)

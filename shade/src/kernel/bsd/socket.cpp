@@ -59,7 +59,7 @@ void CompatibilityKernel::dispatch_bsd_socket(Cpu& cpu, std::uint32_t number)
         pending_recvmsgs_[cpu.processor_id()] =
             PendingRecvmsg { fd, registers[1], cpu.processor_id() };
         process_.waiting_for_events = true;
-        cpu.halt(Umbra::HaltReason::UserDefined5);
+        cpu.halt(Dynarmic::HaltReason::UserDefined5);
         return;
     }
     case 28: { // sendmsg
@@ -263,7 +263,7 @@ void CompatibilityKernel::dispatch_bsd_socket(Cpu& cpu, std::uint32_t number)
                 registers[5], cpu.processor_id(), std::nullopt };
         process_.waiting_for_events = true;
         bsd_success(cpu, 0);
-        cpu.halt(Umbra::HaltReason::UserDefined5);
+        cpu.halt(Dynarmic::HaltReason::UserDefined5);
         return;
     }
     case darwin::syscall::accept: {
@@ -288,7 +288,7 @@ void CompatibilityKernel::dispatch_bsd_socket(Cpu& cpu, std::uint32_t number)
                         cpu.processor_id() };
                 process_.waiting_for_events = true;
                 bsd_success(cpu, 0);
-                cpu.halt(Umbra::HaltReason::UserDefined5);
+                cpu.halt(Dynarmic::HaltReason::UserDefined5);
                 return;
             }
             if (accepted.status == HostSocketStatus::Error) {
@@ -327,7 +327,7 @@ void CompatibilityKernel::dispatch_bsd_socket(Cpu& cpu, std::uint32_t number)
                 cpu.processor_id() };
         process_.waiting_for_events = true;
         bsd_success(cpu, 0);
-        cpu.halt(Umbra::HaltReason::UserDefined5);
+        cpu.halt(Dynarmic::HaltReason::UserDefined5);
         return;
     }
     case 31: // getpeername
@@ -621,7 +621,7 @@ void CompatibilityKernel::dispatch_bsd_socket(Cpu& cpu, std::uint32_t number)
                         PendingHostConnect { fd, cpu.processor_id() };
                     process_.waiting_for_events = true;
                     bsd_success(cpu, 0);
-                    cpu.halt(Umbra::HaltReason::UserDefined5);
+                    cpu.halt(Dynarmic::HaltReason::UserDefined5);
                 }
             } else {
                 bsd_success(cpu, 0);

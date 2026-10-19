@@ -304,7 +304,7 @@ void CompatibilityKernel::wait_on_semaphore_object(Cpu& cpu,
             "\n");
         ++semaphore_wait_trace_count_;
     }
-    cpu.halt(Umbra::HaltReason::UserDefined5);
+    cpu.halt(Dynarmic::HaltReason::UserDefined5);
 }
 
 } // namespace shade

@@ -84,7 +84,7 @@ public:
     // Native-cache limits are host code-generator profiles, not Guest device,
     // application or firmware profiles. x64 keeps the complete mapping safely
     // inside the signed rel32 reach used by generated terminals; arm64 retains
-    // Umbra's current address-space limit.
+    // Dynarmic's current address-space limit.
     [[nodiscard]] static constexpr JitNativeBackend
     native_backend() noexcept
     {

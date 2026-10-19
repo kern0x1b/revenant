@@ -13,7 +13,7 @@
 #include <sstream>
 #include <system_error>
 
-#include <umbra/interface/A32/disassembler.h>
+#include <dynarmic/interface/A32/disassembler.h>
 
 #include "foundation/output.hpp"
 #include "graphics/display_presenter.hpp"
@@ -269,7 +269,7 @@ void SessionDiagnostics::stopped(std::uint32_t stopped_pid,
     if (const auto instruction = stopped_runtime->memory->read32(
             stopped_registers[15], MemoryPermission::Execute)) {
         message << " insn=0x" << std::hex << *instruction << "("
-                << Umbra::A32::DisassembleArm(*instruction) << ")"
+                << Dynarmic::A32::DisassembleArm(*instruction) << ")"
                 << " lr=0x" << stopped_registers[14] << std::dec;
     }
     if (stopped_result.fault) {

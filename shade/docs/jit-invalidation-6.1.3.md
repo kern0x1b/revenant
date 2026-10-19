@@ -72,8 +72,8 @@ nothing left.
 
 ## Scope
 
-The defect is in `src/umbra/backend/block_range_information.cpp`, shared by the x64 and arm64
-backends, and the same `equal_range` lookup is in azahar-emu/umbra master, so it is not specific
+The defect is in `src/dynarmic/backend/block_range_information.cpp`, shared by the x64 and arm64
+backends, and the same `equal_range` lookup is in azahar-emu/dynarmic master, so it is not specific
 to the Shade fork or to this port. It only shows up when a range invalidation has to cover more than
 one translated block - dlclose/dlopen at the same address, or self-modifying code that rewrites a
 whole page.

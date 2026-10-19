@@ -98,7 +98,7 @@ public:
         std::unique_lock<std::mutex> lock_;
         const ExclusiveAccess* previous_;
     };
-    // A shared Umbra monitor can conservatively invalidate all reservations
+    // A shared Dynarmic monitor can conservatively invalidate all reservations
     // whenever this address space performs a checked Guest write. Direct JIT
     // writes are only installed for private pages, so shared/COW writes pass
     // through this boundary before another execution slice begins.
@@ -120,7 +120,7 @@ public:
     // can advance its backing identity; immutable/read-only direct accesses may
     // continue using the read table.
     void disable_jit_write_page_table();
-    // Umbra calls this immediately before establishing an LDREX reservation.
+    // Dynarmic calls this immediately before establishing an LDREX reservation.
     // Keep the touched pages on the checked-write path from that point onward;
     // otherwise a later ordinary store could bypass reservation invalidation
     // through an already compiled direct-write block.
@@ -131,7 +131,7 @@ public:
     void clear_exclusive_access_tracking();
     // A physical page can become write-tracked after another AddressSpace has
     // already cached a direct JIT write pointer to it. The execution boundary
-    // calls this safe point before re-entering Umbra so those old aliases
+    // calls this safe point before re-entering Dynarmic so those old aliases
     // are redirected through the checked write callbacks.
     void synchronize_shared_write_tracking();
 

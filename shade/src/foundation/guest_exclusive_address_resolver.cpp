@@ -55,8 +55,8 @@ void GuestExclusiveAddressResolver::unbind(std::size_t processor_base,
     }
 }
 
-Umbra::VAddr GuestExclusiveAddressResolver::resolve(
-    std::size_t processor_id, Umbra::VAddr address) const noexcept
+Dynarmic::VAddr GuestExclusiveAddressResolver::resolve(
+    std::size_t processor_id, Dynarmic::VAddr address) const noexcept
 {
     try {
         const std::shared_lock lock { mutex_ };
@@ -74,8 +74,8 @@ Umbra::VAddr GuestExclusiveAddressResolver::resolve(
     }
 }
 
-Umbra::VAddr GuestExclusiveAddressResolver::resolve_callback(
-    void* context, std::size_t processor_id, Umbra::VAddr address) noexcept
+Dynarmic::VAddr GuestExclusiveAddressResolver::resolve_callback(
+    void* context, std::size_t processor_id, Dynarmic::VAddr address) noexcept
 {
     if (context == nullptr)
         return address;

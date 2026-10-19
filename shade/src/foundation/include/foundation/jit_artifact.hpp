@@ -28,11 +28,11 @@
 #include "foundation/arm_cpu_model.hpp"
 #include "foundation/content_identity.hpp"
 
-namespace Umbra::A32 {
+namespace Dynarmic::A32 {
 class NativeCodeSlab;
 }
 
-namespace Umbra::IR {
+namespace Dynarmic::IR {
 class Block;
 }
 
@@ -71,7 +71,7 @@ struct JitArtifactKey {
     PortableLayoutIdentity layout_identity;
     std::uint32_t guest_pc { };
     bool thumb { };
-    // Umbra's complete block location. guest_pc/thumb remain as readable
+    // Dynarmic's complete block location. guest_pc/thumb remain as readable
     // fields for diagnostics, but this value is the cache identity for all
     // CPSR/FPSCR/IT/single-step state that affects translation.
     std::uint64_t location_descriptor { };
@@ -82,7 +82,7 @@ struct JitArtifactKey {
     std::uint32_t image_slide { };
     std::uint32_t hle_abi_version { };
     std::uint32_t backend_abi_version { };
-    std::uint64_t umbra_build_fingerprint { };
+    std::uint64_t dynarmic_build_fingerprint { };
     std::uint64_t codegen_options { };
     JitHostIsa host_isa { JitHostIsa::Unknown };
     std::uint64_t host_feature_mask { };
@@ -114,7 +114,7 @@ struct JitConstantDependency {
 
 struct JitArtifactData {
     // This is a normalized, portable representation. It is deliberately not a
-    // copy of Umbra's native code cache.
+    // copy of Dynarmic's native code cache.
     std::vector<std::byte> normalized_ir;
     std::vector<std::uint64_t> relocation_targets;
     std::vector<std::uint64_t> exit_locations;
@@ -124,16 +124,16 @@ struct JitArtifactData {
     // speculative profile hint, but it does not participate in executable
     // artifact identity.
     std::uint64_t translation_nanoseconds { };
-    // Every executable page observed by Umbra while translating the block.
+    // Every executable page observed by Dynarmic while translating the block.
     // Empty dependencies are not importable by the CPU integration.
     std::vector<JitCodeDependency> code_dependencies;
-    // Read-only values folded by Umbra's constant-memory pass.
+    // Read-only values folded by Dynarmic's constant-memory pass.
     std::vector<JitConstantDependency> constant_dependencies;
 };
 
 struct JitArtifactLimits {
     // Zero means unbounded. The default resident target matches the initial
-    // metadata budget; native code is still owned by Umbra's live cache.
+    // metadata budget; native code is still owned by Dynarmic's live cache.
     std::size_t resident_bytes { 64U * 1024U * 1024U };
     std::size_t persistence_bytes { };
     // A disabled persistence store is a successful no-op on save and a cache
@@ -328,7 +328,7 @@ struct JitArtifactLookup {
 
 struct JitArtifactPreparedLookup {
     JitArtifactLookup lookup;
-    std::shared_ptr<Umbra::IR::Block> block;
+    std::shared_ptr<Dynarmic::IR::Block> block;
     std::uint64_t preparation_nanoseconds { };
     JitDemandArtifactStageResult result {
         JitDemandArtifactStageResult::TransientFailure
@@ -675,7 +675,7 @@ public:
     [[nodiscard]] std::uint64_t linked_target(std::size_t cell) const;
     [[nodiscard]] std::atomic<std::uint64_t>* link_cell_address(
         std::size_t cell) const;
-    [[nodiscard]] Umbra::A32::NativeCodeSlab*
+    [[nodiscard]] Dynarmic::A32::NativeCodeSlab*
     native_code_slab() const noexcept;
 
     // Guest address-space changes are published once per process context. The
@@ -701,7 +701,7 @@ public:
     [[nodiscard]] bool observe_slab_generation(
         std::uint64_t generation) noexcept;
     // The last generation observed at a safe executor boundary. Unlike the
-    // Umbra NativeCodeSlab::generation() query, this snapshot never waits
+    // Dynarmic NativeCodeSlab::generation() query, this snapshot never waits
     // for an outstanding invalidation to finish.
     [[nodiscard]] std::uint64_t observed_slab_generation() const noexcept
     {
@@ -715,7 +715,7 @@ private:
 
     std::uint64_t context_id_ { };
     std::atomic<std::uint32_t> process_id_ { };
-    std::shared_ptr<Umbra::A32::NativeCodeSlab> native_code_slab_;
+    std::shared_ptr<Dynarmic::A32::NativeCodeSlab> native_code_slab_;
     mutable std::mutex mutex_;
     bool process_id_bound_ { };
     std::atomic<std::uint64_t> cache_invalidation_epoch_ { };

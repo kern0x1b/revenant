@@ -4,8 +4,8 @@ Shade
 Shade is Charon's emulator for legacy iPhone OS and iOS userlands on macOS
 arm64 hosts. It is licensed under the Mozilla Public License 2.0; see LICENSE.
 
-The JIT core, kept as a separate submodule, is licensed under the BSD Zero
-Clause License; see the LICENSE in its tree.
+The JIT core, Dynarmic (Copyright (c) MerryMage and its contributors), is
+licensed under the BSD Zero Clause License; see LICENSE.txt in its tree.
 
 Third-party components
 ----------------------
@@ -13,7 +13,7 @@ Third-party components
 These carry their own licenses and notices, which each keeps in its own tree.
 This file only summarizes them.
 
-  Boost libraries (external/ext-boost)     BSL-1.0
+  Boost libraries 1.81.0                   BSL-1.0
   fmt          MIT           (c) Victor Zverovich and {fmt} contributors
   xbyak        BSD-3-Clause  (c) 2007 MITSUNARI Shigeo
   robin-map    MIT           Tessil

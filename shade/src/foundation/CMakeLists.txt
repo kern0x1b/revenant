@@ -23,7 +23,7 @@ add_library(shade_foundation STATIC
     darwin_notify_state_hle.cpp
     device_model.cpp
     guest_image_table.cpp
-    umbra_ir_artifact.cpp
+    dynarmic_ir_artifact.cpp
     dyld_shared_cache.cpp
     executable_catalog.cpp
     firmware_prepare.cpp
@@ -51,13 +51,13 @@ add_library(shade_foundation STATIC
 add_library(Shade::foundation ALIAS shade_foundation)
 shade_configure_module(shade_foundation)
 target_compile_definitions(shade_foundation PRIVATE
-    SHADE_UMBRA_BUILD_FINGERPRINT=${SHADE_UMBRA_BUILD_FINGERPRINT})
+    SHADE_DYNARMIC_BUILD_FINGERPRINT=${SHADE_DYNARMIC_BUILD_FINGERPRINT})
 target_include_directories(shade_foundation SYSTEM PRIVATE
-    "${SHADE_UMBRA_DIR}/externals/mcl/include"
-    "${SHADE_UMBRA_DIR}/externals/fmt/include"
+    "${SHADE_DYNARMIC_DIR}/externals/mcl/include"
+    "${SHADE_DYNARMIC_DIR}/externals/fmt/include"
     "${SHADE_BOOST_DIR}")
 target_link_libraries(shade_foundation PUBLIC
-    umbra Threads::Threads Shade::xnu_adapter
+    dynarmic Threads::Threads Shade::xnu_adapter
     Shade::foundation_memory Shade::foundation_block_profile)
 if(TARGET PkgConfig::PLIST)
     target_link_libraries(shade_foundation PRIVATE PkgConfig::PLIST)

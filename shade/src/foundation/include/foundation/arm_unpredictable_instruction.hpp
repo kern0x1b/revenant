@@ -15,7 +15,7 @@
 namespace shade {
 
 // Applies the selected core's deterministic behavior for an instruction that
-// Umbra reports as unpredictable. Thumb-2 instructions use the decoder
+// Dynarmic reports as unpredictable. Thumb-2 instructions use the decoder
 // order `first_halfword << 16 | second_halfword`; ARM instructions use their
 // architectural 32-bit encoding. Returns false when the strict exception path
 // must remain in effect.

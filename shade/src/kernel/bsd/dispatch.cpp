@@ -118,7 +118,7 @@ void CompatibilityKernel::dispatch_bsd_nosys(Cpu& cpu, bool send_sigsys)
         return;
     static_cast<void>(deliver_signal(darwin::signal::bad_system_call));
     if (process_.exited)
-        cpu.halt(Umbra::HaltReason::UserDefined1);
+        cpu.halt(Dynarmic::HaltReason::UserDefined1);
 }
 
 void CompatibilityKernel::dispatch_bsd(Cpu& cpu, std::uint32_t number)

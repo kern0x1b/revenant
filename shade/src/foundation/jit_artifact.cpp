@@ -26,9 +26,9 @@
 #include <unordered_set>
 #include <utility>
 
-#include <umbra/interface/A32/a32.h>
+#include <dynarmic/interface/A32/a32.h>
 
-#include "umbra_ir_artifact.hpp"
+#include "dynarmic_ir_artifact.hpp"
 
 namespace shade {
 namespace {
@@ -440,7 +440,7 @@ namespace {
         write_u32(stream, key.image_slide);
         write_u32(stream, key.hle_abi_version);
         write_u32(stream, key.backend_abi_version);
-        write_u64(stream, key.umbra_build_fingerprint);
+        write_u64(stream, key.dynarmic_build_fingerprint);
         write_u64(stream, key.codegen_options);
         stream.put(static_cast<char>(key.host_isa));
         stream.put('\0');
@@ -491,9 +491,9 @@ namespace {
         const auto slide = read_u32(stream);
         const auto hle = read_u32(stream);
         const auto backend = read_u32(stream);
-        const auto umbra = read_u64(stream);
+        const auto dynarmic = read_u64(stream);
         const auto options = read_u64(stream);
-        if (!timing || !ticks || !slide || !hle || !backend || !umbra ||
+        if (!timing || !ticks || !slide || !hle || !backend || !dynarmic ||
             !options) {
             return std::nullopt;
         }
@@ -502,7 +502,7 @@ namespace {
         key.image_slide = *slide;
         key.hle_abi_version = *hle;
         key.backend_abi_version = *backend;
-        key.umbra_build_fingerprint = *umbra;
+        key.dynarmic_build_fingerprint = *dynarmic;
         key.codegen_options = *options;
         const auto host_isa = stream.get();
         if (host_isa == std::char_traits<char>::eof() ||
@@ -584,7 +584,7 @@ namespace {
         std::uint32_t guest_ticks_per_second { };
         std::uint32_t hle_abi_version { };
         std::uint32_t backend_abi_version { };
-        std::uint64_t umbra_build_fingerprint { };
+        std::uint64_t dynarmic_build_fingerprint { };
         std::uint64_t codegen_options { };
         JitHostIsa host_isa { JitHostIsa::Unknown };
         std::uint64_t host_feature_mask { };
@@ -605,7 +605,7 @@ namespace {
             hash_scalar(hash, profile.guest_ticks_per_second);
             hash_scalar(hash, profile.hle_abi_version);
             hash_scalar(hash, profile.backend_abi_version);
-            hash_scalar(hash, profile.umbra_build_fingerprint);
+            hash_scalar(hash, profile.dynarmic_build_fingerprint);
             hash_scalar(hash, profile.codegen_options);
             hash_scalar(hash, profile.host_isa);
             hash_scalar(hash, profile.host_feature_mask);
@@ -665,7 +665,7 @@ namespace {
         return ArtifactIndexProfile { key.architecture, key.cpu_model,
             key.timing_model_version, key.guest_ticks_per_second,
             key.hle_abi_version, key.backend_abi_version,
-            key.umbra_build_fingerprint, key.codegen_options, key.host_isa,
+            key.dynarmic_build_fingerprint, key.codegen_options, key.host_isa,
             key.host_feature_mask, key.artifact_format_version };
     }
 
@@ -767,7 +767,7 @@ namespace {
             append_u32(result, profile.guest_ticks_per_second);
             append_u32(result, profile.hle_abi_version);
             append_u32(result, profile.backend_abi_version);
-            append_u64(result, profile.umbra_build_fingerprint);
+            append_u64(result, profile.dynarmic_build_fingerprint);
             append_u64(result, profile.codegen_options);
             result.push_back(static_cast<std::byte>(profile.host_isa));
             result.insert(result.end(), 3U, std::byte { });
@@ -1098,10 +1098,10 @@ namespace {
                 const auto ticks = read_u32(stream);
                 const auto hle = read_u32(stream);
                 const auto backend = read_u32(stream);
-                const auto umbra = read_u64(stream);
+                const auto dynarmic = read_u64(stream);
                 const auto options = read_u64(stream);
                 const auto host_isa = read_u8(stream);
-                if (!timing || !ticks || !hle || !backend || !umbra ||
+                if (!timing || !ticks || !hle || !backend || !dynarmic ||
                     !options || !host_isa || !read_zeroes(stream, 3U)) {
                     return std::nullopt;
                 }
@@ -1118,7 +1118,7 @@ namespace {
                 profiles.push_back(ArtifactIndexProfile {
                     static_cast<ArmArchitectureVersion>(*architecture),
                     static_cast<ArmCpuModelKind>(*cpu_model), *timing, *ticks,
-                    *hle, *backend, *umbra, *options,
+                    *hle, *backend, *dynarmic, *options,
                     static_cast<JitHostIsa>(*host_isa), *host_features,
                     *format });
             }
@@ -1156,8 +1156,8 @@ namespace {
                 key.image_slide = image.image_slide;
                 key.hle_abi_version = profile.hle_abi_version;
                 key.backend_abi_version = profile.backend_abi_version;
-                key.umbra_build_fingerprint =
-                    profile.umbra_build_fingerprint;
+                key.dynarmic_build_fingerprint =
+                    profile.dynarmic_build_fingerprint;
                 key.codegen_options = profile.codegen_options;
                 key.host_isa = profile.host_isa;
                 key.host_feature_mask = profile.host_feature_mask;
@@ -2199,7 +2199,7 @@ std::size_t JitArtifactKeyHash::operator()(
     hash_scalar(hash, key.image_slide);
     hash_scalar(hash, key.hle_abi_version);
     hash_scalar(hash, key.backend_abi_version);
-    hash_scalar(hash, key.umbra_build_fingerprint);
+    hash_scalar(hash, key.dynarmic_build_fingerprint);
     hash_scalar(hash, key.codegen_options);
     hash_scalar(hash, key.host_isa);
     hash_scalar(hash, key.host_feature_mask);
@@ -3543,7 +3543,7 @@ void JitArtifactStore::perform_background_prepare(
             prepared.rejection = JitArtifactValidationRejection::EmptyIr;
         } else {
             const auto ir_started = std::chrono::steady_clock::now();
-            auto block = deserialize_umbra_ir(
+            auto block = deserialize_dynarmic_ir(
                 prepared.lookup.artifact->data.normalized_ir);
             ir_deserialization_nanoseconds =
                 static_cast<std::uint64_t>(std::max<std::int64_t>(
@@ -3552,7 +3552,7 @@ void JitArtifactStore::perform_background_prepare(
                            .count()));
             if (block && block->Location().Value() == key.location_descriptor) {
                 prepared.block =
-                    std::make_shared<Umbra::IR::Block>(std::move(*block));
+                    std::make_shared<Dynarmic::IR::Block>(std::move(*block));
                 prepared.result = JitDemandArtifactStageResult::Staged;
             } else if (!block) {
                 prepared.result =
@@ -5441,7 +5441,7 @@ bool JitArtifactStore::save_full(const std::filesystem::path& path,
 
 ExecutionContext::ExecutionContext()
     : context_id_ { next_context_id.fetch_add(1, std::memory_order_relaxed) }
-    , native_code_slab_ { std::make_shared<Umbra::A32::NativeCodeSlab>() }
+    , native_code_slab_ { std::make_shared<Dynarmic::A32::NativeCodeSlab>() }
 {
 }
 
@@ -5497,7 +5497,7 @@ std::atomic<std::uint64_t>* ExecutionContext::link_cell_address(
     return &link_cells_.at(cell)->target_token;
 }
 
-Umbra::A32::NativeCodeSlab*
+Dynarmic::A32::NativeCodeSlab*
 ExecutionContext::native_code_slab() const noexcept
 {
     return native_code_slab_.get();

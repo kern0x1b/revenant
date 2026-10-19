@@ -2347,7 +2347,7 @@ bool UserlandHleRegistry::dispatch(
         return false;
     }
 
-    // Umbra exposes the architectural PC after SVC. Thumb HLEs share one
+    // Dynarmic exposes the architectural PC after SVC. Thumb HLEs share one
     // immediate and are selected by their two-byte entry address; ARM HLEs
     // retain the encoded registration id used by the original implementation.
     const auto entry = cpu.registers()[15] - (thumb ? 2U : 4U);
@@ -2364,7 +2364,7 @@ bool UserlandHleRegistry::dispatch(
         // A host-backed driver owns one persistent guest callback thread. Park
         // it between device periods; the scheduler restores its registers and
         // wakes the same slot when the next buffer is due.
-        cpu.halt(Umbra::HaltReason::UserDefined5);
+        cpu.halt(Dynarmic::HaltReason::UserDefined5);
         return true;
     }
     if (!thumb &&

@@ -46,7 +46,7 @@ constexpr std::uint64_t tick_budget = 100'000U;
 // handler is involved.
 struct Machine {
     AddressSpace memory;
-    Umbra::ExclusiveMonitor monitor { 1U };
+    Dynarmic::ExclusiveMonitor monitor { 1U };
     Cpu cpu { 0, memory, monitor };
 
     Machine()

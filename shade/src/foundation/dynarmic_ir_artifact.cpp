@@ -2,9 +2,9 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 //
-// Serialize and validate portable Umbra IR translation artifacts.
+// Serialize and validate portable Dynarmic IR translation artifacts.
 
-#include "umbra_ir_artifact.hpp"
+#include "dynarmic_ir_artifact.hpp"
 
 #include <algorithm>
 #include <array>
@@ -14,14 +14,14 @@
 #include <unordered_set>
 #include <utility>
 
-#include <umbra/frontend/A32/a32_location_descriptor.h>
-#include <umbra/frontend/A32/a32_types.h>
-#include <umbra/frontend/A64/a64_types.h>
-#include <umbra/ir/acc_type.h>
-#include <umbra/ir/cond.h>
-#include <umbra/ir/opcodes.h>
-#include <umbra/ir/terminal.h>
-#include <umbra/ir/type.h>
+#include <dynarmic/frontend/A32/a32_location_descriptor.h>
+#include <dynarmic/frontend/A32/a32_types.h>
+#include <dynarmic/frontend/A64/a64_types.h>
+#include <dynarmic/ir/acc_type.h>
+#include <dynarmic/ir/cond.h>
+#include <dynarmic/ir/opcodes.h>
+#include <dynarmic/ir/terminal.h>
+#include <dynarmic/ir/type.h>
 
 namespace shade {
 namespace {
@@ -32,7 +32,7 @@ namespace {
     constexpr std::size_t maximum_bytes = 16U * 1024U * 1024U;
     constexpr std::uint32_t maximum_instructions = 16U * 1024U;
     constexpr std::uint32_t maximum_terminal_depth = 32U;
-    // Umbra's x64 allocator has 64 spill slots. Keeping the entire
+    // Dynarmic's x64 allocator has 64 spill slots. Keeping the entire
     // live-value frontier within that pool guarantees that an adversarial
     // dependency graph cannot exhaust spills regardless of which host registers
     // the configuration reserves for fastmem or page-table state.
@@ -162,79 +162,79 @@ namespace {
 
     [[nodiscard]] bool valid_condition(std::uint8_t value)
     {
-        return value <= static_cast<std::uint8_t>(Umbra::IR::Cond::AL);
+        return value <= static_cast<std::uint8_t>(Dynarmic::IR::Cond::AL);
     }
 
     [[nodiscard]] bool valid_acc_type(std::uint8_t value)
     {
-        return value <= static_cast<std::uint8_t>(Umbra::IR::AccType::SWAP);
+        return value <= static_cast<std::uint8_t>(Dynarmic::IR::AccType::SWAP);
     }
 
-    [[nodiscard]] bool valid_value_type(Umbra::IR::Type type)
+    [[nodiscard]] bool valid_value_type(Dynarmic::IR::Type type)
     {
         switch (type) {
-        case Umbra::IR::Type::U1:
-        case Umbra::IR::Type::U8:
-        case Umbra::IR::Type::U16:
-        case Umbra::IR::Type::U32:
-        case Umbra::IR::Type::U64:
-        case Umbra::IR::Type::A32Reg:
-        case Umbra::IR::Type::A32ExtReg:
-        case Umbra::IR::Type::A64Reg:
-        case Umbra::IR::Type::A64Vec:
-        case Umbra::IR::Type::CoprocInfo:
-        case Umbra::IR::Type::NZCVFlags:
-        case Umbra::IR::Type::Cond:
-        case Umbra::IR::Type::AccType:
+        case Dynarmic::IR::Type::U1:
+        case Dynarmic::IR::Type::U8:
+        case Dynarmic::IR::Type::U16:
+        case Dynarmic::IR::Type::U32:
+        case Dynarmic::IR::Type::U64:
+        case Dynarmic::IR::Type::A32Reg:
+        case Dynarmic::IR::Type::A32ExtReg:
+        case Dynarmic::IR::Type::A64Reg:
+        case Dynarmic::IR::Type::A64Vec:
+        case Dynarmic::IR::Type::CoprocInfo:
+        case Dynarmic::IR::Type::NZCVFlags:
+        case Dynarmic::IR::Type::Cond:
+        case Dynarmic::IR::Type::AccType:
             return true;
-        case Umbra::IR::Type::Void:
-        case Umbra::IR::Type::Opaque:
-        case Umbra::IR::Type::U128:
-        case Umbra::IR::Type::Table:
+        case Dynarmic::IR::Type::Void:
+        case Dynarmic::IR::Type::Opaque:
+        case Dynarmic::IR::Type::U128:
+        case Dynarmic::IR::Type::Table:
             return false;
         }
         return false;
     }
 
     [[nodiscard]] bool canonical_a32_location(
-        Umbra::IR::LocationDescriptor location)
+        Dynarmic::IR::LocationDescriptor location)
     {
-        const Umbra::A32::LocationDescriptor decoded { location };
-        return static_cast<Umbra::IR::LocationDescriptor>(decoded).Value() ==
+        const Dynarmic::A32::LocationDescriptor decoded { location };
+        return static_cast<Dynarmic::IR::LocationDescriptor>(decoded).Value() ==
                location.Value();
     }
 
     [[nodiscard]] bool aligned_a32_location(
-        Umbra::IR::LocationDescriptor location)
+        Dynarmic::IR::LocationDescriptor location)
     {
-        const Umbra::A32::LocationDescriptor decoded { location };
+        const Dynarmic::A32::LocationDescriptor decoded { location };
         const auto alignment = decoded.TFlag() ? 2U : 4U;
         return decoded.PC() % alignment == 0U;
     }
 
-    [[nodiscard]] bool valid_terminal(const Umbra::IR::Terminal& terminal,
-        const Umbra::A32::LocationDescriptor& initial_location,
+    [[nodiscard]] bool valid_terminal(const Dynarmic::IR::Terminal& terminal,
+        const Dynarmic::A32::LocationDescriptor& initial_location,
         bool has_set_check_bit)
     {
         struct Visitor : boost::static_visitor<bool> {
-            const Umbra::A32::LocationDescriptor& initial_location;
+            const Dynarmic::A32::LocationDescriptor& initial_location;
             bool has_set_check_bit;
 
-            Visitor(const Umbra::A32::LocationDescriptor& initial,
+            Visitor(const Dynarmic::A32::LocationDescriptor& initial,
                 bool has_set_check_bit_)
                 : initial_location { initial }
                 , has_set_check_bit { has_set_check_bit_ }
             {
             }
 
-            bool operator()(const Umbra::IR::Term::Invalid&) const
+            bool operator()(const Dynarmic::IR::Term::Invalid&) const
             {
                 return false;
             }
 
-            bool operator()(const Umbra::IR::Term::Interpret& value) const
+            bool operator()(const Dynarmic::IR::Term::Interpret& value) const
             {
-                const Umbra::A32::LocationDescriptor next { value.next };
+                const Dynarmic::A32::LocationDescriptor next { value.next };
                 // Both current backends either assert these invariants or do
                 // not emit Interpret terminals at all. Keep malformed portable
                 // IR off Emit().
@@ -245,44 +245,44 @@ namespace {
                        next.EFlag() == initial_location.EFlag();
             }
 
-            bool operator()(const Umbra::IR::Term::ReturnToDispatch&) const
+            bool operator()(const Dynarmic::IR::Term::ReturnToDispatch&) const
             {
                 return true;
             }
 
-            bool operator()(const Umbra::IR::Term::LinkBlock& value) const
+            bool operator()(const Dynarmic::IR::Term::LinkBlock& value) const
             {
                 return canonical_a32_location(value.next) &&
                        aligned_a32_location(value.next);
             }
 
             bool operator()(
-                const Umbra::IR::Term::LinkBlockFast& value) const
+                const Dynarmic::IR::Term::LinkBlockFast& value) const
             {
                 return canonical_a32_location(value.next) &&
                        aligned_a32_location(value.next);
             }
 
-            bool operator()(const Umbra::IR::Term::PopRSBHint&) const
+            bool operator()(const Dynarmic::IR::Term::PopRSBHint&) const
             {
                 return true;
             }
 
-            bool operator()(const Umbra::IR::Term::FastDispatchHint&) const
+            bool operator()(const Dynarmic::IR::Term::FastDispatchHint&) const
             {
                 return true;
             }
 
-            bool operator()(const Umbra::IR::Term::If& value) const
+            bool operator()(const Dynarmic::IR::Term::If& value) const
             {
-                return value.if_ <= Umbra::IR::Cond::AL &&
+                return value.if_ <= Dynarmic::IR::Cond::AL &&
                        valid_terminal(
                            value.then_, initial_location, has_set_check_bit) &&
                        valid_terminal(
                            value.else_, initial_location, has_set_check_bit);
             }
 
-            bool operator()(const Umbra::IR::Term::CheckBit& value) const
+            bool operator()(const Dynarmic::IR::Term::CheckBit& value) const
             {
                 return has_set_check_bit &&
                        valid_terminal(
@@ -291,7 +291,7 @@ namespace {
                            value.else_, initial_location, has_set_check_bit);
             }
 
-            bool operator()(const Umbra::IR::Term::CheckHalt& value) const
+            bool operator()(const Dynarmic::IR::Term::CheckHalt& value) const
             {
                 return valid_terminal(
                     value.else_, initial_location, has_set_check_bit);
@@ -301,31 +301,31 @@ namespace {
     }
 
     void write_location(
-        Writer& writer, Umbra::IR::LocationDescriptor location)
+        Writer& writer, Dynarmic::IR::LocationDescriptor location)
     {
         writer.u64(location.Value());
     }
 
     [[nodiscard]] bool read_location(
-        Reader& reader, Umbra::IR::LocationDescriptor& location)
+        Reader& reader, Dynarmic::IR::LocationDescriptor& location)
     {
         std::uint64_t value { };
         if (!reader.u64(value))
             return false;
-        location = Umbra::IR::LocationDescriptor { value };
+        location = Dynarmic::IR::LocationDescriptor { value };
         return true;
     }
 
-    void write_terminal(Writer& writer, const Umbra::IR::Terminal& terminal,
+    void write_terminal(Writer& writer, const Dynarmic::IR::Terminal& terminal,
         std::uint32_t depth);
 
     void write_terminal_location(
-        Writer& writer, Umbra::IR::LocationDescriptor location)
+        Writer& writer, Dynarmic::IR::LocationDescriptor location)
     {
         write_location(writer, location);
     }
 
-    void write_terminal(Writer& writer, const Umbra::IR::Terminal& terminal,
+    void write_terminal(Writer& writer, const Dynarmic::IR::Terminal& terminal,
         std::uint32_t depth)
     {
         if (depth > maximum_terminal_depth) {
@@ -342,11 +342,11 @@ namespace {
             {
             }
 
-            void operator()(const Umbra::IR::Term::Invalid&) const
+            void operator()(const Dynarmic::IR::Term::Invalid&) const
             {
                 writer.byte(0U);
             }
-            void operator()(const Umbra::IR::Term::Interpret& value) const
+            void operator()(const Dynarmic::IR::Term::Interpret& value) const
             {
                 writer.byte(1U);
                 write_terminal_location(writer, value.next);
@@ -358,43 +358,43 @@ namespace {
                         static_cast<std::uint64_t>(value.num_instructions));
                 }
             }
-            void operator()(const Umbra::IR::Term::ReturnToDispatch&) const
+            void operator()(const Dynarmic::IR::Term::ReturnToDispatch&) const
             {
                 writer.byte(2U);
             }
-            void operator()(const Umbra::IR::Term::LinkBlock& value) const
+            void operator()(const Dynarmic::IR::Term::LinkBlock& value) const
             {
                 writer.byte(3U);
                 write_terminal_location(writer, value.next);
             }
             void operator()(
-                const Umbra::IR::Term::LinkBlockFast& value) const
+                const Dynarmic::IR::Term::LinkBlockFast& value) const
             {
                 writer.byte(4U);
                 write_terminal_location(writer, value.next);
             }
-            void operator()(const Umbra::IR::Term::PopRSBHint&) const
+            void operator()(const Dynarmic::IR::Term::PopRSBHint&) const
             {
                 writer.byte(5U);
             }
-            void operator()(const Umbra::IR::Term::FastDispatchHint&) const
+            void operator()(const Dynarmic::IR::Term::FastDispatchHint&) const
             {
                 writer.byte(6U);
             }
-            void operator()(const Umbra::IR::Term::If& value) const
+            void operator()(const Dynarmic::IR::Term::If& value) const
             {
                 writer.byte(7U);
                 writer.byte(static_cast<std::uint8_t>(value.if_));
                 write_terminal(writer, value.then_, depth + 1U);
                 write_terminal(writer, value.else_, depth + 1U);
             }
-            void operator()(const Umbra::IR::Term::CheckBit& value) const
+            void operator()(const Dynarmic::IR::Term::CheckBit& value) const
             {
                 writer.byte(8U);
                 write_terminal(writer, value.then_, depth + 1U);
                 write_terminal(writer, value.else_, depth + 1U);
             }
-            void operator()(const Umbra::IR::Term::CheckHalt& value) const
+            void operator()(const Dynarmic::IR::Term::CheckHalt& value) const
             {
                 writer.byte(9U);
                 write_terminal(writer, value.else_, depth + 1U);
@@ -403,7 +403,7 @@ namespace {
         boost::apply_visitor(visitor, terminal);
     }
 
-    [[nodiscard]] std::optional<Umbra::IR::Terminal> read_terminal(
+    [[nodiscard]] std::optional<Dynarmic::IR::Terminal> read_terminal(
         Reader& reader, std::uint32_t depth)
     {
         if (depth > maximum_terminal_depth)
@@ -413,7 +413,7 @@ namespace {
             return std::nullopt;
         switch (tag) {
         case 1: {
-            Umbra::IR::LocationDescriptor next { 0 };
+            Dynarmic::IR::LocationDescriptor next { 0 };
             std::uint64_t count { };
             if (!read_location(reader, next) || !reader.u64(count) ||
                 count == 0) {
@@ -422,35 +422,35 @@ namespace {
             if (count > std::numeric_limits<std::size_t>::max()) {
                 return std::nullopt;
             }
-            auto terminal = Umbra::IR::Term::Interpret { next };
+            auto terminal = Dynarmic::IR::Term::Interpret { next };
             terminal.num_instructions = static_cast<std::size_t>(count);
-            return Umbra::IR::Terminal { terminal };
+            return Dynarmic::IR::Terminal { terminal };
         }
         case 2:
-            return Umbra::IR::Terminal {
-                Umbra::IR::Term::ReturnToDispatch { }
+            return Dynarmic::IR::Terminal {
+                Dynarmic::IR::Term::ReturnToDispatch { }
             };
         case 3: {
-            Umbra::IR::LocationDescriptor next { 0 };
+            Dynarmic::IR::LocationDescriptor next { 0 };
             if (!read_location(reader, next))
                 return std::nullopt;
-            return Umbra::IR::Terminal { Umbra::IR::Term::LinkBlock {
+            return Dynarmic::IR::Terminal { Dynarmic::IR::Term::LinkBlock {
                 next } };
         }
         case 4: {
-            Umbra::IR::LocationDescriptor next { 0 };
+            Dynarmic::IR::LocationDescriptor next { 0 };
             if (!read_location(reader, next))
                 return std::nullopt;
-            return Umbra::IR::Terminal { Umbra::IR::Term::LinkBlockFast {
+            return Dynarmic::IR::Terminal { Dynarmic::IR::Term::LinkBlockFast {
                 next } };
         }
         case 5:
-            return Umbra::IR::Terminal {
-                Umbra::IR::Term::PopRSBHint { }
+            return Dynarmic::IR::Terminal {
+                Dynarmic::IR::Term::PopRSBHint { }
             };
         case 6:
-            return Umbra::IR::Terminal {
-                Umbra::IR::Term::FastDispatchHint { }
+            return Dynarmic::IR::Terminal {
+                Dynarmic::IR::Term::FastDispatchHint { }
             };
         case 7: {
             std::uint8_t condition { };
@@ -461,8 +461,8 @@ namespace {
             auto else_terminal = read_terminal(reader, depth + 1U);
             if (!then_terminal || !else_terminal)
                 return std::nullopt;
-            return Umbra::IR::Terminal { Umbra::IR::Term::If {
-                static_cast<Umbra::IR::Cond>(condition),
+            return Dynarmic::IR::Terminal { Dynarmic::IR::Term::If {
+                static_cast<Dynarmic::IR::Cond>(condition),
                 std::move(*then_terminal), std::move(*else_terminal) } };
         }
         case 8: {
@@ -470,14 +470,14 @@ namespace {
             auto else_terminal = read_terminal(reader, depth + 1U);
             if (!then_terminal || !else_terminal)
                 return std::nullopt;
-            return Umbra::IR::Terminal { Umbra::IR::Term::CheckBit {
+            return Dynarmic::IR::Terminal { Dynarmic::IR::Term::CheckBit {
                 std::move(*then_terminal), std::move(*else_terminal) } };
         }
         case 9: {
             auto else_terminal = read_terminal(reader, depth + 1U);
             if (!else_terminal)
                 return std::nullopt;
-            return Umbra::IR::Terminal { Umbra::IR::Term::CheckHalt {
+            return Dynarmic::IR::Terminal { Dynarmic::IR::Term::CheckHalt {
                 std::move(*else_terminal) } };
         }
         default:
@@ -487,21 +487,21 @@ namespace {
 
     struct EncodedValue {
         ValueTag tag { };
-        Umbra::IR::Type type { Umbra::IR::Type::Void };
+        Dynarmic::IR::Type type { Dynarmic::IR::Type::Void };
         std::uint32_t reference { };
         std::uint64_t scalar { };
         std::array<std::uint8_t, 8> coprocessor { };
     };
 
     struct EncodedInstruction {
-        Umbra::IR::Opcode opcode { Umbra::IR::Opcode::Void };
+        Dynarmic::IR::Opcode opcode { Dynarmic::IR::Opcode::Void };
         std::uint32_t name { };
         std::vector<EncodedValue> arguments;
     };
 
-    [[nodiscard]] bool emitter_safe_opcode(Umbra::IR::Opcode opcode)
+    [[nodiscard]] bool emitter_safe_opcode(Dynarmic::IR::Opcode opcode)
     {
-        using Opcode = Umbra::IR::Opcode;
+        using Opcode = Dynarmic::IR::Opcode;
         switch (opcode) {
         case Opcode::Void:
         case Opcode::Identity:
@@ -528,7 +528,7 @@ namespace {
 #define OPCODE(name, type, ...) case Opcode::name:
 #define A32OPC(name, type, ...) case Opcode::A32##name:
 #define A64OPC(...)
-#include <umbra/ir/opcodes.inc>
+#include <dynarmic/ir/opcodes.inc>
 #undef OPCODE
 #undef A32OPC
 #undef A64OPC
@@ -538,32 +538,32 @@ namespace {
         }
     }
 
-    [[nodiscard]] Umbra::IR::Type encoded_value_type(
+    [[nodiscard]] Dynarmic::IR::Type encoded_value_type(
         const EncodedValue& value,
         const std::vector<EncodedInstruction>& instructions)
     {
         if (value.tag == ValueTag::Immediate)
             return value.type;
-        return Umbra::IR::GetTypeOf(instructions[value.reference].opcode);
+        return Dynarmic::IR::GetTypeOf(instructions[value.reference].opcode);
     }
 
     [[nodiscard]] bool encoded_is_scalar(const EncodedValue& value,
         const std::vector<EncodedInstruction>& instructions)
     {
         switch (encoded_value_type(value, instructions)) {
-        case Umbra::IR::Type::U8:
-        case Umbra::IR::Type::U16:
-        case Umbra::IR::Type::U32:
-        case Umbra::IR::Type::U64:
+        case Dynarmic::IR::Type::U8:
+        case Dynarmic::IR::Type::U16:
+        case Dynarmic::IR::Type::U32:
+        case Dynarmic::IR::Type::U64:
             return true;
         default:
             return false;
         }
     }
 
-    [[nodiscard]] bool carry_parent(Umbra::IR::Opcode opcode)
+    [[nodiscard]] bool carry_parent(Dynarmic::IR::Opcode opcode)
     {
-        using Opcode = Umbra::IR::Opcode;
+        using Opcode = Dynarmic::IR::Opcode;
         switch (opcode) {
         case Opcode::MostSignificantWord:
         case Opcode::LogicalShiftLeft32:
@@ -581,9 +581,9 @@ namespace {
         }
     }
 
-    [[nodiscard]] bool overflow_parent(Umbra::IR::Opcode opcode)
+    [[nodiscard]] bool overflow_parent(Dynarmic::IR::Opcode opcode)
     {
-        using Opcode = Umbra::IR::Opcode;
+        using Opcode = Dynarmic::IR::Opcode;
         switch (opcode) {
         case Opcode::Add32:
         case Opcode::Add64:
@@ -599,9 +599,9 @@ namespace {
         }
     }
 
-    [[nodiscard]] bool ge_parent(Umbra::IR::Opcode opcode)
+    [[nodiscard]] bool ge_parent(Dynarmic::IR::Opcode opcode)
     {
-        using Opcode = Umbra::IR::Opcode;
+        using Opcode = Dynarmic::IR::Opcode;
         switch (opcode) {
         case Opcode::PackedAddU8:
         case Opcode::PackedAddS8:
@@ -621,9 +621,9 @@ namespace {
         }
     }
 
-    [[nodiscard]] bool nzcv_parent(Umbra::IR::Opcode opcode)
+    [[nodiscard]] bool nzcv_parent(Dynarmic::IR::Opcode opcode)
     {
-        using Opcode = Umbra::IR::Opcode;
+        using Opcode = Dynarmic::IR::Opcode;
         switch (opcode) {
         case Opcode::Add32:
         case Opcode::Add64:
@@ -645,9 +645,9 @@ namespace {
         }
     }
 
-    [[nodiscard]] bool upper_lower_parent(Umbra::IR::Opcode opcode)
+    [[nodiscard]] bool upper_lower_parent(Dynarmic::IR::Opcode opcode)
     {
-        using Opcode = Umbra::IR::Opcode;
+        using Opcode = Dynarmic::IR::Opcode;
         switch (opcode) {
         case Opcode::VectorSignedMultiply16:
         case Opcode::VectorSignedMultiply32:
@@ -659,9 +659,9 @@ namespace {
         }
     }
 
-    [[nodiscard]] bool a32_memory_opcode(Umbra::IR::Opcode opcode)
+    [[nodiscard]] bool a32_memory_opcode(Dynarmic::IR::Opcode opcode)
     {
-        using Opcode = Umbra::IR::Opcode;
+        using Opcode = Dynarmic::IR::Opcode;
         switch (opcode) {
         case Opcode::A32ReadMemory8:
         case Opcode::A32ReadMemory16:
@@ -700,11 +700,11 @@ namespace {
     }
 
     [[nodiscard]] bool a32_execution_mode_equal(
-        Umbra::IR::LocationDescriptor lhs,
-        Umbra::IR::LocationDescriptor rhs)
+        Dynarmic::IR::LocationDescriptor lhs,
+        Dynarmic::IR::LocationDescriptor rhs)
     {
-        const Umbra::A32::LocationDescriptor lhs_decoded { lhs };
-        const Umbra::A32::LocationDescriptor rhs_decoded { rhs };
+        const Dynarmic::A32::LocationDescriptor lhs_decoded { lhs };
+        const Dynarmic::A32::LocationDescriptor rhs_decoded { rhs };
         return lhs_decoded.TFlag() == rhs_decoded.TFlag() &&
                lhs_decoded.EFlag() == rhs_decoded.EFlag() &&
                lhs_decoded.SingleStepping() == rhs_decoded.SingleStepping() &&
@@ -712,46 +712,46 @@ namespace {
     }
 
     [[nodiscard]] bool a32_location_in_block(
-        Umbra::IR::LocationDescriptor candidate,
-        Umbra::IR::LocationDescriptor start,
-        Umbra::IR::LocationDescriptor end)
+        Dynarmic::IR::LocationDescriptor candidate,
+        Dynarmic::IR::LocationDescriptor start,
+        Dynarmic::IR::LocationDescriptor end)
     {
         if (!canonical_a32_location(candidate) ||
             !aligned_a32_location(candidate) ||
             !a32_execution_mode_equal(candidate, start)) {
             return false;
         }
-        const Umbra::A32::LocationDescriptor candidate_decoded { candidate };
-        const Umbra::A32::LocationDescriptor start_decoded { start };
-        const Umbra::A32::LocationDescriptor end_decoded { end };
+        const Dynarmic::A32::LocationDescriptor candidate_decoded { candidate };
+        const Dynarmic::A32::LocationDescriptor start_decoded { start };
+        const Dynarmic::A32::LocationDescriptor end_decoded { end };
         return candidate_decoded.PC() >= start_decoded.PC() &&
                candidate_decoded.PC() < end_decoded.PC();
     }
 
-    [[nodiscard]] bool is_fp_opcode(Umbra::IR::Opcode opcode)
+    [[nodiscard]] bool is_fp_opcode(Dynarmic::IR::Opcode opcode)
     {
-        return opcode >= Umbra::IR::Opcode::FPAbs16 &&
-               opcode <= Umbra::IR::Opcode::FPVectorToUnsignedFixed64;
+        return opcode >= Dynarmic::IR::Opcode::FPAbs16 &&
+               opcode <= Dynarmic::IR::Opcode::FPVectorToUnsignedFixed64;
     }
 
     [[nodiscard]] bool valid_fp_instruction(
         const EncodedInstruction& instruction,
-        const Umbra::A32::LocationDescriptor& initial_location)
+        const Dynarmic::A32::LocationDescriptor& initial_location)
     {
-        using Opcode = Umbra::IR::Opcode;
+        using Opcode = Dynarmic::IR::Opcode;
         if (!is_fp_opcode(instruction.opcode))
             return true;
 
-        // Umbra's FP control operands are compile-time IR metadata. Several
+        // Dynarmic's FP control operands are compile-time IR metadata. Several
         // x64 emitters dereference lookup tables or optional rounding encodings
         // directly, so a reference here is not merely semantically odd: it is
         // unsafe input.
         for (std::size_t argument = 0; argument < instruction.arguments.size();
             ++argument) {
             const auto expected =
-                Umbra::IR::GetArgTypeOf(instruction.opcode, argument);
-            if ((expected == Umbra::IR::Type::U1 ||
-                    expected == Umbra::IR::Type::U8) &&
+                Dynarmic::IR::GetArgTypeOf(instruction.opcode, argument);
+            if ((expected == Dynarmic::IR::Type::U1 ||
+                    expected == Dynarmic::IR::Type::U8) &&
                 !immediate_at(instruction, argument)) {
                 return false;
             }
@@ -880,7 +880,7 @@ namespace {
     [[nodiscard]] bool valid_vector_instruction(
         const EncodedInstruction& instruction)
     {
-        using Opcode = Umbra::IR::Opcode;
+        using Opcode = Dynarmic::IR::Opcode;
         const auto immediate_below = [&](std::size_t argument,
                                          std::uint64_t limit) {
             return immediate_at(instruction, argument) &&
@@ -956,8 +956,8 @@ namespace {
     }
 
     [[nodiscard]] std::optional<EncodedValue> encode_value(
-        const Umbra::IR::Value& value,
-        const std::unordered_map<const Umbra::IR::Inst*, std::uint32_t>&
+        const Dynarmic::IR::Value& value,
+        const std::unordered_map<const Dynarmic::IR::Inst*, std::uint32_t>&
             indices)
     {
         if (!value.IsImmediate() || value.IsIdentity()) {
@@ -966,7 +966,7 @@ namespace {
             if (found == indices.end())
                 return std::nullopt;
             return EncodedValue { ValueTag::Reference,
-                Umbra::IR::Type::Opaque, found->second, 0, { } };
+                Dynarmic::IR::Type::Opaque, found->second, 0, { } };
         }
 
         const auto type = value.GetType();
@@ -974,45 +974,45 @@ namespace {
             return std::nullopt;
         EncodedValue encoded { ValueTag::Immediate, type };
         switch (type) {
-        case Umbra::IR::Type::U1:
+        case Dynarmic::IR::Type::U1:
             encoded.scalar = value.GetU1() ? 1U : 0U;
             break;
-        case Umbra::IR::Type::U8:
+        case Dynarmic::IR::Type::U8:
             encoded.scalar = value.GetU8();
             break;
-        case Umbra::IR::Type::U16:
+        case Dynarmic::IR::Type::U16:
             encoded.scalar = value.GetU16();
             break;
-        case Umbra::IR::Type::U32:
+        case Dynarmic::IR::Type::U32:
             encoded.scalar = value.GetU32();
             break;
-        case Umbra::IR::Type::U64:
+        case Dynarmic::IR::Type::U64:
             encoded.scalar = value.GetU64();
             break;
-        case Umbra::IR::Type::A32Reg:
+        case Dynarmic::IR::Type::A32Reg:
             encoded.scalar = static_cast<std::uint32_t>(value.GetA32RegRef());
             break;
-        case Umbra::IR::Type::A32ExtReg:
+        case Dynarmic::IR::Type::A32ExtReg:
             encoded.scalar =
                 static_cast<std::uint32_t>(value.GetA32ExtRegRef());
             break;
-        case Umbra::IR::Type::A64Reg:
+        case Dynarmic::IR::Type::A64Reg:
             encoded.scalar = static_cast<std::uint32_t>(value.GetA64RegRef());
             break;
-        case Umbra::IR::Type::A64Vec:
+        case Dynarmic::IR::Type::A64Vec:
             encoded.scalar = static_cast<std::uint32_t>(value.GetA64VecRef());
             break;
-        case Umbra::IR::Type::CoprocInfo: {
+        case Dynarmic::IR::Type::CoprocInfo: {
             const auto info = value.GetCoprocInfo();
             std::copy(info.begin(), info.end(), encoded.coprocessor.begin());
             break;
         }
-        case Umbra::IR::Type::NZCVFlags:
+        case Dynarmic::IR::Type::NZCVFlags:
             break;
-        case Umbra::IR::Type::Cond:
+        case Dynarmic::IR::Type::Cond:
             encoded.scalar = static_cast<std::uint32_t>(value.GetCond());
             break;
-        case Umbra::IR::Type::AccType:
+        case Dynarmic::IR::Type::AccType:
             encoded.scalar = static_cast<std::uint32_t>(value.GetAccType());
             break;
         default:
@@ -1030,30 +1030,30 @@ namespace {
         }
         writer.u16(static_cast<std::uint16_t>(value.type));
         switch (value.type) {
-        case Umbra::IR::Type::U1:
-        case Umbra::IR::Type::U8:
+        case Dynarmic::IR::Type::U1:
+        case Dynarmic::IR::Type::U8:
             writer.byte(static_cast<std::uint8_t>(value.scalar));
             break;
-        case Umbra::IR::Type::U16:
+        case Dynarmic::IR::Type::U16:
             writer.u16(static_cast<std::uint16_t>(value.scalar));
             break;
-        case Umbra::IR::Type::U32:
-        case Umbra::IR::Type::A32Reg:
-        case Umbra::IR::Type::A32ExtReg:
-        case Umbra::IR::Type::A64Reg:
-        case Umbra::IR::Type::A64Vec:
+        case Dynarmic::IR::Type::U32:
+        case Dynarmic::IR::Type::A32Reg:
+        case Dynarmic::IR::Type::A32ExtReg:
+        case Dynarmic::IR::Type::A64Reg:
+        case Dynarmic::IR::Type::A64Vec:
             writer.u32(static_cast<std::uint32_t>(value.scalar));
             break;
-        case Umbra::IR::Type::U64:
+        case Dynarmic::IR::Type::U64:
             writer.u64(value.scalar);
             break;
-        case Umbra::IR::Type::CoprocInfo:
+        case Dynarmic::IR::Type::CoprocInfo:
             writer.raw(value.coprocessor);
             break;
-        case Umbra::IR::Type::NZCVFlags:
+        case Dynarmic::IR::Type::NZCVFlags:
             break;
-        case Umbra::IR::Type::Cond:
-        case Umbra::IR::Type::AccType:
+        case Dynarmic::IR::Type::Cond:
+        case Dynarmic::IR::Type::AccType:
             writer.byte(static_cast<std::uint8_t>(value.scalar));
             break;
         default:
@@ -1074,7 +1074,7 @@ namespace {
                 return std::nullopt;
             }
             return EncodedValue { ValueTag::Reference,
-                Umbra::IR::Type::Opaque, reference, 0, { } };
+                Dynarmic::IR::Type::Opaque, reference, 0, { } };
         }
         if (raw_tag != static_cast<std::uint8_t>(ValueTag::Immediate)) {
             return std::nullopt;
@@ -1083,72 +1083,72 @@ namespace {
         std::uint16_t raw_type { };
         if (!reader.u16(raw_type))
             return std::nullopt;
-        const auto type = static_cast<Umbra::IR::Type>(raw_type);
+        const auto type = static_cast<Dynarmic::IR::Type>(raw_type);
         if (!valid_value_type(type))
             return std::nullopt;
         switch (type) {
-        case Umbra::IR::Type::U1:
-        case Umbra::IR::Type::U8: {
+        case Dynarmic::IR::Type::U1:
+        case Dynarmic::IR::Type::U8: {
             std::uint8_t value { };
             if (!reader.byte(value) ||
-                (type == Umbra::IR::Type::U1 && value > 1U)) {
+                (type == Dynarmic::IR::Type::U1 && value > 1U)) {
                 return std::nullopt;
             }
             return EncodedValue { ValueTag::Immediate, type, 0, value, { } };
         }
-        case Umbra::IR::Type::U16: {
+        case Dynarmic::IR::Type::U16: {
             std::uint16_t value { };
             if (!reader.u16(value))
                 return std::nullopt;
             return EncodedValue { ValueTag::Immediate, type, 0, value, { } };
         }
-        case Umbra::IR::Type::U32: {
+        case Dynarmic::IR::Type::U32: {
             std::uint32_t value { };
             if (!reader.u32(value))
                 return std::nullopt;
             return EncodedValue { ValueTag::Immediate, type, 0, value, { } };
         }
-        case Umbra::IR::Type::U64: {
+        case Dynarmic::IR::Type::U64: {
             std::uint64_t value { };
             if (!reader.u64(value))
                 return std::nullopt;
             return EncodedValue { ValueTag::Immediate, type, 0, value, { } };
         }
-        case Umbra::IR::Type::A32Reg:
-        case Umbra::IR::Type::A32ExtReg:
-        case Umbra::IR::Type::A64Reg:
-        case Umbra::IR::Type::A64Vec: {
+        case Dynarmic::IR::Type::A32Reg:
+        case Dynarmic::IR::Type::A32ExtReg:
+        case Dynarmic::IR::Type::A64Reg:
+        case Dynarmic::IR::Type::A64Vec: {
             std::uint32_t value { };
             if (!reader.u32(value))
                 return std::nullopt;
-            if (type == Umbra::IR::Type::A32Reg && value > 15U) {
+            if (type == Dynarmic::IR::Type::A32Reg && value > 15U) {
                 return std::nullopt;
             }
-            if (type == Umbra::IR::Type::A32ExtReg && value > 79U) {
+            if (type == Dynarmic::IR::Type::A32ExtReg && value > 79U) {
                 return std::nullopt;
             }
-            if ((type == Umbra::IR::Type::A64Reg ||
-                    type == Umbra::IR::Type::A64Vec) &&
+            if ((type == Dynarmic::IR::Type::A64Reg ||
+                    type == Dynarmic::IR::Type::A64Vec) &&
                 value > 31U) {
                 return std::nullopt;
             }
             return EncodedValue { ValueTag::Immediate, type, 0, value, { } };
         }
-        case Umbra::IR::Type::CoprocInfo: {
+        case Dynarmic::IR::Type::CoprocInfo: {
             std::array<std::uint8_t, 8> value { };
             if (!reader.raw(value))
                 return std::nullopt;
             return EncodedValue { ValueTag::Immediate, type, 0, 0, value };
         }
-        case Umbra::IR::Type::NZCVFlags:
+        case Dynarmic::IR::Type::NZCVFlags:
             return EncodedValue { ValueTag::Immediate, type };
-        case Umbra::IR::Type::Cond: {
+        case Dynarmic::IR::Type::Cond: {
             std::uint8_t value { };
             if (!reader.byte(value) || !valid_condition(value))
                 return std::nullopt;
             return EncodedValue { ValueTag::Immediate, type, 0, value, { } };
         }
-        case Umbra::IR::Type::AccType: {
+        case Dynarmic::IR::Type::AccType: {
             std::uint8_t value { };
             if (!reader.byte(value) || !valid_acc_type(value))
                 return std::nullopt;
@@ -1160,16 +1160,16 @@ namespace {
     }
 
     [[nodiscard]] bool valid_encoded_ir(
-        Umbra::IR::LocationDescriptor location,
-        Umbra::IR::LocationDescriptor end_location,
-        Umbra::IR::Cond condition,
-        const std::optional<Umbra::IR::LocationDescriptor>& condition_failed,
+        Dynarmic::IR::LocationDescriptor location,
+        Dynarmic::IR::LocationDescriptor end_location,
+        Dynarmic::IR::Cond condition,
+        const std::optional<Dynarmic::IR::LocationDescriptor>& condition_failed,
         std::uint64_t condition_failed_cycles, std::uint64_t cycles,
         const std::vector<EncodedInstruction>& instructions,
-        const Umbra::IR::Terminal& terminal)
+        const Dynarmic::IR::Terminal& terminal)
     {
-        using Opcode = Umbra::IR::Opcode;
-        using Type = Umbra::IR::Type;
+        using Opcode = Dynarmic::IR::Opcode;
+        using Type = Dynarmic::IR::Type;
 
         if (!canonical_a32_location(location) ||
             !aligned_a32_location(location) ||
@@ -1178,8 +1178,8 @@ namespace {
             !a32_execution_mode_equal(end_location, location)) {
             return false;
         }
-        const Umbra::A32::LocationDescriptor initial_location { location };
-        const Umbra::A32::LocationDescriptor final_location { end_location };
+        const Dynarmic::A32::LocationDescriptor initial_location { location };
+        const Dynarmic::A32::LocationDescriptor final_location { end_location };
         const auto pc_delta = static_cast<std::uint64_t>(final_location.PC()) -
                               static_cast<std::uint64_t>(initial_location.PC());
         if (final_location.PC() <= initial_location.PC() ||
@@ -1193,7 +1193,7 @@ namespace {
             condition_failed_cycles >= maximum_cycle_count) {
             return false;
         }
-        if ((condition == Umbra::IR::Cond::AL) != !condition_failed) {
+        if ((condition == Dynarmic::IR::Cond::AL) != !condition_failed) {
             return false;
         }
         if (!condition_failed) {
@@ -1205,7 +1205,7 @@ namespace {
                 !a32_execution_mode_equal(*condition_failed, location)) {
                 return false;
             }
-            const Umbra::A32::LocationDescriptor failed {
+            const Dynarmic::A32::LocationDescriptor failed {
                 *condition_failed
             };
             if (failed.PC() <= initial_location.PC() ||
@@ -1245,15 +1245,15 @@ namespace {
                 instruction.name == 0U || instruction.name <= previous_name ||
                 instruction.name > maximum_instructions ||
                 instruction.arguments.size() !=
-                    Umbra::IR::GetNumArgsOf(instruction.opcode) ||
-                instruction.arguments.size() > Umbra::IR::max_arg_count) {
+                    Dynarmic::IR::GetNumArgsOf(instruction.opcode) ||
+                instruction.arguments.size() > Dynarmic::IR::max_arg_count) {
                 return false;
             }
             previous_name = instruction.name;
 
             if (use_counts[index] != 0U) {
                 const auto result_type =
-                    Umbra::IR::GetTypeOf(instruction.opcode);
+                    Dynarmic::IR::GetTypeOf(instruction.opcode);
                 const bool allocated_value =
                     result_type == Type::U1 || result_type == Type::U8 ||
                     result_type == Type::U16 || result_type == Type::U32 ||
@@ -1278,9 +1278,9 @@ namespace {
                 }
                 const auto actual_type =
                     encoded_value_type(argument, instructions);
-                const auto expected_type = Umbra::IR::GetArgTypeOf(
+                const auto expected_type = Dynarmic::IR::GetArgTypeOf(
                     instruction.opcode, argument_index);
-                if (!Umbra::IR::AreTypesCompatible(
+                if (!Dynarmic::IR::AreTypesCompatible(
                         actual_type, expected_type)) {
                     return false;
                 }
@@ -1334,7 +1334,7 @@ namespace {
             if (a32_memory_opcode(instruction.opcode)) {
                 if (!immediate_at(instruction, 0) ||
                     !a32_location_in_block(
-                        Umbra::IR::LocationDescriptor {
+                        Dynarmic::IR::LocationDescriptor {
                             instruction.arguments[0].scalar },
                         location, end_location)) {
                     return false;
@@ -1345,7 +1345,7 @@ namespace {
             case Opcode::PushRSB: {
                 if (!immediate_at(instruction, 0))
                     return false;
-                const Umbra::IR::LocationDescriptor target {
+                const Dynarmic::IR::LocationDescriptor target {
                     instruction.arguments[0].scalar
                 };
                 if (!canonical_a32_location(target) ||
@@ -1511,60 +1511,60 @@ namespace {
         return valid_terminal(terminal, initial_location, has_set_check_bit);
     }
 
-    [[nodiscard]] std::optional<Umbra::IR::Value> decode_value(
+    [[nodiscard]] std::optional<Dynarmic::IR::Value> decode_value(
         const EncodedValue& encoded,
-        const std::vector<Umbra::IR::Inst*>& instructions)
+        const std::vector<Dynarmic::IR::Inst*>& instructions)
     {
         if (encoded.tag == ValueTag::Reference) {
             if (encoded.reference >= instructions.size())
                 return std::nullopt;
-            return Umbra::IR::Value { instructions[encoded.reference] };
+            return Dynarmic::IR::Value { instructions[encoded.reference] };
         }
         switch (encoded.type) {
-        case Umbra::IR::Type::U1:
-            return Umbra::IR::Value { encoded.scalar != 0 };
-        case Umbra::IR::Type::U8:
-            return Umbra::IR::Value { static_cast<std::uint8_t>(
+        case Dynarmic::IR::Type::U1:
+            return Dynarmic::IR::Value { encoded.scalar != 0 };
+        case Dynarmic::IR::Type::U8:
+            return Dynarmic::IR::Value { static_cast<std::uint8_t>(
                 encoded.scalar) };
-        case Umbra::IR::Type::U16:
-            return Umbra::IR::Value { static_cast<std::uint16_t>(
+        case Dynarmic::IR::Type::U16:
+            return Dynarmic::IR::Value { static_cast<std::uint16_t>(
                 encoded.scalar) };
-        case Umbra::IR::Type::U32:
-            return Umbra::IR::Value { static_cast<std::uint32_t>(
+        case Dynarmic::IR::Type::U32:
+            return Dynarmic::IR::Value { static_cast<std::uint32_t>(
                 encoded.scalar) };
-        case Umbra::IR::Type::U64:
-            return Umbra::IR::Value { encoded.scalar };
-        case Umbra::IR::Type::A32Reg:
-            return Umbra::IR::Value { static_cast<Umbra::A32::Reg>(
+        case Dynarmic::IR::Type::U64:
+            return Dynarmic::IR::Value { encoded.scalar };
+        case Dynarmic::IR::Type::A32Reg:
+            return Dynarmic::IR::Value { static_cast<Dynarmic::A32::Reg>(
                 encoded.scalar) };
-        case Umbra::IR::Type::A32ExtReg:
-            return Umbra::IR::Value { static_cast<Umbra::A32::ExtReg>(
+        case Dynarmic::IR::Type::A32ExtReg:
+            return Dynarmic::IR::Value { static_cast<Dynarmic::A32::ExtReg>(
                 encoded.scalar) };
-        case Umbra::IR::Type::A64Reg:
-            return Umbra::IR::Value { static_cast<Umbra::A64::Reg>(
+        case Dynarmic::IR::Type::A64Reg:
+            return Dynarmic::IR::Value { static_cast<Dynarmic::A64::Reg>(
                 encoded.scalar) };
-        case Umbra::IR::Type::A64Vec:
-            return Umbra::IR::Value { static_cast<Umbra::A64::Vec>(
+        case Dynarmic::IR::Type::A64Vec:
+            return Dynarmic::IR::Value { static_cast<Dynarmic::A64::Vec>(
                 encoded.scalar) };
-        case Umbra::IR::Type::CoprocInfo:
-            return Umbra::IR::Value { Umbra::IR::Value::CoprocessorInfo {
+        case Dynarmic::IR::Type::CoprocInfo:
+            return Dynarmic::IR::Value { Dynarmic::IR::Value::CoprocessorInfo {
                 encoded.coprocessor } };
-        case Umbra::IR::Type::NZCVFlags:
-            return Umbra::IR::Value::EmptyNZCVImmediateMarker();
-        case Umbra::IR::Type::Cond:
-            return Umbra::IR::Value { static_cast<Umbra::IR::Cond>(
+        case Dynarmic::IR::Type::NZCVFlags:
+            return Dynarmic::IR::Value::EmptyNZCVImmediateMarker();
+        case Dynarmic::IR::Type::Cond:
+            return Dynarmic::IR::Value { static_cast<Dynarmic::IR::Cond>(
                 encoded.scalar) };
-        case Umbra::IR::Type::AccType:
-            return Umbra::IR::Value { static_cast<Umbra::IR::AccType>(
+        case Dynarmic::IR::Type::AccType:
+            return Dynarmic::IR::Value { static_cast<Dynarmic::IR::AccType>(
                 encoded.scalar) };
         default:
             return std::nullopt;
         }
     }
 
-    [[nodiscard]] bool append_instruction(Umbra::IR::Block& block,
-        Umbra::IR::Opcode opcode,
-        const std::vector<Umbra::IR::Value>& args)
+    [[nodiscard]] bool append_instruction(Dynarmic::IR::Block& block,
+        Dynarmic::IR::Opcode opcode,
+        const std::vector<Dynarmic::IR::Value>& args)
     {
         switch (args.size()) {
         case 0:
@@ -1589,8 +1589,8 @@ namespace {
 
 } // namespace
 
-std::optional<std::vector<std::byte>> serialize_umbra_ir(
-    const Umbra::IR::Block& block)
+std::optional<std::vector<std::byte>> serialize_dynarmic_ir(
+    const Dynarmic::IR::Block& block)
 {
     Writer writer;
     writer.raw(magic);
@@ -1608,7 +1608,7 @@ std::optional<std::vector<std::byte>> serialize_umbra_ir(
     if (block.size() > maximum_instructions)
         return std::nullopt;
     writer.u32(static_cast<std::uint32_t>(block.size()));
-    std::unordered_map<const Umbra::IR::Inst*, std::uint32_t> indices;
+    std::unordered_map<const Dynarmic::IR::Inst*, std::uint32_t> indices;
     indices.reserve(block.size());
     std::uint32_t index = 0;
     for (const auto& instruction : block) {
@@ -1618,7 +1618,7 @@ std::optional<std::vector<std::byte>> serialize_umbra_ir(
         writer.u32(static_cast<std::uint32_t>(instruction.GetOpcode()));
         writer.u32(instruction.GetName());
         const auto argument_count = instruction.NumArgs();
-        if (argument_count > Umbra::IR::max_arg_count)
+        if (argument_count > Dynarmic::IR::max_arg_count)
             return std::nullopt;
         writer.byte(static_cast<std::uint8_t>(argument_count));
         for (std::size_t argument = 0; argument < argument_count; ++argument) {
@@ -1635,7 +1635,7 @@ std::optional<std::vector<std::byte>> serialize_umbra_ir(
     return std::move(writer).take();
 }
 
-std::optional<Umbra::IR::Block> deserialize_umbra_ir(
+std::optional<Dynarmic::IR::Block> deserialize_dynarmic_ir(
     std::span<const std::byte> bytes)
 {
     if (bytes.empty() || bytes.size() > maximum_bytes)
@@ -1648,8 +1648,8 @@ std::optional<Umbra::IR::Block> deserialize_umbra_ir(
     if (!reader.u32(version) || version != format_version)
         return std::nullopt;
 
-    Umbra::IR::LocationDescriptor location { 0 };
-    Umbra::IR::LocationDescriptor end_location { 0 };
+    Dynarmic::IR::LocationDescriptor location { 0 };
+    Dynarmic::IR::LocationDescriptor end_location { 0 };
     if (!read_location(reader, location) ||
         !read_location(reader, end_location)) {
         return std::nullopt;
@@ -1660,9 +1660,9 @@ std::optional<Umbra::IR::Block> deserialize_umbra_ir(
         !reader.byte(has_condition_failed) || has_condition_failed > 1U) {
         return std::nullopt;
     }
-    std::optional<Umbra::IR::LocationDescriptor> condition_failed;
+    std::optional<Dynarmic::IR::LocationDescriptor> condition_failed;
     if (has_condition_failed != 0) {
-        Umbra::IR::LocationDescriptor value { 0 };
+        Dynarmic::IR::LocationDescriptor value { 0 };
         if (!read_location(reader, value))
             return std::nullopt;
         condition_failed = value;
@@ -1688,14 +1688,14 @@ std::optional<Umbra::IR::Block> deserialize_umbra_ir(
         std::uint8_t argument_count { };
         if (!reader.u32(raw_opcode) || !reader.u32(name) ||
             !reader.byte(argument_count) ||
-            raw_opcode >= Umbra::IR::OpcodeCount ||
+            raw_opcode >= Dynarmic::IR::OpcodeCount ||
             argument_count !=
-                Umbra::IR::GetNumArgsOf(
-                    static_cast<Umbra::IR::Opcode>(raw_opcode)) ||
-            argument_count > Umbra::IR::max_arg_count) {
+                Dynarmic::IR::GetNumArgsOf(
+                    static_cast<Dynarmic::IR::Opcode>(raw_opcode)) ||
+            argument_count > Dynarmic::IR::max_arg_count) {
             return std::nullopt;
         }
-        const auto opcode = static_cast<Umbra::IR::Opcode>(raw_opcode);
+        const auto opcode = static_cast<Dynarmic::IR::Opcode>(raw_opcode);
         EncodedInstruction instruction { opcode, name, { } };
         instruction.arguments.reserve(argument_count);
         for (std::uint8_t argument = 0; argument < argument_count; ++argument) {
@@ -1712,19 +1712,19 @@ std::optional<Umbra::IR::Block> deserialize_umbra_ir(
         return std::nullopt;
     }
     if (!valid_encoded_ir(location, end_location,
-            static_cast<Umbra::IR::Cond>(condition), condition_failed,
+            static_cast<Dynarmic::IR::Cond>(condition), condition_failed,
             condition_failed_cycles, cycles, encoded_instructions, *terminal)) {
         return std::nullopt;
     }
 
-    // No Umbra IR object is touched until every byte and every x64 emitter
+    // No Dynarmic IR object is touched until every byte and every x64 emitter
     // precondition above has been checked without assertions. The construction
     // calls below therefore only receive producer-shaped data.
-    Umbra::IR::Block block { location };
-    std::vector<Umbra::IR::Inst*> instructions;
+    Dynarmic::IR::Block block { location };
+    std::vector<Dynarmic::IR::Inst*> instructions;
     instructions.reserve(encoded_instructions.size());
     for (const auto& encoded_instruction : encoded_instructions) {
-        std::vector<Umbra::IR::Value> arguments;
+        std::vector<Dynarmic::IR::Value> arguments;
         arguments.reserve(encoded_instruction.arguments.size());
         for (const auto& encoded_argument : encoded_instruction.arguments) {
             auto value = decode_value(encoded_argument, instructions);
@@ -1739,7 +1739,7 @@ std::optional<Umbra::IR::Block> deserialize_umbra_ir(
         instructions.push_back(&block.back());
     }
     block.SetEndLocation(end_location);
-    block.SetCondition(static_cast<Umbra::IR::Cond>(condition));
+    block.SetCondition(static_cast<Dynarmic::IR::Cond>(condition));
     if (condition_failed)
         block.SetConditionFailedLocation(*condition_failed);
     block.ConditionFailedCycleCount() =
@@ -1749,9 +1749,9 @@ std::optional<Umbra::IR::Block> deserialize_umbra_ir(
     return block;
 }
 
-bool validate_umbra_ir(std::span<const std::byte> bytes)
+bool validate_dynarmic_ir(std::span<const std::byte> bytes)
 {
-    return deserialize_umbra_ir(bytes).has_value();
+    return deserialize_dynarmic_ir(bytes).has_value();
 }
 
 } // namespace shade

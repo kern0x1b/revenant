@@ -30,8 +30,8 @@ option(SHADE_ENABLE_VULKAN
 if(SHADE_ENABLE_VULKAN)
     find_package(Vulkan QUIET)
 endif()
-option(SHADE_ENABLE_UMBRA_TEST_EMIT_FAILURE
-    "Compile Umbra portable-emit fault injection for tests" OFF)
+option(SHADE_ENABLE_DYNARMIC_TEST_EMIT_FAILURE
+    "Compile Dynarmic portable-emit fault injection for tests" OFF)
 find_package(PkgConfig QUIET)
 if(SHADE_ENABLE_SDL2 AND PkgConfig_FOUND)
     pkg_check_modules(SDL2 QUIET IMPORTED_TARGET sdl2)
@@ -54,80 +54,100 @@ set(SHADE_WORKSPACE_DIR "${CMAKE_CURRENT_SOURCE_DIR}" CACHE PATH
 set(SHADE_TESTS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/tests" CACHE PATH
     "Compatibility test source tree; may live in the surrounding workspace")
 
-set(SHADE_UMBRA_DIR "${CMAKE_CURRENT_SOURCE_DIR}/external/umbra" CACHE PATH
-    "Path to the Umbra checkout")
-set(SHADE_BOOST_DIR "${CMAKE_CURRENT_SOURCE_DIR}/external/ext-boost" CACHE PATH
-    "Path to the matching ext-boost checkout")
+# Dynarmic and Boost are not kept in this tree: hades pins them in third_party/
+# (the upstream commit or archive, and our patches), and third_party/fetch.lua
+# prepares them under .deps/. Configure prepares them itself when they are not
+# there yet, and they can be pointed elsewhere with the two cache paths.
+get_filename_component(SHADE_HADES_DIR "${CMAKE_CURRENT_SOURCE_DIR}/.." ABSOLUTE)
+set(SHADE_DYNARMIC_DIR "${SHADE_HADES_DIR}/.deps/dynarmic" CACHE PATH
+    "Path to Dynarmic at hades' pin, with its patches applied")
+set(SHADE_BOOST_DIR "${SHADE_HADES_DIR}/.deps/boost" CACHE PATH
+    "Path to the Boost release hades pins (its headers)")
 
-if(NOT EXISTS "${SHADE_UMBRA_DIR}/CMakeLists.txt")
+foreach(shade_dep IN ITEMS dynarmic boost)
+    string(TOUPPER "${shade_dep}" shade_dep_upper)
+    if(NOT EXISTS "${SHADE_${shade_dep_upper}_DIR}" AND
+       EXISTS "${SHADE_HADES_DIR}/third_party/${shade_dep}/UPSTREAM")
+        execute_process(
+            COMMAND xmake l "${SHADE_HADES_DIR}/third_party/fetch.lua" ${shade_dep}
+                    "${SHADE_${shade_dep_upper}_DIR}"
+            WORKING_DIRECTORY "${SHADE_HADES_DIR}"
+            RESULT_VARIABLE shade_dep_result)
+        if(NOT shade_dep_result EQUAL 0)
+            message(FATAL_ERROR "preparing ${shade_dep} from third_party/${shade_dep} failed")
+        endif()
+    endif()
+endforeach()
+
+if(NOT EXISTS "${SHADE_DYNARMIC_DIR}/CMakeLists.txt")
     message(FATAL_ERROR
-        "Umbra was not found at ${SHADE_UMBRA_DIR}. "
-        "Initialize the submodule or set SHADE_UMBRA_DIR.")
+        "Dynarmic was not found at ${SHADE_DYNARMIC_DIR}. "
+        "Run `xmake l third_party/fetch.lua dynarmic` in hades or set SHADE_DYNARMIC_DIR.")
 endif()
 if(NOT EXISTS "${SHADE_BOOST_DIR}/boost/version.hpp")
     message(FATAL_ERROR
-        "ext-boost was not found at ${SHADE_BOOST_DIR}. "
-        "Initialize the submodule or set SHADE_BOOST_DIR.")
+        "Boost was not found at ${SHADE_BOOST_DIR}. "
+        "Run `xmake l third_party/fetch.lua boost` in hades or set SHADE_BOOST_DIR.")
 endif()
 
 execute_process(
     COMMAND git rev-parse HEAD
-    WORKING_DIRECTORY "${SHADE_UMBRA_DIR}"
-    RESULT_VARIABLE SHADE_UMBRA_REVISION_RESULT
-    OUTPUT_VARIABLE SHADE_UMBRA_CHECKED_OUT_REVISION
+    WORKING_DIRECTORY "${SHADE_DYNARMIC_DIR}"
+    RESULT_VARIABLE SHADE_DYNARMIC_REVISION_RESULT
+    OUTPUT_VARIABLE SHADE_DYNARMIC_CHECKED_OUT_REVISION
     ERROR_QUIET
     OUTPUT_STRIP_TRAILING_WHITESPACE)
-if(SHADE_UMBRA_REVISION_RESULT EQUAL 0 AND
-   NOT SHADE_UMBRA_CHECKED_OUT_REVISION STREQUAL "")
-    set(SHADE_UMBRA_SELECTED_REVISION
-        "${SHADE_UMBRA_CHECKED_OUT_REVISION}" CACHE INTERNAL
-        "Umbra revision observed during configure" FORCE)
+if(SHADE_DYNARMIC_REVISION_RESULT EQUAL 0 AND
+   NOT SHADE_DYNARMIC_CHECKED_OUT_REVISION STREQUAL "")
+    set(SHADE_DYNARMIC_SELECTED_REVISION
+        "${SHADE_DYNARMIC_CHECKED_OUT_REVISION}" CACHE INTERNAL
+        "Dynarmic revision observed during configure" FORCE)
     message(STATUS
-        "Using Umbra ${SHADE_UMBRA_CHECKED_OUT_REVISION}")
+        "Using Dynarmic ${SHADE_DYNARMIC_CHECKED_OUT_REVISION}")
 else()
-    set(SHADE_UMBRA_SELECTED_REVISION "unknown" CACHE INTERNAL
-        "Umbra revision observed during configure" FORCE)
+    set(SHADE_DYNARMIC_SELECTED_REVISION "unknown" CACHE INTERNAL
+        "Dynarmic revision observed during configure" FORCE)
 endif()
 
-# Force Umbra's FindBoost invocation to use the matching header-only tree.
+# Force Dynarmic's FindBoost invocation to use the matching header-only tree.
 set(Boost_NO_SYSTEM_PATHS ON CACHE BOOL "" FORCE)
 set(BOOST_ROOT "${SHADE_BOOST_DIR}" CACHE PATH "" FORCE)
 set(Boost_INCLUDE_DIR "${SHADE_BOOST_DIR}" CACHE PATH "" FORCE)
 set(Boost_INCLUDE_DIRS "${SHADE_BOOST_DIR}" CACHE PATH "" FORCE)
 
-set(UMBRA_FRONTENDS A32 CACHE STRING "" FORCE)
-set(UMBRA_TESTS OFF CACHE BOOL "" FORCE)
-set(UMBRA_ENABLE_TEST_EMIT_FAILURE
-    "${SHADE_ENABLE_UMBRA_TEST_EMIT_FAILURE}" CACHE BOOL "" FORCE)
-set(UMBRA_USE_BUNDLED_EXTERNALS ON CACHE BOOL "" FORCE)
-set(UMBRA_USE_LLVM OFF CACHE BOOL "" FORCE)
-set(UMBRA_WARNINGS_AS_ERRORS OFF CACHE BOOL "" FORCE)
-set(UMBRA_USE_PRECOMPILED_HEADERS OFF CACHE BOOL "" FORCE)
+set(DYNARMIC_FRONTENDS A32 CACHE STRING "" FORCE)
+set(DYNARMIC_TESTS OFF CACHE BOOL "" FORCE)
+set(DYNARMIC_ENABLE_TEST_EMIT_FAILURE
+    "${SHADE_ENABLE_DYNARMIC_TEST_EMIT_FAILURE}" CACHE BOOL "" FORCE)
+set(DYNARMIC_USE_BUNDLED_EXTERNALS ON CACHE BOOL "" FORCE)
+set(DYNARMIC_USE_LLVM OFF CACHE BOOL "" FORCE)
+set(DYNARMIC_WARNINGS_AS_ERRORS OFF CACHE BOOL "" FORCE)
+set(DYNARMIC_USE_PRECOMPILED_HEADERS OFF CACHE BOOL "" FORCE)
 
 # Public headers are kept with their owning module. The list is intentionally
 # explicit so every target, including the out-of-tree workspace tests, sees
 # the same <module>/<name>.hpp include spelling. A major module owns one
 # include root; implementation subdirectories do not add public roots.
-# Persistent portable-IR artifacts must not cross a different Umbra build.
+# Persistent portable-IR artifacts must not cross a different Dynarmic build.
 # Include the actual revision and any deliberate local checkout changes in the
 # artifact key so a custom development checkout cannot reuse stale artifacts.
-set(SHADE_UMBRA_BUILD_FINGERPRINT 0x0ULL)
-if(SHADE_UMBRA_REVISION_RESULT EQUAL 0 AND
-   NOT SHADE_UMBRA_CHECKED_OUT_REVISION STREQUAL "")
+set(SHADE_DYNARMIC_BUILD_FINGERPRINT 0x0ULL)
+if(SHADE_DYNARMIC_REVISION_RESULT EQUAL 0 AND
+   NOT SHADE_DYNARMIC_CHECKED_OUT_REVISION STREQUAL "")
     execute_process(
         COMMAND git diff --no-ext-diff --binary
-        WORKING_DIRECTORY "${SHADE_UMBRA_DIR}"
-        OUTPUT_VARIABLE SHADE_UMBRA_WORKTREE_DIFF
+        WORKING_DIRECTORY "${SHADE_DYNARMIC_DIR}"
+        OUTPUT_VARIABLE SHADE_DYNARMIC_WORKTREE_DIFF
         ERROR_QUIET)
-    string(SHA256 SHADE_UMBRA_BUILD_HASH
-           "${SHADE_UMBRA_CHECKED_OUT_REVISION}\n${SHADE_UMBRA_WORKTREE_DIFF}")
-    string(SUBSTRING "${SHADE_UMBRA_BUILD_HASH}" 0 16
-           SHADE_UMBRA_BUILD_HASH_PREFIX)
-    set(SHADE_UMBRA_BUILD_FINGERPRINT
-        "0x${SHADE_UMBRA_BUILD_HASH_PREFIX}ULL")
+    string(SHA256 SHADE_DYNARMIC_BUILD_HASH
+           "${SHADE_DYNARMIC_CHECKED_OUT_REVISION}\n${SHADE_DYNARMIC_WORKTREE_DIFF}")
+    string(SUBSTRING "${SHADE_DYNARMIC_BUILD_HASH}" 0 16
+           SHADE_DYNARMIC_BUILD_HASH_PREFIX)
+    set(SHADE_DYNARMIC_BUILD_FINGERPRINT
+        "0x${SHADE_DYNARMIC_BUILD_HASH_PREFIX}ULL")
 endif()
 
-add_subdirectory("${SHADE_UMBRA_DIR}" external/umbra EXCLUDE_FROM_ALL)
+add_subdirectory("${SHADE_DYNARMIC_DIR}" external/dynarmic EXCLUDE_FROM_ALL)
 
 function(shade_configure_target target)
     target_compile_features(${target} PUBLIC cxx_std_20)

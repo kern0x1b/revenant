@@ -36,7 +36,7 @@
 #include <variant>
 #include <vector>
 
-#include <umbra/interface/A32/disassembler.h>
+#include <dynarmic/interface/A32/disassembler.h>
 
 #include "foundation/address_space.hpp"
 #include "foundation/cpu.hpp"
@@ -889,7 +889,7 @@ void disasm(const std::vector<std::string>& args, Output& output)
                 break;
             text << "0x" << std::hex << std::setw(8) << std::setfill('0')
                  << address << "  " << std::setw(4) << *instruction << "      "
-                 << Umbra::A32::DisassembleThumb16(*instruction) << '\n';
+                 << Dynarmic::A32::DisassembleThumb16(*instruction) << '\n';
         } else {
             const auto address =
                 start_address + static_cast<std::uint32_t>(index * 4U);
@@ -898,7 +898,7 @@ void disasm(const std::vector<std::string>& args, Output& output)
                 break;
             text << "0x" << std::hex << std::setw(8) << std::setfill('0')
                  << address << "  " << std::setw(8) << *instruction << "  "
-                 << Umbra::A32::DisassembleArm(*instruction);
+                 << Dynarmic::A32::DisassembleArm(*instruction);
             if ((*instruction & 0x0f000000U) == 0x0b000000U) {
                 auto displacement =
                     static_cast<std::int32_t>(*instruction << 8U) >> 6U;
@@ -934,7 +934,7 @@ void smoke(const std::vector<std::string>& args, Output& output)
     append_word(code, 4, 0xef000080U); // svc #0x80 (Darwin syscall gate)
     memory.copy_in(code_address, code);
 
-    Umbra::ExclusiveMonitor shared_exclusive_monitor { core_count };
+    Dynarmic::ExclusiveMonitor shared_exclusive_monitor { core_count };
     auto shared_exclusive_address_resolver =
         std::make_shared<GuestExclusiveAddressResolver>();
     CpuCluster cluster { core_count, core_count, memory, core_count,
@@ -950,7 +950,7 @@ void smoke(const std::vector<std::string>& args, Output& output)
     const auto results = cluster.run_parallel(16);
 
     std::ostringstream text;
-    text << "Umbra ARMv6 parallel smoke test: " << core_count
+    text << "Dynarmic ARMv6 parallel smoke test: " << core_count
          << " virtual CPU(s)\n";
     if (core_count > 1) {
         text << "mode: exact; execution-slot LDREX state resolves through "
@@ -967,7 +967,7 @@ void smoke(const std::vector<std::string>& args, Output& output)
         if (cluster.cpu(index).registers()[0] != expected ||
             results[index].svc != std::optional<std::uint32_t> { 0x80 }) {
             throw std::runtime_error {
-                "Umbra smoke test produced an unexpected CPU state"
+                "Dynarmic smoke test produced an unexpected CPU state"
             };
         }
     }

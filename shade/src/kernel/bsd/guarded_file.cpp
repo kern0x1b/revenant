@@ -19,7 +19,7 @@ bool CompatibilityKernel::reject_guarded_descriptor(
     // Preserve the fatal default disposition without performing the forbidden
     // operation. Mach EXC_GUARD exception-port delivery is not modeled yet.
     exit_process(0U, darwin::signal::kill);
-    cpu.halt(Umbra::HaltReason::UserDefined1);
+    cpu.halt(Dynarmic::HaltReason::UserDefined1);
     return true;
 }
 

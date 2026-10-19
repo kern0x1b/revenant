@@ -67,7 +67,7 @@ bool CompatibilityKernel::send_host_socket_bytes(Cpu& cpu, std::uint32_t fd,
         output_.write(
             "[network] write wait pid=" + std::to_string(process_.pid) +
             " fd=" + std::to_string(fd) + "\n");
-        cpu.halt(Umbra::HaltReason::UserDefined5);
+        cpu.halt(Dynarmic::HaltReason::UserDefined5);
         return true;
     }
     if (result.status == HostSocketStatus::Error) {

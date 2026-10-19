@@ -144,7 +144,7 @@ void CompatibilityKernel::dispatch_bsd_signal(Cpu& cpu, std::uint32_t number)
         process_.waiting_for_events = true;
         output_.write("[signal] suspend pid=" + std::to_string(process_.pid) +
                       " cpu=" + std::to_string(cpu.processor_id()) + "\n");
-        cpu.halt(Umbra::HaltReason::UserDefined5);
+        cpu.halt(Dynarmic::HaltReason::UserDefined5);
         return;
     }
     if (number == darwin::syscall::pthread_kill) {
@@ -192,7 +192,7 @@ void CompatibilityKernel::dispatch_bsd_signal(Cpu& cpu, std::uint32_t number)
         }
         bsd_success(cpu, 0);
         if (process_.exited)
-            cpu.halt(Umbra::HaltReason::UserDefined1);
+            cpu.halt(Dynarmic::HaltReason::UserDefined1);
         else
             deliver_pending_signals(cpu);
         return;
@@ -283,7 +283,7 @@ void CompatibilityKernel::dispatch_bsd_signal(Cpu& cpu, std::uint32_t number)
     }
     bsd_success(cpu, 0);
     if (process_.exited) {
-        cpu.halt(Umbra::HaltReason::UserDefined1);
+        cpu.halt(Dynarmic::HaltReason::UserDefined1);
     } else if (std::find(targets.begin(), targets.end(), process_.pid) !=
                targets.end()) {
         bool signal_stopped = false;

@@ -129,7 +129,7 @@ void CompatibilityKernel::dispatch_mach_message(
             registers[0] = darwin::mach_message::receive_timed_out;
             return;
         }
-        cpu.halt(Umbra::HaltReason::UserDefined5);
+        cpu.halt(Dynarmic::HaltReason::UserDefined5);
     };
     const auto wants_send =
         (registers[1] & darwin::mach_message::option_send) != 0;
@@ -1096,7 +1096,7 @@ void CompatibilityKernel::dispatch_mach_message(
                        mach_message_wake_handler_ && remote_owner != 0) {
                 // The sender's CompatibilityKernel does not own the receiver's
                 // pending-mach map. The app-level callback resolves that map
-                // and wakes the selected receiver without touching Umbra
+                // and wakes the selected receiver without touching Dynarmic
                 // from a different host thread.
                 receiver_wake_result =
                     mach_message_wake_handler_(remote_owner, remote_object);

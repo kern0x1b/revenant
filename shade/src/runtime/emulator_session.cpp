@@ -122,7 +122,7 @@ namespace {
         const CpuRunResult& result, const Cpu& cpu)
     {
         using Kind = CompatibilityKernel::GuestFault::Kind;
-        using Exception = Umbra::A32::Exception;
+        using Exception = Dynarmic::A32::Exception;
         if (result.exception_kind) {
             switch (*result.exception_kind) {
             case Exception::NoExecuteFault:
@@ -579,10 +579,10 @@ void EmulatorSession::run()
     };
     auto process =
         loader.load(binary, std::move(initial_arguments), initial_environment);
-    // Umbra's global monitor indexes reservations by processor id. Reserve
+    // Dynarmic's global monitor indexes reservations by processor id. Reserve
     // disjoint ranges for boot-created Guest processes so same-address shared
     // mappings can invalidate reservations across process boundaries.
-    Umbra::ExclusiveMonitor shared_exclusive_monitor {
+    Dynarmic::ExclusiveMonitor shared_exclusive_monitor {
         maximum_shared_monitor_slots
     };
     auto shared_exclusive_address_resolver =
@@ -3897,7 +3897,7 @@ void EmulatorSession::run()
             // A local ARM exclusive reservation belongs to the physical
             // processor, not to the saved register context. Clear it only at a
             // real serialized thread switch; repeated slices of the same thread
-            // retain the ordinary Umbra fast path.
+            // retain the ordinary Dynarmic fast path.
             prepared_slices.front().execution.cpu->clear_exclusive_state(
                 prepared_slices.front().scheduled.processor);
             last_serial_thread = prepared_slices.front().scheduled.thread;
@@ -4009,8 +4009,8 @@ void EmulatorSession::run()
             std::uint8_t debug_signal = gdb_signal::trap;
             const auto fatal_result = result.fault ||
                                       !result.exception.empty() ||
-                                      Umbra::Has(result.reason,
-                                          Umbra::HaltReason::UserDefined4);
+                                      Dynarmic::Has(result.reason,
+                                          Dynarmic::HaltReason::UserDefined4);
             if (fatal_result) {
                 const auto& registers = cpu.registers();
                 std::ostringstream failure;
@@ -4034,11 +4034,11 @@ void EmulatorSession::run()
             }
             auto completion = XnuSliceCompletion::Continue;
             bool scheduler_completed = false;
-            if (Umbra::Has(
-                    result.reason, Umbra::HaltReason::UserDefined5)) {
+            if (Dynarmic::Has(
+                    result.reason, Dynarmic::HaltReason::UserDefined5)) {
                 completion = XnuSliceCompletion::Block;
-            } else if (Umbra::Has(
-                           result.reason, Umbra::HaltReason::UserDefined6) &&
+            } else if (Dynarmic::Has(
+                           result.reason, Dynarmic::HaltReason::UserDefined6) &&
                        runtime.pending_exec) {
                 auto pending = std::move(*runtime.pending_exec);
                 runtime.pending_exec.reset();
@@ -4151,18 +4151,18 @@ void EmulatorSession::run()
                     completion = XnuSliceCompletion::Terminate;
                     hard_stop = true;
                 }
-            } else if (Umbra::Has(result.reason,
-                           Umbra::HaltReason::CacheInvalidation)) {
-                // Umbra may return after completing a shared code-cache
+            } else if (Dynarmic::Has(result.reason,
+                           Dynarmic::HaltReason::CacheInvalidation)) {
+                // Dynarmic may return after completing a shared code-cache
                 // invalidation at a safe host boundary. This is not a guest
                 // wait or scheduler state transition; resume the same runnable
                 // slice.
                 completion = XnuSliceCompletion::Continue;
-            } else if (Umbra::Has(
-                           result.reason, Umbra::HaltReason::UserDefined1)) {
+            } else if (Dynarmic::Has(
+                           result.reason, Dynarmic::HaltReason::UserDefined1)) {
                 completion = XnuSliceCompletion::Terminate;
-            } else if (Umbra::Has(
-                           result.reason, Umbra::HaltReason::UserDefined8)) {
+            } else if (Dynarmic::Has(
+                           result.reason, Dynarmic::HaltReason::UserDefined8)) {
                 if (const auto request =
                         runtime.kernel->consume_scheduler_yield(index);
                     request) {
@@ -4201,8 +4201,8 @@ void EmulatorSession::run()
                 // equal-priority peer can run after a wall-time-expensive
                 // translation or immediate SVC.
                 completion = XnuSliceCompletion::HostCooperate;
-            } else if (Umbra::Has(
-                           result.reason, Umbra::HaltReason::UserDefined2)) {
+            } else if (Dynarmic::Has(
+                           result.reason, Dynarmic::HaltReason::UserDefined2)) {
                 // XNU AST preemption retains the current quantum. The
                 // scheduler requeues this thread at the head of its
                 // priority, while a higher priority still wins selection.

@@ -130,7 +130,7 @@ struct RuntimePrecompileTask {
 
 struct Runtime {
     // Keep the reservation before the native runtime fields so its destructor
-    // releases the budget only after Umbra's code cache has been destroyed.
+    // releases the budget only after Dynarmic's code cache has been destroyed.
     std::shared_ptr<JitCodeCacheReservation> jit_cache_reservation;
     JitCodeCacheClass jit_cache_class { JitCodeCacheClass::Background };
     std::unique_ptr<AddressSpace> memory;

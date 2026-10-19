@@ -148,7 +148,7 @@ bool CompatibilityKernel::dispatch_bsd_process_spawn(
         }
         message << '\n';
         output_.write(message.str());
-        cpu.halt(Umbra::HaltReason::UserDefined6);
+        cpu.halt(Dynarmic::HaltReason::UserDefined6);
         return true;
     }
 

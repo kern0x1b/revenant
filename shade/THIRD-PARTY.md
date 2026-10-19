@@ -4,12 +4,19 @@
 
 | Component | Version | License | Copyright | Where |
 | --- | --- | --- | --- | --- |
-| Umbra | this project's own core | 0BSD | see its `LICENSE` | `external/umbra`, a submodule |
-| Boost libraries | 1.81.0, trimmed | BSL-1.0 | the Boost authors | `external/ext-boost`, a submodule |
 | Vulkan Memory Allocator | 3.4.0 | MIT | 2017 - 2026 Advanced Micro Devices, Inc. | `external/vulkan-memory-allocator`, unmodified single header |
 
-Umbra vendors libraries of its own, listed in its `THIRD-PARTY.md`. Each vendored
-tree keeps its license file and notices; do not edit them in place.
+Each vendored tree keeps its license file and notices; do not edit them in place.
+
+## Pinned, not bundled
+
+| Component | Version | License | Copyright | Pin |
+| --- | --- | --- | --- | --- |
+| Dynarmic | MC-XiaoXiao/dynarmic at the pinned commit, with our patches | 0BSD | MerryMage and contributors (`LICENSE.txt` in its tree) | `../third_party/dynarmic` |
+| Boost libraries | 1.81.0 release | BSL-1.0 | the Boost authors | `../third_party/boost` |
+
+Their sources are prepared under `../.deps/` from the pins; Dynarmic vendors libraries of its own
+in its `externals/`, each with its license.
 
 ## Linked, not bundled
 

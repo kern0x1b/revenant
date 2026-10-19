@@ -2,7 +2,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 //
-// Execute guest ARM code through Umbra and coordinate translation
+// Execute guest ARM code through Dynarmic and coordinate translation
 // and CPU callbacks.
 
 #pragma once
@@ -18,8 +18,8 @@
 #include <string>
 #include <vector>
 
-#include <umbra/interface/A32/a32.h>
-#include <umbra/interface/exclusive_monitor.h>
+#include <dynarmic/interface/A32/a32.h>
+#include <dynarmic/interface/exclusive_monitor.h>
 
 #include "foundation/address_space.hpp"
 #include "foundation/arm_cpu_model.hpp"
@@ -151,7 +151,7 @@ class JitArtifactStore;
 enum class JitArtifactRetention : std::uint8_t;
 
 struct CpuRunResult {
-    Umbra::HaltReason reason { };
+    Dynarmic::HaltReason reason { };
     std::uint64_t ticks_consumed { };
     std::optional<std::uint32_t> svc;
     std::uint64_t svc_calls { };
@@ -159,13 +159,13 @@ struct CpuRunResult {
     std::optional<std::uint32_t> debug_breakpoint;
     std::string exception;
     // Host-only cooperative boundary marker. UserDefined2 remains the
-    // Umbra halt bit for compatibility, but this flag distinguishes a
+    // Dynarmic halt bit for compatibility, but this flag distinguishes a
     // host slice boundary from a guest AST/deferred-SVC stop.
     bool host_yielded { };
     std::uint64_t host_yield_checks { };
     // The architectural exception behind `exception`, and the address of the
     // instruction that raised it, for a kernel that turns it into a signal.
-    std::optional<Umbra::A32::Exception> exception_kind;
+    std::optional<Dynarmic::A32::Exception> exception_kind;
     std::uint32_t exception_pc { };
 };
 
@@ -193,7 +193,7 @@ public:
         std::function<void(Cpu&, std::uint32_t, std::size_t, std::uint64_t)>;
 
     Cpu(std::size_t processor_id, AddressSpace& memory,
-        Umbra::ExclusiveMonitor& monitor);
+        Dynarmic::ExclusiveMonitor& monitor);
     ~Cpu();
     Cpu(const Cpu&) = delete;
     Cpu& operator=(const Cpu&) = delete;
@@ -218,17 +218,17 @@ public:
     void invalidate_cache_ranges(
         std::span<const CacheInvalidationRange> ranges);
     // Kernel-side traps that touch an invalid guest range use the same
-    // Umbra memory-abort result as an ordinary load/store fault. When the
+    // Dynarmic memory-abort result as an ordinary load/store fault. When the
     // trap is dispatched outside a running executor, this also records the
     // fatal halt boundary for the scheduler's deferred-SVC path.
     void raise_memory_fault(
         std::uint32_t address, std::size_t size, MemoryPermission access);
     void clear_halt();
-    void halt(Umbra::HaltReason reason = Umbra::HaltReason::UserDefined1);
+    void halt(Dynarmic::HaltReason reason = Dynarmic::HaltReason::UserDefined1);
     // Record and request an XNU AST/preemption boundary. This remains
     // separate from host cooperative yielding and deferred SVC halts.
     void request_guest_preemption();
-    [[nodiscard]] Umbra::HaltReason consume_requested_halt_reason();
+    [[nodiscard]] Dynarmic::HaltReason consume_requested_halt_reason();
 
     [[nodiscard]] std::size_t processor_id() const { return processor_id_; }
     [[nodiscard]] std::array<std::uint32_t, 16>& registers();
@@ -273,7 +273,7 @@ private:
     std::uint32_t guest_thread_ { };
     std::optional<std::uint32_t> memory_write_watch_address_;
     bool debug_breakpoints_enabled_ { };
-    Umbra::HaltReason requested_halt_reason_ { };
+    Dynarmic::HaltReason requested_halt_reason_ { };
 };
 
 class CpuCluster {
@@ -297,13 +297,13 @@ public:
     CpuCluster(std::size_t initial_processor_count,
         std::size_t maximum_processor_count, AddressSpace& memory,
         std::size_t execution_slot_count, const ArmCpuModel& cpu_model);
-    // Boot-created processes can share a Umbra monitor so LDREX/STREX
+    // Boot-created processes can share a Dynarmic monitor so LDREX/STREX
     // reservations at the same Guest address observe cross-process writes.
     // Each cluster receives a disjoint processor-id range in that monitor.
     CpuCluster(std::size_t initial_processor_count,
         std::size_t maximum_processor_count, AddressSpace& memory,
         std::size_t execution_slot_count, const ArmCpuModel& cpu_model,
-        Umbra::ExclusiveMonitor& monitor, std::size_t monitor_processor_base,
+        Dynarmic::ExclusiveMonitor& monitor, std::size_t monitor_processor_base,
         std::shared_ptr<JitArtifactStore> artifact_store = { },
         std::shared_ptr<GuestExclusiveAddressResolver> address_resolver = { },
         std::size_t precompile_lane_count = 1U);
@@ -321,7 +321,7 @@ public:
     [[nodiscard]] std::optional<std::size_t> add_cpu();
     void set_process_id(std::uint32_t process_id);
     void set_jit_code_cache_size(std::size_t bytes);
-    // Construct the primary Umbra executor without running Guest code.
+    // Construct the primary Dynarmic executor without running Guest code.
     // Spawned foreground processes use this from a Host worker while their
     // initial Guest thread remains suspended, keeping the non-preemptible
     // constructor off the interactive scheduler thread.
@@ -363,7 +363,7 @@ public:
         PrecompileStopCondition stop_condition = { },
         std::optional<JitPrecompileSource> source = std::nullopt);
     // Stop queued precompilation and wait only for this cluster's active
-    // precompile call to reach a Umbra block boundary.
+    // precompile call to reach a Dynarmic block boundary.
     void quiesce_precompilation();
     // A dead guest task keeps its small register context until the parent
     // reaps the process, but no longer needs executable host code. Detach the
@@ -384,8 +384,8 @@ private:
     std::size_t maximum_processor_count_ { };
     bool serialized_execution_ { };
     const ArmCpuModel* cpu_model_ { };
-    Umbra::ExclusiveMonitor monitor_;
-    Umbra::ExclusiveMonitor* execution_monitor_ { };
+    Dynarmic::ExclusiveMonitor monitor_;
+    Dynarmic::ExclusiveMonitor* execution_monitor_ { };
     std::size_t monitor_processor_base_ { };
     std::size_t monitor_processor_count_ { };
     std::shared_ptr<GuestExclusiveAddressResolver> address_resolver_;

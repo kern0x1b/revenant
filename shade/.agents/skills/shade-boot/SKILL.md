@@ -8,7 +8,6 @@ description: Build this Shade checkout and boot a firmware root filesystem with 
 ## 1. Build
 
 ```sh
-git submodule update --init
 cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
 cmake --build build
 ```

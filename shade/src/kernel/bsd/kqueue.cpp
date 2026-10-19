@@ -305,7 +305,7 @@ void CompatibilityKernel::dispatch_bsd_kqueue(Cpu& cpu, std::uint32_t number)
             " fd=" + std::to_string(fd) +
             " registrations=" + std::to_string(queue->second.size()) + "\n");
         bsd_success(cpu, 0);
-        cpu.halt(Umbra::HaltReason::UserDefined5);
+        cpu.halt(Dynarmic::HaltReason::UserDefined5);
         return;
     }
     }
