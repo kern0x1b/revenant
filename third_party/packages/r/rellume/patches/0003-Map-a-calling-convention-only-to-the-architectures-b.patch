@@ -1,0 +1,37 @@
+From bad643c7dcafa764ef934dc08f67aa119eb2fc57 Mon Sep 17 00:00:00 2001
+From: kern0x1b <kern0x1b@users.noreply.github.com>
+Date: Mon, 19 Oct 2026 20:11:52 +0200
+Subject: [PATCH 3/4] Map a calling convention only to the architectures built
+ in
+
+CallConv::ToArch named Arch::X86_64 and Arch::RV64 unconditionally,
+while the enumerators exist only when their front ends are built, so a
+build without x86-64 or RISC-V did not compile. Every other switch over
+the architectures guards its cases this way already.
+---
+ src/callconv.cc | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/src/callconv.cc b/src/callconv.cc
+index c2a7045..fbce518 100644
+--- a/src/callconv.cc
++++ b/src/callconv.cc
+@@ -107,9 +107,15 @@ unsigned CallConv::CpuStructParamIdx() const {
+ Arch CallConv::ToArch() const {
+     switch (*this) {
+     default: return Arch::INVALID;
++#ifdef RELLUME_WITH_X86_64
+     case CallConv::X86_64_SPTR:  return Arch::X86_64;
++#endif
++#ifdef RELLUME_WITH_RV64
+     case CallConv::RV64_SPTR:    return Arch::RV64;
++#endif
++#ifdef RELLUME_WITH_AARCH64
+     case CallConv::AArch64_SPTR: return Arch::AArch64;
++#endif
+     }
+ }
+ 
+-- 
+2.54.0 (Apple Git-157)
+

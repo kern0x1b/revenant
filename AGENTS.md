@@ -16,6 +16,10 @@ The workspace contract (`$HOME/Git/projects/ios/AGENTS.md`) applies. Inside hade
 - Third-party code is a package of `third_party/packages/<letter>/<name>/`: the upstream by url and commit or
   checksum, our changes as `git format-patch` files in its `patches/`, applied in order by `add_patches`. Never
   commit a copy of upstream code.
+- Every dependency is at its latest release, or at the head of its main branch where it has no releases or we need
+  what is not released yet. A newer version that dropped something we need (armv7, iOS 6, an API, a build mode) gets
+  it back as a patch on that version; an old pin is never the answer. Moving a pin means rebasing our patches onto
+  the new version and dropping the ones upstream made unnecessary.
 - Skills live in `.agents/skills/` at the top of hades (`.claude/skills` links there); a member keeps none of its
   own. xmake's own skills come from the `xmake-skills` plugin pinned in `.claude/settings.json`, never a copy.
   psychopomp is a plugin of the hades marketplace (`.claude-plugin/marketplace.json`).

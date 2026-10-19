@@ -666,16 +666,18 @@ A Swift library is a package the same way: it requires `charon@swift-runtime`,
 compiles its modules with the runtime's compiler and flags, installs them as
 static libraries with their `.swiftmodule`s, and names the folders a port's
 Swift finds them in with `package:setenv("CHARON_SWIFT_MODULES", ...)`; the
-swift rule adds those folders to the compile. `charon@styx` is the first: a
+swift rule adds those folders to the compile. `charon@styx` is the first:
+OpenCombine at a pinned commit with the patches in `packages/s/styx/patches`, a
 single module named `Combine` — the core, the Dispatch scheduler and the
-Foundation integration folded together — with its C++ helper and that helper's
-module map, so a port writes `import Combine`. `DispatchTime.distance(to:)`,
-which the runtime's Dispatch overlay (from Swift 5.4.3) does not have, is added
-to it in the largest unit that fits an `Int`. The `URLSession` publishers are
-not shipped (iOS 7, and they need a TLS stack), and a run loop timer's tolerance
-is read and set only behind `#available` — both in the fork's own sources, not a
-build-time patch, so the module builds and runs on iOS 6 with availability
-checking on. A port takes it with `add_requires("charon@styx", {alias =
+Foundation integration compiled together — with its C++ helper and that helper's
+module map, so a port writes `import Combine`. The scheduler takes `DispatchTime`
+distances from its own arithmetic, since the runtime's Dispatch overlay (from
+Swift 5.4.3) has no `DispatchTime.distance(to:)`; the `URLSession` data task
+publisher is declared from iOS 7, and a run loop timer's tolerance is read and
+set only behind `#available`, so the module builds and runs on iOS 6 with
+availability checking on. With `sources = true` the recipe installs the patched
+tree laid out as that module and compiles nothing, for a project that builds it
+itself. A port takes it with `add_requires("charon@styx", {alias =
 "combine"})` and `add_packages("combine")` beside the runtime and libcxx.
 
 `charon@eidolon` is the second: Eidolon, the SwiftUI API written anew on the

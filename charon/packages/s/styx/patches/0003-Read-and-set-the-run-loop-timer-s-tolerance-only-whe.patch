@@ -1,0 +1,46 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: kern0x1b <kern0x1b@users.noreply.github.com>
+Date: Mon, 19 Oct 2026 20:41:13 +0200
+Subject: [PATCH 3/9] Read and set the run loop timer's tolerance only where
+ iOS 7 has it
+
+CFRunLoopTimerGetTolerance and CFRunLoopTimerSetTolerance are iOS 7 and
+macOS 10.9 API. With availability checking on, the module does not
+compile for an iOS 6 deployment target without a guard, and without
+availability checking the calls are weak imports that are NULL on iOS 6
+and crash on the first timer. Behind #available, a timer on an earlier
+release has no tolerance: reading it gives zero, and setting it does
+nothing.
+---
+ Sources/OpenCombineFoundation/Helpers/Portability.swift | 9 +++++++--
+ 1 file changed, 7 insertions(+), 2 deletions(-)
+
+diff --git a/Sources/OpenCombineFoundation/Helpers/Portability.swift b/Sources/OpenCombineFoundation/Helpers/Portability.swift
+index 3d778f6..06cd4db 100644
+--- a/Sources/OpenCombineFoundation/Helpers/Portability.swift
++++ b/Sources/OpenCombineFoundation/Helpers/Portability.swift
+@@ -74,14 +74,19 @@ internal struct Timer {
+     internal var tolerance: TimeInterval {
+         get {
+ #if canImport(Darwin)
+-            return CFRunLoopTimerGetTolerance(underlyingTimer)
++            if #available(iOS 7.0, macOS 10.9, *) {
++                return CFRunLoopTimerGetTolerance(underlyingTimer)
++            }
++            return 0
+ #else
+             return underlyingTimer.tolerance
+ #endif
+         }
+         nonmutating set {
+ #if canImport(Darwin)
+-            CFRunLoopTimerSetTolerance(underlyingTimer, newValue)
++            if #available(iOS 7.0, macOS 10.9, *) {
++                CFRunLoopTimerSetTolerance(underlyingTimer, newValue)
++            }
+ #else
+             underlyingTimer.tolerance = newValue
+ #endif
+-- 
+2.54.0 (Apple Git-157)
+

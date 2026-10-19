@@ -40,7 +40,8 @@ a C compiler, and builds again when the recipe changes.
 
 Third-party code is never a copy here: `dynarmic` is MC-XiaoXiao's dynarmic at a commit plus our arm64 backend as
 patches, `boost` the 1.81.0 release archive by its checksum, `xmake` the head of its dev branch after v3.1.2 plus our
-patches to its addon handling, among them `add_addons(<name>, {sourcedir = <folder>})`.
+patches to its addon handling, among them `add_addons(<name>, {sourcedir = <folder>})`, and styx's `Combine`
+OpenCombine at a commit plus the patches of `charon@styx`.
 
 ### The members for iOS
 
@@ -65,7 +66,8 @@ so hades is always built with `./xmakew`.
 
 `CHARON_REPO` names another charon folder for the packages (a released tree whose packages are installed already).
 charon's recipes of the members (`charon@styx`, `charon@eidolon`, `charon@swiftui`, `charon@shade`) are for
-applications outside hades and keep their pinned commits.
+applications outside hades and keep their pinned commits. The one hades requires itself is `charon@styx` with
+`sources = true`: it installs the patched OpenCombine tree, and styx's targets compile it.
 
 ## Publishing a member
 

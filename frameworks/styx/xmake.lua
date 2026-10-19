@@ -1,19 +1,85 @@
 if is_plat("iphoneos") then
+    add_requires("charon@styx", {alias = "styx", configs = {sources = true}})
+
+    local function sources(target, ...)
+        return path.join(target:pkg("styx"):installdir(), "src", ...)
+    end
+
     target("CombineHelpers")
         set_kind("static")
         add_rules("@addon/charon/apple-ios")
-        add_packages("libcxx")
+        add_packages("libcxx", "styx")
         set_languages("c++17")
         set_optimize("faster")
         add_cxxflags("-include exception")
-        add_files("Sources/CombineHelpers/CombineHelpers.cpp")
-        add_includedirs("Sources/CombineHelpers/include", {public = true})
+        on_load(function (target)
+            target:add("files", sources(target, "CombineHelpers", "*.cpp"))
+            target:add("includedirs", sources(target, "CombineHelpers", "include"), {public = true})
+        end)
 
     target("Combine")
         set_kind("static")
         add_rules("@addon/charon/swift")
         add_deps("CombineHelpers")
+        add_packages("styx")
         set_optimize("fastest")
-        add_files("Sources/Combine/**.swift")
         add_frameworks("Foundation", "CoreFoundation")
+        on_load(function (target)
+            target:add("files", sources(target, "Combine", "**.swift"))
+        end)
+
+    target("CombineXCTest")
+        set_kind("static")
+        set_default(false)
+        add_rules("@addon/charon/swift")
+        set_values("swift.module", "XCTest")
+        add_packages("apple-backports")
+        set_optimize("fastest")
+        add_files("harness/XCTest.swift")
+        add_frameworks("Foundation")
+
+    target("CombineTests")
+        set_default(false)
+        add_rules("@addon/charon/daemon", "@addon/charon/swift")
+        add_deps("Combine", "CombineXCTest")
+        add_packages("styx", "apple-backports")
+        add_frameworks("Foundation", "CoreFoundation")
+        set_optimize("fastest")
+        set_values("swift.flags", "-DOPENCOMBINE_COMPATIBILITY_TEST", "-disable-availability-checking", "-suppress-warnings")
+        set_values("charon.libraries", "apple-backports")
+        set_values("charon.control", "harness/control")
+        set_values("charon.waive.weak-imports",
+                   "every weak import is reached only behind #available or carried by the backports: the runtime's overlays built with availability checking on, Styx's run-loop timer tolerance, compiler-rt's version check")
+        on_load(function (target)
+            local tests = sources(target, "Tests", "OpenCombineTests")
+            local harness = path.join(os.scriptdir(), "harness")
+            local text = import("discover", {rootdir = harness, anonymous = true}).main(tests, path.join(harness, "skip.txt"))
+            local main = path.join(target:autogendir(), "main.swift")
+            if not os.isfile(main) or io.readfile(main) ~= text then
+                io.writefile(main, text)
+            end
+            target:add("files", path.join(tests, "**.swift"), main)
+        end)
+
+    target("CombineGenerated")
+        set_kind("phony")
+        set_default(false)
+        add_packages("styx")
+        add_tests("templates")
+        on_test(function (target)
+            local gyb = path.join(os.scriptdir(), "..", "..", "charon", "modules", "gyb", "main.lua")
+            local header = io.readfile(sources(target, "utils", "template_header.txt")):gsub("\n$", "")
+            local templates = os.files(sources(target, "Combine", "**.gyb"))
+            assert(#templates > 0, "charon@styx installed no gyb templates")
+            for _, template in ipairs(templates) do
+                local generated = path.join(path.directory(template), "GENERATED-" .. path.basename(template))
+                local expanded = path.join(target:autogendir(), path.filename(generated))
+                os.mkdir(path.directory(expanded))
+                os.vrunv(os.programfile(), {"l", gyb, "-Dtemplate_header=" .. header, "--line-directive", "", "-o", expanded, template})
+                if io.readfile(expanded, {encoding = "binary"}) ~= io.readfile(generated, {encoding = "binary"}) then
+                    raise("%s is not what %s expands to", generated, template)
+                end
+            end
+            return true
+        end)
 end

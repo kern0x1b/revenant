@@ -120,7 +120,6 @@ xmake l coverage.lua --check                            # the ledger, checked ag
 | `xmake.lua` | the `SwiftUI` target, and the targets of `eidolon/` and `rtpkg/`, as part of the hades project |
 | `eidolon/` | the module (`Sources/SwiftUI`), the demo app, the engine tests, the probe, the snapshot references, the coverage ledger, and the targets (`xmake.lua`, `control`, `Info.plist`) of the app, the snapshot bundle and the tests for `xmake emulate` |
 | `bridge/` | the typed API diff against Apple's interface, the invented-name gate, and the name lists they use |
-| `combine/` | build and run scripts for the upstream OpenCombine test suite on iOS 6, with its results (Styx's ancestor; Styx carries its own now) |
 | `rtpkg/` | `eidolonrt`, a daemon of Styx and the runtime with the backports, as a target of the hades project |
 | `docs/` | the research (in Russian) |
 | `*.sh`, `device.lua` | run the emulator, take snapshots and timings, reach a device |
@@ -132,7 +131,7 @@ xmake l coverage.lua --check                            # the ledger, checked ag
 | [`eidolon/README.md`](eidolon/README.md) | the ledger: what is implemented, ignored, simplified or missing; measurements |
 | [`docs/research.md`](docs/research.md) | why Apple's SwiftUI cannot be ported, and the design of this implementation (Russian) |
 | [`bridge/README.md`](bridge/README.md) | the guest build by hand: the sample app, the slot table |
-| [`combine/RESULTS.md`](combine/RESULTS.md) | OpenCombine on iOS 6 before the Styx fork: 1448 of 1453 of its tests |
+| [`../styx/docs/TEST-RESULTS.md`](../styx/docs/TEST-RESULTS.md) | OpenCombine's own tests against Styx, the `Combine` this module re-exports, on iOS 6 |
 | [`AGENTS.md`](AGENTS.md) | the contributor guide |
 
 ## Trademarks

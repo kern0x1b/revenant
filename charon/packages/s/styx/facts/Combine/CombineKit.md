@@ -1,8 +1,13 @@
 # The layer of our own, and what was measured
 
-`packages/s/styx/files/CombineKit` closes the measured gap between the module
-`charon@styx` builds and the Combine Apple's SDK 26.2 declares. It is compiled into the
-same module, so it sees the fork's internal helpers, and no vendored file is edited.
+This is the record of `charon@styx` `2026.09.20`, when the package built a fork of
+OpenCombine and a layer of its own, `packages/s/styx/files/CombineKit`, closed the measured
+gap between that module and the Combine Apple's SDK 26.2 declares. The layer was compiled
+into the same module, so it saw the fork's internal helpers, and no vendored file was edited.
+From `2026.10.19` the package builds OpenCombine itself with the patches in
+`packages/s/styx/patches/`: the layer's files are patches `0005` to `0008`, and patch `0001`
+declares what the fork nested under `OCombine` at Apple's level, so the divergence the
+73 rows below describe is gone there. The counts below were not taken again.
 
 ## The measurements, and how they were taken
 

@@ -12,6 +12,12 @@ function checks.shade()
     os.execv(os.programfile(), {"test", "-P", root, "shade_*/*"}, {curdir = root})
 end
 
+function checks.katabasis()
+    os.execv(os.programfile(), {"f", "-P", root, "-y"}, {curdir = root})
+    os.execv(os.programfile(), {"build", "-P", root, "xlate", "xlgen"}, {curdir = root})
+    os.execv(os.programfile(), {"test", "-P", root, "katabasis_corpus/*"}, {curdir = root})
+end
+
 function checks.comments()
     os.execv(os.programfile(), {"l", path.join(root, "tools", "comments.lua"), "check"}, {curdir = root})
 end

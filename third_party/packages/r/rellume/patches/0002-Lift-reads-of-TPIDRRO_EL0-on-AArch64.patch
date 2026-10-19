@@ -1,0 +1,50 @@
+From 45e9f1aedb27e412ae81d6c23263e34f0ea6407a Mon Sep 17 00:00:00 2001
+From: kern0x1b <kern0x1b@users.noreply.github.com>
+Date: Sun, 27 Sep 2026 08:51:59 +0200
+Subject: [PATCH 2/4] Lift reads of TPIDRRO_EL0 on AArch64
+
+Darwin keeps a thread's TSD block in TPIDRRO_EL0, and Swift's
+exclusivity checking reads it with mrs followed by a load at a fixed
+offset. No case answered that system register, so every function that
+did it failed to decode. The register is read-only from EL0, so only the
+mrs is lifted, as a load of a new exported slot of the CPU structure
+that takes the place of the padding after tpidr_el0; the embedder fills
+it per thread.
+---
+ data/rellume/cpustruct-aarch64.json | 2 +-
+ src/a64/main.cc                     | 6 ++++++
+ 2 files changed, 7 insertions(+), 1 deletion(-)
+
+diff --git a/data/rellume/cpustruct-aarch64.json b/data/rellume/cpustruct-aarch64.json
+index b44a8ce..03e7233 100644
+--- a/data/rellume/cpustruct-aarch64.json
++++ b/data/rellume/cpustruct-aarch64.json
+@@ -38,7 +38,7 @@
+     {"name": "x30", "size": 8, "reg": ["GP(30)", "I64"], "export": true},
+     {"name": "sp",  "size": 8, "reg": ["GP(31)", "I64"], "export": true},
+     {"name": "tpidr_el0", "size": 8, "reg": ["INVALID", "I64"]},
+-    {               "size": 8},
++    {"name": "tpidrro_el0", "size": 8, "reg": ["INVALID", "I64"], "export": true},
+ 
+     {"name": "v0",  "size": 16, "reg": ["VEC(0)", "V2I64"], "export": true},
+     {"name": "v1",  "size": 16, "reg": ["VEC(1)", "V2I64"], "export": true},
+diff --git a/src/a64/main.cc b/src/a64/main.cc
+index f8be8b9..5cfe372 100644
+--- a/src/a64/main.cc
++++ b/src/a64/main.cc
+@@ -316,6 +316,12 @@ bool Lifter::Lift(const Instr& inst) {
+             SetGp(a64.rt, /*w32=*/false, res);
+             break;
+         }
++        case 0xde83: {
++            unsigned idx = SptrIdx::aarch64::TPIDRRO_EL0;
++            auto res = irb.CreateLoad(irb.getInt64Ty(), fi.sptr[idx]);
++            SetGp(a64.rt, false, res);
++            break;
++        }
+         case 0xda10: {// NZCV (bits 31-28)
+             llvm::Value* nzcv = irb.getInt64(0);
+             nzcv = irb.CreateOr(nzcv, irb.CreateShl(irb.CreateZExt(GetFlag(ArchReg::SF), irb.getInt64Ty()), 31)); // nzcv |= n << 31
+-- 
+2.54.0 (Apple Git-157)
+

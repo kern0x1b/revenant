@@ -1,0 +1,46 @@
+From e40563b65224a2b2cef63308706c35527d35ac64 Mon Sep 17 00:00:00 2001
+From: kern0x1b <kern0x1b@users.noreply.github.com>
+Date: Mon, 19 Oct 2026 20:34:55 +0200
+Subject: [PATCH 4/4] Lift AArch64 without the x86-64 decoder
+
+The AArch64 lifter sized its instruction marker by FdInstr and looked
+its overrides up by inst.type(), both of fadec, so the AArch64 front end
+did not compile without the x86-64 one. Without it the marker carries
+the farmdec instruction, and there are no overrides: they are keyed by
+fadec's instruction types.
+---
+ src/a64/main.cc | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/src/a64/main.cc b/src/a64/main.cc
+index 5cfe372..1042690 100644
+--- a/src/a64/main.cc
++++ b/src/a64/main.cc
+@@ -55,18 +55,24 @@ bool Lifter::Lift(const Instr& inst) {
+     // Add instruction marker
+     if (cfg.instr_marker) {
+         llvm::StringRef str_ref{reinterpret_cast<const char*>(&inst),
++#ifdef RELLUME_WITH_X86_64
+                                 sizeof(FdInstr)};
++#else
++                                sizeof(farmdec::Inst)};
++#endif
+         llvm::MDString* md = llvm::MDString::get(irb.getContext(), str_ref);
+         llvm::Value* md_val = llvm::MetadataAsValue::get(irb.getContext(), md);
+         irb.CreateCall(cfg.instr_marker, {AddrIPRel(), md_val});
+     }
+ 
+     // Check overridden implementations first.
++#ifdef RELLUME_WITH_X86_64
+     const auto& override = cfg.instr_overrides.find(inst.type());
+     if (override != cfg.instr_overrides.end()) {
+         CallExternalFunction(override->second);
+         return true;
+     }
++#endif
+ 
+     const farmdec::Inst* a64p = inst;
+     const farmdec::Inst& a64 = *a64p;
+-- 
+2.54.0 (Apple Git-157)
+

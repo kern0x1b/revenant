@@ -2,8 +2,7 @@
 
 Styx is validated on armv7, iOS 6.1.3, built against the Charon Swift runtime
 (Swift 6.4) with **availability checking on** for the module. Two suites run:
-the project's own `import Combine` probe, and the full upstream Combine test
-suite this fork descends from.
+the project's own `import Combine` probe, and OpenCombine's own test suite.
 
 ## The upstream suite
 
@@ -18,7 +17,7 @@ Folding the three upstream modules into a single `Combine` module changed none o
 these numbers: the merge preserves the whole public surface and the runtime
 behavior. The five that do not pass are all pre-existing and are **documented
 limits, not silent failures** — each is a property of armv7/iOS 6 or of a newer
-Swift, not of this fork:
+Swift, not of Styx's patches:
 
 - **`DispatchQueueSchedulerTests.testStrideFromDispatchTimeInterval`** and
   **`testStrideFromNumericValue`** — crash. `DispatchQueue.SchedulerTimeType.Stride.magnitude`
@@ -50,12 +49,20 @@ emulation:
 - `PassthroughSubject`, `CurrentValueSubject`, `map`, `removeDuplicates`,
   `eraseToAnyPublisher`, `assign(to:on:)`, `scan`, `Zip`, `Future` + `flatMap`.
 
-## Intentional omissions
+## What the run leaves out
 
-- **`URLSession` publishers** (`dataTaskPublisher`): `URLSession` is iOS 7+, and
-  the publishers need a TLS stack this build does not carry. Not shipped.
-- **`CombineLatest`, `Merge`, `collect(byTime:)`**: absent from the base this
-  fork started at; added as consuming code needs them.
+`harness/skip.txt` names what the `CombineTests` daemon does not run, so one run
+reaches its end and its exit status is the verdict: the three crashes and the
+up-front skip above, and `URLSessionTests` (16 tests), whose test classes
+subclass `URLSession`, an iOS 7 class. Of the 1469 tests upstream's suite has,
+1449 run.
+
+## Not covered by upstream's tests
+
+- **`URLSession.dataTaskPublisher`** is marked iOS 7; on iOS 6 it needs the
+  `URLSession` a port carries from the backports.
+- **`Merge`, `CombineLatest`, `collect(_:options:)`**: OpenCombine has none of
+  them, so its suite does not exercise them.
 
 ## Device status
 

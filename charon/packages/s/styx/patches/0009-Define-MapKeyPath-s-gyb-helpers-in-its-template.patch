@@ -1,0 +1,37 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: kern0x1b <kern0x1b@users.noreply.github.com>
+Date: Mon, 19 Oct 2026 20:41:14 +0200
+Subject: [PATCH 9/9] Define MapKeyPath's gyb helpers in its template
+
+The template imported suffix_variadic and list_with_suffix_variadic from
+gyb_opencombine_support, a Python module beside gyb.py. The templates are
+expanded with a gyb that has no such module, so the two functions are
+defined in the template itself, with the same bodies. The expansion is
+byte for byte the generated source this tree ships.
+---
+ .../Publishers/Publishers.MapKeyPath.swift.gyb           | 9 +++++----
+ 1 file changed, 5 insertions(+), 4 deletions(-)
+
+diff --git a/Sources/OpenCombine/Publishers/Publishers.MapKeyPath.swift.gyb b/Sources/OpenCombine/Publishers/Publishers.MapKeyPath.swift.gyb
+index d195dc8..a1321b1 100644
+--- a/Sources/OpenCombine/Publishers/Publishers.MapKeyPath.swift.gyb
++++ b/Sources/OpenCombine/Publishers/Publishers.MapKeyPath.swift.gyb
+@@ -9,10 +9,11 @@ ${template_header}
+ // swiftlint:disable large_tuple
+ 
+ %{
+-from gyb_opencombine_support import (
+-    suffix_variadic,
+-    list_with_suffix_variadic
+-)
++def suffix_variadic(name, index, arity):
++    return name + ('' if arity == 1 else str(index))
++
++def list_with_suffix_variadic(name, arity):
++    return [suffix_variadic(name, i, arity) for i in range(arity)]
+ 
+ import random
+ 
+-- 
+2.54.0 (Apple Git-157)
+
